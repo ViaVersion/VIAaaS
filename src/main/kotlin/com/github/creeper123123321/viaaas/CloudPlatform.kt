@@ -1,8 +1,10 @@
 package com.github.creeper123123321.viaaas
 
+import de.gerrygames.viarewind.api.ViaRewindPlatform
 import io.netty.buffer.ByteBuf
 import io.netty.channel.DefaultEventLoop
 import io.netty.channel.socket.SocketChannel
+import nl.matsv.viabackwards.api.ViaBackwardsPlatform
 import us.myles.ViaVersion.AbstractViaConfig
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.ViaAPI
@@ -32,6 +34,19 @@ import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
+object CloudBackwards: ViaBackwardsPlatform {
+    val log = Logger.getLogger("ViaBackwards")
+    override fun getDataFolder() = File("config/viabackwards")
+    override fun getLogger(): Logger = log
+    override fun disable() {
+    }
+}
+
+object CloudRewind: ViaRewindPlatform {
+    val log = Logger.getLogger("ViaRewind")
+    override fun getLogger(): Logger = log
+}
+
 object CloudLoader : ViaPlatformLoader {
     override fun unload() {
     }
@@ -40,7 +55,6 @@ object CloudLoader : ViaPlatformLoader {
         Via.getManager().providers.use(MovementTransmitterProvider::class.java, BungeeMovementTransmitter())
         Via.getManager().providers.use(VersionProvider::class.java, CloudVersionProvider)
     }
-
 }
 
 object CloudCommands : ViaCommandHandler()

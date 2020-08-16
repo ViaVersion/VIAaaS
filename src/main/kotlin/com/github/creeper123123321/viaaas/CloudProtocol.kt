@@ -15,15 +15,17 @@ import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.util.logging.Logger
 
 class CloudHandlerProtocol : SimpleProtocol() {
+    val logger = Logger.getLogger("CloudHandlerProtocol")
     override fun registerPackets() {
         this.registerIncoming(State.HANDSHAKE, 0, 0, object : PacketRemapper() {
             override fun registerMap() {
                 handler { wrapper: PacketWrapper ->
-                    val protVer = wrapper.passthrough(Type.VAR_INT)
+                    val playerVer = wrapper.passthrough(Type.VAR_INT)
                     val addr = wrapper.passthrough(Type.STRING) // Server Address
-                    val svPort = wrapper.passthrough(Type.UNSIGNED_SHORT)
+                    wrapper.passthrough(Type.UNSIGNED_SHORT)
                     val nextState = wrapper.passthrough(Type.VAR_INT)
 
                     val addrParts = addr.split(0.toChar())[0].split(".")
@@ -65,7 +67,7 @@ class CloudHandlerProtocol : SimpleProtocol() {
                     }
                     backAddr = backAddr.replace(Regex("\\.$"), "")
 
-                    println("connecting ${wrapper.user().channel!!.remoteAddress()} ($protVer) to $backAddr:$port ($backProtocol)")
+                    logger.info("connecting ${wrapper.user().channel!!.remoteAddress()} ($playerVer) to $backAddr:$port ($backProtocol)")
 
                     wrapper.user().channel!!.setAutoRead(false)
                     wrapper.user().put(CloudData(
@@ -77,7 +79,7 @@ class CloudHandlerProtocol : SimpleProtocol() {
                     Via.getPlatform().runAsync {
                         val frontForwarder = wrapper.user().channel!!.pipeline().get(CloudSideForwarder::class.java)
                         try {
-                            val socketAddr = InetSocketAddress(InetAddress.getByName(backAddr), svPort)
+                            val socketAddr = InetSocketAddress(InetAddress.getByName(backAddr), port)
                             val addrInfo = socketAddr.address
                             if (addrInfo.isSiteLocalAddress
                                     || addrInfo.isLoopbackAddress
@@ -90,7 +92,7 @@ class CloudHandlerProtocol : SimpleProtocol() {
 
                             bootstrap.addListener {
                                 if (it.isSuccess) {
-                                    println("conected ${wrapper.user().channel?.remoteAddress()} to $socketAddr")
+                                    logger.info("conected ${wrapper.user().channel?.remoteAddress()} to $socketAddr")
                                     val chann = bootstrap.channel() as SocketChannel
                                     chann.pipeline().get(CloudSideForwarder::class.java).other = wrapper.user().channel
                                     frontForwarder.other = chann
@@ -98,9 +100,9 @@ class CloudHandlerProtocol : SimpleProtocol() {
                                     try {
                                         backHandshake.writeByte(0) // Packet 0 handshake
                                         val connProto =
-                                                if (ProtocolRegistry.getProtocolPath(protVer, backProtocol) != null) {
+                                                if (ProtocolRegistry.getProtocolPath(playerVer, backProtocol) != null) {
                                                     backProtocol
-                                                } else protVer
+                                                } else playerVer
                                         Type.VAR_INT.writePrimitive(backHandshake, connProto)
                                         val nullPos = addr.indexOf(0.toChar())
                                         Type.STRING.write(backHandshake, backAddr

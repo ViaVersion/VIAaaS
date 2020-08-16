@@ -1,11 +1,14 @@
 package com.github.creeper123123321.viaaas
 
+import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
+import java.io.File
+import kotlin.system.exitProcess
 
 fun main() {
     Via.init(ViaManager.builder()
@@ -17,6 +20,10 @@ fun main() {
     MappingDataLoader.enableMappingsCache()
 
     Via.getManager().init()
+
+    CloudRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
+
+    CloudBackwards.init(File("config/viabackwards.yml"))
 
     val boss = NioEventLoopGroup()
     val worker = NioEventLoopGroup()
@@ -42,8 +49,9 @@ fun main() {
     }
 
     future.channel().close().sync()
-    boss.shutdownGracefully()
-    worker.shutdownGracefully()
+    boss.shutdownGracefully().sync()
+    worker.shutdownGracefully().sync()
     Via.getManager().destroy()
+    exitProcess(0) // todo what's stucking?
 }
 
