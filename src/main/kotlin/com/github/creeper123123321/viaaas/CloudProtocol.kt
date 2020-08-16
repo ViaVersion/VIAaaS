@@ -138,7 +138,7 @@ class CloudHandlerProtocol : SimpleProtocol() {
                     it.cancel()
                     it.create(3) {
                         it.write(Type.VAR_INT, threshold)
-                    }.send(CloudHandlerProtocol::class.java)
+                    }.send(CloudHandlerProtocol::class.java, true, true) // needs to be sent uncompressed
                     pipe.get(CloudCompressor::class.java).threshold = threshold
                     pipe.get(CloudDecompressor::class.java).threshold = threshold
 
