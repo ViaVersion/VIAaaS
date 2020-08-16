@@ -2,6 +2,7 @@ package com.github.creeper123123321.viaaas
 
 import io.netty.buffer.ByteBuf
 import io.netty.channel.DefaultEventLoop
+import io.netty.channel.socket.SocketChannel
 import us.myles.ViaVersion.AbstractViaConfig
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.ViaAPI
@@ -66,6 +67,7 @@ object CloudAPI : ViaAPI<Unit> {
     override fun sendRawPacket(p0: Unit?, p1: ByteBuf?) {
         TODO("Not yet implemented")
     }
+
     override fun sendRawPacket(p0: UUID?, p1: ByteBuf?) {
         TODO("Not yet implemented")
     }
@@ -73,9 +75,11 @@ object CloudAPI : ViaAPI<Unit> {
     override fun getPlayerVersion(p0: Unit?): Int {
         TODO("Not yet implemented")
     }
+
     override fun getPlayerVersion(p0: UUID?): Int {
         TODO("Not yet implemented")
     }
+
     override fun getVersion(): String = CloudPlatform.pluginVersion
     override fun getSupportedVersions(): SortedSet<Int> = ProtocolRegistry.getSupportedVersions()
 }
@@ -87,12 +91,14 @@ object CloudPlatform : ViaPlatform<Unit> {
     override fun sendMessage(p0: UUID, p1: String) {
         // todo
     }
+
     override fun kickPlayer(p0: UUID, p1: String): Boolean = false // todo
     override fun getApi(): ViaAPI<Unit> = CloudAPI
     override fun getDataFolder(): File = File("viaversion")
     override fun getConf(): ViaVersionConfig = CloudConfig
     override fun onReload() {
     }
+
     override fun getDump(): JsonObject = JsonObject()
     override fun runSync(runnable: Runnable): TaskId = CloudTask(eventLoop.submit(runnable))
     override fun runSync(p0: Runnable, p1: Long): TaskId = CloudTask(eventLoop.schedule(p0, p1 * 50L, TimeUnit.MILLISECONDS))
@@ -105,10 +111,12 @@ object CloudPlatform : ViaPlatform<Unit> {
     override fun cancelTask(p0: TaskId?) {
         (p0 as CloudTask).obj.cancel(false)
     }
+
     override fun isPluginEnabled(): Boolean = true
     override fun getConfigurationProvider(): ConfigurationProvider {
         TODO("Not yet implemented")
     }
+
     override fun getPlatformName(): String = "VIAaaS"
     override fun getPluginVersion(): String = VersionInfo.VERSION
     override fun isOldClientsAllowed(): Boolean = true
@@ -134,9 +142,9 @@ object CloudConfig : AbstractViaConfig(File("config/viaversion.yml")) {
 
     // Based on Sponge ViaVersion
     private val UNSUPPORTED = listOf("anti-xray-patch", "bungee-ping-interval",
-                "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
-                "item-cache", "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
-                "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox")
+            "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
+            "item-cache", "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
+            "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox")
 
     init {
         // Load config
@@ -155,7 +163,7 @@ object CloudConsoleSender : ViaCommandSender {
     override fun hasPermission(p0: String): Boolean = true
 }
 
-object CloudVersionProvider: VersionProvider() {
+object CloudVersionProvider : VersionProvider() {
     override fun getServerProtocol(connection: UserConnection): Int {
         val data = connection.get(CloudData::class.java)
         val ver = data?.backendVer
@@ -164,5 +172,9 @@ object CloudVersionProvider: VersionProvider() {
     }
 }
 
-data class CloudData(val userConnection: UserConnection, val backendAddr: String, val backendVer: Int)
-    : StoredObject(userConnection)
+data class CloudData(val userConnection: UserConnection,
+                     var backendVer: Int,
+                     var backendChannel: SocketChannel? = null,
+                     var frontOnline: Boolean,
+                     var pendingStatus: Boolean = false
+) : StoredObject(userConnection)

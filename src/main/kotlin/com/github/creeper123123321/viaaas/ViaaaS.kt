@@ -6,10 +6,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
-import us.myles.ViaVersion.api.data.UserConnection
 
-
-fun main(args: Array<String>) {
+fun main() {
     Via.init(ViaManager.builder()
             .injector(CloudInjector)
             .loader(CloudLoader)
@@ -19,12 +17,15 @@ fun main(args: Array<String>) {
     MappingDataLoader.enableMappingsCache()
 
     Via.getManager().init()
+
     val boss = NioEventLoopGroup()
     val worker = NioEventLoopGroup()
     val future = ServerBootstrap().group(boss, worker)
             .channel(NioServerSocketChannel::class.java)
             .childHandler(ChannelInit)
             .bind(25565)
+            .addListener { println(it) }
+
 
     loop@ while (true) {
         try {

@@ -24,6 +24,8 @@ repositories {
 
 dependencies {
     implementation("us.myles:viaversion:3.1.0")
+    implementation("nl.matsv:viabackwards-all:3.1.0")
+    implementation("de.gerrygames:viarewind-all:1.5.1")
     implementation("io.netty:netty-all:4.1.51.Final")
     implementation(kotlin("stdlib-jdk8"))
 }
