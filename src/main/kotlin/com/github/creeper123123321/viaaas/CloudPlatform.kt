@@ -37,7 +37,8 @@ object CloudLoader : ViaPlatformLoader {
     }
 
     override fun load() {
-        Via.getManager().providers.use(MovementTransmitterProvider::class.java, BungeeMovementTransmitter());
+        Via.getManager().providers.use(MovementTransmitterProvider::class.java, BungeeMovementTransmitter())
+        Via.getManager().providers.use(VersionProvider::class.java, CloudVersionProvider)
     }
 
 }

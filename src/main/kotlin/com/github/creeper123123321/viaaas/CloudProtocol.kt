@@ -7,12 +7,14 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import us.myles.ViaVersion.api.PacketWrapper
 import us.myles.ViaVersion.api.Via
+import us.myles.ViaVersion.api.protocol.ProtocolRegistry
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.api.protocol.SimpleProtocol
 import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
 import java.net.InetAddress
+import java.net.InetSocketAddress
 
 class CloudHandlerProtocol : SimpleProtocol() {
     override fun registerPackets() {
@@ -61,6 +63,7 @@ class CloudHandlerProtocol : SimpleProtocol() {
                             foundDomain = true
                         }
                     }
+                    backAddr = backAddr.replace(Regex("\\.$"), "")
 
                     println("connecting ${wrapper.user().channel!!.remoteAddress()} ($protVer) to $backAddr:$port ($backProtocol)")
 
@@ -74,23 +77,31 @@ class CloudHandlerProtocol : SimpleProtocol() {
                     Via.getPlatform().runAsync {
                         val frontForwarder = wrapper.user().channel!!.pipeline().get(CloudSideForwarder::class.java)
                         try {
-                            val backInetAddr = InetAddress.getByName(backAddr)
-                            if (backInetAddr.isAnyLocalAddress) throw SecurityException("Local addresses aren't allowed")
+                            val socketAddr = InetSocketAddress(InetAddress.getByName(backAddr), svPort)
+                            val addrInfo = socketAddr.address
+                            if (addrInfo.isSiteLocalAddress
+                                    || addrInfo.isLoopbackAddress
+                                    || addrInfo.isLinkLocalAddress
+                                    || addrInfo.isAnyLocalAddress) throw SecurityException("Local addresses aren't allowed")
                             val bootstrap = Bootstrap().handler(BackendInit(wrapper.user()))
                                     .channel(NioSocketChannel::class.java)
                                     .group(wrapper.user().channel!!.eventLoop())
-                                    .connect(backInetAddr, port)
-                            println(backInetAddr)
+                                    .connect(socketAddr)
 
                             bootstrap.addListener {
                                 if (it.isSuccess) {
+                                    println("conected ${wrapper.user().channel?.remoteAddress()} to $socketAddr")
                                     val chann = bootstrap.channel() as SocketChannel
                                     chann.pipeline().get(CloudSideForwarder::class.java).other = wrapper.user().channel
                                     frontForwarder.other = chann
                                     val backHandshake = ByteBufAllocator.DEFAULT.buffer()
                                     try {
                                         backHandshake.writeByte(0) // Packet 0 handshake
-                                        Type.VAR_INT.writePrimitive(backHandshake, protVer) // client ver
+                                        val connProto =
+                                                if (ProtocolRegistry.getProtocolPath(protVer, backProtocol) != null) {
+                                                    backProtocol
+                                                } else protVer
+                                        Type.VAR_INT.writePrimitive(backHandshake, connProto)
                                         val nullPos = addr.indexOf(0.toChar())
                                         Type.STRING.write(backHandshake, backAddr
                                                 + (if (nullPos != -1) addr.substring(nullPos) else "")) // Server Address
@@ -123,12 +134,15 @@ class CloudHandlerProtocol : SimpleProtocol() {
             override fun registerMap() {
                 handler {
                     val pipe = it.user().channel!!.pipeline()
-                    val threshold = it.passthrough(Type.VAR_INT)
+                    val threshold = it.read(Type.VAR_INT)
+                    it.cancel()
+                    it.create(3) {
+                        it.write(Type.VAR_INT, threshold)
+                    }.send(CloudHandlerProtocol::class.java)
                     pipe.get(CloudCompressor::class.java).threshold = threshold
                     pipe.get(CloudDecompressor::class.java).threshold = threshold
 
-                    val backPipe = it.user().channel!!
-                            .pipeline().get(CloudSideForwarder::class.java).other?.pipeline()
+                    val backPipe = pipe.get(CloudSideForwarder::class.java).other?.pipeline()
                     backPipe?.get(CloudCompressor::class.java)?.threshold = threshold
                     backPipe?.get(CloudDecompressor::class.java)?.threshold = threshold
                 }
