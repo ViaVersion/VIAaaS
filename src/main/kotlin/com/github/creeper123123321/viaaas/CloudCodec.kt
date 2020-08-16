@@ -10,7 +10,6 @@ import io.netty.handler.codec.*
 import io.netty.handler.flow.FlowControlHandler
 import io.netty.handler.timeout.ReadTimeoutHandler
 import us.myles.ViaVersion.api.data.UserConnection
-import us.myles.ViaVersion.api.protocol.ProtocolPipeline
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.exception.CancelCodecException
 import us.myles.ViaVersion.exception.CancelDecoderException
@@ -24,7 +23,7 @@ import java.util.zip.Inflater
 object ChannelInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         val user = UserConnection(ch)
-        ProtocolPipeline(user).add(CloudHandlerProtocol())
+        CloudPipeline(user)
         ch.pipeline().addLast("frame-encoder", FrameEncoder)
                 .addLast("frame-decoder", FrameDecoder())
                 .addLast("compress", CloudCompressor())

@@ -37,7 +37,7 @@ fun main() {
     loop@ while (true) {
         try {
             val cmd = readLine()?.trim()?.split(" ")
-            when (cmd?.get(0)) {
+            when (cmd?.get(0)?.toLowerCase()) {
                 "stop", "end" -> break@loop
                 "viaversion", "viaver" -> Via.getManager().commandHandler.onCommand(CloudConsoleSender, cmd.subList(1, cmd.size)
                         .toTypedArray())

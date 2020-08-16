@@ -7,9 +7,8 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import us.myles.ViaVersion.api.PacketWrapper
 import us.myles.ViaVersion.api.Via
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import us.myles.ViaVersion.api.protocol.SimpleProtocol
+import us.myles.ViaVersion.api.data.UserConnection
+import us.myles.ViaVersion.api.protocol.*
 import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
@@ -17,7 +16,20 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.logging.Logger
 
-class CloudHandlerProtocol : SimpleProtocol() {
+class CloudPipeline(userConnection: UserConnection) : ProtocolPipeline(userConnection) {
+    override fun registerPackets() {
+        super.registerPackets()
+        add(CloudHandlerProtocol)
+    }
+
+    override fun add(protocol: Protocol<*, *, *, *>?) {
+        super.add(protocol)
+        pipes().remove(CloudHandlerProtocol)
+        pipes().add(CloudHandlerProtocol) // needs to be the last
+    }
+}
+
+object CloudHandlerProtocol : SimpleProtocol() {
     val logger = Logger.getLogger("CloudHandlerProtocol")
     override fun registerPackets() {
         this.registerIncoming(State.HANDSHAKE, 0, 0, object : PacketRemapper() {
