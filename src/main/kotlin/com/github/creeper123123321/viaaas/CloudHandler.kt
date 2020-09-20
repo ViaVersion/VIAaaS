@@ -12,10 +12,12 @@ import us.myles.ViaVersion.packets.State
 import java.util.logging.Logger
 
 val logger = Logger.getLogger("CloudHandler")
-class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?) : SimpleChannelInboundHandler<ByteBuf>() {
 
+class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?) : SimpleChannelInboundHandler<ByteBuf>() {
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
-        other?.write(msg.retain())
+        if (!userConnection.isPendingDisconnect) {
+            other!!.write(msg.retain())
+        }
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
@@ -39,17 +41,17 @@ class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?
         cause.printStackTrace()
     }
 
+
     fun disconnect(s: String) {
         if (userConnection.channel?.isActive != true) return
 
-        val msg = "[VIAaaS] $s";
         logger.info("Disconnecting " + userConnection.channel!!.remoteAddress() + ": " + s)
         when (userConnection.protocolInfo!!.state) {
             State.LOGIN -> {
                 val packet = ByteBufAllocator.DEFAULT.buffer()
                 try {
                     packet.writeByte(0) // id 0 disconnect
-                    Type.STRING.write(packet, Gson().toJson(msg))
+                    Type.STRING.write(packet, Gson().toJson("[VIAaaS] §c$s"))
                     userConnection.sendRawPacketFuture(packet.retain()).addListener { userConnection.channel?.close() }
                 } finally {
                     packet.release()
@@ -60,8 +62,7 @@ class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?
                 try {
                     packet.writeByte(0) // id 0 disconnect
                     Type.STRING.write(packet, """{"version": {"name": "VIAaaS","protocol": -1},
-"players": {"max": 0,"online": 0,"sample": []},	
-"description": {"text": ${Gson().toJson(msg)}}}""")
+"players": {"max": 0,"online": 0,"sample": []},"description": {"text": ${Gson().toJson("§c$s")}}}""")
                     userConnection.sendRawPacketFuture(packet.retain()).addListener { userConnection.channel?.close() }
                 } finally {
                     packet.release()

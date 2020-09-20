@@ -23,11 +23,20 @@ repositories {
 }
 
 dependencies {
-    implementation("us.myles:viaversion:3.1.1-SNAPSHOT")
-    implementation("nl.matsv:viabackwards-all:3.1.1-SNAPSHOT")
+    implementation("us.myles:viaversion:3.1.1")
+    implementation("nl.matsv:viabackwards-all:3.1.1")
     implementation("de.gerrygames:viarewind-all:1.5.1")
+    implementation("net.md-5:bungeecord-chat:1.16-R0.3")
     implementation("io.netty:netty-all:4.1.51.Final")
     implementation(kotlin("stdlib-jdk8"))
+
+    val ktorVersion = "1.4.0"
+
+    implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-websockets:$ktorVersion")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    testCompile("io.ktor:ktor-server-test-host:$ktorVersion")
 }
 
 val run: JavaExec by tasks

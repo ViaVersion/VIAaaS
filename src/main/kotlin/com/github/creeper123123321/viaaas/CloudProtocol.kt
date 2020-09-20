@@ -3,18 +3,25 @@ package com.github.creeper123123321.viaaas
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.Channel
+import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import us.myles.ViaVersion.api.PacketWrapper
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.UserConnection
-import us.myles.ViaVersion.api.protocol.*
+import us.myles.ViaVersion.api.protocol.Protocol
+import us.myles.ViaVersion.api.protocol.ProtocolPipeline
+import us.myles.ViaVersion.api.protocol.ProtocolRegistry
+import us.myles.ViaVersion.api.protocol.SimpleProtocol
 import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.logging.Logger
+import javax.naming.NameNotFoundException
+import javax.naming.directory.InitialDirContext
+
 
 class CloudPipeline(userConnection: UserConnection) : ProtocolPipeline(userConnection) {
     override fun registerPackets() {
@@ -35,63 +42,42 @@ object CloudHandlerProtocol : SimpleProtocol() {
         this.registerIncoming(State.HANDSHAKE, 0, 0, object : PacketRemapper() {
             override fun registerMap() {
                 handler { wrapper: PacketWrapper ->
+                    wrapper.cancel()
                     val playerVer = wrapper.passthrough(Type.VAR_INT)
                     val addr = wrapper.passthrough(Type.STRING) // Server Address
                     wrapper.passthrough(Type.UNSIGNED_SHORT)
                     val nextState = wrapper.passthrough(Type.VAR_INT)
 
-                    val addrParts = addr.split(0.toChar())[0].split(".")
-                    var foundDomain = false
-                    var foundOptions = false
-                    var port = 25565
-                    var online = true // todo implement this between proxy and player
-                    var backProtocol = 47 // todo auto protocol
-                    var backAddr = ""
-                    addrParts.reversed().forEach {
-                        if (foundDomain) {
-                            if (!foundOptions) {
-                                if (it.startsWith("_")) {
-                                    val arg = it.substring(2)
-                                    when {
-                                        it.startsWith("_p", ignoreCase = true) -> port = arg.toInt()
-                                        it.startsWith("_o", ignoreCase = true) -> online = arg.toBoolean()
-                                        it.startsWith("_v", ignoreCase = true) -> {
-                                            try {
-                                                backProtocol = Integer.parseInt(arg)
-                                            } catch (e: NumberFormatException) {
-                                                val closest = ProtocolVersion.getClosest(arg.replace("_", "."))
-                                                if (closest != null) {
-                                                    backProtocol = closest.id
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    foundOptions = true
-                                }
-                            }
-                            if (foundOptions) {
-                                backAddr = "$it.$backAddr"
-                            }
-                        } else if (it.equals("viaaas", ignoreCase = true)) {
-                            foundDomain = true
-                        }
-                    }
-                    backAddr = backAddr.replace(Regex("\\.$"), "")
+                    val parsed = ViaaaSAddress().parse(addr)
 
-                    logger.info("connecting ${wrapper.user().channel!!.remoteAddress()} ($playerVer) to $backAddr:$port ($backProtocol)")
+                    logger.info("connecting ${wrapper.user().channel!!.remoteAddress()} ($playerVer) to ${parsed.realAddress}:${parsed.port} (${parsed.protocol})")
 
                     wrapper.user().channel!!.setAutoRead(false)
                     wrapper.user().put(CloudData(
-                            backendVer = backProtocol,
+                            backendVer = parsed.protocol,
                             userConnection = wrapper.user(),
-                            frontOnline = online
+                            frontOnline = parsed.online
                     ))
 
                     Via.getPlatform().runAsync {
                         val frontForwarder = wrapper.user().channel!!.pipeline().get(CloudSideForwarder::class.java)
                         try {
-                            val socketAddr = InetSocketAddress(InetAddress.getByName(backAddr), port)
+                            var srvResolvedAddr = parsed.realAddress
+                            var srvResolvedPort = parsed.port
+                            if (srvResolvedPort == 25565) {
+                                try {
+                                    // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java
+                                    val ctx = InitialDirContext()
+                                    val attr = ctx.getAttributes("dns:///_minecraft._tcp.${parsed.realAddress}", arrayOf("SRV"))["SRV"]
+                                    if (attr != null && attr.size() > 0) {
+                                        val record = (attr.get(0) as String).split(" ").toTypedArray()
+                                        srvResolvedAddr = record[3]
+                                        srvResolvedPort = record[2].toInt()
+                                    }
+                                } catch (ignored: NameNotFoundException) {
+                                }
+                            }
+                            val socketAddr = InetSocketAddress(InetAddress.getByName(srvResolvedAddr), srvResolvedPort)
                             val addrInfo = socketAddr.address
                             if (addrInfo.isSiteLocalAddress
                                     || addrInfo.isLoopbackAddress
@@ -100,6 +86,7 @@ object CloudHandlerProtocol : SimpleProtocol() {
                             val bootstrap = Bootstrap().handler(BackendInit(wrapper.user()))
                                     .channel(NioSocketChannel::class.java)
                                     .group(wrapper.user().channel!!.eventLoop())
+                                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
                                     .connect(socketAddr)
 
                             bootstrap.addListener {
@@ -110,28 +97,23 @@ object CloudHandlerProtocol : SimpleProtocol() {
                                     frontForwarder.other = chann
                                     val backHandshake = ByteBufAllocator.DEFAULT.buffer()
                                     try {
+                                        val nullParts = addr.split(0.toChar())
                                         backHandshake.writeByte(0) // Packet 0 handshake
-                                        val connProto =
-                                                if (ProtocolRegistry.getProtocolPath(playerVer, backProtocol) != null) {
-                                                    backProtocol
-                                                } else playerVer
+                                        val connProto = if (ProtocolRegistry.getProtocolPath(playerVer, parsed.protocol) != null) parsed.protocol else playerVer
                                         Type.VAR_INT.writePrimitive(backHandshake, connProto)
-                                        val nullPos = addr.indexOf(0.toChar())
-                                        Type.STRING.write(backHandshake, backAddr
-                                                + (if (nullPos != -1) addr.substring(nullPos) else "")) // Server Address
-                                        backHandshake.writeShort(port)
+                                        Type.STRING.write(backHandshake, srvResolvedAddr + (if (nullParts.size == 2) 0.toChar() + nullParts[1] else "")) // Server Address
+                                        backHandshake.writeShort(srvResolvedPort)
                                         Type.VAR_INT.writePrimitive(backHandshake, nextState)
                                         chann.writeAndFlush(backHandshake.retain())
                                     } finally {
                                         backHandshake.release()
                                     }
+                                    wrapper.user().channel!!.setAutoRead(true)
                                 } else {
                                     wrapper.user().channel!!.eventLoop().submit {
                                         frontForwarder.disconnect("Couldn't connect: " + it.cause().toString())
                                     }
                                 }
-
-                                wrapper.user().channel!!.setAutoRead(true)
                             }
                         } catch (e: Exception) {
                             wrapper.user().channel!!.eventLoop().submit {
@@ -156,9 +138,9 @@ object CloudHandlerProtocol : SimpleProtocol() {
                     pipe.get(CloudCompressor::class.java).threshold = threshold
                     pipe.get(CloudDecompressor::class.java).threshold = threshold
 
-                    val backPipe = pipe.get(CloudSideForwarder::class.java).other?.pipeline()
-                    backPipe?.get(CloudCompressor::class.java)?.threshold = threshold
-                    backPipe?.get(CloudDecompressor::class.java)?.threshold = threshold
+                    val backPipe = pipe.get(CloudSideForwarder::class.java).other!!.pipeline()
+                    backPipe.get(CloudCompressor::class.java)?.threshold = threshold
+                    backPipe.get(CloudDecompressor::class.java)?.threshold = threshold
                 }
             }
         })

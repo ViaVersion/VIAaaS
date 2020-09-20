@@ -24,25 +24,25 @@ object ChannelInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         val user = UserConnection(ch)
         CloudPipeline(user)
-        ch.pipeline().addLast("frame-encoder", FrameEncoder)
+        ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
+                .addLast("frame-encoder", FrameEncoder)
                 .addLast("frame-decoder", FrameDecoder())
                 .addLast("compress", CloudCompressor())
                 .addLast("decompress", CloudDecompressor())
+                .addLast("flow-handler", FlowControlHandler())
                 .addLast("via-encoder", CloudEncodeHandler(user))
                 .addLast("via-decoder", CloudDecodeHandler(user))
-                .addLast("flow-handler", FlowControlHandler())
-                .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
                 .addLast("handler", CloudSideForwarder(user, null))
     }
 }
 
 class BackendInit(val user: UserConnection) : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
-        ch.pipeline().addLast("frame-encoder", FrameEncoder)
+        ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
+                .addLast("frame-encoder", FrameEncoder)
                 .addLast("frame-decoder", FrameDecoder())
                 .addLast("compress", CloudCompressor())
                 .addLast("decompress", CloudDecompressor())
-                .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
                 .addLast("handler", CloudSideForwarder(user, null))
     }
 }
@@ -57,7 +57,7 @@ class CloudDecompressor(var threshold: Int = -1) : MessageToMessageDecoder<ByteB
             out.add(input.retain())
             return
         }
-        if (input.readableBytes() != 0) {
+        if (input.isReadable) {
             val outLength = Type.VAR_INT.readPrimitive(input)
             if (outLength == 0) {
                 out.add(input.readBytes(input.readableBytes()))
