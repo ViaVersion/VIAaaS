@@ -42,7 +42,6 @@ object CloudHandlerProtocol : SimpleProtocol() {
         this.registerIncoming(State.HANDSHAKE, 0, 0, object : PacketRemapper() {
             override fun registerMap() {
                 handler { wrapper: PacketWrapper ->
-                    wrapper.cancel()
                     val playerVer = wrapper.passthrough(Type.VAR_INT)
                     val addr = wrapper.passthrough(Type.STRING) // Server Address
                     wrapper.passthrough(Type.UNSIGNED_SHORT)

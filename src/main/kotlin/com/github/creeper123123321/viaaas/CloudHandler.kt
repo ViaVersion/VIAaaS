@@ -16,7 +16,7 @@ val logger = Logger.getLogger("CloudHandler")
 class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?) : SimpleChannelInboundHandler<ByteBuf>() {
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
         if (!userConnection.isPendingDisconnect) {
-            other!!.write(msg.retain())
+            other?.write(msg.retain())
         }
     }
 
