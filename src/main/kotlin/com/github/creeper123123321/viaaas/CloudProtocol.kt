@@ -26,17 +26,20 @@ import javax.naming.directory.InitialDirContext
 class CloudPipeline(userConnection: UserConnection) : ProtocolPipeline(userConnection) {
     override fun registerPackets() {
         super.registerPackets()
-        add(CloudHandlerProtocol)
+        add(CloudHeadProtocol)
+        add(CloudTailProtocol)
     }
 
     override fun add(protocol: Protocol<*, *, *, *>?) {
         super.add(protocol)
-        pipes().remove(CloudHandlerProtocol)
-        pipes().add(CloudHandlerProtocol) // needs to be the last
+        pipes().remove(CloudHeadProtocol)
+        pipes().add(0, CloudHeadProtocol)
+        pipes().remove(CloudTailProtocol)
+        pipes().add(CloudTailProtocol)
     }
 }
 
-object CloudHandlerProtocol : SimpleProtocol() {
+object CloudHeadProtocol : SimpleProtocol() {
     val logger = Logger.getLogger("CloudHandlerProtocol")
     override fun registerPackets() {
         this.registerIncoming(State.HANDSHAKE, 0, 0, object : PacketRemapper() {
@@ -124,26 +127,6 @@ object CloudHandlerProtocol : SimpleProtocol() {
             }
         })
 
-        this.registerOutgoing(State.LOGIN, 3, 3, object : PacketRemapper() {
-            // set compression
-            override fun registerMap() {
-                handler {
-                    val pipe = it.user().channel!!.pipeline()
-                    val threshold = it.read(Type.VAR_INT)
-                    it.cancel()
-                    it.create(3) {
-                        it.write(Type.VAR_INT, threshold)
-                    }.send(CloudHandlerProtocol::class.java, true, true) // needs to be sent uncompressed
-                    pipe.get(CloudCompressor::class.java).threshold = threshold
-                    pipe.get(CloudDecompressor::class.java).threshold = threshold
-
-                    val backPipe = pipe.get(CloudSideForwarder::class.java).other!!.pipeline()
-                    backPipe.get(CloudCompressor::class.java)?.threshold = threshold
-                    backPipe.get(CloudDecompressor::class.java)?.threshold = threshold
-                }
-            }
-        })
-
         this.registerOutgoing(State.LOGIN, 1, 1, object : PacketRemapper() {
             // encryption request
             override fun registerMap() {
@@ -151,6 +134,34 @@ object CloudHandlerProtocol : SimpleProtocol() {
                     val frontForwarder = it.user().channel!!.pipeline().get(CloudSideForwarder::class.java)
                     it.cancel()
                     frontForwarder.disconnect("Online mode in backend currently isn't compatible")
+                }
+            }
+        })
+    }
+}
+
+object CloudTailProtocol : SimpleProtocol() {
+    override fun registerPackets() {
+        this.registerOutgoing(State.LOGIN, 3, 3, object : PacketRemapper() {
+            // set compression
+            override fun registerMap() {
+                handler {
+                    val pipe = it.user().channel!!.pipeline()
+                    val threshold = it.read(Type.VAR_INT)
+                    it.cancel()
+                    try {
+                        it.create(3) {
+                            it.write(Type.VAR_INT, threshold)
+                        }.send(CloudTailProtocol::class.java, true, true) // needs to be sent uncompressed
+                    } catch (ignored: Exception) {
+                        // ViaRewind cancels it
+                    }
+                    pipe.get(CloudCompressor::class.java).threshold = threshold
+                    pipe.get(CloudDecompressor::class.java).threshold = threshold
+
+                    val backPipe = pipe.get(CloudSideForwarder::class.java).other!!.pipeline()
+                    backPipe.get(CloudCompressor::class.java)?.threshold = threshold
+                    backPipe.get(CloudDecompressor::class.java)?.threshold = threshold
                 }
             }
         })
