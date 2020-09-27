@@ -26,15 +26,14 @@ import javax.naming.directory.InitialDirContext
 class CloudPipeline(userConnection: UserConnection) : ProtocolPipeline(userConnection) {
     override fun registerPackets() {
         super.registerPackets()
-        add(CloudHeadProtocol)
-        add(CloudTailProtocol)
+        add(CloudHeadProtocol) // add() will add tail protocol
     }
 
     override fun add(protocol: Protocol<*, *, *, *>?) {
         super.add(protocol)
-        pipes().remove(CloudHeadProtocol)
+        pipes().removeIf { it == CloudHeadProtocol }
         pipes().add(0, CloudHeadProtocol)
-        pipes().remove(CloudTailProtocol)
+        pipes().removeIf { it == CloudTailProtocol }
         pipes().add(CloudTailProtocol)
     }
 }
@@ -149,13 +148,9 @@ object CloudTailProtocol : SimpleProtocol() {
                     val pipe = it.user().channel!!.pipeline()
                     val threshold = it.read(Type.VAR_INT)
                     it.cancel()
-                    try {
-                        it.create(3) {
-                            it.write(Type.VAR_INT, threshold)
-                        }.send(CloudTailProtocol::class.java, true, true) // needs to be sent uncompressed
-                    } catch (ignored: Exception) {
-                        // ViaRewind cancels it
-                    }
+                    it.create(3) {
+                        it.write(Type.VAR_INT, threshold)
+                    }.send(CloudTailProtocol::class.java, true, true) // needs to be sent uncompressed
                     pipe.get(CloudCompressor::class.java).threshold = threshold
                     pipe.get(CloudDecompressor::class.java).threshold = threshold
 
