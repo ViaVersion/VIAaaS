@@ -6,6 +6,10 @@ Idea: server.example.com._p25565._v1_12_2._otrue.viaaas.example.com (default bac
 TODO: Online mode, protocol auto detection, transparent proxying?
 
 
-Usage: ./gradlew clean run
-
-Connect to mc.example.com._v1_8.viaaas.localhost (currently "viaaas" subdomain is used for separating VIAaaS proxy address from backend address)
+Usage:
+- ./gradlew clean run
+- There is currently no config
+- Backend address is determined by virtual host
+- VIAaaS currently must be used in a "viaaas" subdomain (may change in the future)
+- Private IP addresses are currently blocked
+- Connect to mc.example.com._v1_8.viaaas.localhost
