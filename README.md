@@ -8,4 +8,4 @@ TODO: Online mode, protocol auto detection, transparent proxying?
 
 Usage: ./gradlew clean run
 
-Connect to mc.example.com._v1_8.viaaas.localhost (currently "viaaas" subdomain is used for separating VIAaaS proxy subdomain from backend address)
+Connect to mc.example.com._v1_8.viaaas.localhost (currently "viaaas" subdomain is used for separating VIAaaS proxy address from backend address)
