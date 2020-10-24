@@ -46,10 +46,10 @@ object CloudHeadProtocol : SimpleProtocol() {
                 handler { wrapper: PacketWrapper ->
                     val playerVer = wrapper.passthrough(Type.VAR_INT)
                     val addr = wrapper.passthrough(Type.STRING) // Server Address
-                    wrapper.passthrough(Type.UNSIGNED_SHORT)
+                    val receivedPort = wrapper.passthrough(Type.UNSIGNED_SHORT)
                     val nextState = wrapper.passthrough(Type.VAR_INT)
 
-                    val parsed = ViaaaSAddress().parse(addr)
+                    val parsed = VIAaaSAddress().parse(addr, VIAaaSConfig.hostName)
 
                     logger.info("connecting ${wrapper.user().channel!!.remoteAddress()} ($playerVer) to ${parsed.realAddress}:${parsed.port} (${parsed.protocol})")
 
@@ -64,7 +64,7 @@ object CloudHeadProtocol : SimpleProtocol() {
                         val frontForwarder = wrapper.user().channel!!.pipeline().get(CloudSideForwarder::class.java)
                         try {
                             var srvResolvedAddr = parsed.realAddress
-                            var srvResolvedPort = parsed.port
+                            var srvResolvedPort = if (parsed.port != 0) parsed.port else receivedPort
                             if (srvResolvedPort == 25565) {
                                 try {
                                     // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java

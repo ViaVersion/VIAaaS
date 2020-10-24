@@ -1,43 +1,46 @@
 <!doctype html>
-<!-- insert here online mode auth code with wss -->
-<html>
+<!-- todo insert here online mode auth code with wss -->
+<html lang="en">
 <head>
-    <script>
-// Global variable to hold the websocket.
-var socket = null;
-
-function connect() {
-    console.log("Begin connect");
-    socket = new WebSocket("wss://" + window.location.host + "/ws");
-
-    socket.onerror = function() {
-        console.log("socket error");
-    };
-
-    socket.onopen = function() {
-        console.log("Connected");
-    };
-
-    socket.onclose = function(evt) {
-        // Try to gather an explanation about why this was closed.
-        var explanation = "";
-        if (evt.reason && evt.reason.length > 0) {
-            explanation = "reason: " + evt.reason;
-        } else {
-            explanation = "without a reason specified";
-        }
-
-        console.log("Disconnected with close code " + evt.code + " and " + explanation);
-        setTimeout(connect, 5000);
-    };
-
-    socket.onmessage = function(event) {
-        console.log(event.data.toString());
-    };
-}
-connect();
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VIAaaS</title>
+    <style>
+        body {font-family: sans-serif}
+    </style>
 </head>
 <body>
+<p>WebSocket connection status: <span id="connection_status">?</span></p>
+<p>DO NOT TYPE YOUR CREDENTIALS IF YOU DON'T TRUST THE CONNECTION TO THIS VIAAAS INSTANCE!</p>
+<p>Minecraft Login:</p>
+<p>Minecraft Password:</p>
+<script>
+    var socket = null;
+    var connectionStatus = document.getElementById("connection_status");
+
+    function connect() {
+        connectionStatus.innerText = "connecting...";
+        socket = new WebSocket("wss://" + window.location.host + "/ws");
+
+        socket.onerror = () => {
+            connectionStatus.innerText = "socket error";
+        };
+
+        socket.onopen = () => {
+            connectionStatus.innerText = "connected";
+        };
+
+        socket.onclose = evt => {
+            connectionStatus.innerText = "disconnected with close code " + evt.code + " and reason: " + evt.reason;
+            setTimeout(connect, 5000);
+        };
+
+        socket.onmessage = event => {
+            console.log(event.data.toString());
+        };
+    }
+
+    connect();
+</script>
 </body>
 </html>

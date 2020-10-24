@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClassName = "com.github.creeper123123321.viaaas.ViaaaSKt"
+    mainClassName = "com.github.creeper123123321.viaaas.VIAaaSKt"
 }
 
 java {
@@ -36,7 +36,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    testCompile("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 }
 
 val run: JavaExec by tasks

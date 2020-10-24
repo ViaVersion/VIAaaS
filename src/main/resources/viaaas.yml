@@ -1,0 +1,7 @@
+# See application.conf in resources for https interface options
+# Port used for binding Minecraft port
+port: 25565
+# Address to bind
+bind-address: localhost
+# Host name of this instance, that will be used in the virtual host
+host-name: viaaas.localhost

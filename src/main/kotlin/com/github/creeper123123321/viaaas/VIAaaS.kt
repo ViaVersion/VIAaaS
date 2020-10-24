@@ -10,6 +10,7 @@ import io.ktor.routing.*
 import io.ktor.server.netty.*
 import io.ktor.websocket.*
 import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import kotlinx.coroutines.channels.consumeEach
@@ -17,27 +18,27 @@ import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
+import us.myles.ViaVersion.util.Config
 import java.io.File
 import java.net.InetAddress
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.exitProcess
 
-
 fun main(args: Array<String>) {
-    val args = args.mapIndexed { i, content -> i to content }.toMap()
+    File("config/https.jks").apply {
+        parentFile.mkdirs()
+        if (!exists()) generateCertificate(this)
+    }
+
     Via.init(ViaManager.builder()
             .injector(CloudInjector)
             .loader(CloudLoader)
             .commandHandler(CloudCommands)
             .platform(CloudPlatform).build())
-
     MappingDataLoader.enableMappingsCache()
-
     Via.getManager().init()
-
     CloudRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
-
     CloudBackwards.init(File("config/viabackwards.yml"))
 
     val boss = NioEventLoopGroup()
@@ -45,8 +46,9 @@ fun main(args: Array<String>) {
     val future = ServerBootstrap().group(boss, worker)
             .channel(NioServerSocketChannel::class.java)
             .childHandler(ChannelInit)
-            .bind(InetAddress.getByName(args[0] ?: "::"), args[1]?.toIntOrNull() ?: 25565)
-
+            .childOption(ChannelOption.IP_TOS, 0x18)
+            .childOption(ChannelOption.TCP_NODELAY, true)
+            .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
     println("Binded minecraft into " + future.sync().channel().localAddress())
 
     Thread { EngineMain.main(arrayOf()) }.start()
@@ -72,13 +74,32 @@ fun main(args: Array<String>) {
     exitProcess(0) // todo what's stucking?
 }
 
-class ViaaaSAddress {
+fun Application.mainWeb() {
+    ViaWebApp().apply { main() }
+}
+
+object VIAaaSConfig : Config(File("config/viaaas.yml")) {
+    init {
+        reloadConfig()
+    }
+
+    override fun getUnsupportedOptions() = emptyList<String>().toMutableList()
+    override fun getDefaultConfigURL() = VIAaaSConfig::class.java.classLoader.getResource("viaaas.yml")!!
+    override fun handleConfig(p0: MutableMap<String, Any>?) {
+    }
+
+    val port: Int get() = this.getInt("port", 25565)
+    val bindAddress: String get() = this.getString("bind-address", "localhost")!!
+    val hostName: String get() = this.getString("host-name", "viaaas.localhost")!!
+}
+
+class VIAaaSAddress {
     var protocol = 0
     var viaSuffix: String? = null
     var realAddress: String? = null
-    var port: Int = 25565
-    var online: Boolean = false
-    fun parse(address: String): ViaaaSAddress {
+    var port = 0
+    var online = false
+    fun parse(address: String, viaHostName: String): VIAaaSAddress {
         val parts = address.split('.')
         var foundDomain = false
         var foundOptions = false
@@ -112,7 +133,8 @@ class ViaaaSAddress {
                 if (foundOptions) {
                     realAddrPart = true
                 }
-            } else if (part.equals("viaaas", ignoreCase = true)) {
+            } else if (parts.filterIndexed { a, _ -> a <= i }
+                            .joinToString(".").equals(viaHostName, ignoreCase = true)) {
                 foundDomain = true
             }
             if (realAddrPart) {
@@ -130,97 +152,5 @@ class ViaaaSAddress {
             viaSuffix = suffix
         }
         return this
-    }
-}
-
-fun Application.mainWeb() {
-    ViaWebApp().apply { main() }
-}
-
-class ViaWebApp {
-    data class WebSession(val id: String)
-
-    val server = WebDashboardServer()
-
-    fun Application.main() {
-        install(DefaultHeaders)
-        install(CallLogging)
-        install(WebSockets) {
-            pingPeriod = Duration.ofMinutes(1)
-        }
-
-        routing {
-            webSocket("/ws") {
-                server.connected(this)
-
-                try {
-                    incoming.consumeEach { frame ->
-                        if (frame is Frame.Text) {
-                            server.onMessage(this, frame.readText())
-                        }
-                    }
-                } finally {
-                    server.disconnected(this)
-                }
-            }
-
-            static {
-                defaultResource("auth.html", "web")
-                resources("web")
-            }
-
-        }
-    }
-}
-
-class WebDashboardServer {
-    val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
-    suspend fun connected(ws: WebSocketSession) {
-        clients[ws] = WebClient(ws, WebLogin())
-    }
-
-    suspend fun onMessage(ws: WebSocketSession, msg: String) {
-        val client = clients[ws]!!
-        client.state.onMessage(client, msg)
-    }
-
-    suspend fun disconnected(ws: WebSocketSession) {
-        val client = clients[ws]!!
-        client.state.disconnected(client)
-        clients.remove(ws)
-    }
-}
-
-
-data class WebClient(val ws: WebSocketSession, val state: WebState) {
-}
-
-
-interface WebState {
-    fun onMessage(webClient: WebClient, msg: String)
-    fun disconnected(webClient: WebClient)
-}
-
-class WebLogin : WebState {
-    override fun onMessage(webClient: WebClient, msg: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun disconnected(webClient: WebClient) {
-        TODO("Not yet implemented")
-    }
-}
-
-
-object CertificateGenerator {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        val jksFile = File("build/temporary.jks").apply {
-            parentFile.mkdirs()
-        }
-
-        if (!jksFile.exists()) {
-            generateCertificate(jksFile) // Generates the certificate
-        }
     }
 }
