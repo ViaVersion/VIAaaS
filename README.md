@@ -8,8 +8,5 @@ TODO: Online mode, protocol auto detection, transparent proxying?
 
 Usage:
 - ./gradlew clean run
-- There is currently no config
-- Backend address is determined by virtual host
-- VIAaaS currently must be used in a "viaaas" subdomain (may change in the future)
-- Private IP addresses are currently blocked
+- Connection to private IP addresses are currently blocked
 - Connect to mc.example.com._v1_8.viaaas.localhost

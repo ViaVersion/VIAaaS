@@ -133,7 +133,7 @@ class VIAaaSAddress {
                 if (foundOptions) {
                     realAddrPart = true
                 }
-            } else if (parts.filterIndexed { a, _ -> a <= i }
+            } else if (parts.filterIndexed { a, _ -> a >= i }
                             .joinToString(".").equals(viaHostName, ignoreCase = true)) {
                 foundDomain = true
             }
