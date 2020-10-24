@@ -3,7 +3,6 @@ package com.github.creeper123123321.viaaas
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.cio.websocket.*
-import io.ktor.http.cio.websocket.WebSockets
 import io.ktor.http.content.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
@@ -80,7 +79,6 @@ class WebLogin : WebState {
     override suspend fun start(webClient: WebClient) {
         webClient.ws.send("test")
         webClient.ws.flush()
-        TODO("Not yet implemented")
     }
 
     override suspend fun onMessage(webClient: WebClient, msg: String) {

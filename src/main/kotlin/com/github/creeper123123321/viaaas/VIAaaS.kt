@@ -2,18 +2,14 @@ package com.github.creeper123123321.viaaas
 
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.http.cio.websocket.*
-import io.ktor.http.content.*
 import io.ktor.network.tls.certificates.*
-import io.ktor.routing.*
+import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.websocket.*
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import kotlinx.coroutines.channels.consumeEach
+import io.netty.util.concurrent.Future
 import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
@@ -21,9 +17,6 @@ import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.util.Config
 import java.io.File
 import java.net.InetAddress
-import java.time.Duration
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     File("config/https.jks").apply {
@@ -51,7 +44,7 @@ fun main(args: Array<String>) {
             .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
     println("Binded minecraft into " + future.sync().channel().localAddress())
 
-    Thread { EngineMain.main(arrayOf()) }.start()
+    val ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
 
     loop@ while (true) {
         try {
@@ -67,11 +60,11 @@ fun main(args: Array<String>) {
         }
     }
 
-    future.channel().close().sync()
-    boss.shutdownGracefully().sync()
-    worker.shutdownGracefully().sync()
+    ktorServer.stop(1000, 1000)
+    listOf<Future<*>>(future.channel().close(), boss.shutdownGracefully(), worker.shutdownGracefully())
+            .forEach { it.sync() }
+
     Via.getManager().destroy()
-    exitProcess(0) // todo what's stucking?
 }
 
 fun Application.mainWeb() {

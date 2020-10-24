@@ -1,5 +1,6 @@
 package com.github.creeper123123321.viaaas
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import de.gerrygames.viarewind.api.ViaRewindPlatform
 import io.netty.buffer.ByteBuf
 import io.netty.channel.DefaultEventLoop
@@ -101,8 +102,8 @@ object CloudAPI : ViaAPI<Unit> {
 
 object CloudPlatform : ViaPlatform<Unit> {
     val connMan = ViaConnectionManager()
-    val executor = Executors.newCachedThreadPool()
-    val eventLoop = DefaultEventLoop()
+    val executor = Executors.newCachedThreadPool(ThreadFactoryBuilder().setNameFormat("VIAaaS").setDaemon(true).build())
+    val eventLoop = DefaultEventLoop(executor)
     override fun sendMessage(p0: UUID, p1: String) {
         // todo
     }
