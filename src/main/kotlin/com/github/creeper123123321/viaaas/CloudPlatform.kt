@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import de.gerrygames.viarewind.api.ViaRewindPlatform
 import io.netty.buffer.ByteBuf
 import io.netty.channel.DefaultEventLoop
-import io.netty.channel.socket.SocketChannel
 import nl.matsv.viabackwards.api.ViaBackwardsPlatform
 import us.myles.ViaVersion.AbstractViaConfig
 import us.myles.ViaVersion.api.Via
@@ -15,7 +14,6 @@ import us.myles.ViaVersion.api.boss.BossColor
 import us.myles.ViaVersion.api.boss.BossStyle
 import us.myles.ViaVersion.api.command.ViaCommandSender
 import us.myles.ViaVersion.api.configuration.ConfigurationProvider
-import us.myles.ViaVersion.api.data.StoredObject
 import us.myles.ViaVersion.api.data.UserConnection
 import us.myles.ViaVersion.api.platform.*
 import us.myles.ViaVersion.api.protocol.ProtocolRegistry
@@ -187,10 +185,3 @@ object CloudVersionProvider : VersionProvider() {
         return super.getServerProtocol(connection)
     }
 }
-
-data class CloudData(val userConnection: UserConnection,
-                     var backendVer: Int,
-                     var backendChannel: SocketChannel? = null,
-                     var frontOnline: Boolean,
-                     var pendingStatus: Boolean = false
-) : StoredObject(userConnection)

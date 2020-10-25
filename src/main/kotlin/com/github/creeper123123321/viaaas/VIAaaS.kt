@@ -21,6 +21,7 @@ import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.util.Config
 import java.io.File
 import java.net.InetAddress
+import java.security.KeyPairGenerator
 
 val httpClient = HttpClient {
     defaultRequest {
@@ -29,6 +30,12 @@ val httpClient = HttpClient {
     install(JsonFeature) {
         serializer = GsonSerializer()
     }
+}
+
+// Minecraft doesn't have forward secrecy
+val mcCryptoKey = KeyPairGenerator.getInstance("RSA").let {
+    it.initialize(4096) // https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
+    it.genKeyPair()
 }
 
 fun main(args: Array<String>) {

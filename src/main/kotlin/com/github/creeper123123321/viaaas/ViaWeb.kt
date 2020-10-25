@@ -1,9 +1,12 @@
 package com.github.creeper123123321.viaaas
 
+import com.google.common.base.Preconditions
 import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.ktor.application.*
+import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -12,18 +15,22 @@ import io.ktor.http.content.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.runBlocking
 import java.net.URLEncoder
 import java.time.Duration
 import java.util.*
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.collections.set
 
+
 // todo https://minecraft.id/documentation
 
-class ViaWebApp {
-    val server = WebDashboardServer()
+val viaWebServer = WebDashboardServer()
 
+class ViaWebApp {
     fun Application.main() {
         install(DefaultHeaders)
         install(CallLogging)
@@ -34,17 +41,18 @@ class ViaWebApp {
         routing {
             webSocket("/ws") {
                 try {
-                    server.connected(this)
+                    viaWebServer.connected(this)
                     incoming.consumeEach { frame ->
                         if (frame is Frame.Text) {
-                            server.onMessage(this, frame.readText())
+                            viaWebServer.onMessage(this, frame.readText())
                         }
                     }
                 } catch (e: Exception) {
-                    server.onException(this, e)
+                    e.printStackTrace()
+                    viaWebServer.onException(this, e)
                     this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, e.toString()))
                 } finally {
-                    server.disconnected(this)
+                    viaWebServer.disconnected(this)
                 }
             }
 
@@ -56,12 +64,35 @@ class ViaWebApp {
     }
 }
 
+// https://github.com/VelocityPowered/Velocity/blob/6467335f74a7d1617512a55cc9acef5e109b51ac/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
+fun fromUndashed(string: String): UUID {
+    Preconditions.checkArgument(string.length == 32, "Length is incorrect")
+    return UUID(
+            java.lang.Long.parseUnsignedLong(string.substring(0, 16), 16),
+            java.lang.Long.parseUnsignedLong(string.substring(16), 16)
+    )
+}
+
 class WebDashboardServer {
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val loginTokens = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.DAYS)
-            .build<UUID, String>()
-    val usernames = ConcurrentHashMap<String, WebClient>()
+            .build<UUID, UUID>()
+
+    // Minecraft account -> WebClient
+    val listeners = ConcurrentHashMap<UUID, MutableSet<WebClient>>()
+    val usernameIdCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .build<String, UUID>(CacheLoader.from { name ->
+                runBlocking {
+                    httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
+                            ?.get("id")?.asString?.let { fromUndashed(it) }
+                }
+            })
+
+    val pendingSessionHashes = CacheBuilder.newBuilder()
+            .expireAfterWrite(30, TimeUnit.SECONDS)
+            .build<String, CompletableFuture<Void>>(CacheLoader.from { _ -> CompletableFuture() })
 
     suspend fun connected(ws: WebSocketSession) {
         val loginState = WebLogin()
@@ -91,7 +122,7 @@ class WebDashboardServer {
 data class WebClient(val server: WebDashboardServer,
                      val ws: WebSocketSession,
                      val state: WebState,
-                     val listenedUsernames: MutableSet<String> = mutableSetOf())
+                     val listenedIds: MutableSet<UUID> = mutableSetOf())
 
 interface WebState {
     suspend fun start(webClient: WebClient)
@@ -120,29 +151,34 @@ class WebLogin : WebState {
                         encodeInQuery = false) {
                 }
 
+
                 if (check.getAsJsonPrimitive("valid").asBoolean) {
                     val token = UUID.randomUUID()
-                    webClient.server.loginTokens.put(token, username)
+                    val mcIdUser = check.get("username").asString
+                    val uuid = webClient.server.usernameIdCache.get(mcIdUser)
+
+                    webClient.server.loginTokens.put(token, uuid)
                     webClient.ws.send("""{"action": "minecraft_id_result", "success": true,
-                        | "username": "$username", "token": "$token"}""".trimMargin())
+                        | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin())
                 } else {
                     webClient.ws.send("""{"action": "minecraft_id_result", "success": false}""")
                 }
             }
             "listen_login_requests" -> {
                 val token = UUID.fromString(obj.getAsJsonPrimitive("token").asString)
-                val user = webClient.server.loginTokens.get(token) { "" }
-                if (user != "") {
+                val user = webClient.server.loginTokens.getIfPresent(token)
+                if (user != null) {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": true, "username": "$user"}""")
-                    webClient.listenedUsernames.add(user)
-                    webClient.server.usernames[user] = webClient
+                    webClient.listenedIds.add(user)
+                    webClient.server.listeners.computeIfAbsent(user) { Collections.newSetFromMap(ConcurrentHashMap()) }
+                            .add(webClient)
                 } else {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
                 }
             }
             "session_hash_response" -> {
-                val token = UUID.fromString(obj.getAsJsonPrimitive("token").asString)
-                val user = webClient.server.loginTokens.get(token) { null }!!
+                val hash = obj.get("session_hash").asString
+                webClient.server.pendingSessionHashes.getIfPresent(hash)?.complete(null)
             }
             else -> throw IllegalStateException("invalid action!")
         }
@@ -151,7 +187,7 @@ class WebLogin : WebState {
     }
 
     override suspend fun disconnected(webClient: WebClient) {
-        webClient.listenedUsernames.forEach { webClient.server.usernames.remove(it, webClient) }
+        webClient.listenedIds.forEach { webClient.server.listeners[it]?.remove(webClient) }
     }
 
     override suspend fun onException(webClient: WebClient, exception: java.lang.Exception) {

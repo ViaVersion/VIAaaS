@@ -18,6 +18,7 @@ import us.myles.ViaVersion.util.PipelineUtil
 import java.util.concurrent.TimeUnit
 import java.util.zip.Deflater
 import java.util.zip.Inflater
+import javax.crypto.Cipher
 
 
 object ChannelInit : ChannelInitializer<Channel>() {
@@ -25,6 +26,8 @@ object ChannelInit : ChannelInitializer<Channel>() {
         val user = UserConnection(ch)
         CloudPipeline(user)
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
+                .addLast("encrypt", CloudEncryptor())
+                .addLast("decrypt", CloudDecryptor())
                 .addLast("frame-encoder", FrameEncoder)
                 .addLast("frame-decoder", FrameDecoder())
                 .addLast("compress", CloudCompressor())
@@ -36,9 +39,33 @@ object ChannelInit : ChannelInitializer<Channel>() {
     }
 }
 
+class CloudDecryptor(var cipher: Cipher? = null) : MessageToMessageDecoder<ByteBuf>() {
+    override fun decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
+        val i = msg.readerIndex()
+        val size = msg.readableBytes()
+        if (cipher != null) {
+            msg.writerIndex(i + cipher!!.update(msg.nioBuffer(), msg.nioBuffer(i, cipher!!.getOutputSize(size))))
+        }
+        out.add(msg.retain())
+    }
+}
+
+class CloudEncryptor(var cipher: Cipher? = null) : MessageToMessageEncoder<ByteBuf>() {
+    override fun encode(ctx: ChannelHandlerContext?, msg: ByteBuf, out: MutableList<Any>) {
+        val i = msg.readerIndex()
+        val size = msg.readableBytes()
+        if (cipher != null) {
+            msg.writerIndex(i + cipher!!.update(msg.nioBuffer(), msg.nioBuffer(i, cipher!!.getOutputSize(size))))
+        }
+        out.add(msg.retain())
+    }
+}
+
 class BackendInit(val user: UserConnection) : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
+                .addLast("encrypt", CloudEncryptor())
+                .addLast("decrypt", CloudDecryptor())
                 .addLast("frame-encoder", FrameEncoder)
                 .addLast("frame-decoder", FrameDecoder())
                 .addLast("compress", CloudCompressor())
