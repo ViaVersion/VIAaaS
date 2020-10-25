@@ -34,6 +34,8 @@ dependencies {
 
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-gson:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")

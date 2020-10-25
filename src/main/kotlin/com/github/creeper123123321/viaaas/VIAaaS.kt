@@ -2,6 +2,10 @@ package com.github.creeper123123321.viaaas
 
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import io.ktor.client.request.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -17,6 +21,15 @@ import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.util.Config
 import java.io.File
 import java.net.InetAddress
+
+val httpClient = HttpClient {
+    defaultRequest {
+        header("User-Agent", "VIAaaS")
+    }
+    install(JsonFeature) {
+        serializer = GsonSerializer()
+    }
+}
 
 fun main(args: Array<String>) {
     File("config/https.jks").apply {
@@ -61,6 +74,7 @@ fun main(args: Array<String>) {
     }
 
     ktorServer.stop(1000, 1000)
+    httpClient.close()
     listOf<Future<*>>(future.channel().close(), boss.shutdownGracefully(), worker.shutdownGracefully())
             .forEach { it.sync() }
 

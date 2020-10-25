@@ -1,5 +1,4 @@
 <!doctype html>
-<!-- todo insert here online mode auth code with wss -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,33 +9,89 @@
     </style>
 </head>
 <body>
+WIP todo insert here online mode auth code with wss, store login things in the browser, make viaaas ask the browser to contact session servers
 <p>WebSocket connection status: <span id="connection_status">?</span></p>
 <p>DO NOT TYPE YOUR CREDENTIALS IF YOU DON'T TRUST THE CONNECTION TO THIS VIAAAS INSTANCE!</p>
-<p>Minecraft Login:</p>
-<p>Minecraft Password:</p>
+<p><span id="content"></span></p>
 <script>
+    let urlParams = new URLSearchParams();
+    window.location.search.split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
+    history.replaceState(null, null, "auth.html");
+    var username = urlParams.get("username");
+    var mcauth_code = urlParams.get("mcauth_code");
+    if (urlParams.get("mcauth_success") == "false") {
+        alert("Couldn't authenticate with Minecraft.ID: " + urlParams.get("mcauth_msg"));
+    }
+
     var socket = null;
     var connectionStatus = document.getElementById("connection_status");
+    var content = document.getElementById("content");
+
+    function listen(token) {
+        socket.send('{"action": "listen_login_requests", "token": "' + token + '"}');
+    }
 
     function connect() {
         connectionStatus.innerText = "connecting...";
         socket = new WebSocket("wss://" + window.location.host + "/ws");
 
-        socket.onerror = () => {
+        socket.onerror = e => {
+            console.log(e);
             connectionStatus.innerText = "socket error";
+            content.innerHTML = "";
         };
 
         socket.onopen = () => {
             connectionStatus.innerText = "connected";
+            content.innerHTML = "";
         };
 
         socket.onclose = evt => {
             connectionStatus.innerText = "disconnected with close code " + evt.code + " and reason: " + evt.reason;
+            content.innerHTML = "";
             setTimeout(connect, 5000);
         };
 
         socket.onmessage = event => {
             console.log(event.data.toString());
+            let parsed = JSON.parse(event.data);
+            if (parsed.action == "ad_minecraft_id_login") {
+                let link = document.createElement("a");
+                link.innerText = "Prove your ownership of your accounts to this VIAaaS instance with Minecraft.ID";
+                link.href = "javascript:";
+                link.onclick = () => {
+                    if (username != null && mcauth_code != null) {
+                        socket.send('{"action": "minecraft_id_login", "username": "' + username + '", "code": "' + mcauth_code + '"}');
+                        username = null; mcauth_code = null;
+                    } else {
+                        let user = prompt("Username: ", "");
+                        let callbackUrl = new URL(location.origin + location.pathname + "?username=" + encodeURIComponent(user));
+                        location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
+                    }
+                };
+                content.appendChild(link);
+
+                (localStorage.getItem("tokens") || "").split(",").filter(it => it != "").forEach(listen);
+            } else if (parsed.action == "minecraft_id_result") {
+                if (!parsed.success) {
+                    alert("Server couldn't verify account via Minecraft.ID");
+                } else {
+                    listen(parsed.token);
+                    let tokens = (localStorage.getItem("tokens") || "").split(",");
+                    tokens.push(parsed.token);
+                    localStorage.setItem("tokens", tokens.join(","));
+                }
+            } else if (parsed.action == "listen_login_requests_result") {
+                if (parsed.success) {
+                    let msg = document.createElement("p");
+                    msg.innerText = "Listening to logins with username: " + parsed.username;
+                    content.appendChild(msg);
+                } else {
+                    let tokens = (localStorage.getItem("tokens") || "").split(",");
+                    tokens = tokens.filter(it => it != parsed.token);
+                    localStorage.setItem("tokens", tokens.join(","));
+                }
+            }
         };
     }
 
