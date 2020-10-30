@@ -9,6 +9,7 @@ import io.netty.channel.SimpleChannelInboundHandler
 import org.slf4j.LoggerFactory
 import us.myles.ViaVersion.api.data.UserConnection
 import us.myles.ViaVersion.api.type.Type
+import us.myles.ViaVersion.exception.CancelCodecException
 import us.myles.ViaVersion.packets.State
 
 val chLogger = LoggerFactory.getLogger("VIAaaS CloudHandler")
@@ -37,6 +38,7 @@ class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+        if (cause is CancelCodecException) return
         disconnect("Exception: $cause")
         cause.printStackTrace()
     }
