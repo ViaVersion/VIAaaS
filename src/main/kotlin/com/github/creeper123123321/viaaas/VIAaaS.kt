@@ -14,14 +14,21 @@ import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.Future
+import net.minecrell.terminalconsole.SimpleTerminalConsole
+import org.slf4j.LoggerFactory
 import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
+import us.myles.ViaVersion.api.command.ViaCommandSender
 import us.myles.ViaVersion.api.data.MappingDataLoader
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.util.Config
 import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator
+import java.util.*
+
+var runningServer = true
+var viaaasLogger = LoggerFactory.getLogger("VIAaaS")
 
 val httpClient = HttpClient {
     defaultRequest {
@@ -62,22 +69,12 @@ fun main(args: Array<String>) {
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
-    println("Binded minecraft into " + future.sync().channel().localAddress())
+    viaaasLogger.info("Binded minecraft into " + future.sync().channel().localAddress())
 
     val ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
 
-    loop@ while (true) {
-        try {
-            val cmd = readLine()?.trim()?.split(" ")
-            when (cmd?.get(0)?.toLowerCase()) {
-                "stop", "end" -> break@loop
-                "viaversion", "viaver" -> Via.getManager().commandHandler.onCommand(CloudConsoleSender, cmd.subList(1, cmd.size)
-                        .toTypedArray())
-                else -> println("unknown command")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    while (runningServer) {
+        VIAaaSConsole().start()
     }
 
     ktorServer.stop(1000, 1000)
@@ -86,6 +83,55 @@ fun main(args: Array<String>) {
             .forEach { it.sync() }
 
     Via.getManager().destroy()
+}
+
+class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
+    val commands = hashMapOf<String, (String, Array<String>) -> Unit>()
+    override fun isRunning(): Boolean = runningServer
+
+    init {
+        commands["stop"] = { _, _ -> this.shutdown() }
+        commands["end"] = commands["stop"]!!
+        commands["viaversion"] = { _, args ->
+            Via.getManager().commandHandler.onCommand(this, args)
+        }
+        commands["viaver"] = commands["viaversion"]!!
+        commands["vvcloud"] = commands["viaversion"]!!
+        commands["help"] = { _, _ ->
+            sendMessage(commands.keys.toString())
+        }
+        commands["?"] = commands["help"]!!
+    }
+
+    override fun runCommand(command: String) {
+        val cmd = command.split(" ")
+        try {
+            val alias = cmd[0].toLowerCase()
+            val args = cmd.subList(1, cmd.size).toTypedArray()
+            val runnable = commands[alias]
+            if (runnable == null) {
+                sendMessage("unknown command, try 'help'")
+            } else {
+                runnable(alias, args)
+            }
+        } catch (e: Exception) {
+            sendMessage("Error running command: $e")
+        }
+    }
+
+    override fun shutdown() {
+        viaaasLogger.info("Shutting down...")
+        runningServer = false
+    }
+
+
+    override fun sendMessage(p0: String) {
+        LoggerFactory.getLogger(this.name).info(p0)
+    }
+
+    override fun hasPermission(p0: String): Boolean = true
+    override fun getUUID(): UUID = UUID.fromString(name)
+    override fun getName(): String = "VIAaaS Console"
 }
 
 fun Application.mainWeb() {

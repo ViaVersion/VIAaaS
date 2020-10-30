@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- parts stolen from https://github.com/GeyserMC/Geyser/blob/4a425df20d1b4fa3cd614910a269f3d3f2609535/bootstrap/standalone/src/main/resources/log4j2.xml -->
+<Configuration status="WARN">
+    <Appenders>
+        <TerminalConsole name="TerminalConsole">
+            <PatternLayout
+                    pattern="%d{HH:mm:ss} %style{%highlight{%level}{FATAL=red dark, ERROR=red, WARN=yellow bright, INFO=cyan bright, DEBUG=green, TRACE=white}} [%thread] [%logger] %minecraftFormatting{%msg}%n"/>
+        </TerminalConsole>
+        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] [%logger] %level{length=1} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+        </RollingRandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="TerminalConsole"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -5,6 +5,7 @@ import de.gerrygames.viarewind.api.ViaRewindPlatform
 import io.netty.buffer.ByteBuf
 import io.netty.channel.DefaultEventLoop
 import nl.matsv.viabackwards.api.ViaBackwardsPlatform
+import org.slf4j.LoggerFactory
 import us.myles.ViaVersion.AbstractViaConfig
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.ViaAPI
@@ -23,6 +24,7 @@ import us.myles.ViaVersion.commands.ViaCommandHandler
 import us.myles.ViaVersion.protocols.base.VersionProvider
 import us.myles.ViaVersion.protocols.protocol1_9to1_8.providers.MovementTransmitterProvider
 import us.myles.ViaVersion.sponge.VersionInfo
+import us.myles.ViaVersion.sponge.util.LoggerWrapper
 import us.myles.viaversion.libs.gson.JsonObject
 import java.io.File
 import java.net.URL
@@ -34,7 +36,7 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
 object CloudBackwards: ViaBackwardsPlatform {
-    val log = Logger.getLogger("ViaBackwards")
+    val log = LoggerWrapper(LoggerFactory.getLogger("ViaBackwards"))
     override fun getDataFolder() = File("config/viabackwards")
     override fun getLogger(): Logger = log
     override fun disable() {
@@ -42,7 +44,7 @@ object CloudBackwards: ViaBackwardsPlatform {
 }
 
 object CloudRewind: ViaRewindPlatform {
-    val log = Logger.getLogger("ViaRewind")
+    val log = LoggerWrapper(LoggerFactory.getLogger("ViaRewind"))
     override fun getLogger(): Logger = log
 }
 
@@ -119,7 +121,7 @@ object CloudPlatform : ViaPlatform<Unit> {
     override fun runRepeatingSync(p0: Runnable, p1: Long): TaskId = CloudTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
     override fun getPlatformVersion(): String = "VIAaaS"
     override fun runAsync(p0: Runnable): TaskId = CloudTask(CompletableFuture.runAsync(p0, executor))
-    override fun getLogger(): Logger = Logger.getLogger("ViaVersion")
+    override fun getLogger(): Logger = LoggerWrapper(LoggerFactory.getLogger("ViaVersion"))
     override fun getConnectionManager(): ViaConnectionManager = connMan
     override fun getOnlinePlayers(): Array<ViaCommandSender> = arrayOf()
     override fun cancelTask(p0: TaskId?) {
@@ -168,13 +170,6 @@ object CloudConfig : AbstractViaConfig(File("config/viaversion.yml")) {
 
 class CloudTask(val obj: Future<*>) : TaskId {
     override fun getObject(): Any = obj
-}
-
-object CloudConsoleSender : ViaCommandSender {
-    override fun sendMessage(p0: String) = println(p0.replace(Regex("§."), ""))
-    override fun getName(): String = "VIAaaS console"
-    override fun getUUID(): UUID = UUID.fromString(name)
-    override fun hasPermission(p0: String): Boolean = true
 }
 
 object CloudVersionProvider : VersionProvider() {

@@ -6,12 +6,12 @@ import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
+import org.slf4j.LoggerFactory
 import us.myles.ViaVersion.api.data.UserConnection
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
-import java.util.logging.Logger
 
-val logger = Logger.getLogger("CloudHandler")
+val chLogger = LoggerFactory.getLogger("VIAaaS CloudHandler")
 
 class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?) : SimpleChannelInboundHandler<ByteBuf>() {
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
@@ -22,7 +22,7 @@ class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         super.channelInactive(ctx)
-        logger.info(userConnection.channel?.remoteAddress().toString() + " was disconnected")
+        chLogger.info(userConnection.channel?.remoteAddress().toString() + " was disconnected")
         other?.close()
     }
 
@@ -45,7 +45,7 @@ class CloudSideForwarder(val userConnection: UserConnection, var other: Channel?
     fun disconnect(s: String) {
         if (userConnection.channel?.isActive != true) return
 
-        logger.info("Disconnecting " + userConnection.channel!!.remoteAddress() + ": " + s)
+        chLogger.info("Disconnecting " + userConnection.channel!!.remoteAddress() + ": " + s)
         when (userConnection.protocolInfo!!.state) {
             State.LOGIN -> {
                 val packet = ByteBufAllocator.DEFAULT.buffer()

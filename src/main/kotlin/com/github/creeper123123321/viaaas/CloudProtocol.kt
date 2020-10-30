@@ -191,12 +191,18 @@ object CloudTailProtocol : SimpleProtocol() {
                             .generatePublic(X509EncodedKeySpec(it.get(Type.BYTE_ARRAY_PRIMITIVE, 0)))
                     data.backToken = it.get(Type.BYTE_ARRAY_PRIMITIVE, 1)
 
+                    val id = "VIAaaS" + ByteArray(10).let {
+                        secureRandom.nextBytes(it)
+                        Base64.getEncoder().withoutPadding().encodeToString(it)
+                        // https://developer.mozilla.org/en-US/docs/Glossary/Base64 133% of original
+                    }
                     // We'll use non-vanilla server id, public key size and token size
-                    it.set(Type.STRING, 0, "VIAaaS")
+                    it.set(Type.STRING, 0, id)
                     it.set(Type.BYTE_ARRAY_PRIMITIVE, 0, mcCryptoKey.public.encoded)
                     val token = ByteArray(16)
                     secureRandom.nextBytes(token)
                     data.frontToken = token
+                    data.frontId = id
                     it.set(Type.BYTE_ARRAY_PRIMITIVE, 1, token.clone())
                 }
             }
@@ -233,7 +239,7 @@ object CloudTailProtocol : SimpleProtocol() {
                     wrapper.user().channel!!.pipeline().get(CloudEncryptor::class.java).cipher = aesEn
                     wrapper.user().channel!!.pipeline().get(CloudDecryptor::class.java).cipher = aesDe
 
-                    val frontHash = generateServerHash("VIAaaS", secret, mcCryptoKey.public)
+                    val frontHash = generateServerHash(data.frontId!!, secret, mcCryptoKey.public)
 
                     val backKey = ByteArray(16)
                     secureRandom.nextBytes(backKey)
@@ -333,5 +339,6 @@ data class CloudData(val userConnection: UserConnection,
                      var backPublicKey: PublicKey? = null,
                      var backToken: ByteArray? = null,
                      var frontToken: ByteArray? = null,
-                     var frontLoginName: String? = null
+                     var frontLoginName: String? = null,
+                     var frontId: String? = null
 ) : StoredObject(userConnection)

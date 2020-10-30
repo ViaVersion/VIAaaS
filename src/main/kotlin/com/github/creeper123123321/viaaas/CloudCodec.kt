@@ -173,11 +173,6 @@ class CloudDecodeHandler(val info: UserConnection) : MessageToMessageDecoder<Byt
             transformedBuf.release()
         }
     }
-
-    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        if (PipelineUtil.containsCause(cause, CancelCodecException::class.java)) return
-        super.exceptionCaught(ctx, cause)
-    }
 }
 
 class CloudEncodeHandler(val info: UserConnection) : MessageToMessageEncoder<ByteBuf>() {
@@ -194,10 +189,5 @@ class CloudEncodeHandler(val info: UserConnection) : MessageToMessageEncoder<Byt
         } finally {
             transformedBuf.release()
         }
-    }
-
-    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        if (PipelineUtil.containsCause(cause, CancelCodecException::class.java)) return
-        super.exceptionCaught(ctx, cause)
     }
 }

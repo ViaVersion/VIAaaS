@@ -16,6 +16,8 @@ import io.ktor.routing.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 import java.net.URLEncoder
 import java.time.Duration
 import java.util.*
@@ -29,11 +31,14 @@ import kotlin.collections.set
 // todo https://minecraft.id/documentation
 
 val viaWebServer = WebDashboardServer()
+val webLogger = LoggerFactory.getLogger("VIAaaS Web")
 
 class ViaWebApp {
     fun Application.main() {
         install(DefaultHeaders)
-        install(CallLogging)
+        install(CallLogging) {
+            level = Level.INFO
+        }
         install(WebSockets) {
             pingPeriod = Duration.ofMinutes(1)
         }
@@ -94,7 +99,7 @@ class WebDashboardServer {
             .expireAfterWrite(30, TimeUnit.SECONDS)
             .build<String, CompletableFuture<Void>>(CacheLoader.from { _ -> CompletableFuture() })
 
-    suspend fun connected(ws: WebSocketSession) {
+    suspend fun connected(ws: WebSocketServerSession) {
         val loginState = WebLogin()
         val client = WebClient(this, ws, loginState)
         clients[ws] = client
@@ -120,7 +125,7 @@ class WebDashboardServer {
 
 
 data class WebClient(val server: WebDashboardServer,
-                     val ws: WebSocketSession,
+                     val ws: WebSocketServerSession,
                      val state: WebState,
                      val listenedIds: MutableSet<UUID> = mutableSetOf())
 
@@ -138,7 +143,7 @@ class WebLogin : WebState {
     }
 
     override suspend fun onMessage(webClient: WebClient, msg: String) {
-        val obj = Gson().fromJson<JsonObject>(msg, JsonObject::class.java)
+        val obj = Gson().fromJson(msg, JsonObject::class.java)
 
         when (obj.getAsJsonPrimitive("action").asString) {
             "minecraft_id_login" -> {
@@ -151,7 +156,6 @@ class WebLogin : WebState {
                         encodeInQuery = false) {
                 }
 
-
                 if (check.getAsJsonPrimitive("valid").asBoolean) {
                     val token = UUID.randomUUID()
                     val mcIdUser = check.get("username").asString
@@ -160,8 +164,11 @@ class WebLogin : WebState {
                     webClient.server.loginTokens.put(token, uuid)
                     webClient.ws.send("""{"action": "minecraft_id_result", "success": true,
                         | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin())
+
+                    webLogger.info("${webClient.ws.call.request.origin} generated a token for account $mcIdUser $uuid")
                 } else {
                     webClient.ws.send("""{"action": "minecraft_id_result", "success": false}""")
+                    webLogger.info("${webClient.ws.call.request.origin} failed to generated a token for account $username")
                 }
             }
             "listen_login_requests" -> {
@@ -172,8 +179,11 @@ class WebLogin : WebState {
                     webClient.listenedIds.add(user)
                     webClient.server.listeners.computeIfAbsent(user) { Collections.newSetFromMap(ConcurrentHashMap()) }
                             .add(webClient)
+
+                    webLogger.info("${webClient.ws.call.request.origin} is listening for logins for $user")
                 } else {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
+                    webLogger.info("${webClient.ws.call.request.origin} failed token for $user")
                 }
             }
             "session_hash_response" -> {
