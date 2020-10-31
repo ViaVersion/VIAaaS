@@ -16,7 +16,6 @@ WIP TODO - authenticate to backend server via browser, proxy the Mojang Login AP
 <script>
     let urlParams = new URLSearchParams();
     window.location.search.split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
-    history.replaceState(null, null, "auth.html");
     var username = urlParams.get("username");
     var mcauth_code = urlParams.get("mcauth_code");
     if (urlParams.get("mcauth_success") == "false") {

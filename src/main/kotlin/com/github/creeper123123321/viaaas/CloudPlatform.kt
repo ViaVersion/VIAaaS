@@ -35,7 +35,7 @@ import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
-object CloudBackwards: ViaBackwardsPlatform {
+object CloudBackwards : ViaBackwardsPlatform {
     val log = LoggerWrapper(LoggerFactory.getLogger("ViaBackwards"))
     override fun getDataFolder() = File("config/viabackwards")
     override fun getLogger(): Logger = log
@@ -43,7 +43,7 @@ object CloudBackwards: ViaBackwardsPlatform {
     }
 }
 
-object CloudRewind: ViaRewindPlatform {
+object CloudRewind : ViaRewindPlatform {
     val log = LoggerWrapper(LoggerFactory.getLogger("ViaRewind"))
     override fun getLogger(): Logger = log
 }
@@ -104,6 +104,11 @@ object CloudPlatform : ViaPlatform<Unit> {
     val connMan = ViaConnectionManager()
     val executor = Executors.newCachedThreadPool(ThreadFactoryBuilder().setNameFormat("VIAaaS").setDaemon(true).build())
     val eventLoop = DefaultEventLoop(executor)
+
+    init {
+        eventLoop.execute(initFuture::join)
+    }
+
     override fun sendMessage(p0: UUID, p1: String) {
         // todo
     }
@@ -129,9 +134,7 @@ object CloudPlatform : ViaPlatform<Unit> {
     }
 
     override fun isPluginEnabled(): Boolean = true
-    override fun getConfigurationProvider(): ConfigurationProvider {
-        TODO("Not yet implemented")
-    }
+    override fun getConfigurationProvider(): ConfigurationProvider = CloudConfig
 
     override fun getPlatformName(): String = "VIAaaS"
     override fun getPluginVersion(): String = VersionInfo.VERSION

@@ -26,9 +26,10 @@ import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 var runningServer = true
-var viaaasLogger = LoggerFactory.getLogger("VIAaaS")
+val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
 
 val httpClient = HttpClient {
     defaultRequest {
@@ -38,6 +39,8 @@ val httpClient = HttpClient {
         serializer = GsonSerializer()
     }
 }
+
+val initFuture = CompletableFuture<Unit>()
 
 // Minecraft doesn't have forward secrecy
 val mcCryptoKey = KeyPairGenerator.getInstance("RSA").let {
@@ -69,15 +72,23 @@ fun main(args: Array<String>) {
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
-    viaaasLogger.info("Binded minecraft into " + future.sync().channel().localAddress())
 
-    val ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
+    var ktorServer: NettyApplicationEngine? = null
+    try {
+        viaaasLogger.info("Binded minecraft into " + future.sync().channel().localAddress())
+        ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
+    } catch (e: Exception) {
+        runningServer = false
+        e.printStackTrace()
+    }
+
+    initFuture.complete(Unit)
 
     while (runningServer) {
         VIAaaSConsole().start()
     }
 
-    ktorServer.stop(1000, 1000)
+    ktorServer?.stop(1000, 1000)
     httpClient.close()
     listOf<Future<*>>(future.channel().close(), boss.shutdownGracefully(), worker.shutdownGracefully())
             .forEach { it.sync() }
