@@ -14,8 +14,10 @@ import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.net.URLEncoder
@@ -81,7 +83,7 @@ fun fromUndashed(string: String): UUID {
 class WebDashboardServer {
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val loginTokens = CacheBuilder.newBuilder()
-            .expireAfterWrite(10, TimeUnit.DAYS)
+            .expireAfterAccess(10, TimeUnit.DAYS)
             .build<UUID, UUID>()
 
     // Minecraft account -> WebClient
@@ -90,8 +92,10 @@ class WebDashboardServer {
             .expireAfterWrite(1, TimeUnit.HOURS)
             .build<String, UUID>(CacheLoader.from { name ->
                 runBlocking {
-                    httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
-                            ?.get("id")?.asString?.let { fromUndashed(it) }
+                    withContext(Dispatchers.IO) {
+                        httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
+                                ?.get("id")?.asString?.let { fromUndashed(it) }
+                    }
                 }
             })
 
@@ -175,7 +179,7 @@ class WebLogin : WebState {
                 val token = UUID.fromString(obj.getAsJsonPrimitive("token").asString)
                 val user = webClient.server.loginTokens.getIfPresent(token)
                 if (user != null) {
-                    webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": true, "username": "$user"}""")
+                    webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": true, "user": "$user"}""")
                     webClient.listenedIds.add(user)
                     webClient.server.listeners.computeIfAbsent(user) { Collections.newSetFromMap(ConcurrentHashMap()) }
                             .add(webClient)
@@ -183,7 +187,7 @@ class WebLogin : WebState {
                     webLogger.info("Listening for logins for $user")
                 } else {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
-                    webLogger.info("Failed token for $user")
+                    webLogger.info("Failed token")
                 }
             }
             "session_hash_response" -> {

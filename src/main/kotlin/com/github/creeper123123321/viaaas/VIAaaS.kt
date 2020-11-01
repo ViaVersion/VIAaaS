@@ -23,6 +23,7 @@ import us.myles.ViaVersion.api.data.MappingDataLoader
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.util.Config
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.net.InetAddress
 import java.security.KeyPairGenerator
 import java.util.*
@@ -165,11 +166,12 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
 }
 
 class VIAaaSAddress {
-    var protocol = 0
+    var protocol: Int? = null
     var viaSuffix: String? = null
     var realAddress: String? = null
-    var port = 0
-    var online = false
+    var port: Int? = null
+    var online = true
+    var altUsername : String? = null
     fun parse(address: String, viaHostName: String): VIAaaSAddress {
         val parts = address.split('.')
         var foundDomain = false
@@ -195,6 +197,10 @@ class VIAaaSAddress {
                                         protocol = closest.id
                                     }
                                 }
+                            }
+                            part.startsWith("_u", ignoreCase = true) -> {
+                                if (arg.length > 16) throw IllegalArgumentException("Invalid alt username")
+                                altUsername = arg
                             }
                         }
                     } else {

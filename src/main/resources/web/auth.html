@@ -9,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.1/uuid.min.js"></script>
 </head>
 <body>
-TODO - what to do with invalid session error because it uses the same account?
 <p>DO NOT TYPE YOUR CREDENTIALS IF YOU DON'T TRUST THIS VIAAAS INSTANCE OR THE CORS PROXY!</p>
 <p>Mojang API calls in browser are called through a CORS Proxy. See https://github.com/Zibri/cloudflare-cors-anywhere
     for setting up one.</p>
@@ -250,14 +249,14 @@ TODO - what to do with invalid session error because it uses the same account?
             } else if (parsed.action == "listen_login_requests_result") {
                 if (parsed.success) {
                     let msg = document.createElement("p");
-                    msg.innerText = "Listening to logins with username: " + parsed.username;
+                    msg.innerText = "Listening to login: " + parsed.user;
                     content.appendChild(msg);
                 } else {
                     removeToken(parsed.token);
                 }
             } else if (parsed.action == "session_hash_request") {
                 if (confirm("auth request sent from server, info: " + event.data + ". Should we authenticate?")) {
-                    let accounts = getMcAccounts().filter(it => it.user.toLowerCase() == parsed.username.toLowerCase());
+                    let accounts = getMcAccounts().filter(it => it.user.toLowerCase() == parsed.user.toLowerCase());
                     accounts.forEach(it => {
                         $.ajax({type: "post",
                             url: localStorage.getItem("cors-proxy") + "https://sessionserver.mojang.com/session/minecraft/join",
@@ -275,7 +274,7 @@ TODO - what to do with invalid session error because it uses the same account?
                             alert("Failed to authenticate to Minecraft backend server!");
                         });
                     });
-                    if (accounts.length == 0) alert("Couldn't find " + parsed.username + " account in browser");
+                    if (accounts.length == 0) alert("Couldn't find " + parsed.user + " account in browser");
                 }
             }
         };

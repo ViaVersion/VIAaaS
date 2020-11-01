@@ -11,10 +11,8 @@ import io.netty.handler.flow.FlowControlHandler
 import io.netty.handler.timeout.ReadTimeoutHandler
 import us.myles.ViaVersion.api.data.UserConnection
 import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.exception.CancelCodecException
 import us.myles.ViaVersion.exception.CancelDecoderException
 import us.myles.ViaVersion.exception.CancelEncoderException
-import us.myles.ViaVersion.util.PipelineUtil
 import java.util.concurrent.TimeUnit
 import java.util.zip.Deflater
 import java.util.zip.Inflater
@@ -35,7 +33,7 @@ object ChannelInit : ChannelInitializer<Channel>() {
                 .addLast("flow-handler", FlowControlHandler())
                 .addLast("via-encoder", CloudEncodeHandler(user))
                 .addLast("via-decoder", CloudDecodeHandler(user))
-                .addLast("handler", CloudSideForwarder(user, null))
+                .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = true))
     }
 }
 
@@ -70,7 +68,7 @@ class BackendInit(val user: UserConnection) : ChannelInitializer<Channel>() {
                 .addLast("frame-decoder", FrameDecoder())
                 .addLast("compress", CloudCompressor())
                 .addLast("decompress", CloudDecompressor())
-                .addLast("handler", CloudSideForwarder(user, null))
+                .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = false))
     }
 }
 
