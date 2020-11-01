@@ -4,14 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VIAaaS Authenticator</title>
-    <style>
-        body {font-family: sans-serif}
-    </style>
+    <style>body {font-family: sans-serif}</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.1/uuid.min.js"></script>
 </head>
 <body>
-WIP TODO - authenticate to backend server via browser, proxy the Mojang Login API, does this work on 1.7 and other versions?
+TODO - what to do with invalid session error because it uses the same account?
+<p>DO NOT TYPE YOUR CREDENTIALS IF YOU DON'T TRUST THIS VIAAAS INSTANCE OR THE CORS PROXY!</p>
+<p>Mojang API calls in browser are called through a CORS Proxy. See https://github.com/Zibri/cloudflare-cors-anywhere
+    for setting up one.</p>
+<label for="cors-proxy">CORS Proxy URL:</label>
+<br>
+<input type="url" id="cors-proxy" name="cors-proxy" value="" onchange="localStorage.setItem('cors-proxy', this.value);">
+<script></script>
+<hr>
+<p>Browser Minecraft accounts:</p>
+<p><span id="add-account">
+    <label for="email">Email/Username (legacy):</label>
+    <br>
+    <input type="text" id="email" name="email" value="">
+    <br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" value="">
+    <br><br>
+    <input type="button" value="Login into Minecraft" onclick="loginMc()">
+</span></p>
+<span id="accounts"></span>
+<hr>
 <p>WebSocket connection status: <span id="connection_status">?</span></p>
-<p>DO NOT TYPE YOUR CREDENTIALS IF YOU DON'T TRUST THIS VIAAAS INSTANCE!</p>
 <p><span id="content"></span></p>
 <script>
     let urlParams = new URLSearchParams();
@@ -22,17 +42,155 @@ WIP TODO - authenticate to backend server via browser, proxy the Mojang Login AP
         alert("Couldn't authenticate with Minecraft.ID: " + urlParams.get("mcauth_msg"));
     }
 
+    var wsUrl = "wss://" + window.location.host + "/ws";
+
     var socket = null;
     var connectionStatus = document.getElementById("connection_status");
     var content = document.getElementById("content");
+    var acounts = document.getElementById("accounts");
+
+    $("#cors-proxy").val(localStorage.getItem("cors-proxy"));
+
+    function loginMc() {
+        var clientToken = uuid.v4();
+        $.ajax({type: "post",
+            url: localStorage.getItem("cors-proxy") + "https://authserver.mojang.com/authenticate",
+            data: JSON.stringify({
+                agent: {name: "Minecraft", version: 1},
+                username: $("#email").val(),
+                password: $("#password").val(),
+                clientToken: clientToken,
+                }),
+            contentType: "application/json",
+            dataType: "json"
+        }).done((data) => {
+            storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id);
+        }).fail(() => alert("Failed to login"));
+        $("#email").val("");
+        $("#password").val("");
+    }
+
+    function storeMcAccount(accessToken, clientToken, name, id) {
+        let accounts = JSON.parse(localStorage.getItem("mc_accounts")) || [];
+        accounts.push({accessToken: accessToken, clientToken: clientToken, name: name, id: id});
+        localStorage.setItem("mc_accounts", JSON.stringify(accounts));
+        refreshAccountList();
+    }
+
+    function removeMcAccount(id) {
+        let accounts = JSON.parse(localStorage.getItem("mc_accounts")) || [];
+        accounts = accounts.filter(it => it.id != id);
+        localStorage.setItem("mc_accounts", JSON.stringify(accounts));
+        refreshAccountList();
+    }
+
+    function getMcAccounts() {
+        return JSON.parse(localStorage.getItem("mc_accounts")) || [];
+    }
+
+    function logout(id) {
+        getMcAccounts().filter(it => it.id == id).forEach(it => {
+            $.ajax({type: "post",
+                url: localStorage.getItem("cors-proxy") + "https://authserver.mojang.com/invalidate",
+                data: JSON.stringify({
+                    accessToken: it.accessToken,
+                    clientToken: it.clientToken
+                }),
+                contentType: "application/json",
+                dataType: "json"
+            }).done((data) => {
+                removeMcAccount(id);
+            }).fail(() => {
+                if (confirm("failed to invalidate token! remove account?")) {
+                    removeMcAccount(id);
+                }
+            });
+        });
+    }
+
+    function addMcAccountToList(id, name) {
+        let p = document.createElement("p");
+        let n = document.createElement("span");
+        n.innerText = id + " (" + name + ") ";
+        let remove = document.createElement("a");
+        remove.innerText = "Remove";
+        remove.href = "javascript:";
+        remove.onclick = () => {
+            logout(id);
+        };
+        p.appendChild(n);
+        p.append(remove);
+        accounts.appendChild(p);
+    }
+
+    function refreshAccountList() {
+        accounts.innerHTML = "";
+        getMcAccounts().forEach(it => addMcAccountToList(it.id, it.name));
+    }
+
+    function refreshAccountsIfNeeded() {
+        getMcAccounts().forEach(it => {
+            $.ajax({type: "post",
+                url: localStorage.getItem("cors-proxy") + "https://authserver.mojang.com/validate",
+                data: JSON.stringify({
+                    accessToken: it.accessToken,
+                    clientToken: it.clientToken
+                }),
+                contentType: "application/json",
+                dataType: "json"
+            }).fail(() => {
+                // Needs refresh
+                $.ajax({type: "post",
+                    url: localStorage.getItem("cors-proxy") + "https://authserver.mojang.com/refresh",
+                    data: JSON.stringify({
+                        accessToken: it.accessToken,
+                        clientToken: it.clientToken
+                    }),
+                    contentType: "application/json",
+                    dataType: "json"
+                }).done((data) => {
+                    removeMcAccount(data.selectedProfile.id);
+                    storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id);
+                }).fail(() => {
+                    if (confirm("failed to refresh token! remove account?")) {
+                        removeMcAccount(it.id);
+                    }
+                });
+            });
+        });
+    }
+
+    refreshAccountList();
+
+    refreshAccountsIfNeeded();
 
     function listen(token) {
-        socket.send('{"action": "listen_login_requests", "token": "' + token + '"}');
+        socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
+    }
+
+    function saveToken(token) {
+        let hTokens = JSON.parse(localStorage.getItem("tokens")) || {};
+        let tokens = hTokens[wsUrl] || [];
+        tokens.push(token);
+        hTokens[wsUrl] = tokens;
+        localStorage.setItem("tokens", JSON.stringify(hTokens));
+    }
+
+    function removeToken(token) {
+        let hTokens = JSON.parse(localStorage.getItem("tokens")) || {};
+        let tokens = hTokens[wsUrl] || [];
+        tokens = tokens.filter(it => it != token);
+        hTokens[wsUrl] = tokens;
+        localStorage.setItem("tokens", JSON.stringify(hTokens));
+    }
+
+    function getTokens() {
+        return (JSON.parse(localStorage.getItem("tokens")) || {})[wsUrl] || [];
     }
 
     function connect() {
         connectionStatus.innerText = "connecting...";
-        socket = new WebSocket("wss://" + window.location.host + "/ws");
+        socket = new WebSocket(wsUrl);
 
         socket.onerror = e => {
             console.log(e);
@@ -44,7 +202,7 @@ WIP TODO - authenticate to backend server via browser, proxy the Mojang Login AP
             connectionStatus.innerText = "connected";
             content.innerHTML = "";
 
-            (localStorage.getItem("tokens") || "").split(",").filter(it => it != "").forEach(listen);
+            getTokens().forEach(listen);
         };
 
         socket.onclose = evt => {
@@ -58,31 +216,36 @@ WIP TODO - authenticate to backend server via browser, proxy the Mojang Login AP
             let parsed = JSON.parse(event.data);
             if (parsed.action == "ad_minecraft_id_login") {
                 if (username != null && mcauth_code != null) {
+                    let p = document.createElement("p");
                     let add = document.createElement("a");
-                    add.innerText = "Add account " + username;
+                    p.appendChild(add);
+                    add.innerText = "Listen to " + username;
                     add.href = "javascript:";
                     add.onclick = () => {
-                        socket.send('{"action": "minecraft_id_login", "username": "' + username + '", "code": "' + mcauth_code + '"}');
+                        socket.send(JSON.stringify({
+                            "action": "minecraft_id_login",
+                            "username": username,
+                            "code": mcauth_code}));
                     };
-                    content.appendChild(add);
+                    content.appendChild(p);
                 }
+                let p = document.createElement("p");
                 let link = document.createElement("a");
-                link.innerText = "Add account with Minecraft.ID";
+                p.appendChild(link);
+                link.innerText = "Listen to username in VIAaaS instance";
                 link.href = "javascript:";
                 link.onclick = () => {
                     let user = prompt("Username: ", "");
                     let callbackUrl = new URL(location.origin + location.pathname + "?username=" + encodeURIComponent(user));
                     location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
                 };
-                content.appendChild(link);
+                content.appendChild(p);
             } else if (parsed.action == "minecraft_id_result") {
                 if (!parsed.success) {
                     alert("Server couldn't verify account via Minecraft.ID");
                 } else {
                     listen(parsed.token);
-                    let tokens = (localStorage.getItem("tokens") || "").split(",");
-                    tokens.push(parsed.token);
-                    localStorage.setItem("tokens", tokens.join(","));
+                    saveToken(parsed.token);
                 }
             } else if (parsed.action == "listen_login_requests_result") {
                 if (parsed.success) {
@@ -90,13 +253,30 @@ WIP TODO - authenticate to backend server via browser, proxy the Mojang Login AP
                     msg.innerText = "Listening to logins with username: " + parsed.username;
                     content.appendChild(msg);
                 } else {
-                    let tokens = (localStorage.getItem("tokens") || "").split(",");
-                    tokens = tokens.filter(it => it != parsed.token);
-                    localStorage.setItem("tokens", tokens.join(","));
+                    removeToken(parsed.token);
                 }
             } else if (parsed.action == "session_hash_request") {
-                alert("TODO!"); // todo
-                socket.send('{"action": "session_hash_response", "session_hash": "' + parsed.session_hash + '"}');
+                if (confirm("auth request sent from server, info: " + event.data + ". Should we authenticate?")) {
+                    let accounts = getMcAccounts().filter(it => it.user.toLowerCase() == parsed.username.toLowerCase());
+                    accounts.forEach(it => {
+                        $.ajax({type: "post",
+                            url: localStorage.getItem("cors-proxy") + "https://sessionserver.mojang.com/session/minecraft/join",
+                            data: JSON.stringify({
+                                accessToken: it.accessToken,
+                                selectedProfile: it.id,
+                                serverId: parsed.session_hash
+                            }),
+                            contentType: "application/json",
+                            dataType: "json"
+                        }).done((data) => {
+                            socket.send(JSON.stringify({"action": "session_hash_response", "session_hash": parsed.session_hash}));
+                        }).fail((e) => {
+                            console.log(e);
+                            alert("Failed to authenticate to Minecraft backend server!");
+                        });
+                    });
+                    if (accounts.length == 0) alert("Couldn't find " + parsed.username + " account in browser");
+                }
             }
         };
     }

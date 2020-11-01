@@ -11,6 +11,7 @@ import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import us.myles.ViaVersion.api.PacketWrapper
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.StoredObject
@@ -32,7 +33,6 @@ import java.security.SecureRandom
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
 import java.util.concurrent.TimeUnit
-import java.util.logging.Logger
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -55,7 +55,7 @@ class CloudPipeline(userConnection: UserConnection) : ProtocolPipeline(userConne
 }
 
 object CloudHeadProtocol : SimpleProtocol() {
-    val logger = Logger.getLogger("CloudHandlerProtocol")
+    val logger = LoggerFactory.getLogger("CloudHandlerProtocol")
     override fun registerPackets() {
         this.registerIncoming(State.HANDSHAKE, 0, 0, object : PacketRemapper() {
             override fun registerMap() {
@@ -265,7 +265,7 @@ object CloudTailProtocol : SimpleProtocol() {
 
                                 var sent = false
                                 viaWebServer.listeners[fromUndashed(profile.get("id")!!.asString)]?.forEach {
-                                    it.ws.send("""{"action": "session_hash_request", "session_hash": "$backHash",
+                                    it.ws.send("""{"action": "session_hash_request", "username": "${data.frontLoginName!!}", "session_hash": "$backHash",
                                         | "client_address": "${wrapper.user().channel!!.remoteAddress()}", "backend_public_key":
                                         |  "${Base64.getEncoder().encodeToString(data.backPublicKey!!.encoded)}"}""".trimMargin())
                                     it.ws.flush()
@@ -276,25 +276,25 @@ object CloudTailProtocol : SimpleProtocol() {
                                     throw IllegalStateException("No connection to browser, connect in /auth.html")
                                 } else {
                                     viaWebServer.pendingSessionHashes.get(backHash).get(15, TimeUnit.SECONDS)
-                                    wrapper.user().channel!!.eventLoop().submit {
-                                        val backCrypto = ByteBufAllocator.DEFAULT.buffer()
+                                    val backChan = wrapper.user().channel!!.pipeline()
+                                            .get(CloudSideForwarder::class.java).other!!
+                                    backChan.eventLoop().submit {
+                                        val backCryptoAnswer = ByteBufAllocator.DEFAULT.buffer()
                                         try {
-                                            backCrypto.writeByte(1) // Packet id
-                                            Type.BYTE_ARRAY_PRIMITIVE.write(backCrypto, Cipher.getInstance("RSA").let {
+                                            backCryptoAnswer.writeByte(1) // Packet id
+                                            Type.BYTE_ARRAY_PRIMITIVE.write(backCryptoAnswer, Cipher.getInstance("RSA").let {
                                                 it.init(Cipher.ENCRYPT_MODE, data.backPublicKey)
                                                 it.doFinal(backKey)
                                             })
-                                            Type.BYTE_ARRAY_PRIMITIVE.write(backCrypto, Cipher.getInstance("RSA").let {
+                                            Type.BYTE_ARRAY_PRIMITIVE.write(backCryptoAnswer, Cipher.getInstance("RSA").let {
                                                 it.init(Cipher.ENCRYPT_MODE, data.backPublicKey)
                                                 it.doFinal(data.backToken)
                                             })
-                                            val backChan = wrapper.user().channel!!.pipeline()
-                                                    .get(CloudSideForwarder::class.java).other!!
-                                            backChan.writeAndFlush(backCrypto.retain())
+                                            backChan.writeAndFlush(backCryptoAnswer.retain())
                                             backChan.pipeline().get(CloudEncryptor::class.java).cipher = backAesEn
                                             backChan.pipeline().get(CloudDecryptor::class.java).cipher = backAesDe
                                         } finally {
-                                            backCrypto.release()
+                                            backCryptoAnswer.release()
                                         }
                                     }
                                 }

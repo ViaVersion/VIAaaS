@@ -165,10 +165,10 @@ class WebLogin : WebState {
                     webClient.ws.send("""{"action": "minecraft_id_result", "success": true,
                         | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin())
 
-                    webLogger.info("${webClient.ws.call.request.origin} generated a token for account $mcIdUser $uuid")
+                    webLogger.info("Generated a token for account $mcIdUser $uuid")
                 } else {
                     webClient.ws.send("""{"action": "minecraft_id_result", "success": false}""")
-                    webLogger.info("${webClient.ws.call.request.origin} failed to generated a token for account $username")
+                    webLogger.info("Failed to generated a token for account $username")
                 }
             }
             "listen_login_requests" -> {
@@ -180,10 +180,10 @@ class WebLogin : WebState {
                     webClient.server.listeners.computeIfAbsent(user) { Collections.newSetFromMap(ConcurrentHashMap()) }
                             .add(webClient)
 
-                    webLogger.info("${webClient.ws.call.request.origin} is listening for logins for $user")
+                    webLogger.info("Listening for logins for $user")
                 } else {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
-                    webLogger.info("${webClient.ws.call.request.origin} failed token for $user")
+                    webLogger.info("Failed token for $user")
                 }
             }
             "session_hash_response" -> {
