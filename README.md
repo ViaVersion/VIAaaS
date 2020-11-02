@@ -24,3 +24,4 @@ Usage for online mode (may block your Mojang account):
 - Log in into Minecraft account with the username you'll use in _u option via browser.
 - Connect to mc.example.com._v1_8.viaaas._u(BACKUSERNAME).localhost
 - Approve the login
+- There are some information about Mojang password resetting: https://github.com/GeyserMC/Geyser/wiki/Common-Issues#mojang-resetting-account-credentials
