@@ -24,9 +24,9 @@ repositories {
 }
 
 dependencies {
-    implementation("us.myles:viaversion:3.2.0-1.16.4-rc1")
-    implementation("nl.matsv:viabackwards-all:3.2.0-SNAPSHOT")
-    implementation("de.gerrygames:viarewind-all:1.5.2-SNAPSHOT")
+    implementation("us.myles:viaversion:3.2.0")
+    implementation("nl.matsv:viabackwards-all:3.2.0")
+    implementation("de.gerrygames:viarewind-all:1.5.2")
     implementation("io.netty:netty-all:4.1.53.Final")
 
     implementation("org.apache.logging.log4j:log4j-core:2.13.3")
