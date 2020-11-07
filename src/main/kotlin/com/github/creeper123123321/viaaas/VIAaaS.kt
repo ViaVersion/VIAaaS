@@ -10,11 +10,27 @@ import io.ktor.network.tls.certificates.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.ChannelFactory
 import io.netty.channel.ChannelOption
+import io.netty.channel.EventLoopGroup
+import io.netty.channel.epoll.Epoll
+import io.netty.channel.epoll.EpollEventLoopGroup
+import io.netty.channel.epoll.EpollServerSocketChannel
+import io.netty.channel.epoll.EpollSocketChannel
+import io.netty.channel.kqueue.KQueue
+import io.netty.channel.kqueue.KQueueEventLoopGroup
+import io.netty.channel.kqueue.KQueueServerSocketChannel
+import io.netty.channel.kqueue.KQueueSocketChannel
 import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.ServerSocketChannel
+import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.Future
 import net.minecrell.terminalconsole.SimpleTerminalConsole
+import org.jline.reader.Candidate
+import org.jline.reader.LineReader
+import org.jline.reader.LineReaderBuilder
 import org.slf4j.LoggerFactory
 import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
@@ -23,7 +39,6 @@ import us.myles.ViaVersion.api.data.MappingDataLoader
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.util.Config
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.net.InetAddress
 import java.security.KeyPairGenerator
 import java.util.*
@@ -49,6 +64,30 @@ val mcCryptoKey = KeyPairGenerator.getInstance("RSA").let {
     it.genKeyPair()
 }
 
+fun eventLoopGroup(): EventLoopGroup {
+    if (VIAaaSConfig.isNativeTransportMc) {
+        if (Epoll.isAvailable()) return EpollEventLoopGroup()
+        if (KQueue.isAvailable()) return KQueueEventLoopGroup()
+    }
+    return NioEventLoopGroup()
+}
+
+fun channelServerSocketFactory(): ChannelFactory<ServerSocketChannel> {
+    if (VIAaaSConfig.isNativeTransportMc) {
+        if (Epoll.isAvailable()) return ChannelFactory { EpollServerSocketChannel() }
+        if (KQueue.isAvailable()) return ChannelFactory { KQueueServerSocketChannel() }
+    }
+    return ChannelFactory { NioServerSocketChannel() }
+}
+
+fun channelSocketFactory(): ChannelFactory<SocketChannel> {
+    if (VIAaaSConfig.isNativeTransportMc) {
+        if (Epoll.isAvailable()) return ChannelFactory { EpollSocketChannel() }
+        if (KQueue.isAvailable()) return ChannelFactory { KQueueSocketChannel() }
+    }
+    return ChannelFactory { NioSocketChannel() }
+}
+
 fun main(args: Array<String>) {
     File("config/https.jks").apply {
         parentFile.mkdirs()
@@ -65,10 +104,12 @@ fun main(args: Array<String>) {
     CloudRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
     CloudBackwards.init(File("config/viabackwards.yml"))
 
-    val boss = NioEventLoopGroup()
-    val worker = NioEventLoopGroup()
-    val future = ServerBootstrap().group(boss, worker)
-            .channel(NioServerSocketChannel::class.java)
+    val parent = eventLoopGroup()
+    val child = eventLoopGroup()
+
+    val future = ServerBootstrap()
+            .group(parent, child)
+            .channelFactory(channelServerSocketFactory())
             .childHandler(ChannelInit)
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
@@ -91,28 +132,65 @@ fun main(args: Array<String>) {
 
     ktorServer?.stop(1000, 1000)
     httpClient.close()
-    listOf<Future<*>>(future.channel().close(), boss.shutdownGracefully(), worker.shutdownGracefully())
+    listOf<Future<*>>(future.channel().close(), parent.shutdownGracefully(), child.shutdownGracefully())
             .forEach { it.sync() }
 
     Via.getManager().destroy()
 }
 
 class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
-    val commands = hashMapOf<String, (String, Array<String>) -> Unit>()
+    val commands = hashMapOf<String, (MutableList<String>?, String, Array<String>) -> Unit>()
     override fun isRunning(): Boolean = runningServer
 
     init {
-        commands["stop"] = { _, _ -> this.shutdown() }
+        commands["stop"] = { suggestion, _, _ -> if (suggestion == null) this.shutdown() }
         commands["end"] = commands["stop"]!!
-        commands["viaversion"] = { _, args ->
-            Via.getManager().commandHandler.onCommand(this, args)
+        commands["viaversion"] = { suggestion, _, args ->
+            if (suggestion == null) {
+                Via.getManager().commandHandler.onCommand(this, args)
+            } else {
+                suggestion.addAll(Via.getManager().commandHandler.onTabComplete(this, args))
+            }
         }
         commands["viaver"] = commands["viaversion"]!!
         commands["vvcloud"] = commands["viaversion"]!!
-        commands["help"] = { _, _ ->
-            sendMessage(commands.keys.toString())
+        commands["help"] = { suggestion , _, _ ->
+            if (suggestion == null) sendMessage(commands.keys.toString())
         }
         commands["?"] = commands["help"]!!
+        commands["list"] = { suggestion, _, _ ->
+            if (suggestion == null) {
+                Via.getPlatform().connectionManager.connections.forEach {
+                    sendMessage("${it.channel?.remoteAddress()} (${it.protocolInfo?.protocolVersion}) -> " +
+                            "(${it.protocolInfo?.serverProtocolVersion}) " +
+                            "${it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.other?.remoteAddress()}")
+                }
+            }
+        }
+    }
+
+    override fun buildReader(builder: LineReaderBuilder): LineReader {
+        // Stolen from Velocity
+        return super.buildReader(builder.appName("VIAaaS").completer { _, line, candidates ->
+            try {
+                val cmdArgs = line.line().substring(0, line.cursor()).split(" ")
+                val alias = cmdArgs[0]
+                val args = cmdArgs.filterIndexed { i, _ -> i > 0 }
+                if (cmdArgs.size == 1) {
+                    candidates.addAll(commands.keys.filter { it.startsWith(alias, ignoreCase = true) }
+                            .map { Candidate(it) })
+                } else {
+                    val cmd = commands[alias.toLowerCase()]
+                    if (cmd != null) {
+                        val suggestions = mutableListOf<String>()
+                        cmd(suggestions, alias, args.toTypedArray())
+                        candidates.addAll(suggestions.map(::Candidate))
+                    }
+                }
+            } catch (e: Exception) {
+                sendMessage("Error completing command: $e")
+            }
+        })
     }
 
     override fun runCommand(command: String) {
@@ -124,7 +202,7 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
             if (runnable == null) {
                 sendMessage("unknown command, try 'help'")
             } else {
-                runnable(alias, args)
+                runnable(null, alias, args)
             }
         } catch (e: Exception) {
             sendMessage("Error running command: $e")
@@ -160,6 +238,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     override fun handleConfig(p0: MutableMap<String, Any>?) {
     }
 
+    val isNativeTransportMc: Boolean get() = this.getBoolean("native-transport-mc", true)
     val port: Int get() = this.getInt("port", 25565)
     val bindAddress: String get() = this.getString("bind-address", "localhost")!!
     val hostName: String get() = this.getString("host-name", "viaaas.localhost")!!
@@ -171,7 +250,7 @@ class VIAaaSAddress {
     var realAddress: String? = null
     var port: Int? = null
     var online = true
-    var altUsername : String? = null
+    var altUsername: String? = null
     fun parse(address: String, viaHostName: String): VIAaaSAddress {
         val parts = address.split('.')
         var foundDomain = false

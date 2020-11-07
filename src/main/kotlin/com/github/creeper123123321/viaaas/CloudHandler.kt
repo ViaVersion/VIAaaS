@@ -12,7 +12,6 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelOption
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioSocketChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -145,7 +144,7 @@ class HandshakeState : MinecraftConnectionState {
                         || addrInfo.isAnyLocalAddress) throw SecurityException("Local addresses aren't allowed")
 
                 val bootstrap = Bootstrap().handler(BackendInit(handler.user))
-                        .channel(NioSocketChannel::class.java)
+                        .channelFactory(channelSocketFactory())
                         .group(handler.user.channel!!.eventLoop())
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
                         .connect(socketAddr)
@@ -403,7 +402,7 @@ fun encryptRsa(publicKey: PublicKey, data: ByteArray) = Cipher.getInstance("RSA"
     it.doFinal(data)
 }
 
-fun mcCfb8(key: ByteArray, mode: Int) : Cipher {
+fun mcCfb8(key: ByteArray, mode: Int): Cipher {
     val spec = SecretKeySpec(key, "AES")
     val iv = IvParameterSpec(key)
     return Cipher.getInstance("AES/CFB8/NoPadding").let {
