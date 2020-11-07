@@ -23,7 +23,7 @@ Usage for online mode (may block your Mojang account):
  can be active, your Minecraft client will give Bad Login after you approve the login in your browser. You can use https://www.curseforge.com/minecraft/mc-mods/auth-me for reauthenticate the client.)
 - Set up a CORS Proxy (something like https://github.com/Rob--W/cors-anywhere (less likely to look suspicious to
  Mojang if you run on your local machine) or https://github.com/Zibri/cloudflare-cors-anywhere (more suspicious)).
-- Go to https://localhost:25543/auth.html, configure the CORS Proxy URL and listen to the username you're using to connect.
+- Go to https://localhost:25543/auth.html, configure the CORS Proxy URL (something like http://localhost:8080/) and listen to the username you're using to connect.
 - Log in into Minecraft account with the username you'll use in _u option via browser.
 - Connect to mc.example.com._v1_8.viaaas._u(BACKUSERNAME).localhost
 - Approve the login
