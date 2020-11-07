@@ -1,5 +1,6 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.ben-manes.versions") version "0.34.0"
     application
     kotlin("jvm") version "1.4.10"
 }
@@ -28,6 +29,7 @@ dependencies {
     implementation("nl.matsv:viabackwards-all:3.2.0")
     implementation("de.gerrygames:viarewind-all:1.5.2")
     implementation("io.netty:netty-all:4.1.53.Final")
+    implementation("org.yaml:snakeyaml:1.26")
 
     implementation("org.apache.logging.log4j:log4j-core:2.13.3")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.3")
@@ -59,5 +61,6 @@ tasks {
     }
     build {
         dependsOn(shadowJar)
+        dependsOn(named("dependencyUpdates"))
     }
 }

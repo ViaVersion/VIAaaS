@@ -4,34 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VIAaaS Authenticator</title>
-    <style>body {font-family: sans-serif}</style>
+    <style>
+        body {
+            font-family: sans-serif
+        }
+        @media (min-width: 700px) {
+            #browser_accounts {
+                float: right
+            }
+        }
+        #browser_accounts {
+            border: 1px solid black;
+            padding: 10px
+        }
+        #connection_status {
+            background: black;
+            color: white
+        }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.1/uuid.min.js"></script>
 </head>
 <body>
+<div id="browser_accounts">
+    <p>Browser Minecraft accounts:</p>
+    <p><label for="cors-proxy">CORS Proxy URL:</label>
+    <br>
+    <input type="url" id="cors-proxy" name="cors-proxy" value="" onchange="localStorage.setItem('cors-proxy', this.value);">
+    </p>
+    <p><span id="add-account">
+        <label for="email">Email/Username (legacy):</label>
+        <br>
+        <input type="text" id="email" name="email" value="">
+        <br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" value="">
+        <br><br>
+        <input type="button" value="Login into Minecraft" onclick="loginMc()">
+    </span></p>
+    <span id="accounts"></span>
+</div>
+<div id="server_content">
 <p>DO NOT TYPE YOUR CREDENTIALS IF YOU DON'T TRUST THIS VIAAAS INSTANCE OR THE CORS PROXY!</p>
 <p>Mojang API calls in browser are called through a CORS Proxy. See https://github.com/Rob--W/cors-anywhere
-    for setting up one.</p>
-<label for="cors-proxy">CORS Proxy URL:</label>
-<br>
-<input type="url" id="cors-proxy" name="cors-proxy" value="" onchange="localStorage.setItem('cors-proxy', this.value);">
-<script></script>
-<hr>
-<p>Browser Minecraft accounts:</p>
-<p><span id="add-account">
-    <label for="email">Email/Username (legacy):</label>
-    <br>
-    <input type="text" id="email" name="email" value="">
-    <br>
-    <label for="password">Password:</label><br>
-    <input type="password" id="password" name="password" value="">
-    <br><br>
-    <input type="button" value="Login into Minecraft" onclick="loginMc()">
-</span></p>
-<span id="accounts"></span>
-<hr>
+    for setting up one. Calling Mojang API from a remote IP address may block your account.</p>
 <p>WebSocket connection status: <span id="connection_status">?</span></p>
+<hr>
 <p><span id="content"></span></p>
+</div>
 <script>
     let urlParams = new URLSearchParams();
     window.location.search.split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
@@ -167,6 +187,10 @@
         socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
     }
 
+    function confirmJoin(hash) {
+        socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
+    }
+
     function saveToken(token) {
         let hTokens = JSON.parse(localStorage.getItem("tokens")) || {};
         let tokens = hTokens[wsUrl] || [];
@@ -241,7 +265,7 @@
                 content.appendChild(p);
             } else if (parsed.action == "minecraft_id_result") {
                 if (!parsed.success) {
-                    alert("Server couldn't verify account via Minecraft.ID");
+                    alert("VIAaaS instance couldn't verify account via Minecraft.ID");
                 } else {
                     listen(parsed.token);
                     saveToken(parsed.token);
@@ -255,7 +279,7 @@
                     removeToken(parsed.token);
                 }
             } else if (parsed.action == "session_hash_request") {
-                if (confirm("auth request sent from server, info: " + event.data + ". Should we authenticate?")) {
+                if (confirm("Confirm auth request sent from VIAaaS instance? info: " + event.data)) {
                     let accounts = getMcAccounts().filter(it => it.user.toLowerCase() == parsed.user.toLowerCase());
                     accounts.forEach(it => {
                         $.ajax({type: "post",
@@ -268,13 +292,15 @@
                             contentType: "application/json",
                             dataType: "json"
                         }).done((data) => {
-                            socket.send(JSON.stringify({"action": "session_hash_response", "session_hash": parsed.session_hash}));
+                            confirmJoin(parsed.session_hash);
                         }).fail((e) => {
                             console.log(e);
                             alert("Failed to authenticate to Minecraft backend server!");
                         });
                     });
-                    if (accounts.length == 0) alert("Couldn't find " + parsed.user + " account in browser");
+                    if (accounts.length == 0 && confirm("Couldn't find " + parsed.user + " account in browser. Continue without authentication (works on LAN worlds)?")) {
+                        confirmJoin(parsed.session_hash);
+                    }
                 }
             }
         };

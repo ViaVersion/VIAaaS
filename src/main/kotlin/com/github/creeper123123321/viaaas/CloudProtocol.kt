@@ -47,8 +47,9 @@ object CloudHeadProtocol : SimpleProtocol() {
                     wrapper.write(Type.STRING, backAddr)
                     wrapper.write(Type.UNSIGNED_SHORT, backPort)
 
-                    val playerAddr = wrapper.user().channel!!.remoteAddress()
-                    logger.info("connecting $playerAddr ($playerVer) -> $backAddr:$backPort ($backProto)")
+                    val playerAddr = wrapper.user().channel!!.pipeline()
+                            .get(CloudMinecraftHandler::class.java)!!.address
+                    logger.info("Connecting $playerAddr ($playerVer) -> $backAddr:$backPort ($backProto)")
 
                     wrapper.user().put(CloudData(
                             userConnection = wrapper.user(),

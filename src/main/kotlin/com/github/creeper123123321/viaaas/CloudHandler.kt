@@ -4,7 +4,6 @@ import com.google.common.net.UrlEscapers
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.ktor.client.request.*
-import io.ktor.http.cio.websocket.*
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
@@ -18,14 +17,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.StoredObject
 import us.myles.ViaVersion.api.data.UserConnection
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.exception.CancelCodecException
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.security.KeyFactory
+import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
@@ -54,6 +54,7 @@ class CloudMinecraftHandler(val user: UserConnection,
                             var other: Channel?,
                             val frontEnd: Boolean) : SimpleChannelInboundHandler<ByteBuf>() {
     val data get() = user.get(HandlerData::class.java)
+    var address: SocketAddress? = null
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
         if (!user.isPendingDisconnect) {
@@ -63,14 +64,15 @@ class CloudMinecraftHandler(val user: UserConnection,
         }
     }
 
-    override fun channelActive(ctx: ChannelHandlerContext?) {
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        address = ctx.channel().remoteAddress()
         if (data == null) {
             user.put(HandlerData(user, HandshakeState()))
         }
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        chLogger.info(ctx.channel().remoteAddress().toString() + " was disconnected")
+        chLogger.info(address?.toString() + " was disconnected")
         other?.close()
     }
 
@@ -91,7 +93,7 @@ class CloudMinecraftHandler(val user: UserConnection,
     fun disconnect(s: String) {
         if (user.channel?.isActive != true) return
 
-        chLogger.info("Disconnecting " + user.channel!!.remoteAddress() + ": " + s)
+        chLogger.info("Disconnecting $address: $s")
         data!!.state.disconnect(this, s)
     }
 }
@@ -117,8 +119,8 @@ class HandshakeState : MinecraftConnectionState {
         }
 
         handler.user.channel!!.setAutoRead(false)
-        Via.getPlatform().runAsync {
-            val frontForwarder = handler.user.channel!!.pipeline().get(CloudMinecraftHandler::class.java)
+        GlobalScope.launch(Dispatchers.IO) {
+            val frontHandler = handler.user.channel!!.pipeline().get(CloudMinecraftHandler::class.java)
             try {
                 var srvResolvedAddr = backAddr
                 var srvResolvedPort = backPort
@@ -150,11 +152,11 @@ class HandshakeState : MinecraftConnectionState {
 
                 bootstrap.addListener {
                     if (it.isSuccess) {
-                        CloudHeadProtocol.logger.info("conected ${handler.user.channel?.remoteAddress()} to $socketAddr")
+                        CloudHeadProtocol.logger.info("Connected ${frontHandler} to $socketAddr")
 
-                        val sockChan = bootstrap.channel() as SocketChannel
-                        sockChan.pipeline().get(CloudMinecraftHandler::class.java).other = handler.user.channel
-                        frontForwarder.other = sockChan
+                        val backChan = bootstrap.channel() as SocketChannel
+                        backChan.pipeline().get(CloudMinecraftHandler::class.java).other = handler.user.channel
+                        frontHandler.other = backChan
 
                         val backHandshake = ByteBufAllocator.DEFAULT.buffer()
                         try {
@@ -163,7 +165,7 @@ class HandshakeState : MinecraftConnectionState {
                             Type.STRING.write(backHandshake, srvResolvedAddr) // Server Address
                             backHandshake.writeShort(srvResolvedPort)
                             Type.VAR_INT.writePrimitive(backHandshake, nextAddr)
-                            sockChan.writeAndFlush(backHandshake.retain())
+                            backChan.writeAndFlush(backHandshake.retain())
                         } finally {
                             backHandshake.release()
                         }
@@ -171,13 +173,13 @@ class HandshakeState : MinecraftConnectionState {
                         handler.user.channel!!.setAutoRead(true)
                     } else {
                         handler.user.channel!!.eventLoop().submit {
-                            frontForwarder.disconnect("Couldn't connect: " + it.cause().toString())
+                            frontHandler.disconnect("Couldn't connect: " + it.cause().toString())
                         }
                     }
                 }
             } catch (e: Exception) {
                 handler.user.channel!!.eventLoop().submit {
-                    frontForwarder.disconnect("Couldn't connect: $e")
+                    frontHandler.disconnect("Couldn't connect: $e")
                 }
             }
         }
@@ -263,28 +265,14 @@ class LoginState : MinecraftConnectionState {
 
     fun handleCryptoResponse(handler: CloudMinecraftHandler, msg: ByteBuf) {
         val frontHash = let {
-            val frontKey = Cipher.getInstance("RSA").let {
-                it.init(Cipher.DECRYPT_MODE, mcCryptoKey.private)
-                it.doFinal(Type.BYTE_ARRAY_PRIMITIVE.read(msg))
-            }
+            val frontKey = decryptRsa(mcCryptoKey.private, Type.BYTE_ARRAY_PRIMITIVE.read(msg))
             // RSA token - wat??? why is it encrypted with RSA if it was sent unencrypted?
-            val decryptedToken = Cipher.getInstance("RSA").let {
-                it.init(Cipher.DECRYPT_MODE, mcCryptoKey.private)
-                it.doFinal(Type.BYTE_ARRAY_PRIMITIVE.read(msg))
-            }
+            val decryptedToken = decryptRsa(mcCryptoKey.private, Type.BYTE_ARRAY_PRIMITIVE.read(msg))
 
             if (!decryptedToken.contentEquals(handler.data!!.frontToken!!)) throw IllegalStateException("invalid token!")
 
-            val spec = SecretKeySpec(frontKey, "AES")
-            val iv = IvParameterSpec(frontKey)
-            val aesEn = Cipher.getInstance("AES/CFB8/NoPadding").let {
-                it.init(Cipher.ENCRYPT_MODE, spec, iv)
-                it
-            }
-            val aesDe = Cipher.getInstance("AES/CFB8/NoPadding").let {
-                it.init(Cipher.DECRYPT_MODE, spec, iv)
-                it
-            }
+            val aesEn = mcCfb8(frontKey, Cipher.ENCRYPT_MODE)
+            val aesDe = mcCfb8(frontKey, Cipher.DECRYPT_MODE)
 
             handler.user.channel!!.pipeline().get(CloudEncryptor::class.java).cipher = aesEn
             handler.user.channel!!.pipeline().get(CloudDecryptor::class.java).cipher = aesDe
@@ -297,17 +285,6 @@ class LoginState : MinecraftConnectionState {
             it
         }
 
-        val backSpec = SecretKeySpec(backKey, "AES")
-        val backIv = IvParameterSpec(backKey)
-        val backAesEn = Cipher.getInstance("AES/CFB8/NoPadding").let {
-            it.init(Cipher.ENCRYPT_MODE, backSpec, backIv)
-            it
-        }
-        val backAesDe = Cipher.getInstance("AES/CFB8/NoPadding").let {
-            it.init(Cipher.DECRYPT_MODE, backSpec, backIv)
-            it
-        }
-
         val backHash = generateServerHash(handler.data!!.backServerId!!, backKey, handler.data!!.backPublicKey!!)
 
         handler.user.channel!!.setAutoRead(false)
@@ -315,36 +292,33 @@ class LoginState : MinecraftConnectionState {
             try {
                 val profile = httpClient.get<JsonObject?>(
                         "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
-                        "${UrlEscapers.urlFormParameterEscaper().escape(handler.data!!.backName!!)}&serverId=$frontHash")
+                                "${UrlEscapers.urlFormParameterEscaper().escape(handler.data!!.backName!!)}&serverId=$frontHash")
                         ?: throw IllegalArgumentException("Couldn't authenticate with session servers")
 
-                var sent = false
-                viaWebServer.listeners[fromUndashed(profile.get("id")!!.asString)]?.forEach {
-                    it.ws.send("""{"action": "session_hash_request", "user": "${handler.data!!.backName!!}", "session_hash": "$backHash",
-                                        | "client_address": "${handler.user.channel!!.remoteAddress()}", "backend_public_key":
-                                        | "${Base64.getEncoder().encodeToString(handler.data!!.backPublicKey!!.encoded)}"}""".trimMargin())
-                    it.ws.flush()
-                    sent = true
-                }
+                val sessionJoin = viaWebServer.requestSessionJoin(
+                        fromUndashed(profile.get("id")!!.asString),
+                        handler.data!!.backName!!,
+                        backHash,
+                        handler.address!!, // Frontend handler
+                        handler.data!!.backPublicKey!!
+                )
 
-                if (!sent) {
-                    throw IllegalStateException("No connection to browser, connect in /auth.html")
+                if (sessionJoin.first == 0) {
+                    throw IllegalStateException("No browsers listening to this account, connect in /auth.html")
                 } else {
-                    viaWebServer.pendingSessionHashes.get(backHash).get(15, TimeUnit.SECONDS)
+                    sessionJoin.second.get(15, TimeUnit.SECONDS)
                     val backChan = handler.other!!
                     backChan.eventLoop().submit {
                         val backMsg = ByteBufAllocator.DEFAULT.buffer()
                         try {
                             backMsg.writeByte(1) // Packet id
-                            Type.BYTE_ARRAY_PRIMITIVE.write(backMsg, Cipher.getInstance("RSA").let {
-                                it.init(Cipher.ENCRYPT_MODE, handler.data!!.backPublicKey)
-                                it.doFinal(backKey)
-                            })
-                            Type.BYTE_ARRAY_PRIMITIVE.write(backMsg, Cipher.getInstance("RSA").let {
-                                it.init(Cipher.ENCRYPT_MODE, handler.data!!.backPublicKey)
-                                it.doFinal(handler.data!!.backToken)
-                            })
+                            Type.BYTE_ARRAY_PRIMITIVE.write(backMsg, encryptRsa(handler.data!!.backPublicKey!!, backKey))
+                            Type.BYTE_ARRAY_PRIMITIVE.write(backMsg, encryptRsa(handler.data!!.backPublicKey!!, handler.data!!.backToken!!))
                             backChan.writeAndFlush(backMsg.retain())
+
+                            val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
+                            val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
+
                             backChan.pipeline().get(CloudEncryptor::class.java).cipher = backAesEn
                             backChan.pipeline().get(CloudDecryptor::class.java).cipher = backAesDe
                         } finally {
@@ -416,5 +390,24 @@ class PlayState : MinecraftConnectionState {
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
         handler.user.disconnect(msg)
+    }
+}
+
+fun decryptRsa(privateKey: PrivateKey, data: ByteArray) = Cipher.getInstance("RSA").let {
+    it.init(Cipher.DECRYPT_MODE, privateKey)
+    it.doFinal(data)
+}
+
+fun encryptRsa(publicKey: PublicKey, data: ByteArray) = Cipher.getInstance("RSA").let {
+    it.init(Cipher.ENCRYPT_MODE, publicKey)
+    it.doFinal(data)
+}
+
+fun mcCfb8(key: ByteArray, mode: Int) : Cipher {
+    val spec = SecretKeySpec(key, "AES")
+    val iv = IvParameterSpec(key)
+    return Cipher.getInstance("AES/CFB8/NoPadding").let {
+        it.init(mode, spec, iv)
+        it
     }
 }

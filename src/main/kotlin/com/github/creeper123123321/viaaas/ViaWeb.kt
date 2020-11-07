@@ -20,7 +20,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import java.net.SocketAddress
 import java.net.URLEncoder
+import java.security.PublicKey
 import java.time.Duration
 import java.util.*
 import java.util.UUID
@@ -101,7 +103,21 @@ class WebDashboardServer {
 
     val pendingSessionHashes = CacheBuilder.newBuilder()
             .expireAfterWrite(30, TimeUnit.SECONDS)
-            .build<String, CompletableFuture<Void>>(CacheLoader.from { _ -> CompletableFuture() })
+            .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
+
+    suspend fun requestSessionJoin(id: UUID, name: String, hash: String,
+                                   address: SocketAddress, backKey: PublicKey)
+            : Pair<Int, CompletableFuture<Unit>> {
+        var sent = 0
+        viaWebServer.listeners[id]?.forEach {
+            it.ws.send("""{"action": "session_hash_request", "user": "$name", "session_hash": "$hash",
+                                        | "client_address": "$address", "backend_public_key":
+                                        | "${Base64.getEncoder().encodeToString(backKey.encoded)}"}""".trimMargin())
+            it.ws.flush()
+            sent++
+        }
+        return sent to viaWebServer.pendingSessionHashes.get(hash)
+    }
 
     suspend fun connected(ws: WebSocketServerSession) {
         val loginState = WebLogin()

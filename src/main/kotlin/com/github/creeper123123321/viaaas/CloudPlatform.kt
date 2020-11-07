@@ -101,8 +101,8 @@ object CloudAPI : ViaAPI<Unit> {
 }
 
 object CloudPlatform : ViaPlatform<Unit> {
-    val connMan = ViaConnectionManager()
-    val executor = Executors.newCachedThreadPool(ThreadFactoryBuilder().setNameFormat("VIAaaS").setDaemon(true).build())
+    val connMan = CloudConnectionManager()
+    val executor = Executors.newCachedThreadPool(ThreadFactoryBuilder().setNameFormat("Via-%d").setDaemon(true).build())
     val eventLoop = DefaultEventLoop(executor)
 
     init {
@@ -139,8 +139,12 @@ object CloudPlatform : ViaPlatform<Unit> {
     override fun getPlatformName(): String = "VIAaaS"
     override fun getPluginVersion(): String = VersionInfo.VERSION
     override fun isOldClientsAllowed(): Boolean = true
+    override fun isProxy(): Boolean = true
 }
 
+class CloudConnectionManager: ViaConnectionManager() {
+    override fun isFrontEnd(conn: UserConnection): Boolean = false
+}
 
 object CloudConfig : AbstractViaConfig(File("config/viaversion.yml")) {
     // https://github.com/ViaVersion/ViaFabric/blob/mc-1.16/src/main/java/com/github/creeper123123321/viafabric/platform/VRViaConfig.java
