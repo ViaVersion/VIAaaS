@@ -152,7 +152,7 @@ class HandshakeState : MinecraftConnectionState {
 
                 bootstrap.addListener {
                     if (it.isSuccess) {
-                        CloudHeadProtocol.logger.info("Connected ${frontHandler} to $socketAddr")
+                        CloudHeadProtocol.logger.info("Connected ${frontHandler.address} -> $socketAddr")
 
                         val backChan = bootstrap.channel() as SocketChannel
                         backChan.pipeline().get(CloudMinecraftHandler::class.java).other = handler.user.channel
