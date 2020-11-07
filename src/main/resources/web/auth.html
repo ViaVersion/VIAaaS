@@ -258,7 +258,7 @@
                 link.innerText = "Listen to username in VIAaaS instance";
                 link.href = "javascript:";
                 link.onclick = () => {
-                    let user = prompt("Username: ", "");
+                    let user = prompt("Username (Minecraft.ID is case-sensitive): ", "");
                     let callbackUrl = new URL(location.origin + location.pathname + "?username=" + encodeURIComponent(user));
                     location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
                 };
