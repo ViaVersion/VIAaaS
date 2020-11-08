@@ -63,7 +63,7 @@
         alert("Couldn't authenticate with Minecraft.ID: " + urlParams.get("mcauth_msg"));
     }
 
-    var wsUrl = "wss://" + window.location.host + "/ws";
+    var wsUrl = window.location.host == "viaversion.github.io" ? prompt("VIAaaS instance WS URL") : "wss://" + window.location.host + "/ws";
 
     var socket = null;
     var connectionStatus = document.getElementById("connection_status");
@@ -81,7 +81,7 @@
                 username: $("#email").val(),
                 password: $("#password").val(),
                 clientToken: clientToken,
-                }),
+            }),
             contentType: "application/json",
             dataType: "json"
         }).done((data) => {
@@ -284,11 +284,12 @@
                     removeToken(parsed.token);
                 }
             } else if (parsed.action == "session_hash_request") {
-                if (confirm("Confirm auth request sent from VIAaaS instance? info: " + event.data)) {
+                if (confirm("Allow auth impersonation from VIAaaS instance? info: " + JSON.stringify(parsed))) {
                     let accounts = getMcAccounts().filter(it => it.name.toLowerCase() == parsed.user.toLowerCase());
                     accounts.forEach(it => {
                         refreshAccountIfNeeded(it, (data) => {
-                            $.ajax({type: "post",
+                            $.ajax({
+                                type: "post",
                                 url: localStorage.getItem("cors-proxy") + "https://sessionserver.mojang.com/session/minecraft/join",
                                 data: JSON.stringify({
                                     accessToken: data.accessToken,
@@ -301,17 +302,20 @@
                                 confirmJoin(parsed.session_hash);
                             }).fail((e) => {
                                 console.log(e);
-                                alert("Failed to authenticate to Minecraft backend server!");
+                                confirmJoin(parsed.session_hash);
+                                alert("Failed to contact session server!");
                             });
                         }, () => {
-                            if (confirm("Couldn't refresh " + parsed.user + " account in browser. Continue without authentication (works on LAN worlds)?")) {
-                                confirmJoin(parsed.session_hash);
-                            }
+                            confirmJoin(parsed.session_hash);
+                            alert("Couldn't refresh " + parsed.user + " account in browser.");
                         });
                     });
-                    if (accounts.length == 0 && confirm("Couldn't find " + parsed.user + " account in browser. Continue without authentication (works on LAN worlds)?")) {
+                    if (accounts.length == 0) {
+                        alert("Couldn't find " + parsed.user + " account in browser.");
                         confirmJoin(parsed.session_hash);
                     }
+                } else if (confirm("Continue without authentication (works on LAN worlds)?")) {
+                    confirmJoin(parsed.session_hash);
                 }
             }
         };
