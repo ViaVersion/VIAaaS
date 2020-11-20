@@ -56,7 +56,7 @@ class CloudMinecraftHandler(val user: UserConnection,
     var address: SocketAddress? = null
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
-        if (!user.isPendingDisconnect) {
+        if (ctx.channel().isActive && !user.isPendingDisconnect) {
             data!!.state.handleMessage(this, ctx, msg)
             if (msg.isReadable) throw IllegalStateException("Remaining bytes!!!")
             //other?.write(msg.retain())
@@ -71,8 +71,8 @@ class CloudMinecraftHandler(val user: UserConnection,
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        chLogger.info(address?.toString() + " was disconnected")
         other?.close()
+        data!!.state.onInactivated(this)
     }
 
     override fun channelReadComplete(ctx: ChannelHandlerContext?) {
@@ -86,13 +86,10 @@ class CloudMinecraftHandler(val user: UserConnection,
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         if (cause is CancelCodecException) return
         disconnect("Exception: $cause")
-        cause.printStackTrace()
+        chLogger.debug("Exception: ", cause)
     }
 
     fun disconnect(s: String) {
-        if (user.channel?.isActive != true) return
-
-        chLogger.info("Disconnecting $address: $s")
         data!!.state.disconnect(this, s)
     }
 }
@@ -101,7 +98,14 @@ interface MinecraftConnectionState {
     fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext,
                       msg: ByteBuf)
 
-    fun disconnect(handler: CloudMinecraftHandler, msg: String)
+    fun disconnect(handler: CloudMinecraftHandler, msg: String) {
+        chLogger.info("Disconnected ${handler.address}: $msg")
+        handler.user.isPendingDisconnect = true
+    }
+
+    fun onInactivated(handler: CloudMinecraftHandler) {
+        chLogger.info(handler.address?.toString() + " inactivated")
+    }
 }
 
 class HandshakeState : MinecraftConnectionState {
@@ -112,8 +116,8 @@ class HandshakeState : MinecraftConnectionState {
         val backPort = Type.UNSIGNED_SHORT.read(msg)
         val nextAddr = Type.VAR_INT.readPrimitive(msg)
         when (nextAddr) {
-            1 -> handler.data!!.state = StatusState()
-            2 -> handler.data!!.state = LoginState()
+            1 -> handler.data!!.state = StatusState
+            2 -> handler.data!!.state = LoginState
             else -> throw IllegalStateException("Invalid next state")
         }
 
@@ -185,11 +189,15 @@ class HandshakeState : MinecraftConnectionState {
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
-        handler.user.disconnect(msg)
+        handler.user.channel?.close() // Not worth logging
+    }
+
+    override fun onInactivated(handler: CloudMinecraftHandler) {
+        // Not worth logging
     }
 }
 
-class LoginState : MinecraftConnectionState {
+object LoginState : MinecraftConnectionState {
     override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
         msg.markReaderIndex()
         val id = Type.VAR_INT.readPrimitive(msg)
@@ -212,7 +220,7 @@ class LoginState : MinecraftConnectionState {
     }
 
     private fun handleLoginSuccess(handler: CloudMinecraftHandler, msg: ByteBuf) {
-        handler.data!!.state = PlayState()
+        handler.data!!.state = PlayState
         forward(handler, msg)
     }
 
@@ -343,10 +351,10 @@ class LoginState : MinecraftConnectionState {
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
+        super.disconnect(handler, msg)
+
         val packet = ByteBufAllocator.DEFAULT.buffer()
         try {
-            handler.user.isPendingDisconnect = true
-
             packet.writeByte(0) // id 0 disconnect
             Type.STRING.write(packet, Gson().toJson("[VIAaaS] §c$msg"))
             handler.user
@@ -358,13 +366,19 @@ class LoginState : MinecraftConnectionState {
     }
 }
 
-class StatusState : MinecraftConnectionState {
+object StatusState : MinecraftConnectionState {
     override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
+        val i = msg.readerIndex()
+        when (Type.VAR_INT.readPrimitive(msg)) {
+            0, 1 -> {}
+            else -> throw IllegalArgumentException("Invalid packet id!")
+        }
+        msg.readerIndex(i)
         handler.other!!.write(msg.retain())
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
-        handler.user.isPendingDisconnect = true
+        super.disconnect(handler, msg)
 
         val packet = ByteBufAllocator.DEFAULT.buffer()
         try {
@@ -379,13 +393,14 @@ class StatusState : MinecraftConnectionState {
     }
 }
 
-class PlayState : MinecraftConnectionState {
+object PlayState : MinecraftConnectionState {
     override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
         handler.other!!.write(msg.retain())
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
-        handler.user.disconnect(msg)
+        super.disconnect(handler, msg)
+        handler.user.channel?.close()
     }
 }
 
