@@ -3,6 +3,7 @@ package com.github.creeper123123321.viaaas
 import com.google.common.net.UrlEscapers
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import de.gerrygames.viarewind.netty.EmptyChannelHandler
 import io.ktor.client.request.*
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBuf
@@ -28,7 +29,6 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -221,13 +221,12 @@ class LoginState : MinecraftConnectionState {
         val threshold = Type.VAR_INT.readPrimitive(msg)
 
         val backPipe = pipe.get(CloudMinecraftHandler::class.java).other!!.pipeline()
-        backPipe.get(CloudCompressor::class.java)?.threshold = threshold
-        backPipe.get(CloudDecompressor::class.java)?.threshold = threshold
+        backPipe.addAfter("frame", "compress", CloudCompressionCodec(threshold))
 
         forward(handler, msg)
 
-        pipe.get(CloudCompressor::class.java).threshold = threshold
-        pipe.get(CloudDecompressor::class.java).threshold = threshold
+        pipe.addAfter("frame", "compress", CloudCompressionCodec(threshold))
+        pipe.addAfter("frame", "decompress", EmptyChannelHandler()) // ViaRewind compat workaround
     }
 
     fun handleCryptoRequest(handler: CloudMinecraftHandler, msg: ByteBuf) {
@@ -273,8 +272,7 @@ class LoginState : MinecraftConnectionState {
             val aesEn = mcCfb8(frontKey, Cipher.ENCRYPT_MODE)
             val aesDe = mcCfb8(frontKey, Cipher.DECRYPT_MODE)
 
-            handler.user.channel!!.pipeline().get(CloudEncryptor::class.java).cipher = aesEn
-            handler.user.channel!!.pipeline().get(CloudDecryptor::class.java).cipher = aesDe
+            handler.user.channel!!.pipeline().addBefore("frame", "crypto", CloudCrypto(aesDe, aesEn))
 
             generateServerHash(handler.data!!.frontId!!, frontKey, mcCryptoKey.public)
         }
@@ -302,12 +300,11 @@ class LoginState : MinecraftConnectionState {
                         handler.data!!.backPublicKey!!
                 )
 
-                if (sessionJoin.first == 0) {
-                    throw IllegalStateException("No browsers listening to this account, connect in /auth.html")
-                } else {
-                    sessionJoin.second.get(15, TimeUnit.SECONDS)
-                    val backChan = handler.other!!
-                    backChan.eventLoop().submit {
+                val backChan = handler.other!!
+                sessionJoin.whenCompleteAsync({ _, throwable ->
+                    if (throwable != null) {
+                        handler.disconnect("Online mode error: $throwable")
+                    } else {
                         val backMsg = ByteBufAllocator.DEFAULT.buffer()
                         try {
                             backMsg.writeByte(1) // Packet id
@@ -318,13 +315,13 @@ class LoginState : MinecraftConnectionState {
                             val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
                             val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
 
-                            backChan.pipeline().get(CloudEncryptor::class.java).cipher = backAesEn
-                            backChan.pipeline().get(CloudDecryptor::class.java).cipher = backAesDe
+
+                            backChan.pipeline().addBefore("frame", "crypto", CloudCrypto(backAesDe, backAesEn))
                         } finally {
                             backMsg.release()
                         }
                     }
-                }
+                }, backChan.eventLoop())
             } catch (e: Exception) {
                 handler.disconnect("Online mode error: $e")
             }

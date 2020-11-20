@@ -49,7 +49,7 @@ val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
 
 val httpClient = HttpClient {
     defaultRequest {
-        header("User-Agent", "VIAaaS")
+        header("User-Agent", "VIAaaS/$viaaasVer")
     }
     install(JsonFeature) {
         serializer = GsonSerializer()
@@ -89,6 +89,10 @@ fun channelSocketFactory(): ChannelFactory<SocketChannel> {
 }
 
 fun main(args: Array<String>) {
+    if (System.getProperty("java.net.preferIPv6Addresses") == null) {
+        System.setProperty("java.net.preferIPv6Addresses", "true")
+    }
+
     File("config/https.jks").apply {
         parentFile.mkdirs()
         if (!exists()) generateCertificate(this)
@@ -160,10 +164,17 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
         commands["?"] = commands["help"]!!
         commands["list"] = { suggestion, _, _ ->
             if (suggestion == null) {
+                sendMessage("List of player connections: ")
                 Via.getPlatform().connectionManager.connections.forEach {
-                    sendMessage("${it.channel?.remoteAddress()} (${it.protocolInfo?.protocolVersion}) -> " +
-                            "(${it.protocolInfo?.serverProtocolVersion}) " +
-                            "${it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.other?.remoteAddress()}")
+                    val pAddr = it.channel?.remoteAddress()
+                    val pVer = it.protocolInfo?.protocolVersion?.let {
+                        ProtocolVersion.getProtocol(it)}
+                    val backName = it.protocolInfo?.username
+                    val backVer = it.protocolInfo?.serverProtocolVersion?.let {
+                        ProtocolVersion.getProtocol(it)}
+                    val backAddr = it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.other?.remoteAddress()
+                    val pName = it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.data?.frontName
+                    sendMessage("$pAddr ($pVer) ($pName) -> ($backVer) ($backName) $backAddr")
                 }
             }
         }

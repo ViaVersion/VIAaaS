@@ -20,6 +20,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import us.myles.ViaVersion.api.Via
 import java.net.SocketAddress
 import java.net.URLEncoder
 import java.security.PublicKey
@@ -29,6 +30,7 @@ import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.collections.set
 
 
@@ -107,7 +109,8 @@ class WebDashboardServer {
 
     suspend fun requestSessionJoin(id: UUID, name: String, hash: String,
                                    address: SocketAddress, backKey: PublicKey)
-            : Pair<Int, CompletableFuture<Unit>> {
+            : CompletableFuture<Unit> {
+        val future = viaWebServer.pendingSessionHashes.get(hash)
         var sent = 0
         viaWebServer.listeners[id]?.forEach {
             it.ws.send("""{"action": "session_hash_request", "user": "$name", "session_hash": "$hash",
@@ -116,7 +119,14 @@ class WebDashboardServer {
             it.ws.flush()
             sent++
         }
-        return sent to viaWebServer.pendingSessionHashes.get(hash)
+        if (sent != 0) {
+            Via.getPlatform().runSync({
+                future.completeExceptionally(TimeoutException("No response from browser"))
+            }, 15 * 20)
+        } else {
+            future.completeExceptionally(IllegalStateException("No browser listening"))
+        }
+        return future
     }
 
     suspend fun connected(ws: WebSocketServerSession) {

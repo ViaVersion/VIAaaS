@@ -3,10 +3,11 @@ package com.github.creeper123123321.viaaas
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
-import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInitializer
-import io.netty.handler.codec.*
+import io.netty.handler.codec.ByteToMessageCodec
+import io.netty.handler.codec.DecoderException
+import io.netty.handler.codec.MessageToMessageCodec
 import io.netty.handler.flow.FlowControlHandler
 import io.netty.handler.timeout.ReadTimeoutHandler
 import us.myles.ViaVersion.api.data.UserConnection
@@ -24,37 +25,27 @@ object ChannelInit : ChannelInitializer<Channel>() {
         val user = UserConnection(ch)
         CloudPipeline(user)
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
-                .addLast("encrypt", CloudEncryptor())
-                .addLast("decrypt", CloudDecryptor())
-                .addLast("frame-encoder", FrameEncoder)
-                .addLast("frame-decoder", FrameDecoder())
-                .addLast("compress", CloudCompressor())
-                .addLast("decompress", CloudDecompressor())
+                // "crypto"
+                .addLast("frame", FrameCodec())
+                // "compress" / dummy "decompress"
                 .addLast("flow-handler", FlowControlHandler())
-                .addLast("via-encoder", CloudEncodeHandler(user))
-                .addLast("via-decoder", CloudDecodeHandler(user))
+                .addLast("via-codec", CloudViaCodec(user))
                 .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = true))
     }
 }
 
-class CloudDecryptor(var cipher: Cipher? = null) : MessageToMessageDecoder<ByteBuf>() {
+class CloudCrypto(val cipherDecode: Cipher, var cipherEncode: Cipher) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
         val i = msg.readerIndex()
         val size = msg.readableBytes()
-        if (cipher != null) {
-            msg.writerIndex(i + cipher!!.update(msg.nioBuffer(), msg.nioBuffer(i, cipher!!.getOutputSize(size))))
-        }
+        msg.writerIndex(i + cipherDecode.update(msg.nioBuffer(), msg.nioBuffer(i, cipherDecode.getOutputSize(size))))
         out.add(msg.retain())
     }
-}
 
-class CloudEncryptor(var cipher: Cipher? = null) : MessageToMessageEncoder<ByteBuf>() {
-    override fun encode(ctx: ChannelHandlerContext?, msg: ByteBuf, out: MutableList<Any>) {
+    override fun encode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
         val i = msg.readerIndex()
         val size = msg.readableBytes()
-        if (cipher != null) {
-            msg.writerIndex(i + cipher!!.update(msg.nioBuffer(), msg.nioBuffer(i, cipher!!.getOutputSize(size))))
-        }
+        msg.writerIndex(i + cipherEncode.update(msg.nioBuffer(), msg.nioBuffer(i, cipherEncode.getOutputSize(size))))
         out.add(msg.retain())
     }
 }
@@ -62,101 +53,113 @@ class CloudEncryptor(var cipher: Cipher? = null) : MessageToMessageEncoder<ByteB
 class BackendInit(val user: UserConnection) : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
-                .addLast("encrypt", CloudEncryptor())
-                .addLast("decrypt", CloudDecryptor())
-                .addLast("frame-encoder", FrameEncoder)
-                .addLast("frame-decoder", FrameDecoder())
-                .addLast("compress", CloudCompressor())
-                .addLast("decompress", CloudDecompressor())
+                // "crypto"
+                .addLast("frame", FrameCodec())
+                // compress
                 .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = false))
     }
 }
 
-class CloudDecompressor(var threshold: Int = -1) : MessageToMessageDecoder<ByteBuf>() {
+class CloudCompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     // https://github.com/Gerrygames/ClientViaVersion/blob/master/src/main/java/de/gerrygames/the5zig/clientviaversion/netty/CompressionEncoder.java
-    private val inflater: Inflater = Inflater()
-
-    @Throws(Exception::class)
-    override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
-        if (threshold == -1) {
-            out.add(input.retain())
-            return
-        }
-        if (input.isReadable) {
-            val outLength = Type.VAR_INT.readPrimitive(input)
-            if (outLength == 0) {
-                out.add(input.readBytes(input.readableBytes()))
-            } else {
-                if (outLength < threshold) {
-                    throw DecoderException("Badly compressed packet - size of $outLength is below server threshold of $threshold")
-                }
-                if (outLength > 2097152) {
-                    throw DecoderException("Badly compressed packet - size of $outLength is larger than protocol maximum of 2097152")
-                }
-                val temp = ByteArray(input.readableBytes())
-                input.readBytes(temp)
-                inflater.setInput(temp)
-                val output = ByteArray(outLength)
-                inflater.inflate(output)
-                out.add(Unpooled.wrappedBuffer(output))
-                inflater.reset()
-            }
-        }
-    }
-
-}
-
-class CloudCompressor(var threshold: Int = -1) : MessageToByteEncoder<ByteBuf>() {
-    // https://github.com/Gerrygames/ClientViaVersion/blob/master/src/main/java/de/gerrygames/the5zig/clientviaversion/netty/CompressionEncoder.java
-    private val buffer = ByteArray(8192)
+    private val inflater: Inflater = Inflater()// https://github.com/Gerrygames/ClientViaVersion/blob/master/src/main/java/de/gerrygames/the5zig/clientviaversion/netty/CompressionEncoder.java
     private val deflater: Deflater = Deflater()
 
     @Throws(Exception::class)
-    override fun encode(ctx: ChannelHandlerContext, input: ByteBuf, out: ByteBuf) {
-        if (threshold == -1) {
-            out.writeBytes(input)
-            return
-        }
+    override fun encode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
         val frameLength = input.readableBytes()
-        if (frameLength < threshold) {
-            Type.VAR_INT.writePrimitive(out, 0)
-            out.writeBytes(input)
-        } else {
-            Type.VAR_INT.writePrimitive(out, frameLength)
+        val outBuf = ctx.alloc().heapBuffer()
+        try {
+            if (frameLength < threshold) {
+                outBuf.writeByte(0)
+                outBuf.writeBytes(input)
+                out.add(outBuf.retain())
+                return
+            }
+            Type.VAR_INT.writePrimitive(outBuf, frameLength)
             val inBytes = ByteArray(frameLength)
             input.readBytes(inBytes)
             deflater.setInput(inBytes, 0, frameLength)
             deflater.finish()
             while (!deflater.finished()) {
-                val written = deflater.deflate(buffer)
-                out.writeBytes(buffer, 0, written)
+                outBuf.ensureWritable(8192)
+                val wIndex = outBuf.writerIndex()
+                outBuf.writerIndex(wIndex + deflater.deflate(outBuf.array(),
+                        outBuf.arrayOffset() + wIndex, outBuf.writableBytes()))
             }
+            out.add(outBuf.retain())
+        } finally {
+            outBuf.release()
             deflater.reset()
+        }
+    }
+
+    @Throws(Exception::class)
+    override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
+        if (input.isReadable) {
+            val outLength = Type.VAR_INT.readPrimitive(input)
+            if (outLength == 0) {
+                out.add(input.retain())
+                return
+            }
+
+            if (outLength < threshold) {
+                throw DecoderException("Badly compressed packet - size of $outLength is below server threshold of $threshold")
+            }
+            if (outLength > 2097152) {
+                throw DecoderException("Badly compressed packet - size of $outLength is larger than protocol maximum of 2097152")
+            }
+
+            val temp = ByteArray(input.readableBytes())
+            input.readBytes(temp)
+            inflater.setInput(temp)
+            val output = ByteArray(outLength)
+            inflater.inflate(output)
+            out.add(Unpooled.wrappedBuffer(output))
+            inflater.reset()
         }
     }
 
 }
 
-@ChannelHandler.Sharable
-object FrameEncoder : MessageToMessageEncoder<ByteBuf>() {
-    override fun encode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
-        val length = ctx.alloc().buffer(5)
-        Type.VAR_INT.writePrimitive(length, msg.readableBytes())
-        out.add(length)
-        out.add(msg.retain())
-    }
-}
+class FrameCodec : ByteToMessageCodec<ByteBuf>() {
+    val badLength = DecoderException("Invalid length!")
 
-class FrameDecoder : ReplayingDecoder<ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
+        if (!ctx.channel().isActive) {
+            input.clear() // Ignore, should prevent DoS https://github.com/SpigotMC/BungeeCord/pull/2908
+            return
+        }
+
+        val index = input.readerIndex()
+        var nByte = 0
+        val result = input.forEachByte {
+            nByte++
+            val hasNext = it.toInt().and(0x10000000) != 0
+            if (nByte > 3) throw badLength
+            hasNext
+        }
+        input.readerIndex(index)
+        if (result == -1) return // not readable
+
         val length = Type.VAR_INT.readPrimitive(input)
-        if (length >= 2097152 || length < 0) throw DecoderException("Invalid length!")
+
+        if (length >= 2097152 || length < 0) throw badLength
+        if (!input.isReadable(length)) {
+            input.readerIndex(index)
+            return
+        }
+
         out.add(input.readRetainedSlice(length))
-        checkpoint()
+    }
+
+    override fun encode(ctx: ChannelHandlerContext, msg: ByteBuf, out: ByteBuf) {
+        Type.VAR_INT.writePrimitive(out, msg.readableBytes())
+        out.writeBytes(msg)
     }
 }
 
-class CloudDecodeHandler(val info: UserConnection) : MessageToMessageDecoder<ByteBuf>() {
+class CloudViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         if (!info.checkIncomingPacket()) throw CancelDecoderException.generate(null)
         if (!info.shouldTransformPacket()) {
@@ -171,9 +174,7 @@ class CloudDecodeHandler(val info: UserConnection) : MessageToMessageDecoder<Byt
             transformedBuf.release()
         }
     }
-}
 
-class CloudEncodeHandler(val info: UserConnection) : MessageToMessageEncoder<ByteBuf>() {
     override fun encode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         info.checkOutgoingPacket()
         if (!info.shouldTransformPacket()) {

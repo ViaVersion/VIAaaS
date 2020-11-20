@@ -1,8 +1,9 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "6.1.0"
-    id("com.github.ben-manes.versions") version "0.34.0"
+    id("com.github.ben-manes.versions") version "0.36.0"
+    id("com.palantir.git-version") version "0.12.3"
     application
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.4.20"
 }
 
 application {
@@ -14,8 +15,15 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+val gitVersion: groovy.lang.Closure<String> by extra
+
 group = "com.github.creeper123123321.viaaas"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT+" + try {
+    gitVersion()
+} catch (e: Exception) {
+    "unknown"
+}
+
 extra.set("archivesBaseName", "VIAaaS")
 
 repositories {
@@ -37,7 +45,7 @@ dependencies {
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.12.1")
 
-    val ktorVersion = "1.4.1"
+    val ktorVersion = "1.4.2"
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
@@ -62,5 +70,13 @@ tasks {
     build {
         dependsOn(shadowJar)
         dependsOn(named("dependencyUpdates"))
+    }
+}
+
+tasks.named<ProcessResources>("processResources") {
+    filesMatching("viaaas_info.json") {
+        filter<org.apache.tools.ant.filters.ReplaceTokens>("tokens" to mapOf(
+                "version" to project.property("version")
+        ))
     }
 }

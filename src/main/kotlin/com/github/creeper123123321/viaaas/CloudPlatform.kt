@@ -25,6 +25,7 @@ import us.myles.ViaVersion.protocols.base.VersionProvider
 import us.myles.ViaVersion.protocols.protocol1_9to1_8.providers.MovementTransmitterProvider
 import us.myles.ViaVersion.sponge.VersionInfo
 import us.myles.ViaVersion.sponge.util.LoggerWrapper
+import us.myles.ViaVersion.util.GsonUtil
 import us.myles.viaversion.libs.gson.JsonObject
 import java.io.File
 import java.net.URL
@@ -34,6 +35,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
+
+val viaaasVer = GsonUtil.getGson().fromJson(CloudPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!
+                .reader(Charsets.UTF_8).readText(), JsonObject::class.java).get("version").asString
 
 object CloudBackwards : ViaBackwardsPlatform {
     val log = LoggerWrapper(LoggerFactory.getLogger("ViaBackwards"))
@@ -60,8 +64,8 @@ object CloudLoader : ViaPlatformLoader {
 
 object CloudCommands : ViaCommandHandler()
 object CloudInjector : ViaInjector {
-    override fun getEncoderName(): String = "via-encoder"
-    override fun getDecoderName() = "via-decoder"
+    override fun getEncoderName(): String = "via-codec"
+    override fun getDecoderName() = "via-codec"
     override fun getDump(): JsonObject = JsonObject()
 
     override fun uninject() {
@@ -124,7 +128,6 @@ object CloudPlatform : ViaPlatform<Unit> {
     override fun runSync(runnable: Runnable): TaskId = CloudTask(eventLoop.submit(runnable))
     override fun runSync(p0: Runnable, p1: Long): TaskId = CloudTask(eventLoop.schedule(p0, p1 * 50L, TimeUnit.MILLISECONDS))
     override fun runRepeatingSync(p0: Runnable, p1: Long): TaskId = CloudTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
-    override fun getPlatformVersion(): String = "VIAaaS"
     override fun runAsync(p0: Runnable): TaskId = CloudTask(CompletableFuture.runAsync(p0, executor))
     override fun getLogger(): Logger = LoggerWrapper(LoggerFactory.getLogger("ViaVersion"))
     override fun getConnectionManager(): ViaConnectionManager = connMan
@@ -137,6 +140,7 @@ object CloudPlatform : ViaPlatform<Unit> {
     override fun getConfigurationProvider(): ConfigurationProvider = CloudConfig
 
     override fun getPlatformName(): String = "VIAaaS"
+    override fun getPlatformVersion(): String = viaaasVer
     override fun getPluginVersion(): String = VersionInfo.VERSION
     override fun isOldClientsAllowed(): Boolean = true
     override fun isProxy(): Boolean = true
