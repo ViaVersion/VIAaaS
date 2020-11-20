@@ -89,10 +89,6 @@ fun channelSocketFactory(): ChannelFactory<SocketChannel> {
 }
 
 fun main(args: Array<String>) {
-    if (System.getProperty("java.net.preferIPv6Addresses") == null) {
-        System.setProperty("java.net.preferIPv6Addresses", "true")
-    }
-
     File("config/https.jks").apply {
         parentFile.mkdirs()
         if (!exists()) generateCertificate(this)
