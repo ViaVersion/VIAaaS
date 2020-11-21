@@ -56,7 +56,7 @@ class CloudMinecraftHandler(val user: UserConnection,
     var address: SocketAddress? = null
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
-        if (ctx.channel().isActive && !user.isPendingDisconnect) {
+        if (ctx.channel().isActive && !user.isPendingDisconnect && msg.isReadable) {
             data!!.state.handleMessage(this, ctx, msg)
             if (msg.isReadable) throw IllegalStateException("Remaining bytes!!!")
             //other?.write(msg.retain())
@@ -369,10 +369,7 @@ object LoginState : MinecraftConnectionState {
 object StatusState : MinecraftConnectionState {
     override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
         val i = msg.readerIndex()
-        when (Type.VAR_INT.readPrimitive(msg)) {
-            0, 1 -> {}
-            else -> throw IllegalArgumentException("Invalid packet id!")
-        }
+        if (Type.VAR_INT.readPrimitive(msg) !in 0..1) throw IllegalArgumentException("Invalid packet id!")
         msg.readerIndex(i)
         handler.other!!.write(msg.retain())
     }
@@ -395,6 +392,9 @@ object StatusState : MinecraftConnectionState {
 
 object PlayState : MinecraftConnectionState {
     override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
+        val i = msg.readerIndex()
+        if (Type.VAR_INT.readPrimitive(msg) !in 0..127) throw IllegalArgumentException("Invalid packet id!")
+        msg.readerIndex(i)
         handler.other!!.write(msg.retain())
     }
 
