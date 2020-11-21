@@ -31,3 +31,6 @@ Usage for online mode (may block your Mojang account):
 - Connect to mc.example.com._v1_8.viaaas._u(BACKUSERNAME).localhost
 - Approve the login
 - There are some information about Mojang password resetting: https://github.com/GeyserMC/Geyser/wiki/Common-Issues#mojang-resetting-account-credentials and https://mobile.twitter.com/MojangSupport/status/863697596350517248
+
+## WARNING
+VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
