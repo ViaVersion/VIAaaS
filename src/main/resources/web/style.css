@@ -1,0 +1,23 @@
+body {
+    word-break: break-word;
+    font-family: sans-serif;
+}
+@media (min-width: 700px) {
+    #browser_accounts {
+        float: right;
+        width: 300px;
+    }
+}
+#browser_accounts {
+    text-align: center;
+    display: inline-block;
+    border: 1px solid black;
+    padding: 10px;
+}
+#connection_status {
+    background: black;
+    color: white;
+}
+.account_head {
+    width: 16px;
+}
