@@ -297,7 +297,7 @@ object LoginState : MinecraftConnectionState {
             try {
                 val profile = httpClient.get<JsonObject?>(
                         "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
-                                "${UrlEscapers.urlFormParameterEscaper().escape(handler.data!!.backName!!)}&serverId=$frontHash")
+                                "${UrlEscapers.urlFormParameterEscaper().escape(handler.data!!.frontName!!)}&serverId=$frontHash")
                         ?: throw IllegalArgumentException("Couldn't authenticate with session servers")
 
                 val sessionJoin = viaWebServer.requestSessionJoin(
