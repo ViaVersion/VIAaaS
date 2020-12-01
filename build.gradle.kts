@@ -47,7 +47,7 @@ dependencies {
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.12.1")
 
-    val ktorVersion = "1.4.2"
+    val ktorVersion = "1.4.3"
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
