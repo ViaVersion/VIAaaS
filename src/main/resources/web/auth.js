@@ -1,6 +1,6 @@
 $(() => {
     let urlParams = new URLSearchParams();
-    window.location.search.split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
+    window.location.hash.split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
     var username = urlParams.get("username");
     var mcauth_code = urlParams.get("mcauth_code");
     if (urlParams.get("mcauth_success") == "false") {
@@ -189,7 +189,7 @@ $(() => {
         link.href = "javascript:";
         link.onclick = () => {
             let user = prompt("Username (Minecraft.ID is case-sensitive): ", "");
-            let callbackUrl = new URL(location.origin + location.pathname + "?username=" + encodeURIComponent(user));
+            let callbackUrl = new URL(location.origin + location.pathname + "#username=" + encodeURIComponent(user));
             location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
         };
         content.appendChild(p);
