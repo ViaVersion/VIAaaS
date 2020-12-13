@@ -1,6 +1,6 @@
 $(() => {
     let urlParams = new URLSearchParams();
-    window.location.hash.split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
+    window.location.hash.substr(1).split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
     var username = urlParams.get("username");
     var mcauth_code = urlParams.get("mcauth_code");
     if (urlParams.get("mcauth_success") == "false") {
