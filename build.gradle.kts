@@ -11,8 +11,8 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 val gitVersion: groovy.lang.Closure<String> by extra
@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    implementation("us.myles:viaversion:3.2.0") { isTransitive = false }
+    implementation("us.myles:viaversion:3.2.1") { isTransitive = false }
     implementation("nl.matsv:viabackwards-all:3.2.0") { isTransitive = false }
     implementation("de.gerrygames:viarewind-all:1.5.2") { isTransitive = false }
     implementation("io.netty:netty-all:4.1.53.Final")
@@ -82,3 +82,7 @@ tasks.named<ProcessResources>("processResources") {
         ))
     }
 }
+
+val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
+
+compileKotlin.kotlinOptions.jvmTarget = "11"

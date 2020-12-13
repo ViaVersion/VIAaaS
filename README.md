@@ -15,6 +15,8 @@ Idea: server.example.com._p25565._v1_12_2._otrue._uBACKUSERNAME.viaaas.example.c
 
 Download: https://github.com/ViaVersion/VIAaaS/actions (needs to be logged into GitHub)
 
+Requires Java 11
+
 Usage for offline mode:
 - Run the shadow jar or ./gradlew clean run
 - Connect to mc.example.com._v1_8.viaaas.localhost
