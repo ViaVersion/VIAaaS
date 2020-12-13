@@ -280,7 +280,7 @@ class VIAaaSAddress {
                                 } catch (e: NumberFormatException) {
                                     val closest = ProtocolVersion.getClosest(arg.replace("_", "."))
                                     if (closest != null) {
-                                        protocol = closest.id
+                                        protocol = closest.version
                                     }
                                 }
                             }
