@@ -84,7 +84,7 @@ $(() => {
         let remove = document.createElement("a");
         n.innerText = " " + name + " ";
         remove.innerText = "Remove";
-        remove.href = "javascript:";
+        remove.href = "#";
         remove.onclick = () => {
             logout(id);
         };
@@ -173,7 +173,7 @@ $(() => {
             let add = document.createElement("a");
             p.appendChild(add);
             add.innerText = "Listen to " + username;
-            add.href = "javascript:";
+            add.href = "#";
             add.onclick = () => {
                 socket.send(JSON.stringify({
                     "action": "minecraft_id_login",
@@ -186,7 +186,7 @@ $(() => {
         let link = document.createElement("a");
         p.appendChild(link);
         link.innerText = "Listen to username in VIAaaS instance";
-        link.href = "javascript:";
+        link.href = "#";
         link.onclick = () => {
             let user = prompt("Username (Minecraft.ID is case-sensitive): ", "");
             let callbackUrl = new URL(location.origin + location.pathname + "#username=" + encodeURIComponent(user));
