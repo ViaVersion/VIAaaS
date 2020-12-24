@@ -1,7 +1,6 @@
 package com.github.creeper123123321.viaaas
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInitializer
@@ -25,12 +24,12 @@ object ChannelInit : ChannelInitializer<Channel>() {
         val user = UserConnection(ch)
         CloudPipeline(user)
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
-                // "crypto"
-                .addLast("frame", FrameCodec())
-                // "compress" / dummy "decompress"
-                .addLast("flow-handler", FlowControlHandler())
-                .addLast("via-codec", CloudViaCodec(user))
-                .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = true))
+            // "crypto"
+            .addLast("frame", FrameCodec())
+            // "compress" / dummy "decompress"
+            .addLast("flow-handler", FlowControlHandler())
+            .addLast("via-codec", CloudViaCodec(user))
+            .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = true))
     }
 }
 
@@ -53,22 +52,23 @@ class CloudCrypto(val cipherDecode: Cipher, var cipherEncode: Cipher) : MessageT
 class BackendInit(val user: UserConnection) : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
-                // "crypto"
-                .addLast("frame", FrameCodec())
-                // compress
-                .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = false))
+            // "crypto"
+            .addLast("frame", FrameCodec())
+            // compress
+            .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = false))
     }
 }
 
 class CloudCompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     // https://github.com/Gerrygames/ClientViaVersion/blob/master/src/main/java/de/gerrygames/the5zig/clientviaversion/netty/CompressionEncoder.java
-    private val inflater: Inflater = Inflater()// https://github.com/Gerrygames/ClientViaVersion/blob/master/src/main/java/de/gerrygames/the5zig/clientviaversion/netty/CompressionEncoder.java
+    private val inflater: Inflater =
+        Inflater()// https://github.com/Gerrygames/ClientViaVersion/blob/master/src/main/java/de/gerrygames/the5zig/clientviaversion/netty/CompressionEncoder.java
     private val deflater: Deflater = Deflater()
 
     @Throws(Exception::class)
     override fun encode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
         val frameLength = input.readableBytes()
-        val outBuf = ctx.alloc().heapBuffer()
+        val outBuf = ctx.alloc().buffer()
         try {
             if (frameLength < threshold) {
                 outBuf.writeByte(0)
@@ -77,15 +77,12 @@ class CloudCompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf,
                 return
             }
             Type.VAR_INT.writePrimitive(outBuf, frameLength)
-            val inBytes = ByteArray(frameLength)
-            input.readBytes(inBytes)
-            deflater.setInput(inBytes, 0, frameLength)
+            deflater.setInput(input.nioBuffer())
             deflater.finish()
             while (!deflater.finished()) {
                 outBuf.ensureWritable(8192)
                 val wIndex = outBuf.writerIndex()
-                outBuf.writerIndex(wIndex + deflater.deflate(outBuf.array(),
-                        outBuf.arrayOffset() + wIndex, outBuf.writableBytes()))
+                outBuf.writerIndex(wIndex + deflater.deflate(outBuf.nioBuffer(wIndex, outBuf.writableBytes())))
             }
             out.add(outBuf.retain())
         } finally {
@@ -110,13 +107,16 @@ class CloudCompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf,
                 throw DecoderException("Badly compressed packet - size of $outLength is larger than protocol maximum of 2097152")
             }
 
-            val temp = ByteArray(input.readableBytes())
-            input.readBytes(temp)
-            inflater.setInput(temp)
-            val output = ByteArray(outLength)
-            inflater.inflate(output)
-            out.add(Unpooled.wrappedBuffer(output))
-            inflater.reset()
+            inflater.setInput(input.nioBuffer())
+            val output = ctx.alloc().buffer(outLength, outLength)
+            try {
+                output.writerIndex(output.writerIndex() + inflater.inflate(
+                        output.nioBuffer(output.writerIndex(), output.writableBytes())))
+                out.add(output.retain())
+            } finally {
+                inflater.reset()
+                output.release()
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 VIAaaS
 ---
-Idea: server.example.com._p25565._v1_12_2._otrue._uBACKUSERNAME.viaaas.example.com (default backend 25565 port and version
- default as auto, online-mode can be optional/required) (similar to tor to web proxies)
+How to use: server.example.com._p25565._v1_12_2._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
+Default WS URL: wss://localhost:25543/ws
 
 - TODO: _o option for disabling online mode only in front end, protocol auto detection
 
@@ -28,9 +28,9 @@ Usage for online mode (may block your Mojang account):
  https://www.curseforge.com/minecraft/mc-mods/auth-me for reauthenticate the client.)
 - You should set up a CORS Proxy (something like https://github.com/Rob--W/cors-anywhere) on local machine.
 - Go to https://localhost:25543/auth.html, configure the CORS Proxy URL (something like http://localhost:8080/) and listen to
- the username you're using to connect.
-- Add web page the account you used in _u parameter.
-- Connect to mc.example.com._v1_8.viaaas._u(BACKUSERNAME).localhost
+ the username A that you're using to connect to the proxy.
+- Add web page the account B you used in _u parameter.
+- Connect to mc.example.com._v1_8.viaaas._u(account B).localhost
 - Approve the login
 - There are some information about Mojang password resetting: https://github.com/GeyserMC/Geyser/wiki/Common-Issues#mojang-resetting-account-credentials and https://mobile.twitter.com/MojangSupport/status/863697596350517248
 

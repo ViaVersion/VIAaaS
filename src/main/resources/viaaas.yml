@@ -8,3 +8,14 @@ bind-address: localhost
 host-name: viaaas.localhost
 # Use netty native transport for Minecraft when available.
 native-transport-mc: true
+# Sets the RSA key size used by client for encrypting the AES symmetric key when using online mode.
+# Minecraft default is 1024. See https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
+mc-rsa-size: 4096
+# Use SecureRandom.getInstanceStrong(). May block if there's not enough entropy when using online mode.
+# See https://wiki.archlinux.org/index.php/Rng-tools
+use-strong-random: true
+# Blocks connection to local addresses
+block-local-address: true
+# Requires virtual host to contain the value from "host-name"
+# A false value could be used for transparent proxying.
+require-host-name: true

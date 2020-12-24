@@ -41,6 +41,7 @@ import us.myles.ViaVersion.util.Config
 import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator
+import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -60,9 +61,11 @@ val initFuture = CompletableFuture<Unit>()
 
 // Minecraft doesn't have forward secrecy
 val mcCryptoKey = KeyPairGenerator.getInstance("RSA").let {
-    it.initialize(4096) // https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
+    it.initialize(VIAaaSConfig.mcRsaSize) // https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
     it.genKeyPair()
 }
+
+val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()
 
 fun eventLoopGroup(): EventLoopGroup {
     if (VIAaaSConfig.isNativeTransportMc) {
@@ -249,6 +252,10 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val port: Int get() = this.getInt("port", 25565)
     val bindAddress: String get() = this.getString("bind-address", "localhost")!!
     val hostName: String get() = this.getString("host-name", "viaaas.localhost")!!
+    val mcRsaSize: Int get() = this.getInt("mc-rsa-size", 4096)
+    val useStrongRandom: Boolean get() = this.getBoolean("use-strong-random", true)
+    val blockLocalAddress: Boolean get() = this.getBoolean("block-local-address", true)
+    val requireHostName: Boolean get() = this.getBoolean("require-host-name", true)
 }
 
 class VIAaaSAddress {

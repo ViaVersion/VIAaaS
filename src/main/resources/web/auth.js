@@ -14,8 +14,8 @@ $(() => {
     var content = document.getElementById("content");
     var acounts = document.getElementById("accounts");
 
-    $("#cors-proxy").val(localStorage.getItem("cors-proxy"));
     $("#cors-proxy").on("change", () => localStorage.setItem('cors-proxy', $("#cors-proxy").val()));
+    $("#cors-proxy").val(localStorage.getItem("cors-proxy"));
     $("#login_submit_mc").on("click", loginMc);
 
     function loginMc() {
