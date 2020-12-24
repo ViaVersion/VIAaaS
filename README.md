@@ -36,3 +36,7 @@ Usage for online mode (may block your Mojang account):
 
 ## WARNING
 VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
+
+## FAQ
+VIAaaS is stuck when connecting with online mode:
+- Your system may have low entropy, see https://wiki.archlinux.org/index.php/Rng-tools
