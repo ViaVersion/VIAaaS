@@ -56,7 +56,7 @@ object CloudHeadProtocol : SimpleProtocol() {
                             backendVer = backProto,
                             frontOnline = parsed.online,
                             altName = parsed.altUsername,
-                            hadHostname = parsed.viaSuffix == null
+                            hadHostname = parsed.viaSuffix != null
                         )
                     )
 
