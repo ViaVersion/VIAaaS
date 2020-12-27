@@ -131,6 +131,10 @@ class HandshakeState : MinecraftConnectionState {
             else -> throw IllegalStateException("Invalid next state")
         }
 
+        if (!handler.user.get(CloudData::class.java)!!.hadHostname && VIAaaSConfig.requireHostName) {
+            throw UnsupportedOperationException("This VIAaaS instance requires you to use the hostname")
+        }
+
         handler.user.channel!!.setAutoRead(false)
         GlobalScope.launch(Dispatchers.IO) {
             val frontHandler = handler.user.channel!!.pipeline().get(CloudMinecraftHandler::class.java)
@@ -153,9 +157,9 @@ class HandshakeState : MinecraftConnectionState {
                 val socketAddr = InetSocketAddress(InetAddress.getByName(srvResolvedAddr), srvResolvedPort)
                 val addrInfo = socketAddr.address
                 if (VIAaaSConfig.blockLocalAddress && (addrInfo.isSiteLocalAddress
-                    || addrInfo.isLoopbackAddress
-                    || addrInfo.isLinkLocalAddress
-                    || addrInfo.isAnyLocalAddress)
+                            || addrInfo.isLoopbackAddress
+                            || addrInfo.isLinkLocalAddress
+                            || addrInfo.isAnyLocalAddress)
                 ) throw SecurityException("Local addresses aren't allowed")
 
                 val bootstrap = Bootstrap().handler(BackendInit(handler.user))

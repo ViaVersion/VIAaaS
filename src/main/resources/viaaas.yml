@@ -19,3 +19,6 @@ block-local-address: true
 # Requires virtual host to contain the value from "host-name"
 # A false value could be used for transparent proxying.
 require-host-name: true
+# Default port to be used to connect to backend server
+# Use -1 to reuse the port sent by client, useful for transparent proxying
+default-backend-port: 25565

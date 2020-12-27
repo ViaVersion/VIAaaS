@@ -256,6 +256,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val useStrongRandom: Boolean get() = this.getBoolean("use-strong-random", true)
     val blockLocalAddress: Boolean get() = this.getBoolean("block-local-address", true)
     val requireHostName: Boolean get() = this.getBoolean("require-host-name", true)
+    val defaultBackendPort: Int get() = this.getInt("default-backend-port", 25565)
 }
 
 class VIAaaSAddress {

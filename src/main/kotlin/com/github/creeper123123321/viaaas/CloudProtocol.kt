@@ -35,8 +35,11 @@ object CloudHeadProtocol : SimpleProtocol() {
                     val receivedPort = wrapper.read(Type.UNSIGNED_SHORT)
 
                     val parsed = VIAaaSAddress().parse(addr.substringBefore(0.toChar()), VIAaaSConfig.hostName)
-                    if (parsed.viaSuffix == null && VIAaaSConfig.requireHostName) throw IllegalStateException("VIAaaS hostname is required")
-                    val backPort = parsed.port ?: receivedPort
+                    val backPort = parsed.port ?: if (VIAaaSConfig.defaultBackendPort == -1) {
+                        receivedPort
+                    } else {
+                        VIAaaSConfig.defaultBackendPort
+                    }
                     val backAddr = parsed.realAddress
                     val backProto = parsed.protocol ?: 47
 
@@ -52,7 +55,8 @@ object CloudHeadProtocol : SimpleProtocol() {
                             userConnection = wrapper.user(),
                             backendVer = backProto,
                             frontOnline = parsed.online,
-                            altName = parsed.altUsername
+                            altName = parsed.altUsername,
+                            hadHostname = parsed.viaSuffix == null
                         )
                     )
 
@@ -67,5 +71,6 @@ data class CloudData(
     val userConnection: UserConnection,
     var backendVer: Int,
     var frontOnline: Boolean,
-    var altName: String?
+    var altName: String?,
+    var hadHostname: Boolean
 ) : StoredObject(userConnection)

@@ -4,15 +4,20 @@ import com.google.common.base.Preconditions
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import io.ktor.application.*
+import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
+import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.util.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
@@ -67,6 +72,126 @@ class ViaWebApp {
                 }
             }
 
+            // todo xbox auth
+            /*
+            val redirectUrl = "https://localhost:25543/xbox-auth/ms-callback"
+            val siteKey = "9e95fd56-0f45-42f9-af28-9b803645da22"
+            val secretKey = "redacted"
+            val azureClientId = "a370fff9-7648-4dbf-b96e-2b4f8d539ac2"
+            val azureClientSecret = "redacted"
+
+            get("/xbox-auth/") {
+                call.respondText(contentType = ContentType.parse("text/html")) {
+                    """<script src="https://hcaptcha.com/1/api.js"></script>
+<form action="/xbox-auth/ms-login" method="POST" id="form">
+    <div class="h-captcha" data-sitekey="$siteKey" data-callback="hc"></div>
+</form>
+<script>function hc() { document.getElementById("form").submit(); }
+window.onload = () => hcaptcha.execute();</script>
+"""
+                }
+            }
+
+            val validTokens = Collections.newSetFromMap<UUID>(ConcurrentHashMap())
+
+            post("/xbox-auth/ms-login") {
+                val multipart = call.receiveParameters()
+
+                val hcaptchaResponse = httpClient.submitForm<JsonObject>(
+                    "https://hcaptcha.com/siteverify",
+                    parametersOf(
+                        "response" to listOf(multipart["h-captcha-response"]!!),
+                        "secret" to listOf(secretKey),
+                        "siteKey" to listOf(siteKey)
+                    )
+                )
+
+                if (!hcaptchaResponse.get("success").asBoolean) {
+                    call.respondText(status = HttpStatusCode.Forbidden) { "hcaptcha failed" }
+                    return@post
+                }
+
+                call.respondRedirect(permanent = false) {
+                    takeFrom(
+                        "https://login.live.com/oauth20_authorize.srf" +
+                                "?client_id=$azureClientId" +
+                                "&response_type=code" +
+                                "&redirect_uri=${URLEncoder.encode(redirectUrl, Charsets.UTF_8)}" +
+                                "&scope=XboxLive.signin" +
+                                "&state=${UUID.randomUUID().also { validTokens.add(it) }}"
+                    )
+                }
+            }
+
+            get("/xbox-auth/ms-callback") {
+                val authCode = call.request.queryParameters.getOrFail("code")
+                val state = call.request.queryParameters.getOrFail("state")
+
+                if (!validTokens.remove(UUID.fromString(state))) {
+                    call.respondText(status = HttpStatusCode.Forbidden) { "failed state token" }
+                    return@get
+                }
+                val authToken = httpClient.submitForm<JsonObject>(
+                    "https://login.live.com/oauth20_token.srf",
+                    parametersOf(
+                        "client_id" to listOf(azureClientId),
+                        "client_secret" to listOf(azureClientSecret),
+                        "code" to listOf(authCode),
+                        "grant_type" to listOf("authorization_code"),
+                        "redirect_uri" to listOf(redirectUrl)
+                    )
+                )
+
+
+                val xboxLiveAuthResult = httpClient.post<JsonObject> {
+                    url("https://user.auth.xboxlive.com/user/authenticate")
+                    body = JsonObject().also {
+                        it.add("Properties", JsonObject().also {
+                            it.addProperty("AuthMethod", "RPS")
+                            it.addProperty("SiteName", "user.auth.xboxlive.com")
+                            it.addProperty("RpsTicket", authToken.get("access_token").asString)
+                        })
+                        it.addProperty("TokenType", "JWT")
+                        it.addProperty("RelyingParty", "http://auth.xboxlive.com")
+                    }
+                    header("content-type", "application/json")
+                    header("accept", "application/json")
+                }
+
+                val xstsAuth = httpClient.post<JsonObject> {
+                    url("https://xsts.auth.xboxlive.com/xsts/authorize")
+                    body = JsonObject().also {
+                        it.add("Properties", JsonObject().also {
+                            it.addProperty("SandboxId", "RETAIL")
+                            it.add(
+                                "UserTokens",
+                                JsonArray().also { it.add(xboxLiveAuthResult.get("Token").asString) })
+                        })
+                        it.addProperty("TokenType", "JWT")
+                        it.addProperty("RelyingParty", "rp://api.minecraftservices.com/")
+                    }
+                    header("content-type", "application/json")
+                    header("accept", "application/json")
+                }
+
+                val mcToken = httpClient.post<JsonObject> {
+                    url("https://api.minecraftservices.com/authentication/login_with_xbox")
+                    body = JsonObject().also {
+                        it.addProperty(
+                            "identityToken",
+                            "XBL3.0 x=${
+                                xstsAuth.getAsJsonObject("DisplayClaims").getAsJsonArray("xui")
+                                    .first { it.asJsonObject.has("uhs") }.asJsonObject.get("uhs").asString
+                            };${xstsAuth.get("Token").asString}"
+                        )
+                    }
+                    header("content-type", "application/json")
+                    header("accept", "application/json")
+                }
+
+                call.respondText { mcToken.get("access_token").asString }
+            } */
+
             static {
                 defaultResource("index.html", "web")
                 resources("web")
@@ -79,43 +204,47 @@ class ViaWebApp {
 fun fromUndashed(string: String): UUID {
     Preconditions.checkArgument(string.length == 32, "Length is incorrect")
     return UUID(
-            java.lang.Long.parseUnsignedLong(string.substring(0, 16), 16),
-            java.lang.Long.parseUnsignedLong(string.substring(16), 16)
+        java.lang.Long.parseUnsignedLong(string.substring(0, 16), 16),
+        java.lang.Long.parseUnsignedLong(string.substring(16), 16)
     )
 }
 
 class WebDashboardServer {
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val loginTokens = CacheBuilder.newBuilder()
-            .expireAfterAccess(10, TimeUnit.DAYS)
-            .build<UUID, UUID>()
+        .expireAfterAccess(10, TimeUnit.DAYS)
+        .build<UUID, UUID>()
 
     // Minecraft account -> WebClient
     val listeners = ConcurrentHashMap<UUID, MutableSet<WebClient>>()
     val usernameIdCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
-            .build<String, UUID>(CacheLoader.from { name ->
-                runBlocking {
-                    withContext(Dispatchers.IO) {
-                        httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
-                                ?.get("id")?.asString?.let { fromUndashed(it) }
-                    }
+        .expireAfterWrite(1, TimeUnit.HOURS)
+        .build<String, UUID>(CacheLoader.from { name ->
+            runBlocking {
+                withContext(Dispatchers.IO) {
+                    httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
+                        ?.get("id")?.asString?.let { fromUndashed(it) }
                 }
-            })
+            }
+        })
 
     val pendingSessionHashes = CacheBuilder.newBuilder()
-            .expireAfterWrite(30, TimeUnit.SECONDS)
-            .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
+        .expireAfterWrite(30, TimeUnit.SECONDS)
+        .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
 
-    suspend fun requestSessionJoin(id: UUID, name: String, hash: String,
-                                   address: SocketAddress, backKey: PublicKey)
+    suspend fun requestSessionJoin(
+        id: UUID, name: String, hash: String,
+        address: SocketAddress, backKey: PublicKey
+    )
             : CompletableFuture<Unit> {
         val future = viaWebServer.pendingSessionHashes.get(hash)
         var sent = 0
         viaWebServer.listeners[id]?.forEach {
-            it.ws.send("""{"action": "session_hash_request", "user": "$name", "session_hash": "$hash",
+            it.ws.send(
+                """{"action": "session_hash_request", "user": "$name", "session_hash": "$hash",
                                         | "client_address": "$address", "backend_public_key":
-                                        | "${Base64.getEncoder().encodeToString(backKey.encoded)}"}""".trimMargin())
+                                        | "${Base64.getEncoder().encodeToString(backKey.encoded)}"}""".trimMargin()
+            )
             it.ws.flush()
             sent++
         }
@@ -154,10 +283,12 @@ class WebDashboardServer {
 }
 
 
-data class WebClient(val server: WebDashboardServer,
-                     val ws: WebSocketServerSession,
-                     val state: WebState,
-                     val listenedIds: MutableSet<UUID> = mutableSetOf())
+data class WebClient(
+    val server: WebDashboardServer,
+    val ws: WebSocketServerSession,
+    val state: WebState,
+    val listenedIds: MutableSet<UUID> = mutableSetOf()
+)
 
 interface WebState {
     suspend fun start(webClient: WebClient)
@@ -181,10 +312,9 @@ class WebLogin : WebState {
                 val code = obj.getAsJsonPrimitive("code").asString
 
                 val check = httpClient.submitForm<JsonObject>(
-                        "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
-                        formParameters = parametersOf("code", code),
-                        encodeInQuery = false) {
-                }
+                    "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
+                    formParameters = parametersOf("code", code),
+                )
 
                 if (check.getAsJsonPrimitive("valid").asBoolean) {
                     val token = UUID.randomUUID()
@@ -192,13 +322,15 @@ class WebLogin : WebState {
                     val uuid = webClient.server.usernameIdCache.get(mcIdUser)
 
                     webClient.server.loginTokens.put(token, uuid)
-                    webClient.ws.send("""{"action": "minecraft_id_result", "success": true,
-                        | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin())
+                    webClient.ws.send(
+                        """{"action": "minecraft_id_result", "success": true,
+                        | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin()
+                    )
 
-                    webLogger.info("Generated a token for account $mcIdUser $uuid")
+                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) generated a token for account $mcIdUser $uuid")
                 } else {
                     webClient.ws.send("""{"action": "minecraft_id_result", "success": false}""")
-                    webLogger.info("Failed to generated a token for account $username")
+                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost})  failed to generated a token for account $username")
                 }
             }
             "listen_login_requests" -> {
@@ -208,12 +340,12 @@ class WebLogin : WebState {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": true, "user": "$user"}""")
                     webClient.listenedIds.add(user)
                     webClient.server.listeners.computeIfAbsent(user) { Collections.newSetFromMap(ConcurrentHashMap()) }
-                            .add(webClient)
+                        .add(webClient)
 
-                    webLogger.info("Listening for logins for $user")
+                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) listening for logins for $user")
                 } else {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
-                    webLogger.info("Failed token")
+                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) failed token")
                 }
             }
             "session_hash_response" -> {
