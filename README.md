@@ -1,15 +1,12 @@
 VIAaaS
 ---
 How to use: server.example.com._p25565._v1_12_2._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
+
 Default WS URL: wss://localhost:25543/ws
 
-- TODO: _o option for disabling online mode only in front end, protocol auto detection
-
-- Connection to private IP addresses are currently blocked
-
-- VIAaaS auth page is designed for storing accounts in the browser local storage.
+- VIAaaS auth page is designed for storing accounts in the player's browser local storage.
  It requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that
- as suspicious and reset/block your account password.
+ as suspicious and reset/block your account password if the IP address is suspect.
 
 - There are some information about Mojang password resetting:
   https://github.com/GeyserMC/Geyser/wiki/Common-Issues#mojang-resetting-account-credentials and
