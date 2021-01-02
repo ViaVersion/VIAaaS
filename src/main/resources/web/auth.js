@@ -90,7 +90,7 @@ $(() => {
         };
         head.className = "account_head";
         head.alt = name + "'s head";
-        head.src = "https://crafatar.com/avatars/" + id + "?overlay";
+        head.src = "https://crafthead.net/helm/" + id;
         p.append(head);
         p.append(n);
         p.append(remove);
