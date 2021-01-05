@@ -11,14 +11,15 @@
     <meta property="og:image" content="https://raw.githubusercontent.com/ViaVersion/ViaVersion/a13c417352298c2269aed8736a76205f0040b705/fabric/src/main/resources/assets/viaversion/textures/squarelogo.png">
     <meta property="og:type" content="game">
     <link rel="icon" href="https://raw.githubusercontent.com/ViaVersion/ViaVersion/a13c417352298c2269aed8736a76205f0040b705/fabric/src/main/resources/assets/viaversion/textures/squarelogo.png">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com/; img-src https://*; connect-src 'self' http://localhost:*/ https: ws: wss:">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/; img-src https://*; connect-src 'self' http://localhost:*/ https: ws: wss:">
     <meta name="referrer" content="no-referrer">
     <!-- only accept http from localhost -->
     <title>VIAaaS Authenticator</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.1/uuid.min.js"></script>
-    <script src="auth.js"></script>
+    <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.0.0-beta.4/js/msal-browser.js" integrity="sha384-7sxY2tN3GMVE5jXH2RL9AdbO6s46vUh9lUid4yNCHJMUzDoj+0N4ve6rLOmR88yN" crossorigin="anonymous"></script>
+    <script src="auth_ms.js"></script>
 </head>
 <body>
 <div id="browser_accounts">
@@ -29,6 +30,8 @@
         <input type="url" id="cors-proxy" name="cors-proxy" value="">
     </p></div>
     <div id="add-account"><form><p>
+        <input id="login_submit_ms" type="button" value="Login with Microsoft">
+        <br>
         <label for="email">Email/Username:</label>
         <br>
         <input type="text" id="email" name="email" value="">
@@ -50,5 +53,6 @@
 <hr>
 <p><span id="content"></span></p>
 </div>
+<script src="auth.js"></script>
 </body>
 </html>
