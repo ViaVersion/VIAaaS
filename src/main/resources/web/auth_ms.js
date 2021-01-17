@@ -5,7 +5,7 @@ const msalConfig = {
     auth: {
         clientId: "a370fff9-7648-4dbf-b96e-2b4f8d539ac2",
         authority: "https://login.microsoftonline.com/consumers/",
-        redirectUri: new URL(location.origin + location.pathname).toString(),
+        redirectUri: "https://viaversion.github.io/VIAaaS/src/main/resources/web/auth.html",
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored
