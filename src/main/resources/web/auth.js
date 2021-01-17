@@ -7,7 +7,8 @@ if (urlParams.get("mcauth_success") == "false") {
 }
 
 function askWsUrl() {
-    let url = prompt("VIAaaS instance websocket", localStorage.getItem("ws-url") || "wss://localhost:25543/ws");
+    let url = localStorage.getItem("ws-url") || "wss://localhost:25543/ws";
+    url = prompt("VIAaaS instance websocket", url) || url;
     localStorage.setItem("ws-url", url);
     return url;
 }
@@ -25,19 +26,18 @@ function getCorsProxy() {
 
 function loginMc() {
     var clientToken = uuid.v4();
-    $.ajax({type: "post",
-        url: getCorsProxy() + "https://authserver.mojang.com/authenticate",
-        data: JSON.stringify({
+    fetch(getCorsProxy() + "https://authserver.mojang.com/authenticate", {method: "post",
+        body: JSON.stringify({
             agent: {name: "Minecraft", version: 1},
             username: $("#email").val(),
             password: $("#password").val(),
             clientToken: clientToken,
         }),
-        contentType: "application/json",
-        dataType: "json"
-    }).done((data) => {
-        storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id);
-    }).fail(() => alert("Failed to login"));
+        headers: {"content-type": "application/json"}
+    }).then((data) => {
+        if (data.status != 200) throw "not 200";
+        storeMcAccount(data.json().accessToken, data.json().clientToken, data.json().selectedProfile.name, data.json().selectedProfile.id);
+    }).catch(() => alert("Failed to login"));
     $("#email").val("");
     $("#password").val("");
 }
