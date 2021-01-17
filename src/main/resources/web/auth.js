@@ -6,7 +6,13 @@ if (urlParams.get("mcauth_success") == "false") {
     alert("Couldn't authenticate with Minecraft.ID: " + urlParams.get("mcauth_msg"));
 }
 
-var wsUrl = window.location.host == "viaversion.github.io" ? prompt("VIAaaS instance WS URL") : "wss://" + window.location.host + "/ws";
+function askWsUrl() {
+    let url = prompt("VIAaaS instance websocket", localStorage.getItem("ws-url") || "wss://localhost:25543/ws");
+    localStorage.setItem("ws-url", url);
+    return url;
+}
+
+var wsUrl = window.location.host == "viaversion.github.io" ? askWsUrl() : "wss://" + window.location.host + "/ws";
 
 var socket = null;
 var connectionStatus = document.getElementById("connection_status");
