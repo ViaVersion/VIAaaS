@@ -64,17 +64,16 @@ function getMcAccounts() {
 
 function logout(id) {
     getMcAccounts().filter(it => it.id == id).forEach(it => {
-        $.ajax({type: "post",
-            url: getCorsProxy() + "https://authserver.mojang.com/invalidate",
-            data: JSON.stringify({
+        fetch(getCorsProxy() + "https://authserver.mojang.com/invalidate", {method: "post",
+            body: JSON.stringify({
                 accessToken: it.accessToken,
                 clientToken: it.clientToken
             }),
-            contentType: "application/json",
-            dataType: "json"
-        }).done((data) => {
+            headers: {"content-type": "application/json"},
+        }).then((data) => {
+            if (data.status != 200) throw "not 200";
             removeMcAccount(id);
-        }).fail(() => {
+        }).catch(() => {
             if (confirm("failed to invalidate token! remove account?")) {
                 removeMcAccount(id);
             }
@@ -128,38 +127,34 @@ function refreshAccountList() {
     (myMSALObj.getAllAccounts() || []).forEach(it => addMsAccountToList("TODO", "TODO", it.username))
 }
 
-function refreshAccountIfNeeded(it, doneCallback, failCallback) {
-    $.ajax({type: "post",
-        url: getCorsProxy() + "https://authserver.mojang.com/validate",
-        data: JSON.stringify({
+function refreshAccountIfNeeded(it) {
+    return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {method: "post",
+        body: JSON.stringify({
             accessToken: it.accessToken,
             clientToken: it.clientToken
         }),
-        contentType: "application/json",
-        dataType: "json"
-    })
-    .done(() => doneCallback(it))
-    .fail(() => {
-        // Needs refresh
-        console.log("refreshing " + it.id);
-        $.ajax({type: "post",
-            url: getCorsProxy() + "https://authserver.mojang.com/refresh",
-            data: JSON.stringify({
-                accessToken: it.accessToken,
-                clientToken: it.clientToken
-            }),
-            contentType: "application/json",
-            dataType: "json"
-        }).done((data) => {
-            console.log("refreshed " + data.selectedProfile.id);
-            removeMcAccount(data.selectedProfile.id);
-            doneCallback(storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id));
-        }).fail(() => {
-            if (confirm("failed to refresh token! remove account?")) {
-                removeMcAccount(it.id);
-            }
-            failCallback();
-        });
+        headers: {"content-type": "application/json"}
+    }).then((data) => {
+        if (data.status != 200) {
+            console.log("refreshing " + it.id);
+            return fetch(getCorsProxy() + "https://authserver.mojang.com/refresh", {
+                method: "post",
+                body: JSON.stringify({
+                    accessToken: it.accessToken,
+                    clientToken: it.clientToken
+                }),
+                headers: {"content-type": "application/json"},
+            }).then(data => {
+                if (data.status != 200) throw "not 200 refresh";
+                console.log("refreshed " + data.selectedProfile.id);
+                removeMcAccount(data.selectedProfile.id);
+                const json = data.json();
+                return storeMcAccount(json.accessToken, json.clientToken, json.selectedProfile.name, json.selectedProfile.id);
+            });
+        }
+        return it;
+    }).catch(() => {
+        alert("failed to refresh token!");
     });
 }
 
@@ -243,27 +238,22 @@ function onSocketMsg(event) {
         if (confirm("Allow auth impersonation from VIAaaS instance? info: " + JSON.stringify(parsed))) {
             let account = getMcAccounts().reverse().find(it => it.name.toLowerCase() == parsed.user.toLowerCase());
             if (account) {
-                refreshAccountIfNeeded(account, (data) => {
-                    $.ajax({
-                        type: "post",
-                        url: getCorsProxy() + "https://sessionserver.mojang.com/session/minecraft/join",
-                        data: JSON.stringify({
+                refreshAccountIfNeeded(account).then((data) => {
+                    return fetch(getCorsProxy() + "https://sessionserver.mojang.com/session/minecraft/join", {
+                        method: "post",
+                        body: JSON.stringify({
                             accessToken: data.accessToken,
                             selectedProfile: data.id,
                             serverId: parsed.session_hash
                         }),
-                        contentType: "application/json",
-                        dataType: "json"
-                    }).done((data) => {
-                        confirmJoin(parsed.session_hash);
-                    }).fail((e) => {
-                        console.log(e);
-                        confirmJoin(parsed.session_hash);
-                        alert("Failed to contact session server!");
+                        headers: {"content-type": "application/json"}
                     });
-                }, () => {
+                }).then((data) => {
+                    if (data.status != 200) throw "not 200";
+                }).finally(() => confirmJoin(parsed.session_hash))
+                .catch((e) => {
                     confirmJoin(parsed.session_hash);
-                    alert("Couldn't refresh " + parsed.user + " account in browser.");
+                    alert("Couldn't contact session server for " + parsed.user + " account in browser.");
                 });
             } else {
                 alert("Couldn't find " + parsed.user + " account in browser.");

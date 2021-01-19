@@ -1,11 +1,14 @@
 // https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-javascript-auth-code
 
+const redirectUrl = location.origin == "https://localhost:25543" ?
+"https://localhost:25543/auth.html" : "https://viaversion.github.io/VIAaaS/src/main/resources/web/auth.html";
+
 // Config object to be passed to Msal on creation
 const msalConfig = {
     auth: {
         clientId: "a370fff9-7648-4dbf-b96e-2b4f8d539ac2",
         authority: "https://login.microsoftonline.com/consumers/",
-        redirectUri: "https://viaversion.github.io/VIAaaS/src/main/resources/web/auth.html",
+        redirectUri: redirectUrl,
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored
@@ -21,8 +24,17 @@ const loginRequest = {
 };
 
 function loginMs() {
-    myMSALObj.loginPopup(loginRequest).then(response => refreshAccountList());
+    myMSALObj.loginRedirect(loginRequest);
 }
+
+function handleResponse(response) {
+    const currentAccounts = myMSALObj.getAllAccounts();
+    refreshAccountList();
+}
+
+$(() => {
+myMSALObj.handleRedirectPromise(handleResponse);
+});
 
 function getMcToken(username) {
     return getTokenPopup(username, loginRequest)
