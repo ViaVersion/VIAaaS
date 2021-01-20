@@ -44,7 +44,7 @@ function refreshTokenMs(username) {
             if (!isSuccess(xboxResponse.status)) throw "xbox response not success";
             return xboxResponse.json();
         }).then(json => {
-            return fetch(getCorsProxy() + "https://xsts.auth.xboxlive.com/xsts/authorize", {method: "post",
+            return fetch("https://xsts.auth.xboxlive.com/xsts/authorize", {method: "post",
                    body: JSON.stringify({Properties: {SandboxId: "RETAIL", UserTokens: [json.Token]},
                        RelyingParty: "rp://api.minecraftservices.com/", TokenType: "JWT"}),
                    headers: {"content-type": "application/json"}});
