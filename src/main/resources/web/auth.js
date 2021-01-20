@@ -78,7 +78,7 @@ function logoutMojang(id) {
             }),
             headers: {"content-type": "application/json"},
         }).then((data) => {
-            if (isSuccess(data.status)) throw "not success code";
+            if (!isSuccess(data.status)) throw "not success logout";
             removeMcAccount(id);
         }).catch((e) => {
             if (confirm("failed to invalidate token! error: " + e + " remove account?")) {

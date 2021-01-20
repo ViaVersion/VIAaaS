@@ -41,7 +41,7 @@ function refreshTokenMs(username) {
                         RpsTicket: "d=" + response.accessToken}, RelyingParty: "http://auth.xboxlive.com", TokenType: "JWT"}),
                     headers: {"content-type": "application/json"}});
         }).then(xboxResponse => {
-            if (isSuccess(xboxResponse.status)) throw "xbox response not success";
+            if (!isSuccess(xboxResponse.status)) throw "xbox response not success";
             return xboxResponse.json();
         }).then(json => {
             return fetch(getCorsProxy() + "https://xsts.auth.xboxlive.com/xsts/authorize", {method: "post",
@@ -49,20 +49,20 @@ function refreshTokenMs(username) {
                        RelyingParty: "rp://api.minecraftservices.com/", TokenType: "JWT"}),
                    headers: {"content-type": "application/json"}});
         }).then(xstsResponse => {
-            if (isSuccess(xstsResponse.status)) throw "xsts response not success";
+            if (!isSuccess(xstsResponse.status)) throw "xsts response not success";
             return xstsResponse.json();
         }).then(json => {
             return fetch(getCorsProxy() + "https://api.minecraftservices.com/authentication/login_with_xbox", {method: "post",
                 body: JSON.stringify({identityToken: "XBL3.0 x=" + json.DisplayClaims.xui.uhs + ";" + json.Token}),
                 headers: {"content-type": "application/json"}});
         }).then(mcResponse => {
-            if (isSuccess(mcResponse.status)) throw "mc response not success";
+            if (!isSuccess(mcResponse.status)) throw "mc response not success";
             return mcResponse.json();
         }).then(json => {
             fetch(getCorsProxy() + "https://api.minecraftservices.com/minecraft/profile", {
                 method: "get", headers: {"content-type": "application/json", "authorization": "Bearer " + json.access_token}}).then(profile => {
                 if (profile.status == 404) throw "no profile";
-                if (isSuccess(profile.status)) throw "profile response not success";
+                if (!isSuccess(profile.status)) throw "profile response not success";
                 return profile.json();
             }).then(jsonProfile => {
                 removeMcAccount(jsonProfile.id);
