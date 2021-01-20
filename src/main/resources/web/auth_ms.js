@@ -53,7 +53,7 @@ function refreshTokenMs(username) {
             return xstsResponse.json();
         }).then(json => {
             return fetch(getCorsProxy() + "https://api.minecraftservices.com/authentication/login_with_xbox", {method: "post",
-                body: JSON.stringify({identityToken: "XBL3.0 x=" + json.DisplayClaims.xui.uhs + ";" + json.Token}),
+                body: JSON.stringify({identityToken: "XBL3.0 x=" + json.DisplayClaims.xui[0].uhs + ";" + json.Token}),
                 headers: {"content-type": "application/json"}});
         }).then(mcResponse => {
             if (!isSuccess(mcResponse.status)) throw "mc response not success";
