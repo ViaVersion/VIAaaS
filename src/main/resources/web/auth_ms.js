@@ -38,20 +38,21 @@ function getMcToken(username) {
                     "RpsTicket": "d=" + response.accessToken}, "RelyingParty": "http://auth.xboxlive.com", "TokenType": "JWT"}),
                     headers: {"content-type": "application/json"}});
         }).then(xboxResponse => {
-            if (xboxResponse != 200) throw "xbox response not 200: " + xboxResponse;
+            if (xboxResponse.status != 200) throw "xbox response not 200";
             // We need CORS proxy
             return fetch(getCorsProxy() + "https://xsts.auth.xboxlive.com/xsts/authorize", {method: "post",
                    body: JSON.stringify({"Properties": {"SandboxId": "RETAIL", "UserTokens": [xboxResponse.json().Token]},
                        "RelyingParty": "rp://api.minecraftservices.com/", "TokenType": "JWT"}),
                    headers: {"content-type": "application/json"}});
         }).then(xstsResponse => {
+            if (xstsResponse.status != 200) throw "xsts response not 200";
             // Need CORS proxy here too
             return fetch(getCorsProxy() + "https://api.minecraftservices.com/authentication/login_with_xbox", {
                 body: JSON.stringify({"identityToken": "XBL3.0 x=" + xstsResponse.json().DisplayClaims.xui.uhs + ";"
                     + xstsResponse.json().Token}), headers: {"content-type": "application/json"}});
         }).then(mcResponse => {
-            console.log(mcResponse); // finally!!!.. todo
-            return mcResponse;
+            if (mcResponse.status != 200) throw "mc response not 200";
+            return mcResponse.json();
         }).catch(error => {
             console.log(error);
         });
