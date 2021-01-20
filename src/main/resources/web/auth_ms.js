@@ -27,14 +27,7 @@ function loginMs() {
     myMSALObj.loginRedirect(loginRequest);
 }
 
-function handleResponse(response) {
-    const currentAccounts = myMSALObj.getAllAccounts();
-    refreshAccountList();
-}
-
-$(() => {
-myMSALObj.handleRedirectPromise(handleResponse);
-});
+myMSALObj.handleRedirectPromise().then(() => refreshAccountList());
 
 function getMcToken(username) {
     return getTokenPopup(username, loginRequest)
