@@ -34,20 +34,20 @@ function getMcToken(username) {
         .then((response) => {
             // this supports CORS
             return fetch("https://user.auth.xboxlive.com/user/authenticate", {method: "post",
-                data: JSON.stringify({"Properties": {"AuthMethod": "RPS", "SiteName": "user.auth.xboxlive.com",
+                body: JSON.stringify({"Properties": {"AuthMethod": "RPS", "SiteName": "user.auth.xboxlive.com",
                     "RpsTicket": "d=" + response.accessToken}, "RelyingParty": "http://auth.xboxlive.com", "TokenType": "JWT"}),
                     headers: {"content-type": "application/json"}});
         }).then(xboxResponse => {
             if (xboxResponse != 200) throw "xbox response not 200: " + xboxResponse;
             // We need CORS proxy
             return fetch(getCorsProxy() + "https://xsts.auth.xboxlive.com/xsts/authorize", {method: "post",
-                   data: JSON.stringify({"Properties": {"SandboxId": "RETAIL", "UserTokens": [xboxResponse.json().Token]},
+                   body: JSON.stringify({"Properties": {"SandboxId": "RETAIL", "UserTokens": [xboxResponse.json().Token]},
                        "RelyingParty": "rp://api.minecraftservices.com/", "TokenType": "JWT"}),
                    headers: {"content-type": "application/json"}});
         }).then(xstsResponse => {
             // Need CORS proxy here too
             return fetch(getCorsProxy() + "https://api.minecraftservices.com/authentication/login_with_xbox", {
-                data: JSON.stringify({"identityToken": "XBL3.0 x=" + xstsResponse.json().DisplayClaims.xui.uhs + ";"
+                body: JSON.stringify({"identityToken": "XBL3.0 x=" + xstsResponse.json().DisplayClaims.xui.uhs + ";"
                     + xstsResponse.json().Token}), headers: {"content-type": "application/json"}});
         }).then(mcResponse => {
             console.log(mcResponse); // finally!!!.. todo
