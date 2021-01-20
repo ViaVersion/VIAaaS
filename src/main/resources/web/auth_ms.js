@@ -27,7 +27,7 @@ function loginMs() {
     myMSALObj.loginRedirect(loginRequest);
 }
 
-myMSALObj.handleRedirectPromise().then(() => refreshAccountList());
+$(() => myMSALObj.handleRedirectPromise().then(() => refreshAccountList()));
 
 function getMcToken(username) {
     return getTokenPopup(username, loginRequest)
