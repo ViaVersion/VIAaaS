@@ -125,7 +125,7 @@ function validateToken(account) {
     return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {method: "post",
         body: JSON.stringify({
             accessToken: account.accessToken,
-            clientToken: account.clientToken
+            clientToken: account.clientToken || undefined
         }),
         headers: {"content-type": "application/json"}
     });
