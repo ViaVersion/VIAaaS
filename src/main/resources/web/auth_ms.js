@@ -61,7 +61,7 @@ function refreshTokenMs(username) {
         }).then(json => {
             return fetch(getCorsProxy() + "https://api.minecraftservices.com/minecraft/profile", {
                 method: "get", headers: {"content-type": "application/json", "authorization": "Bearer " + json.access_token}}).then(profile => {
-                if (profile.status == 404) throw "no profile";
+                if (profile.status == 404) return {id: "MHF_Exclamation", name: "[DEMO]"};
                 if (!isSuccess(profile.status)) throw "profile response not success";
                 return profile.json();
             }).then(jsonProfile => {

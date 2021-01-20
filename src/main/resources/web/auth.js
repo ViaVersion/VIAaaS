@@ -117,7 +117,7 @@ function refreshAccountList() {
     getMcAccounts().filter(isMojang).forEach(it => addMcAccountToList(it.id, it.name));
     (myMSALObj.getAllAccounts() || []).forEach(msAccount => {
        let mcAcc = getMcAccounts().filter(isNotMojang).filter(it => it.msUser == msAccount.username)[0] || {};
-       addMcAccountToList(mcAcc.id || "d3c47f6f-ae3a-45c1-ad7c-e2c762b03ae6", mcAcc.name || "[DEMO]", msAccount.username);
+       addMcAccountToList(mcAcc.id || "MHF_Question", mcAcc.name || "...", msAccount.username);
     });
 }
 
