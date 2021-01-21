@@ -17,8 +17,10 @@ var wsUrl = window.location.host == "viaversion.github.io" ? askWsUrl() : "wss:/
 
 var socket = null;
 var connectionStatus = document.getElementById("connection_status");
-var content = document.getElementById("content");
+var listening = document.getElementById("listening");
+var actions = document.getElementById("actions");
 var acounts = document.getElementById("accounts");
+var listenVisible = false;
 
 isSuccess = status => status >= 200 && status < 300;
 
@@ -28,7 +30,8 @@ function getCorsProxy() {
 
 function loginMc(user, pass) {
     var clientToken = uuid.v4();
-    fetch(getCorsProxy() + "https://authserver.mojang.com/authenticate", {method: "post",
+    fetch(getCorsProxy() + "https://authserver.mojang.com/authenticate", {
+        method: "post",
         body: JSON.stringify({
             agent: {name: "Minecraft", version: 1},
             username: user,
@@ -69,6 +72,10 @@ function getMcAccounts() {
     return JSON.parse(localStorage.getItem("mc_accounts")) || [];
 }
 
+function findAccountByMs(username) {
+    return getMcAccounts().filter(isNotMojang).find(it => it.msUser == username);
+}
+
 function logoutMojang(id) {
     getMcAccounts().filter(isMojang).filter(it => it.id == id).forEach(it => {
         fetch(getCorsProxy() + "https://authserver.mojang.com/invalidate", {method: "post",
@@ -100,7 +107,7 @@ function addMcAccountToList(id, name, msUser = null) {
         if (msUser == null) {
             logoutMojang(id);
         } else {
-            signOut(msUser);
+            logoutMs(msUser);
         }
     };
     head.className = "account_head";
@@ -116,8 +123,8 @@ function refreshAccountList() {
     accounts.innerHTML = "";
     getMcAccounts().filter(isMojang).forEach(it => addMcAccountToList(it.id, it.name));
     (myMSALObj.getAllAccounts() || []).forEach(msAccount => {
-       let mcAcc = getMcAccounts().filter(isNotMojang).filter(it => it.msUser == msAccount.username)[0] || {};
-       addMcAccountToList(mcAcc.id || "MHF_Question", mcAcc.name || "...", msAccount.username);
+        let mcAcc = findAccountByMs(msAccount.username) || {id: "MHF_Question", name: "..."};
+        addMcAccountToList(mcAcc.id, mcAcc.name, msAccount.username);
     });
 }
 
@@ -205,7 +212,8 @@ function getTokens() {
     return (JSON.parse(localStorage.getItem("tokens")) || {})[wsUrl] || [];
 }
 
-function showListenAccount() {
+function renderActions() {
+    actions.innerHTML = "";
     if (username != null && mcauth_code != null) {
         let p = document.createElement("p");
         let add = document.createElement("a");
@@ -213,12 +221,13 @@ function showListenAccount() {
         add.innerText = "Listen to " + username;
         add.href = "#";
         add.onclick = () => {
+            mcauth_code = null;
             socket.send(JSON.stringify({
                 "action": "minecraft_id_login",
                 "username": username,
                 "code": mcauth_code}));
         };
-        content.appendChild(p);
+        actions.appendChild(p);
     }
     let p = document.createElement("p");
     let link = document.createElement("a");
@@ -231,14 +240,15 @@ function showListenAccount() {
         let callbackUrl = new URL(location.origin + location.pathname + "#username=" + encodeURIComponent(user));
         location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
     };
-    content.appendChild(p);
+    actions.appendChild(p);
 }
 
 function onSocketMsg(event) {
     console.log(event.data.toString());
     let parsed = JSON.parse(event.data);
     if (parsed.action == "ad_minecraft_id_login") {
-        showListenAccount();
+        listenVisible = true;
+        renderActions();
     } else if (parsed.action == "minecraft_id_result") {
         if (!parsed.success) {
             alert("VIAaaS instance couldn't verify account via Minecraft.ID");
@@ -250,7 +260,7 @@ function onSocketMsg(event) {
         if (parsed.success) {
             let msg = document.createElement("p");
             msg.innerText = "Listening to login: " + parsed.user;
-            content.appendChild(msg);
+            listening.appendChild(msg);
         } else {
             removeToken(parsed.token);
         }
@@ -259,7 +269,7 @@ function onSocketMsg(event) {
             let account = getMcAccounts().reverse().find(it => it.name.toLowerCase() == parsed.user.toLowerCase());
             if (account) {
                 getMcUserToken(account).then((data) => {
-                    return joinGame(data.accessToken, data.id,parsed.session_hash);
+                    return joinGame(data.accessToken, data.id, parsed.session_hash);
                 }).then((data) => {
                     if (!isSuccess(data.status)) throw "not success join";
                 }).finally(() => confirmJoin(parsed.session_hash))
@@ -277,6 +287,12 @@ function onSocketMsg(event) {
     }
 }
 
+function reset() {
+    listening.innerHTML = "";
+    listenVisible = false;
+    renderActions();
+}
+
 function connect() {
     connectionStatus.innerText = "connecting...";
     socket = new WebSocket(wsUrl);
@@ -284,19 +300,19 @@ function connect() {
     socket.onerror = e => {
         console.log(e);
         connectionStatus.innerText = "socket error";
-        content.innerHTML = "";
+        reset();
     };
 
     socket.onopen = () => {
         connectionStatus.innerText = "connected";
-        content.innerHTML = "";
+        reset();
 
         getTokens().forEach(listen);
     };
 
     socket.onclose = evt => {
         connectionStatus.innerText = "disconnected with close code " + evt.code + " and reason: " + evt.reason;
-        content.innerHTML = "";
+        reset();
         setTimeout(connect, 5000);
     };
 

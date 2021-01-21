@@ -94,7 +94,10 @@ function getTokenPopup(username, request) {
     });
 }
 
-function signOut(username) {
+function logoutMs(username) {
+    let mcAcc = findAccountByMs(username) || {};
+    removeMcAccount(mcAcc.id);
+
     const logoutRequest = {
         account: myMSALObj.getAccountByUsername(username)
     };

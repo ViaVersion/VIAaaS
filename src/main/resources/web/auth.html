@@ -30,7 +30,9 @@
         <input type="url" id="cors-proxy" name="cors-proxy" value="">
     </p></div>
     <div id="add-account"><form><p>
+        <hr>
         <input id="login_submit_ms" type="button" value="Login with Microsoft">
+        <hr>
         <br>
         <label for="email">Email/Username:</label>
         <br>
@@ -40,7 +42,7 @@
         <br>
         <input type="password" id="password" name="password" value="">
         <br><br>
-        <input id="login_submit_mc" type="button" value="Login into Minecraft">
+        <input id="login_submit_mc" type="button" value="Login with Minecraft">
     </p></form></div>
     <div id="accounts"></div>
 </div>
@@ -51,7 +53,8 @@
     for setting up one. Calling Mojang API from a remote IP address may block your account.</p>
 <p>WebSocket connection status: <span id="connection_status">?</span></p>
 <hr>
-<p><span id="content"></span></p>
+<p><span id="actions"></span></p>
+<p><span id="listening"></span></p>
 </div>
 <script src="auth.js"></script>
 </body>
