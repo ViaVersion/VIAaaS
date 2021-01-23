@@ -281,7 +281,7 @@ function onSocketMsg(event) {
                 alert("Couldn't find " + parsed.user + " account in browser.");
                 confirmJoin(parsed.session_hash);
             }
-        } else if (confirm("Continue without authentication (works on LAN worlds)?")) {
+        } else {
             confirmJoin(parsed.session_hash);
         }
     }
