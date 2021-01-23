@@ -38,9 +38,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.collections.set
 
-
-// todo https://minecraft.id/documentation
-
 val viaWebServer = WebDashboardServer()
 val webLogger = LoggerFactory.getLogger("VIAaaS Web")
 

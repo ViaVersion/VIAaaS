@@ -105,7 +105,7 @@ fun main(args: Array<String>) {
     MappingDataLoader.enableMappingsCache()
     Via.getManager().init()
     CloudRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
-    CloudBackwards.init(File("config/viabackwards.yml"))
+    CloudBackwards.init(File("config/viabackwards"))
 
     val parent = eventLoopGroup()
     val child = eventLoopGroup()

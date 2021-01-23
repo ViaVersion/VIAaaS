@@ -10,6 +10,7 @@ import io.netty.handler.codec.MessageToMessageCodec
 import io.netty.handler.flow.FlowControlHandler
 import io.netty.handler.timeout.ReadTimeoutHandler
 import us.myles.ViaVersion.api.data.UserConnection
+import us.myles.ViaVersion.api.protocol.ProtocolPipeline
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.exception.CancelDecoderException
 import us.myles.ViaVersion.exception.CancelEncoderException
@@ -21,15 +22,27 @@ import javax.crypto.Cipher
 
 object ChannelInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
-        val user = UserConnection(ch)
-        CloudPipeline(user)
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
             // "crypto"
             .addLast("frame", FrameCodec())
             // "compress" / dummy "decompress"
             .addLast("flow-handler", FlowControlHandler())
+            .addLast("handler", CloudMinecraftHandler(ConnectionData(
+                frontChannel = ch,
+            ), other = null, frontEnd = true))
+    }
+}
+
+class BackendInit(val connectionData: ConnectionData) : ChannelInitializer<Channel>() {
+    override fun initChannel(ch: Channel) {
+        val user = UserConnection(ch, true)
+        ProtocolPipeline(user)
+        ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
+            // "crypto"
+            .addLast("frame", FrameCodec())
+            // compress
             .addLast("via-codec", CloudViaCodec(user))
-            .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = true))
+            .addLast("handler", CloudMinecraftHandler(connectionData, connectionData.frontChannel, frontEnd = false))
     }
 }
 
@@ -46,16 +59,6 @@ class CloudCrypto(val cipherDecode: Cipher, var cipherEncode: Cipher) : MessageT
         val size = msg.readableBytes()
         msg.writerIndex(i + cipherEncode.update(msg.nioBuffer(), msg.nioBuffer(i, cipherEncode.getOutputSize(size))))
         out.add(msg.retain())
-    }
-}
-
-class BackendInit(val user: UserConnection) : ChannelInitializer<Channel>() {
-    override fun initChannel(ch: Channel) {
-        ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
-            // "crypto"
-            .addLast("frame", FrameCodec())
-            // compress
-            .addLast("handler", CloudMinecraftHandler(user, null, frontEnd = false))
     }
 }
 

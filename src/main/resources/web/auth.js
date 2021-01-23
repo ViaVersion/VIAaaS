@@ -221,11 +221,11 @@ function renderActions() {
         add.innerText = "Listen to " + username;
         add.href = "#";
         add.onclick = () => {
-            mcauth_code = null;
             socket.send(JSON.stringify({
                 "action": "minecraft_id_login",
                 "username": username,
                 "code": mcauth_code}));
+            mcauth_code = null;
         };
         actions.appendChild(p);
     }

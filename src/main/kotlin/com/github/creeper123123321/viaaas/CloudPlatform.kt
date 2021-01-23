@@ -185,8 +185,7 @@ class CloudTask(val obj: Future<*>) : TaskId {
 
 object CloudVersionProvider : VersionProvider() {
     override fun getServerProtocol(connection: UserConnection): Int {
-        val data = connection.get(CloudData::class.java)
-        val ver = data?.backendVer
+        val ver = connection.channel!!.pipeline().get(CloudMinecraftHandler::class.java).data.backVer
         if (ver != null) return ver
         return super.getServerProtocol(connection)
     }

@@ -3,7 +3,6 @@ package com.github.creeper123123321.viaaas
 import com.google.common.net.UrlEscapers
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import de.gerrygames.viarewind.netty.EmptyChannelHandler
 import io.ktor.client.request.*
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBuf
@@ -17,8 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import us.myles.ViaVersion.api.data.StoredObject
-import us.myles.ViaVersion.api.data.UserConnection
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.exception.CancelCodecException
@@ -39,29 +36,34 @@ import javax.naming.directory.InitialDirContext
 
 val chLogger = LoggerFactory.getLogger("VIAaaS MC Handler")
 
-class HandlerData(
-    userConnection: UserConnection,
-    var state: MinecraftConnectionState,
-    var protocolId: Int? = null,
+class ConnectionData(
+    val frontChannel: Channel,
+    var backChannel: Channel? = null,
+    var state: MinecraftConnectionState = HandshakeState(),
+    var frontOnline: Boolean? = null, // todo
     var frontName: String? = null,
     var backName: String? = null,
-    var backServerId: String? = null,
     var backPublicKey: PublicKey? = null,
     var backToken: ByteArray? = null,
     var frontToken: ByteArray? = null,
-    var frontId: String? = null
-) : StoredObject(userConnection)
+    var frontServerId: String? = null,
+    var backServerId: String? = null,
+    var frontVer: Int? = null,
+    var backVer: Int? = null,
+) {
+    val frontHandler get() = frontChannel.pipeline().get(CloudMinecraftHandler::class.java)
+    val backHandler get() = backChannel?.pipeline()?.get(CloudMinecraftHandler::class.java)
+}
 
 class CloudMinecraftHandler(
-    val user: UserConnection,
+    val data: ConnectionData,
     var other: Channel?,
     val frontEnd: Boolean
 ) : SimpleChannelInboundHandler<ByteBuf>() {
-    val data get() = user.get(HandlerData::class.java)!!
-    var address: SocketAddress? = null
+    var remoteAddress: SocketAddress? = null
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
-        if (ctx.channel().isActive && !user.isPendingDisconnect && msg.isReadable) {
+        if (ctx.channel().isActive && msg.isReadable) {
             data.state.handleMessage(this, ctx, msg)
             if (msg.isReadable) throw IllegalStateException("Remaining bytes!!!")
             //other?.write(msg.retain())
@@ -69,10 +71,7 @@ class CloudMinecraftHandler(
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        address = ctx.channel().remoteAddress()
-        if (user.get(HandlerData::class.java) == null) {
-            user.put(HandlerData(user, HandshakeState()))
-        }
+        remoteAddress = ctx.channel().remoteAddress()
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
@@ -106,12 +105,11 @@ interface MinecraftConnectionState {
     )
 
     fun disconnect(handler: CloudMinecraftHandler, msg: String) {
-        chLogger.info("Disconnected ${handler.address}: $msg")
-        handler.user.isPendingDisconnect = true
+        chLogger.info("Disconnected ${handler.remoteAddress}: $msg")
     }
 
     fun onInactivated(handler: CloudMinecraftHandler) {
-        chLogger.info(handler.address?.toString() + " inactivated")
+        chLogger.info(handler.remoteAddress?.toString() + " inactivated")
     }
 }
 
@@ -119,76 +117,80 @@ class HandshakeState : MinecraftConnectionState {
     override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
         val packet = PacketRegistry.decode(
             msg,
-            ProtocolVersion.getProtocol(handler.user.protocolInfo!!.serverProtocolVersion),
+            ProtocolVersion.v1_8, // we still dont know what protocol it is
             State.HANDSHAKE,
             handler.frontEnd
         )
         if (packet !is HandshakePacket) throw IllegalArgumentException("Invalid packet!")
-        handler.data.protocolId = packet.protocolId
+
+        handler.data.frontVer = packet.protocolId
         when (packet.nextState.ordinal) {
             1 -> handler.data.state = StatusState
             2 -> handler.data.state = LoginState
             else -> throw IllegalStateException("Invalid next state")
         }
 
-        if (!handler.user.get(CloudData::class.java)!!.hadHostname && VIAaaSConfig.requireHostName) {
+        val parsed = VIAaaSAddress().parse(packet.address.substringBefore(0.toChar()), VIAaaSConfig.hostName)
+        val backProto = parsed.protocol ?: 47 // todo autodetection
+        val hadHostname = parsed.viaSuffix != null
+
+        packet.address = parsed.realAddress!!
+        packet.port = parsed.port ?: if (VIAaaSConfig.defaultBackendPort == -1) {
+            packet.port
+        } else {
+            VIAaaSConfig.defaultBackendPort
+        }
+
+        handler.data.backVer = backProto
+        handler.data.frontOnline = parsed.online
+        handler.data.backName = parsed.altUsername
+
+        val playerAddr = handler.data.frontHandler.remoteAddress
+        chLogger.info("Connecting $playerAddr (${handler.data.frontVer}) -> ${packet.address}:${packet.port} ($backProto)")
+
+        if (!hadHostname && VIAaaSConfig.requireHostName) {
             throw UnsupportedOperationException("This VIAaaS instance requires you to use the hostname")
         }
 
-        handler.user.channel!!.setAutoRead(false)
+        handler.data.frontChannel.setAutoRead(false)
         GlobalScope.launch(Dispatchers.IO) {
-            val frontHandler = handler.user.channel!!.pipeline().get(CloudMinecraftHandler::class.java)
+            val frontHandler = handler.data.frontHandler
             try {
-                var srvResolvedAddr = packet.address
-                var srvResolvedPort = packet.port
-                if (srvResolvedPort == 25565) {
-                    try {
-                        // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java
-                        val attr = InitialDirContext()
-                            .getAttributes("dns:///_minecraft._tcp.$srvResolvedAddr", arrayOf("SRV"))["SRV"]
-                        if (attr != null && attr.size() > 0) {
-                            val record = (attr.get(0) as String).split(" ")
-                            srvResolvedAddr = record[3]
-                            srvResolvedPort = record[2].toInt()
-                        }
-                    } catch (ignored: NameNotFoundException) {
-                    }
-                }
-                val socketAddr = InetSocketAddress(InetAddress.getByName(srvResolvedAddr), srvResolvedPort)
-                val addrInfo = socketAddr.address
-                if (VIAaaSConfig.blockLocalAddress && (addrInfo.isSiteLocalAddress
-                            || addrInfo.isLoopbackAddress
-                            || addrInfo.isLinkLocalAddress
-                            || addrInfo.isAnyLocalAddress)
-                ) throw SecurityException("Local addresses aren't allowed")
+                val srvResolved = resolveSrv(packet.address, packet.port)
+                packet.address = srvResolved.first
+                packet.port = srvResolved.second
 
-                val bootstrap = Bootstrap().handler(BackendInit(handler.user))
+                val socketAddr = InetSocketAddress(InetAddress.getByName(packet.address), packet.port)
+
+                if (checkLocalAddress(socketAddr.address)) {
+                    throw SecurityException("Local addresses aren't allowed")
+                }
+
+                val bootstrap = Bootstrap().handler(BackendInit(handler.data))
                     .channelFactory(channelSocketFactory())
-                    .group(handler.user.channel!!.eventLoop())
+                    .group(handler.data.frontChannel.eventLoop())
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
                     .connect(socketAddr)
 
                 bootstrap.addListener {
                     if (it.isSuccess) {
-                        CloudHeadProtocol.logger.info("Connected ${frontHandler.address} -> $socketAddr")
+                        chLogger.info("Connected ${frontHandler.remoteAddress} -> $socketAddr")
 
                         val backChan = bootstrap.channel() as SocketChannel
-                        backChan.pipeline().get(CloudMinecraftHandler::class.java).other = handler.user.channel
+                        handler.data.backChannel = backChan
                         frontHandler.other = backChan
 
-                        packet.address = srvResolvedAddr
-                        packet.port = srvResolvedPort
                         forward(handler, packet)
                         backChan.flush()
 
-                        handler.user.channel!!.setAutoRead(true)
+                        handler.data.frontChannel.setAutoRead(true)
                     } else {
                         // We're in the event loop
                         frontHandler.disconnect("Couldn't connect: " + it.cause().toString())
                     }
                 }
             } catch (e: Exception) {
-                handler.user.channel!!.eventLoop().submit {
+                handler.data.frontChannel.eventLoop().submit {
                     frontHandler.disconnect("Couldn't connect: $e")
                 }
             }
@@ -196,7 +198,7 @@ class HandshakeState : MinecraftConnectionState {
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
-        handler.user.channel?.close() // Not worth logging
+        handler.data.frontChannel.close() // Not worth logging
     }
 
     override fun onInactivated(handler: CloudMinecraftHandler) {
@@ -208,7 +210,7 @@ object LoginState : MinecraftConnectionState {
     override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
         val packet = PacketRegistry.decode(
             msg,
-            ProtocolVersion.getProtocol(handler.user.protocolInfo!!.serverProtocolVersion),
+            ProtocolVersion.getProtocol(handler.data.frontVer!!),
             State.LOGIN,
             handler.frontEnd
         )
@@ -232,16 +234,24 @@ object LoginState : MinecraftConnectionState {
     }
 
     private fun handleCompression(handler: CloudMinecraftHandler, setCompression: SetCompression) {
-        val pipe = handler.user.channel!!.pipeline()
+        val pipe = handler.data.frontChannel.pipeline()
         val threshold = setCompression.threshold
 
         val backPipe = pipe.get(CloudMinecraftHandler::class.java).other!!.pipeline()
-        backPipe.addAfter("frame", "compress", CloudCompressionCodec(threshold))
+        if (threshold != -1) {
+            backPipe.addAfter("frame", "compress", CloudCompressionCodec(threshold))
+        } else if (backPipe.get("compress") != null) {
+            backPipe.remove("compress")
+        }
 
         forward(handler, setCompression)
 
-        pipe.addAfter("frame", "compress", CloudCompressionCodec(threshold))
-        pipe.addAfter("frame", "decompress", EmptyChannelHandler()) // ViaRewind compat workaround
+        if (threshold != -1) {
+            pipe.addAfter("frame", "compress", CloudCompressionCodec(threshold))
+            // todo viarewind backend compression
+        } else if (pipe.get("compress") != null) {
+            pipe.remove("compress")
+        }
     }
 
     fun handleCryptoRequest(handler: CloudMinecraftHandler, cryptoRequest: CryptoRequest) {
@@ -261,7 +271,7 @@ object LoginState : MinecraftConnectionState {
             it
         }
         data.frontToken = token
-        data.frontId = id
+        data.frontServerId = id
 
         cryptoRequest.serverId = id
         cryptoRequest.publicKey = mcCryptoKey.public
@@ -281,9 +291,9 @@ object LoginState : MinecraftConnectionState {
             val aesEn = mcCfb8(frontKey, Cipher.ENCRYPT_MODE)
             val aesDe = mcCfb8(frontKey, Cipher.DECRYPT_MODE)
 
-            handler.user.channel!!.pipeline().addBefore("frame", "crypto", CloudCrypto(aesDe, aesEn))
+            handler.data.frontChannel.pipeline().addBefore("frame", "crypto", CloudCrypto(aesDe, aesEn))
 
-            generateServerHash(handler.data.frontId!!, frontKey, mcCryptoKey.public)
+            generateServerHash(handler.data.frontServerId!!, frontKey, mcCryptoKey.public)
         }
 
         val backKey = ByteArray(16).let {
@@ -293,14 +303,13 @@ object LoginState : MinecraftConnectionState {
 
         val backHash = generateServerHash(handler.data.backServerId!!, backKey, handler.data.backPublicKey!!)
 
-        handler.user.channel!!.setAutoRead(false)
+        handler.data.frontChannel.setAutoRead(false)
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 val profile = httpClient.get<JsonObject?>(
                     "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
-                            "${
-                                UrlEscapers.urlFormParameterEscaper().escape(handler.data.frontName!!)
-                            }&serverId=$frontHash"
+                            UrlEscapers.urlFormParameterEscaper().escape(handler.data.frontName!!) +
+                            "&serverId=$frontHash"
                 )
                     ?: throw IllegalArgumentException("Couldn't authenticate with session servers")
 
@@ -308,7 +317,7 @@ object LoginState : MinecraftConnectionState {
                     fromUndashed(profile.get("id")!!.asString),
                     handler.data.backName!!,
                     backHash,
-                    handler.address!!, // Frontend handler
+                    handler.remoteAddress!!, // Frontend handler
                     handler.data.backPublicKey!!
                 )
 
@@ -331,13 +340,13 @@ object LoginState : MinecraftConnectionState {
             } catch (e: Exception) {
                 handler.disconnect("Online mode error: $e")
             }
-            handler.user.channel!!.setAutoRead(true)
+            handler.data.frontChannel.setAutoRead(true)
         }
     }
 
     fun handleLoginStart(handler: CloudMinecraftHandler, loginStart: LoginStart) {
         handler.data.frontName = loginStart.username
-        handler.data.backName = handler.user.get(CloudData::class.java)!!.altName ?: handler.data.frontName
+        handler.data.backName = handler.data.backName ?: handler.data.frontName
 
         loginStart.username = handler.data.backName!!
         forward(handler, loginStart)
@@ -350,9 +359,9 @@ object LoginState : MinecraftConnectionState {
         try {
             packet.writeByte(0) // id 0 disconnect
             Type.STRING.write(packet, Gson().toJson("[VIAaaS] §c$msg"))
-            handler.user
-                .sendRawPacketFuture(packet.retain())
-                .addListener { handler.user.channel?.close() }
+            handler.data.frontChannel
+                .writeAndFlush(packet.retain())
+                .addListener { handler.data.frontChannel.close() }
         } finally {
             packet.release()
         }
@@ -364,7 +373,8 @@ object StatusState : MinecraftConnectionState {
         val i = msg.readerIndex()
         if (Type.VAR_INT.readPrimitive(msg) !in 0..1) throw IllegalArgumentException("Invalid packet id!")
         msg.readerIndex(i)
-        handler.other!!.write(msg.retain())
+        handler.other!!.write(msg.retainedSlice())
+        msg.clear()
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
@@ -377,8 +387,8 @@ object StatusState : MinecraftConnectionState {
                 packet, """{"version": {"name": "VIAaaS", "protocol": -1}, "players":
 | {"max": 0, "online": 0, "sample": []}, "description": {"text": ${Gson().toJson("§c$msg")}}}""".trimMargin()
             )
-            handler.user.sendRawPacketFuture(packet.retain())
-                .addListener { handler.user.channel?.close() }
+            handler.data.frontChannel.writeAndFlush(packet.retain())
+                .addListener { handler.data.frontChannel.close() }
         } finally {
             packet.release()
         }
@@ -390,12 +400,13 @@ object PlayState : MinecraftConnectionState {
         val i = msg.readerIndex()
         if (Type.VAR_INT.readPrimitive(msg) !in 0..127) throw IllegalArgumentException("Invalid packet id!")
         msg.readerIndex(i)
-        handler.other!!.write(msg.retain())
+        handler.other!!.write(msg.retainedSlice())
+        msg.clear()
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
-        handler.user.channel?.close()
+        handler.data.frontChannel.close()
     }
 }
 
@@ -440,9 +451,32 @@ fun generateServerHash(serverId: String, sharedSecret: ByteArray?, key: PublicKe
 private fun forward(handler: CloudMinecraftHandler, packet: Packet) {
     val msg = ByteBufAllocator.DEFAULT.buffer()
     try {
-        PacketRegistry.encode(packet, msg, ProtocolVersion.getProtocol(handler.data.protocolId!!))
+        PacketRegistry.encode(packet, msg, ProtocolVersion.getProtocol(handler.data.frontVer!!))
         handler.other!!.write(msg.retain())
     } finally {
         msg.release()
     }
+}
+
+private fun resolveSrv(address: String, port: Int): Pair<String, Int> {
+    if (port == 25565) {
+        try {
+            // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java
+            val attr = InitialDirContext()
+                .getAttributes("dns:///_minecraft._tcp.$address", arrayOf("SRV"))["SRV"]
+            if (attr != null && attr.size() > 0) {
+                val record = (attr.get(0) as String).split(" ")
+                return record[3] to record[2].toInt()
+            }
+        } catch (ignored: NameNotFoundException) {
+        }
+    }
+    return address to port
+}
+
+private fun checkLocalAddress(inetAddress: InetAddress): Boolean {
+    return VIAaaSConfig.blockLocalAddress && (inetAddress.isSiteLocalAddress
+            || inetAddress.isLoopbackAddress
+            || inetAddress.isLinkLocalAddress
+            || inetAddress.isAnyLocalAddress)
 }
