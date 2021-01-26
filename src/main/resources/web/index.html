@@ -55,10 +55,6 @@
 </nav>
 <div class="container tab-content" id="content">
     <div id="home" class="tab-pane fade show active" role="tabpanel" aria-labelledby="home-tab">
-        <p>DO NOT TYPE YOUR CREDENTIALS IF YOU DON'T TRUST THIS VIAAAS INSTANCE OR THE CORS PROXY!</p>
-	<p>Mojang API calls in browser are called through a CORS Proxy. See
-	    <a href="https://github.com/Rob--W/cors-anywhere">https://github.com/Rob--W/cors-anywhere</a>
-	        for setting up one. Calling Mojang API from a remote IP address may block your account.</p>
 	<p>WebSocket connection status: <span id="connection_status">?</span></p>
 	<hr>
 	<p><span id="actions"></span></p>
@@ -66,13 +62,19 @@
     </div>
 
     <div id="settings" class="tab-pane fade" role="tabpanel" aria-labelledby="settings-tab">
+        <p>Mojang API calls in browser are called through a CORS Proxy. See
+            <a href="https://github.com/Rob--W/cors-anywhere">https://github.com/Rob--W/cors-anywhere</a>
+            for setting up one. Calling Mojang API from a remote IP address may block your account. It will receive
+            sensitive data like email, passwords and tokens. HTTPS is required for non-localhost addresses.
+        </p>
         <div class="mb-3">
-          <label for="cors-proxy" class="form-label">CORS Proxy URL</label>
+          <label for="cors-proxy" class="form-label">CORS Proxy URL Prefix</label>
           <input type="url" class="form-control" id="cors-proxy" placeholder="http://localhost:8080/">
         </div>
+        <p>WebSocket URL of VIAaaS instance. It may contain sensitive data like tokens and usernames. Encrypted websockets are optional.</p>
         <div class="mb-3">
           <label for="ws-url" class="form-label">WebSocket URL</label>
-          <input type="url" class="form-control" id="ws-url" placeholder="ws://viaaas.example.com/ws">
+          <input type="url" class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws">
         </div>
     </div>
 
