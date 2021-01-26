@@ -6,20 +6,23 @@ if (urlParams.get("mcauth_success") == "false") {
     alert("Couldn't authenticate with Minecraft.ID: " + urlParams.get("mcauth_msg"));
 }
 
-function askWsUrl() {
-    let url = localStorage.getItem("ws-url") || "wss://localhost:25543/ws";
-    url = prompt("VIAaaS instance websocket", url) || url;
+function defaultWs() {
+    return window.location.host == "viaversion.github.io" || !window.location.host ? "wss://localhost:25543/ws" : "wss://" + window.location.host + "/ws";
+}
+
+function getWsUrl() {
+    let url = localStorage.getItem("ws-url") || defaultWs();
     localStorage.setItem("ws-url", url);
     return url;
 }
 
-var wsUrl = window.location.host == "viaversion.github.io" ? askWsUrl() : "wss://" + window.location.host + "/ws";
+var wsUrl = getWsUrl();
 
 var socket = null;
 var connectionStatus = document.getElementById("connection_status");
 var listening = document.getElementById("listening");
 var actions = document.getElementById("actions");
-var acounts = document.getElementById("accounts");
+var accounts = document.getElementById("accounts-list");
 var listenVisible = false;
 
 isSuccess = status => status >= 200 && status < 300;
@@ -214,33 +217,35 @@ function getTokens() {
 
 function renderActions() {
     actions.innerHTML = "";
-    if (username != null && mcauth_code != null) {
+    if (listenVisible) {
+        if (username != null && mcauth_code != null) {
+            let p = document.createElement("p");
+            let add = document.createElement("a");
+            p.appendChild(add);
+            add.innerText = "Listen to " + username;
+            add.href = "#";
+            add.onclick = () => {
+                socket.send(JSON.stringify({
+                    "action": "minecraft_id_login",
+                    "username": username,
+                    "code": mcauth_code}));
+                mcauth_code = null;
+            };
+            actions.appendChild(p);
+        }
         let p = document.createElement("p");
-        let add = document.createElement("a");
-        p.appendChild(add);
-        add.innerText = "Listen to " + username;
-        add.href = "#";
-        add.onclick = () => {
-            socket.send(JSON.stringify({
-                "action": "minecraft_id_login",
-                "username": username,
-                "code": mcauth_code}));
-            mcauth_code = null;
+        let link = document.createElement("a");
+        p.appendChild(link);
+        link.innerText = "Listen to username in VIAaaS instance";
+        link.href = "#";
+        link.onclick = () => {
+            let user = prompt("Username (Minecraft.ID is case-sensitive): ", "");
+            if (!user) return;
+            let callbackUrl = new URL(location.origin + location.pathname + "#username=" + encodeURIComponent(user));
+            location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
         };
         actions.appendChild(p);
     }
-    let p = document.createElement("p");
-    let link = document.createElement("a");
-    p.appendChild(link);
-    link.innerText = "Listen to username in VIAaaS instance";
-    link.href = "#";
-    link.onclick = () => {
-        let user = prompt("Username (Minecraft.ID is case-sensitive): ", "");
-        if (!user) return;
-        let callbackUrl = new URL(location.origin + location.pathname + "#username=" + encodeURIComponent(user));
-        location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
-    };
-    actions.appendChild(p);
 }
 
 function onSocketMsg(event) {
@@ -321,8 +326,13 @@ function connect() {
 
 
 $(() => {
-    $("#cors-proxy").on("change", () => localStorage.setItem('cors-proxy', $("#cors-proxy").val()));
+    $("#cors-proxy").on("change", () => localStorage.setItem("cors-proxy", $("#cors-proxy").val()));
     $("#cors-proxy").val(getCorsProxy());
+    $("#ws-url").on("change", () => {
+       localStorage.setItem("ws-url", $("#ws-url").val());
+       location.reload();
+    });
+    $("#ws-url").val(getWsUrl());
     $("#login_submit_mc").on("click", () => loginMc($("#email").val(), $("#password").val()));
     $("#login_submit_ms").on("click", loginMs);
 

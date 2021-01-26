@@ -25,7 +25,7 @@ Usage for offline mode:
 Usage for online mode with two accounts (recommended):
 - Run the shadow jar or ./gradlew clean run
 - You should set up a CORS Proxy (something like https://github.com/Rob--W/cors-anywhere) on local machine.
-- Go to https://localhost:25543/auth.html, configure the CORS Proxy URL (something like http://localhost:8080/,
+- Go to https://localhost:25543/, configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username A that you're using to connect to the proxy.
 - Add the account B you'll use in _u parameter to browser auth page.
 - Connect to mc.example.com._v1_8._u(account B).viaaas.localhost
@@ -34,7 +34,7 @@ Usage for online mode with two accounts (recommended):
 Usage for online mode with one account:
 - Run the shadow jar or ./gradlew clean run
 - You should set up a CORS Proxy (something like https://github.com/Rob--W/cors-anywhere) on local machine.
-- Go to https://localhost:25543/auth.html, configure the CORS Proxy URL (something like http://localhost:8080/,
+- Go to https://localhost:25543/, configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username.
 - Add the account to browser auth page.
 - Connect to mc.example.com._v1_8.viaaas.localhost

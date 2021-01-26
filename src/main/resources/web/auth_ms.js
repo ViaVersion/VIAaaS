@@ -1,7 +1,7 @@
 // https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-javascript-auth-code
 
 const redirectUrl = location.origin == "https://localhost:25543" ?
-"https://localhost:25543/auth.html" : "https://viaversion.github.io/VIAaaS/src/main/resources/web/auth.html";
+"https://localhost:25543/" : "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
 
 const msalConfig = {
     auth: {
