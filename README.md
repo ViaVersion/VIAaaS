@@ -22,24 +22,16 @@ Usage for offline mode:
 - Run the shadow jar or ./gradlew clean run
 - Connect to mc.example.com._v1_8.viaaas.localhost
 
-Usage for online mode with two accounts (recommended):
+Usage for online mode:
+- You can use two accounts (avoids Bad Login error) or the same account for front-end and back-end connections.
 - Run the shadow jar or ./gradlew clean run
-- You should set up a CORS Proxy (something like https://github.com/Rob--W/cors-anywhere) on local machine.
+- You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere, ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```) on local machine.
 - Go to https://localhost:25543/, configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username A that you're using to connect to the proxy.
 - Add the account B you'll use in _u parameter to browser auth page.
-- Connect to mc.example.com._v1_8._u(account B).viaaas.localhost
+- Connect to mc.example.com._v1_8._u(account B).viaaas.localhost ("_u" can be removed if you are using the same account)
 - Approve the login
-
-Usage for online mode with one account:
-- Run the shadow jar or ./gradlew clean run
-- You should set up a CORS Proxy (something like https://github.com/Rob--W/cors-anywhere) on local machine.
-- Go to https://localhost:25543/, configure the CORS Proxy URL (something like http://localhost:8080/,
-  note the ending slash) and listen to the username.
-- Add the account to browser auth page.
-- Connect to mc.example.com._v1_8.viaaas.localhost
-- Approve the login
-- Minecraft client will give Bad Login after you approve the login in your browser. You can use
+- Minecraft client will give Bad Login after you approve the login in your browser if you are using the same account. You can use
   https://www.curseforge.com/minecraft/mc-mods/auth-me for reauthenticate the client.
 
 ## WARNING
