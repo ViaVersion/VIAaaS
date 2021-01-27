@@ -1,8 +1,12 @@
 VIAaaS
 ---
+
+VIAaaS - ViaVersion ~~~acetylsalicylic acid~~~ as a Service - Standalone ViaVersion proxy
+
 How to use: server.example.com._p25565._v1_12_2._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
 
 Default Minecraft: viaaas.localhost with port 25565
+
 Default WS URL: wss://localhost:25543/ws
 
 - VIAaaS auth page is designed for storing accounts in the player's browser local storage.
