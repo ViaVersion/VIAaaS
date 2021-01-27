@@ -11,7 +11,7 @@
     <meta property="og:image" content="https://raw.githubusercontent.com/ViaVersion/ViaVersion/a13c417352298c2269aed8736a76205f0040b705/fabric/src/main/resources/assets/viaversion/textures/squarelogo.png">
     <meta property="og:type" content="game">
     <link rel="icon" href="https://raw.githubusercontent.com/ViaVersion/ViaVersion/a13c417352298c2269aed8736a76205f0040b705/fabric/src/main/resources/assets/viaversion/textures/squarelogo.png">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/; img-src data: https://*; connect-src 'self' http://localhost:*/ https: ws: wss:">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/; img-src data: https://*; connect-src 'self' http://localhost:*/ https: wss:">
     <meta name="referrer" content="no-referrer">
     <!-- only accept http from localhost -->
     <title>VIAaaS</title>
@@ -71,7 +71,7 @@
           <label for="cors-proxy" class="form-label">CORS Proxy URL Prefix</label>
           <input type="url" class="form-control" id="cors-proxy" placeholder="http://localhost:8080/">
         </div>
-        <p>WebSocket URL of VIAaaS instance. It may contain sensitive data like tokens and usernames. Encrypted websockets are optional.</p>
+        <p>VIAaaS instance websocket URL. It may exchange sensitive data like minecraft.id tokens, server hashes and usernames. Encrypted websocket is required.</p>
         <div class="mb-3">
           <label for="ws-url" class="form-label">WebSocket URL</label>
           <input type="url" class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws">
