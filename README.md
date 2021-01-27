@@ -1,7 +1,7 @@
 VIAaaS
 ---
 
-VIAaaS - ViaVersion ~~~acetylsalicylic acid~~~ as a Service - Standalone ViaVersion proxy
+VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersion proxy
 
 How to use: server.example.com._p25565._v1_12_2._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
 
