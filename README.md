@@ -23,13 +23,14 @@ Download: https://github.com/ViaVersion/VIAaaS/actions (needs to be logged into 
 
 Requires Java 11
 
+How to start VIAaaS server:
+- ```java -jar VIAaaS-all.jar```
+
 Usage for offline mode:
-- Run the shadow jar or ./gradlew clean run
 - Connect to mc.example.com._v1_8.viaaas.localhost
 
 Usage for online mode:
 - You can use two accounts (avoids Bad Login error) or the same account for front-end and back-end connections.
-- Run the shadow jar or ./gradlew clean run
 - You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere, ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```) on the machine you are using the VIAaaS authenticator webpage.
 - Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username A that you're using to connect to the proxy.
