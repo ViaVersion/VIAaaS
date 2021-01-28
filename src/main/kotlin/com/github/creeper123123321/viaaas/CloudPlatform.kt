@@ -36,9 +36,6 @@ import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
-val viaaasVer = GsonUtil.getGson().fromJson(CloudPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!
-                .reader(Charsets.UTF_8).readText(), JsonObject::class.java).get("version").asString
-
 object CloudBackwards : ViaBackwardsPlatform {
     val log = LoggerWrapper(LoggerFactory.getLogger("ViaBackwards"))
     override fun getDataFolder() = File("config/viabackwards")
@@ -78,11 +75,14 @@ object CloudInjector : ViaInjector {
     override fun getServerProtocolVersion() = 47 // Dummy
 }
 
-class CloudBossBar(title: String, health: Float, style: BossStyle, color: BossColor) : CommonBoss<Unit>(title, health, color, style)
+class CloudBossBar(title: String, health: Float, style: BossStyle, color: BossColor) :
+    CommonBoss<Unit>(title, health, color, style)
+
 object CloudAPI : ViaAPI<Unit> {
     override fun isInjected(p0: UUID): Boolean = false
     override fun createBossBar(p0: String, p1: BossColor, p2: BossStyle): BossBar<*> = CloudBossBar(p0, 0f, p2, p1)
-    override fun createBossBar(p0: String, p1: Float, p2: BossColor, p3: BossStyle): BossBar<*> = CloudBossBar(p0, p1, p3, p2)
+    override fun createBossBar(p0: String, p1: Float, p2: BossColor, p3: BossStyle): BossBar<*> =
+        CloudBossBar(p0, p1, p3, p2)
 
     override fun sendRawPacket(p0: Unit?, p1: ByteBuf?) {
         TODO("Not yet implemented")
@@ -126,8 +126,12 @@ object CloudPlatform : ViaPlatform<Unit> {
 
     override fun getDump(): JsonObject = JsonObject()
     override fun runSync(runnable: Runnable): TaskId = CloudTask(eventLoop.submit(runnable))
-    override fun runSync(p0: Runnable, p1: Long): TaskId = CloudTask(eventLoop.schedule(p0, p1 * 50L, TimeUnit.MILLISECONDS))
-    override fun runRepeatingSync(p0: Runnable, p1: Long): TaskId = CloudTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
+    override fun runSync(p0: Runnable, p1: Long): TaskId =
+        CloudTask(eventLoop.schedule(p0, p1 * 50L, TimeUnit.MILLISECONDS))
+
+    override fun runRepeatingSync(p0: Runnable, p1: Long): TaskId =
+        CloudTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
+
     override fun runAsync(p0: Runnable): TaskId = CloudTask(CompletableFuture.runAsync(p0, executor))
     override fun getLogger(): Logger = LoggerWrapper(LoggerFactory.getLogger("ViaVersion"))
     override fun getConnectionManager(): ViaConnectionManager = connMan
@@ -146,7 +150,7 @@ object CloudPlatform : ViaPlatform<Unit> {
     override fun isProxy(): Boolean = true
 }
 
-class CloudConnectionManager: ViaConnectionManager() {
+class CloudConnectionManager : ViaConnectionManager() {
     override fun isFrontEnd(conn: UserConnection): Boolean = false
 }
 
@@ -168,10 +172,12 @@ object CloudConfig : AbstractViaConfig(File("config/viaversion.yml")) {
     override fun is1_14HitboxFix(): Boolean = false
 
     // Based on Sponge ViaVersion
-    private val UNSUPPORTED = listOf("anti-xray-patch", "bungee-ping-interval",
-            "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
-            "item-cache", "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
-            "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox")
+    private val UNSUPPORTED = listOf(
+        "anti-xray-patch", "bungee-ping-interval",
+        "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
+        "item-cache", "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
+        "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox"
+    )
 
     init {
         // Load config

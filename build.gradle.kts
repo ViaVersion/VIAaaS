@@ -18,7 +18,7 @@ java {
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.1.0-SNAPSHOT+" + try {
+version = "0.1.1-SNAPSHOT+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"

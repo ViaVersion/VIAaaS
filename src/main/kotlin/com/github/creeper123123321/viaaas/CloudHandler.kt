@@ -34,7 +34,7 @@ import javax.crypto.spec.SecretKeySpec
 import javax.naming.NameNotFoundException
 import javax.naming.directory.InitialDirContext
 
-val chLogger = LoggerFactory.getLogger("VIAaaS MC Handler")
+val mcLogger = LoggerFactory.getLogger("VIAaaS MC")
 
 class ConnectionData(
     val frontChannel: Channel,
@@ -90,7 +90,7 @@ class CloudMinecraftHandler(
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         if (cause is CancelCodecException) return
         disconnect("Exception: $cause")
-        chLogger.debug("Exception: ", cause)
+        mcLogger.debug("Exception: ", cause)
     }
 
     fun disconnect(s: String) {
@@ -105,11 +105,11 @@ interface MinecraftConnectionState {
     )
 
     fun disconnect(handler: CloudMinecraftHandler, msg: String) {
-        chLogger.info("Disconnected ${handler.remoteAddress}: $msg")
+        mcLogger.info("Disconnected ${handler.remoteAddress}: $msg")
     }
 
     fun onInactivated(handler: CloudMinecraftHandler) {
-        chLogger.info(handler.remoteAddress?.toString() + " inactivated")
+        mcLogger.info(handler.remoteAddress?.toString() + " inactivated")
     }
 }
 
@@ -146,7 +146,7 @@ class HandshakeState : MinecraftConnectionState {
         handler.data.backName = parsed.altUsername
 
         val playerAddr = handler.data.frontHandler.remoteAddress
-        chLogger.info("Connecting $playerAddr (${handler.data.frontVer}) -> ${packet.address}:${packet.port} ($backProto)")
+        mcLogger.info("Connecting $playerAddr (${handler.data.frontVer}) -> ${packet.address}:${packet.port} ($backProto)")
 
         if (!hadHostname && VIAaaSConfig.requireHostName) {
             throw UnsupportedOperationException("This VIAaaS instance requires you to use the hostname")
@@ -174,7 +174,7 @@ class HandshakeState : MinecraftConnectionState {
 
                 bootstrap.addListener {
                     if (it.isSuccess) {
-                        chLogger.info("Connected ${frontHandler.remoteAddress} -> $socketAddr")
+                        mcLogger.info("Connected ${frontHandler.remoteAddress} -> $socketAddr")
 
                         val backChan = bootstrap.channel() as SocketChannel
                         handler.data.backChannel = backChan

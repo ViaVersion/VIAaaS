@@ -19,7 +19,6 @@ import java.util.zip.Deflater
 import java.util.zip.Inflater
 import javax.crypto.Cipher
 
-
 object ChannelInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
@@ -27,9 +26,13 @@ object ChannelInit : ChannelInitializer<Channel>() {
             .addLast("frame", FrameCodec())
             // "compress" / dummy "decompress"
             .addLast("flow-handler", FlowControlHandler())
-            .addLast("handler", CloudMinecraftHandler(ConnectionData(
-                frontChannel = ch,
-            ), other = null, frontEnd = true))
+            .addLast(
+                "handler", CloudMinecraftHandler(
+                    ConnectionData(
+                        frontChannel = ch,
+                    ), other = null, frontEnd = true
+                )
+            )
     }
 }
 
@@ -113,8 +116,11 @@ class CloudCompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf,
             inflater.setInput(input.nioBuffer())
             val output = ctx.alloc().buffer(outLength, outLength)
             try {
-                output.writerIndex(output.writerIndex() + inflater.inflate(
-                        output.nioBuffer(output.writerIndex(), output.writableBytes())))
+                output.writerIndex(
+                    output.writerIndex() + inflater.inflate(
+                        output.nioBuffer(output.writerIndex(), output.writableBytes())
+                    )
+                )
                 out.add(output.retain())
             } finally {
                 inflater.reset()

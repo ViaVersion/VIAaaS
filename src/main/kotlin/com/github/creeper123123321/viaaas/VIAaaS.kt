@@ -38,12 +38,19 @@ import us.myles.ViaVersion.api.command.ViaCommandSender
 import us.myles.ViaVersion.api.data.MappingDataLoader
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.util.Config
+import us.myles.ViaVersion.util.GsonUtil
+import us.myles.viaversion.libs.gson.JsonObject
 import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.CompletableFuture
+
+val viaaasVer = GsonUtil.getGson().fromJson(
+    CloudPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!
+        .reader(Charsets.UTF_8).readText(), JsonObject::class.java
+).get("version").asString
 
 var runningServer = true
 val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
@@ -92,16 +99,23 @@ fun channelSocketFactory(): ChannelFactory<SocketChannel> {
 }
 
 fun main(args: Array<String>) {
+    // Stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/Velocity.java
+    if (System.getProperty("io.netty.allocator.maxOrder") == null) {
+        System.setProperty("io.netty.allocator.maxOrder", "9");
+    }
+
     File("config/https.jks").apply {
         parentFile.mkdirs()
         if (!exists()) generateCertificate(this)
     }
 
-    Via.init(ViaManager.builder()
+    Via.init(
+        ViaManager.builder()
             .injector(CloudInjector)
             .loader(CloudLoader)
             .commandHandler(CloudCommands)
-            .platform(CloudPlatform).build())
+            .platform(CloudPlatform).build()
+    )
     MappingDataLoader.enableMappingsCache()
     Via.getManager().init()
     CloudRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
@@ -111,12 +125,12 @@ fun main(args: Array<String>) {
     val child = eventLoopGroup()
 
     val future = ServerBootstrap()
-            .group(parent, child)
-            .channelFactory(channelServerSocketFactory())
-            .childHandler(ChannelInit)
-            .childOption(ChannelOption.IP_TOS, 0x18)
-            .childOption(ChannelOption.TCP_NODELAY, true)
-            .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
+        .group(parent, child)
+        .channelFactory(channelServerSocketFactory())
+        .childHandler(ChannelInit)
+        .childOption(ChannelOption.IP_TOS, 0x18)
+        .childOption(ChannelOption.TCP_NODELAY, true)
+        .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
 
     var ktorServer: NettyApplicationEngine? = null
     try {
@@ -136,7 +150,7 @@ fun main(args: Array<String>) {
     ktorServer?.stop(1000, 1000)
     httpClient.close()
     listOf<Future<*>>(future.channel().close(), parent.shutdownGracefully(), child.shutdownGracefully())
-            .forEach { it.sync() }
+        .forEach { it.sync() }
 
     Via.getManager().destroy()
 }
@@ -157,21 +171,29 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
         }
         commands["viaver"] = commands["viaversion"]!!
         commands["vvcloud"] = commands["viaversion"]!!
-        commands["help"] = { suggestion , _, _ ->
-            if (suggestion == null) sendMessage(commands.keys.toString())
+        commands["help"] = { suggestion, _, _ ->
+            if (suggestion == null) sendMessage(commands.entries.groupBy { it.value }.entries.joinToString(", ") {
+                it.value.joinToString("/") { it.key }
+            })
         }
         commands["?"] = commands["help"]!!
+        commands["ver"] = { suggestion, _, _ ->
+            if (suggestion == null) sendMessage(viaaasVer)
+        }
         commands["list"] = { suggestion, _, _ ->
             if (suggestion == null) {
                 sendMessage("List of player connections: ")
                 Via.getPlatform().connectionManager.connections.forEach {
                     val pAddr = it.channel?.remoteAddress()
                     val pVer = it.protocolInfo?.protocolVersion?.let {
-                        ProtocolVersion.getProtocol(it)}
+                        ProtocolVersion.getProtocol(it)
+                    }
                     val backName = it.protocolInfo?.username
                     val backVer = it.protocolInfo?.serverProtocolVersion?.let {
-                        ProtocolVersion.getProtocol(it)}
-                    val backAddr = it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.other?.remoteAddress()
+                        ProtocolVersion.getProtocol(it)
+                    }
+                    val backAddr =
+                        it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.other?.remoteAddress()
                     val pName = it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.data?.frontName
                     sendMessage("$pAddr ($pVer) ($pName) -> ($backVer) ($backName) $backAddr")
                 }
@@ -188,7 +210,7 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
                 val args = cmdArgs.filterIndexed { i, _ -> i > 0 }
                 if (cmdArgs.size == 1) {
                     candidates.addAll(commands.keys.filter { it.startsWith(alias, ignoreCase = true) }
-                            .map { Candidate(it) })
+                        .map { Candidate(it) })
                 } else {
                     val cmd = commands[alias.toLowerCase()]
                     if (cmd != null) {
@@ -305,7 +327,7 @@ class VIAaaSAddress {
                     realAddrPart = true
                 }
             } else if (parts.filterIndexed { a, _ -> a >= i }
-                            .joinToString(".").equals(viaHostName, ignoreCase = true)) {
+                    .joinToString(".").equals(viaHostName, ignoreCase = true)) {
                 foundDomain = true
             }
             if (realAddrPart) {
