@@ -30,6 +30,7 @@ repositories {
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://repo.viaversion.com/")
+    maven("https://repo.aikar.co/content/groups/aikar/")
 }
 
 dependencies {
@@ -39,7 +40,9 @@ dependencies {
     implementation("io.netty:netty-all:4.1.58.Final")
     implementation("org.yaml:snakeyaml:1.26")
     implementation("com.google.guava:guava:30.0-jre")
-    implementation("it.unimi.dsi:fastutil:8.4.4")
+    implementation("co.aikar:fastutil-base:2.0-SNAPSHOT")
+    implementation("co.aikar:fastutil-longbase:2.0-SNAPSHOT")
+    implementation("co.aikar:fastutil-longhashmap:2.0-SNAPSHOT")
 
     implementation("org.apache.logging.log4j:log4j-core:2.13.3")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.3")
@@ -47,7 +50,7 @@ dependencies {
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.12.1")
 
-    val ktorVersion = "1.5.0"
+    val ktorVersion = "1.5.1"
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
