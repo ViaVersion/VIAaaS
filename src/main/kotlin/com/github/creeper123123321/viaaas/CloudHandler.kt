@@ -91,7 +91,7 @@ class CloudMinecraftHandler(
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         if (cause is CancelCodecException) return
-        mcLogger.info("Exception: ", cause)
+        mcLogger.debug("Exception: ", cause)
         disconnect("Exception: $cause")
     }
 
