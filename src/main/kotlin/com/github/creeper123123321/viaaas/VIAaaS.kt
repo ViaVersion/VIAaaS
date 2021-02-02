@@ -127,7 +127,7 @@ fun main(args: Array<String>) {
     val future = ServerBootstrap()
         .group(parent, child)
         .channelFactory(channelServerSocketFactory())
-        .childHandler(ChannelInit)
+        .childHandler(FrontChannelInit)
         .childOption(ChannelOption.IP_TOS, 0x18)
         .childOption(ChannelOption.TCP_NODELAY, true)
         .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
@@ -279,6 +279,18 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val blockLocalAddress: Boolean get() = this.getBoolean("block-local-address", true)
     val requireHostName: Boolean get() = this.getBoolean("require-host-name", true)
     val defaultBackendPort: Int get() = this.getInt("default-backend-port", 25565)
+    val blockedBackAddresses: List<String>
+        get() = this.get(
+            "blocked-back-addresses",
+            List::class.java,
+            emptyList<String>()
+        )!!.map { it as String }
+    val allowedBackAddresses: List<String>
+        get() = this.get(
+            "allowed-back-addresses",
+            List::class.java,
+            emptyList<String>()
+        )!!.map { it as String }
 }
 
 class VIAaaSAddress {

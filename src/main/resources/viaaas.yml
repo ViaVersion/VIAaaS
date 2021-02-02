@@ -22,3 +22,7 @@ require-host-name: true
 # Default port to be used to connect to backend server
 # Use -1 to reuse the port sent by client, useful for transparent proxying
 default-backend-port: 25565
+# If some server is in this list, it will be blocked. This has priority over allowed-back-addresses
+blocked-back-addresses: ["*.hypixel.net", "hypixel.net"]
+# VIAaaS will only allow if it matches an address in this list
+allowed-back-addresses: ["*"]

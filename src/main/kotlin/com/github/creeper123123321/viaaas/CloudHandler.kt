@@ -1,6 +1,7 @@
 package com.github.creeper123123321.viaaas
 
 import com.google.common.net.UrlEscapers
+import com.google.common.primitives.Ints
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.ktor.client.request.*
@@ -33,6 +34,7 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import javax.naming.NameNotFoundException
 import javax.naming.directory.InitialDirContext
+
 
 val mcLogger = LoggerFactory.getLogger("VIAaaS MC")
 
@@ -89,8 +91,8 @@ class CloudMinecraftHandler(
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         if (cause is CancelCodecException) return
+        mcLogger.info("Exception: ", cause)
         disconnect("Exception: $cause")
-        mcLogger.debug("Exception: ", cause)
     }
 
     fun disconnect(s: String) {
@@ -154,7 +156,6 @@ class HandshakeState : MinecraftConnectionState {
 
         handler.data.frontChannel.setAutoRead(false)
         GlobalScope.launch(Dispatchers.IO) {
-            val frontHandler = handler.data.frontHandler
             try {
                 val srvResolved = resolveSrv(packet.address, packet.port)
                 packet.address = srvResolved.first
@@ -162,11 +163,14 @@ class HandshakeState : MinecraftConnectionState {
 
                 val socketAddr = InetSocketAddress(InetAddress.getByName(packet.address), packet.port)
 
-                if (checkLocalAddress(socketAddr.address)) {
-                    throw SecurityException("Local addresses aren't allowed")
+                if (checkLocalAddress(socketAddr.address)
+                    || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
+                    || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)) {
+                    throw SecurityException("Not allowed")
                 }
 
-                val bootstrap = Bootstrap().handler(BackendInit(handler.data))
+                val bootstrap = Bootstrap()
+                    .handler(BackendInit(handler.data))
                     .channelFactory(channelSocketFactory())
                     .group(handler.data.frontChannel.eventLoop())
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
@@ -174,24 +178,23 @@ class HandshakeState : MinecraftConnectionState {
 
                 bootstrap.addListener {
                     if (it.isSuccess) {
-                        mcLogger.info("Connected ${frontHandler.remoteAddress} -> $socketAddr")
+                        mcLogger.info("Connected ${handler.remoteAddress} -> $socketAddr")
 
                         val backChan = bootstrap.channel() as SocketChannel
                         handler.data.backChannel = backChan
-                        frontHandler.other = backChan
+                        handler.other = backChan
 
-                        forward(handler, packet)
-                        backChan.flush()
+                        forward(handler, packet, true)
 
                         handler.data.frontChannel.setAutoRead(true)
                     } else {
                         // We're in the event loop
-                        frontHandler.disconnect("Couldn't connect: " + it.cause().toString())
+                        handler.disconnect("Couldn't connect: " + it.cause().toString())
                     }
                 }
             } catch (e: Exception) {
                 handler.data.frontChannel.eventLoop().submit {
-                    frontHandler.disconnect("Couldn't connect: $e")
+                    handler.disconnect("Couldn't connect: $e")
                 }
             }
         }
@@ -329,8 +332,7 @@ object LoginState : MinecraftConnectionState {
                         cryptoResponse.encryptedKey = encryptRsa(handler.data.backPublicKey!!, backKey)
                         cryptoResponse.encryptedToken =
                             encryptRsa(handler.data.backPublicKey!!, handler.data.backToken!!)
-                        forward(handler, cryptoResponse)
-                        backChan.flush()
+                        forward(handler, cryptoResponse, true)
 
                         val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
                         val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
@@ -448,11 +450,15 @@ fun generateServerHash(serverId: String, sharedSecret: ByteArray?, key: PublicKe
     return twosComplementHexdigest(digest.digest())
 }
 
-private fun forward(handler: CloudMinecraftHandler, packet: Packet) {
+private fun forward(handler: CloudMinecraftHandler, packet: Packet, flush: Boolean = false) {
     val msg = ByteBufAllocator.DEFAULT.buffer()
     try {
         PacketRegistry.encode(packet, msg, ProtocolVersion.getProtocol(handler.data.frontVer!!))
-        handler.other!!.write(msg.retain())
+        if (flush) {
+            handler.other!!.writeAndFlush(msg.retain())
+        } else {
+            handler.other!!.write(msg.retain())
+        }
     } finally {
         msg.release()
     }
@@ -479,4 +485,26 @@ private fun checkLocalAddress(inetAddress: InetAddress): Boolean {
             || inetAddress.isLoopbackAddress
             || inetAddress.isLinkLocalAddress
             || inetAddress.isAnyLocalAddress)
+}
+
+private fun matchesAddress(addr: InetSocketAddress, list: List<String>): Boolean {
+    return (matchAddress(addr.hostString, list)
+            || (addr.address != null && (matchAddress(addr.address.hostAddress, list)
+            || matchAddress(addr.address.hostName, list))))
+}
+
+private fun matchAddress(addr: String, list: List<String>): Boolean {
+    if (list.contains("*")) return true
+    val parts = addr.split(".").filter(String::isNotEmpty)
+    val isNumericIp = parts.size == 4 && parts.all { Ints.tryParse(it) != null }
+    return (0..parts.size).any { i: Int ->
+        val query: String = if (isNumericIp) {
+            parts.filterIndexed { it, _ -> it <= i }.joinToString(".") +
+                    if (i != 3) ".*" else ""
+        } else {
+            (if (i != 0) "*." else "") +
+                    parts.filterIndexed { it, _ -> it >= i }.joinToString(".")
+        }
+        list.contains(query)
+    }
 }

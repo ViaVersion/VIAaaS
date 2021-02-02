@@ -19,18 +19,17 @@ import java.util.zip.Deflater
 import java.util.zip.Inflater
 import javax.crypto.Cipher
 
-object ChannelInit : ChannelInitializer<Channel>() {
+object FrontChannelInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
-        ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
+        ch.pipeline()
+            .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
             // "crypto"
             .addLast("frame", FrameCodec())
-            // "compress" / dummy "decompress"
+            // "compress"
             .addLast("flow-handler", FlowControlHandler())
             .addLast(
                 "handler", CloudMinecraftHandler(
-                    ConnectionData(
-                        frontChannel = ch,
-                    ), other = null, frontEnd = true
+                    ConnectionData(frontChannel = ch), other = null, frontEnd = true
                 )
             )
     }

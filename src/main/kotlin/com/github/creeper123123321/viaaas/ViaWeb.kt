@@ -63,7 +63,7 @@ class ViaWebApp {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     viaWebServer.onException(this, e)
-                    this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, e.toString()))
+                    this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, "INTERNAL ERROR"))
                 } finally {
                     viaWebServer.disconnected(this)
                 }
