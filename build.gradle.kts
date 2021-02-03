@@ -3,7 +3,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.36.0"
     id("com.palantir.git-version") version "0.12.3"
     application
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.4.30"
 }
 
 application {
