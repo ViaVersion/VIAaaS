@@ -65,7 +65,6 @@ class CloudMinecraftHandler(
         if (ctx.channel().isActive && msg.isReadable) {
             data.state.handleMessage(this, ctx, msg)
             if (msg.isReadable) throw IllegalStateException("Remaining bytes!!!")
-            //other?.write(msg.retain())
         }
     }
 
@@ -372,7 +371,7 @@ object StatusState : MinecraftConnectionState {
         val i = msg.readerIndex()
         if (Type.VAR_INT.readPrimitive(msg) !in 0..1) throw IllegalArgumentException("Invalid packet id!")
         msg.readerIndex(i)
-        handler.other!!.write(msg.retainedSlice(), ctx.voidPromise())
+        forward(handler, msg.retainedSlice())
         msg.clear()
     }
 
@@ -399,7 +398,7 @@ object PlayState : MinecraftConnectionState {
         val i = msg.readerIndex()
         if (Type.VAR_INT.readPrimitive(msg) !in 0..127) throw IllegalArgumentException("Invalid packet id!")
         msg.readerIndex(i)
-        handler.other!!.write(msg.retainedSlice(), ctx.voidPromise())
+        forward(handler, msg.retainedSlice())
         msg.clear()
     }
 
@@ -447,17 +446,22 @@ fun generateServerHash(serverId: String, sharedSecret: ByteArray?, key: PublicKe
     return twosComplementHexdigest(digest.digest())
 }
 
-private fun forward(handler: CloudMinecraftHandler, packet: Packet, channelPromise: ChannelPromise, flush: Boolean = false) {
+private fun forward(handler: CloudMinecraftHandler, packet: Packet, flush: Boolean = false) {
     val msg = ByteBufAllocator.DEFAULT.buffer()
     try {
         PacketRegistry.encode(packet, msg, ProtocolVersion.getProtocol(handler.data.frontVer!!))
-        if (flush) {
-            handler.other!!.writeAndFlush(msg.retain(), channelPromise)
-        } else {
-            handler.other!!.write(msg.retain(), channelPromise)
-        }
+        forward(handler, msg.retain(), flush)
     } finally {
         msg.release()
+    }
+}
+
+private fun forward(handler: CloudMinecraftHandler, byteBuf: ByteBuf, flush: Boolean = false) {
+    val ch = handler.other!!
+    if (flush) {
+        ch.writeAndFlush(byteBuf, ch.voidPromise())
+    } else {
+        ch.write(byteBuf, ch.voidPromise())
     }
 }
 
