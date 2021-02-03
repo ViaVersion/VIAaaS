@@ -40,9 +40,7 @@ dependencies {
     implementation("io.netty:netty-all:4.1.58.Final")
     implementation("org.yaml:snakeyaml:1.26")
     implementation("com.google.guava:guava:30.0-jre")
-    implementation("co.aikar:fastutil-base:2.0-SNAPSHOT")
-    implementation("co.aikar:fastutil-longbase:2.0-SNAPSHOT")
-    implementation("co.aikar:fastutil-longhashmap:2.0-SNAPSHOT")
+    implementation("co.aikar:fastutil-lite:1.0")
 
     implementation("org.apache.logging.log4j:log4j-core:2.13.3")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.3")
