@@ -184,7 +184,7 @@ class CloudViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, B
     }
 
     override fun encode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
-        info.checkOutgoingPacket()
+        if (!info.checkOutgoingPacket()) throw CancelEncoderException.generate(null)
         if (!info.shouldTransformPacket()) {
             out.add(bytebuf.retain())
             return
