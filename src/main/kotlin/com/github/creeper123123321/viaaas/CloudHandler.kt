@@ -8,10 +8,7 @@ import io.ktor.client.request.*
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
-import io.netty.channel.Channel
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelOption
-import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.channel.*
 import io.netty.channel.socket.SocketChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -375,7 +372,7 @@ object StatusState : MinecraftConnectionState {
         val i = msg.readerIndex()
         if (Type.VAR_INT.readPrimitive(msg) !in 0..1) throw IllegalArgumentException("Invalid packet id!")
         msg.readerIndex(i)
-        handler.other!!.write(msg.retainedSlice())
+        handler.other!!.write(msg.retainedSlice(), ctx.voidPromise())
         msg.clear()
     }
 
@@ -402,7 +399,7 @@ object PlayState : MinecraftConnectionState {
         val i = msg.readerIndex()
         if (Type.VAR_INT.readPrimitive(msg) !in 0..127) throw IllegalArgumentException("Invalid packet id!")
         msg.readerIndex(i)
-        handler.other!!.write(msg.retainedSlice())
+        handler.other!!.write(msg.retainedSlice(), ctx.voidPromise())
         msg.clear()
     }
 
@@ -450,14 +447,14 @@ fun generateServerHash(serverId: String, sharedSecret: ByteArray?, key: PublicKe
     return twosComplementHexdigest(digest.digest())
 }
 
-private fun forward(handler: CloudMinecraftHandler, packet: Packet, flush: Boolean = false) {
+private fun forward(handler: CloudMinecraftHandler, packet: Packet, channelPromise: ChannelPromise, flush: Boolean = false) {
     val msg = ByteBufAllocator.DEFAULT.buffer()
     try {
         PacketRegistry.encode(packet, msg, ProtocolVersion.getProtocol(handler.data.frontVer!!))
         if (flush) {
-            handler.other!!.writeAndFlush(msg.retain())
+            handler.other!!.writeAndFlush(msg.retain(), channelPromise)
         } else {
-            handler.other!!.write(msg.retain())
+            handler.other!!.write(msg.retain(), channelPromise)
         }
     } finally {
         msg.release()
