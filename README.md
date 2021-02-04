@@ -3,7 +3,16 @@ VIAaaS
 
 VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersion proxy
 
-How to use: server.example.com._p25565._v1_12_2._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
+How to use: server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
+
+Parts:
+- ```server.example.com```: backend server address
+- ```_p```: backend port
+- ```_v```: backend version (protocol id https://wiki.vg/Protocol_version_numbers or name with underline instead of dots)
+- ```_o```: true to force online mode in frontend, false to disable online mode in frontend. if not set, it will be based on backend online mode.
+- ```_u```: username to use in backend connection
+- ```viaaas.example.com```: hostname suffix (defined in config)
+
 
 Default Minecraft: viaaas.localhost with port 25565
 
@@ -30,7 +39,7 @@ Usage for offline mode:
 - Connect to mc.example.com._v1_8.viaaas.localhost
 
 Usage for online mode:
-- You can use two accounts (avoids Bad Login error) or the same account for front-end and back-end connections.
+- You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections or use ```_ofalse``` (offline mode in frontend, not encrypted).
 - You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere, ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```) on the machine you are using the VIAaaS authenticator webpage.
 - Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username A that you're using to connect to the proxy.
