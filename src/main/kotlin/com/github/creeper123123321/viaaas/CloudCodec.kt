@@ -162,6 +162,7 @@ class FrameCodec : ByteToMessageCodec<ByteBuf>() {
     }
 
     override fun encode(ctx: ChannelHandlerContext, msg: ByteBuf, out: ByteBuf) {
+        if (msg.readableBytes() >= 2097152) throw badLength
         Type.VAR_INT.writePrimitive(out, msg.readableBytes())
         out.writeBytes(msg)
     }
