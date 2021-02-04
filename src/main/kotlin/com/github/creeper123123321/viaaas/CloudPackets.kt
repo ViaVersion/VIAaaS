@@ -16,8 +16,8 @@ import kotlin.properties.Delegates
  * A mutable object which represents a Minecraft packet data
  */
 interface Packet {
-    fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion)
-    fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion)
+    fun decode(byteBuf: ByteBuf, protocolVersion: Int)
+    fun encode(byteBuf: ByteBuf, protocolVersion: Int)
 }
 
 object PacketRegistry {
@@ -70,24 +70,24 @@ object PacketRegistry {
     )
 
     fun getPacketConstructor(
-        protocolVersion: ProtocolVersion,
+        protocolVersion: Int,
         state: State,
         id: Int,
         serverBound: Boolean
     ): Supplier<out Packet>? {
         return entries.firstOrNull {
             it.serverBound == serverBound && it.state == state
-                    && it.versionRange.contains(protocolVersion.version) && it.id == id
+                    && it.versionRange.contains(protocolVersion) && it.id == id
         }?.constructor
     }
 
-    fun getPacketId(packetClass: Class<out Packet>, protocolVersion: ProtocolVersion): Int? {
+    fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int): Int? {
         return entries.firstOrNull {
-            it.versionRange.contains(protocolVersion.version) && it.packetClass == packetClass
+            it.versionRange.contains(protocolVersion) && it.packetClass == packetClass
         }?.id
     }
 
-    fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion, state: State, serverBound: Boolean): Packet {
+    fun decode(byteBuf: ByteBuf, protocolVersion: Int, state: State, serverBound: Boolean): Packet {
         val packetId = Type.VAR_INT.readPrimitive(byteBuf)
         val packet =
             getPacketConstructor(protocolVersion, state, packetId, serverBound)?.get() ?: UnknownPacket(packetId)
@@ -96,7 +96,7 @@ object PacketRegistry {
         return packet
     }
 
-    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: Int) {
         val id = if (packet is UnknownPacket) {
             packet.id
         } else {
@@ -108,13 +108,13 @@ object PacketRegistry {
 }
 
 class UnknownPacket(val id: Int) : Packet {
-    lateinit var content: ByteBuf
+    lateinit var content: ByteArray
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
-        content = byteBuf.slice().clear()
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+        content = ByteArray(byteBuf.readableBytes()).also { byteBuf.readBytes(it) }
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         byteBuf.writeBytes(content)
     }
 }
@@ -127,14 +127,14 @@ class HandshakePacket : Packet {
     var port by Delegates.notNull<Int>()
     lateinit var nextState: State
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         protocolId = Type.VAR_INT.readPrimitive(byteBuf)
         address = Type.STRING.read(byteBuf)
         port = byteBuf.readUnsignedShort()
         nextState = State.values()[Type.VAR_INT.readPrimitive(byteBuf)]
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.VAR_INT.writePrimitive(byteBuf, protocolId)
         Type.STRING.write(byteBuf, address)
         byteBuf.writeShort(port)
@@ -145,11 +145,11 @@ class HandshakePacket : Packet {
 class LoginStart : Packet {
     lateinit var username: String
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         username = Type.STRING.read(byteBuf)
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.STRING.write(byteBuf, username)
     }
 }
@@ -158,8 +158,8 @@ class CryptoResponse : Packet {
     lateinit var encryptedKey: ByteArray
     lateinit var encryptedToken: ByteArray
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
-        if (protocolVersion.version >= ProtocolVersion.v1_8.version) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version) {
             encryptedKey = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
             encryptedToken = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
         } else {
@@ -168,8 +168,8 @@ class CryptoResponse : Packet {
         }
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
-        if (protocolVersion.version >= ProtocolVersion.v1_8.version) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version) {
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedKey)
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedToken)
         } else {
@@ -184,16 +184,16 @@ class CryptoResponse : Packet {
 class PluginResponse : Packet {
     var id by Delegates.notNull<Int>()
     var success by Delegates.notNull<Boolean>()
-    lateinit var data: ByteBuf
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    lateinit var data: ByteArray
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         id = Type.VAR_INT.readPrimitive(byteBuf)
         success = byteBuf.readBoolean()
         if (success) {
-            data = byteBuf.slice().clear()
+            data = ByteArray(byteBuf.readableBytes()).also { byteBuf.readBytes(it) }
         }
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.VAR_INT.writePrimitive(byteBuf, id)
         byteBuf.writeBoolean(success)
         if (success) {
@@ -204,11 +204,11 @@ class PluginResponse : Packet {
 
 class LoginDisconnect : Packet {
     lateinit var msg: String
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         msg = Type.STRING.read(byteBuf)
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.STRING.write(byteBuf, msg)
     }
 }
@@ -218,9 +218,9 @@ class CryptoRequest : Packet {
     lateinit var publicKey: PublicKey
     lateinit var token: ByteArray
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         serverId = Type.STRING.read(byteBuf)
-        if (protocolVersion.version >= ProtocolVersion.v1_8.version) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version) {
             publicKey = KeyFactory.getInstance("RSA")
                 .generatePublic(X509EncodedKeySpec(Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)))
             token = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
@@ -231,9 +231,9 @@ class CryptoRequest : Packet {
         }
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.STRING.write(byteBuf, serverId)
-        if (protocolVersion.version >= ProtocolVersion.v1_8.version) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version) {
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, publicKey.encoded)
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, token)
         } else {
@@ -250,25 +250,25 @@ class LoginSuccess : Packet {
     lateinit var id: UUID
     lateinit var username: String
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         id = when {
-            protocolVersion.version >= ProtocolVersion.v1_16.version -> {
+            protocolVersion >= ProtocolVersion.v1_16.version -> {
                 Type.UUID_INT_ARRAY.read(byteBuf)
             }
-            protocolVersion.version >= ProtocolVersion.v1_7_6.version -> {
+            protocolVersion >= ProtocolVersion.v1_7_6.version -> {
                 UUID.fromString(Type.STRING.read(byteBuf))
             }
-            else -> fromUndashed(Type.STRING.read(byteBuf))
+            else -> parseUndashedId(Type.STRING.read(byteBuf))
         }
         username = Type.STRING.read(byteBuf)
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         when {
-            protocolVersion.version >= ProtocolVersion.v1_16.version -> {
+            protocolVersion >= ProtocolVersion.v1_16.version -> {
                 Type.UUID_INT_ARRAY.write(byteBuf, id)
             }
-            protocolVersion.version >= ProtocolVersion.v1_7_6.version -> {
+            protocolVersion >= ProtocolVersion.v1_7_6.version -> {
                 Type.STRING.write(byteBuf, id.toString())
             }
             else -> Type.STRING.write(byteBuf, id.toString().replace("-", ""))
@@ -279,11 +279,11 @@ class LoginSuccess : Packet {
 
 class SetCompression : Packet {
     var threshold by Delegates.notNull<Int>()
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         threshold = Type.VAR_INT.readPrimitive(byteBuf)
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.VAR_INT.writePrimitive(byteBuf, threshold)
     }
 }
@@ -291,14 +291,14 @@ class SetCompression : Packet {
 class PluginRequest : Packet {
     var id by Delegates.notNull<Int>()
     lateinit var channel: String
-    lateinit var data: ByteBuf
-    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    lateinit var data: ByteArray
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         id = Type.VAR_INT.readPrimitive(byteBuf)
         channel = Type.STRING.read(byteBuf)
-        data = byteBuf.slice().clear()
+        data = ByteArray(byteBuf.readableBytes()).also { byteBuf.readBytes(it) }
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.VAR_INT.writePrimitive(byteBuf, id)
         Type.STRING.write(byteBuf, channel)
         byteBuf.writeBytes(data)

@@ -219,33 +219,37 @@ function renderActions() {
     actions.innerHTML = "";
     if (listenVisible) {
         if (username != null && mcauth_code != null) {
-            let p = document.createElement("p");
-            let add = document.createElement("a");
-            p.appendChild(add);
-            add.innerText = "Listen to " + username;
-            add.href = "#";
-            add.onclick = () => {
+            addAction("Listen to " + username, () => {
                 socket.send(JSON.stringify({
                     "action": "minecraft_id_login",
                     "username": username,
                     "code": mcauth_code}));
                 mcauth_code = null;
-            };
-            actions.appendChild(p);
+            });
         }
-        let p = document.createElement("p");
-        let link = document.createElement("a");
-        p.appendChild(link);
-        link.innerText = "Listen to username in VIAaaS instance";
-        link.href = "#";
-        link.onclick = () => {
-            let user = prompt("Username (Minecraft.ID is case-sensitive): ", "");
+        addAction("Listen to premium login in VIAaaS instance", () => {
+            let user = prompt("Premium username (case-sensitive): ", "");
             if (!user) return;
             let callbackUrl = new URL(location.origin + location.pathname + "#username=" + encodeURIComponent(user));
-            location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user) + "?callback=" + encodeURIComponent(callbackUrl);
-        };
-        actions.appendChild(p);
+            location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
+                + "?callback=" + encodeURIComponent(callbackUrl);
+        });
+        addAction("Listen to offline login in VIAaaS instance", () => {
+            let user = prompt("Offline username (case-sensitive):", "");
+            if (!user) return;
+            socket.send(JSON.stringify({"action": "offline_login", "username": user}));
+        });
     }
+}
+
+function addAction(text, onClick) {
+    let p = document.createElement("p");
+    let link = document.createElement("a");
+    p.appendChild(link);
+    link.innerText = text;
+    link.href = "#";
+    link.onclick = onClick;
+    actions.appendChild(p);
 }
 
 function onSocketMsg(event) {
@@ -254,9 +258,9 @@ function onSocketMsg(event) {
     if (parsed.action == "ad_minecraft_id_login") {
         listenVisible = true;
         renderActions();
-    } else if (parsed.action == "minecraft_id_result") {
+    } else if (parsed.action == "login_result") {
         if (!parsed.success) {
-            alert("VIAaaS instance couldn't verify account via Minecraft.ID");
+            alert("VIAaaS instance couldn't verify Minecraft account");
         } else {
             listen(parsed.token);
             saveToken(parsed.token);

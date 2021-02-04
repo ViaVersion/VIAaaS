@@ -6,7 +6,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.ktor.client.request.*
 import io.netty.bootstrap.Bootstrap
-import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.*
 import io.netty.channel.socket.SocketChannel
@@ -14,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.exception.CancelCodecException
 import us.myles.ViaVersion.packets.State
@@ -26,6 +24,8 @@ import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.util.*
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -42,11 +42,6 @@ class ConnectionData(
     var frontOnline: Boolean? = null, // todo
     var frontName: String? = null,
     var backName: String? = null,
-    var backPublicKey: PublicKey? = null,
-    var backToken: ByteArray? = null,
-    var frontToken: ByteArray? = null,
-    var frontServerId: String? = null,
-    var backServerId: String? = null,
     var frontVer: Int? = null,
     var backVer: Int? = null,
 ) {
@@ -58,13 +53,12 @@ class CloudMinecraftHandler(
     val data: ConnectionData,
     var other: Channel?,
     val frontEnd: Boolean
-) : SimpleChannelInboundHandler<ByteBuf>() {
+) : SimpleChannelInboundHandler<Packet>() {
     var remoteAddress: SocketAddress? = null
 
-    override fun channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
-        if (ctx.channel().isActive && msg.isReadable) {
-            data.state.handleMessage(this, ctx, msg)
-            if (msg.isReadable) throw IllegalStateException("Remaining bytes!!!")
+    override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
+        if (ctx.channel().isActive) {
+            data.state.handlePacket(this, ctx, packet)
         }
     }
 
@@ -97,9 +91,10 @@ class CloudMinecraftHandler(
 }
 
 interface MinecraftConnectionState {
-    fun handleMessage(
+    val state: State
+    fun handlePacket(
         handler: CloudMinecraftHandler, ctx: ChannelHandlerContext,
-        msg: ByteBuf
+        packet: Packet
     )
 
     fun disconnect(handler: CloudMinecraftHandler, msg: String) {
@@ -112,19 +107,27 @@ interface MinecraftConnectionState {
 }
 
 class HandshakeState : MinecraftConnectionState {
-    override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
-        val packet = PacketRegistry.decode(
-            msg,
-            ProtocolVersion.v1_8, // we still dont know what protocol it is
-            State.HANDSHAKE,
-            handler.frontEnd
-        )
+    fun connectBack(handler: CloudMinecraftHandler, socketAddr: InetSocketAddress): ChannelFuture {
+        return Bootstrap()
+            .handler(BackendInit(handler.data))
+            .channelFactory(channelSocketFactory())
+            .group(handler.data.frontChannel.eventLoop())
+            .option(ChannelOption.IP_TOS, 0x18)
+            .option(ChannelOption.TCP_NODELAY, true)
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
+            .connect(socketAddr)
+    }
+
+    override val state: State
+        get() = State.HANDSHAKE
+
+    override fun handlePacket(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         if (packet !is HandshakePacket) throw IllegalArgumentException("Invalid packet!")
 
         handler.data.frontVer = packet.protocolId
         when (packet.nextState.ordinal) {
             1 -> handler.data.state = StatusState
-            2 -> handler.data.state = LoginState
+            2 -> handler.data.state = LoginState()
             else -> throw IllegalStateException("Invalid next state")
         }
 
@@ -161,22 +164,18 @@ class HandshakeState : MinecraftConnectionState {
 
                 if (checkLocalAddress(socketAddr.address)
                     || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
-                    || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)) {
+                    || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)
+                ) {
                     throw SecurityException("Not allowed")
                 }
 
-                val bootstrap = Bootstrap()
-                    .handler(BackendInit(handler.data))
-                    .channelFactory(channelSocketFactory())
-                    .group(handler.data.frontChannel.eventLoop())
-                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
-                    .connect(socketAddr)
+                val future = connectBack(handler, socketAddr)
 
-                bootstrap.addListener {
+                future.addListener {
                     if (it.isSuccess) {
                         mcLogger.info("Connected ${handler.remoteAddress} -> $socketAddr")
 
-                        val backChan = bootstrap.channel() as SocketChannel
+                        val backChan = future.channel() as SocketChannel
                         handler.data.backChannel = backChan
                         handler.other = backChan
 
@@ -205,15 +204,14 @@ class HandshakeState : MinecraftConnectionState {
     }
 }
 
-object LoginState : MinecraftConnectionState {
-    override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
-        val packet = PacketRegistry.decode(
-            msg,
-            ProtocolVersion.getProtocol(handler.data.frontVer!!),
-            State.LOGIN,
-            handler.frontEnd
-        )
+class LoginState : MinecraftConnectionState {
+    val callbackPlayerId = CompletableFuture<String>()
+    lateinit var frontToken: ByteArray
+    lateinit var frontServerId: String
+    override val state: State
+        get() = State.LOGIN
 
+    override fun handlePacket(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         when (packet) {
             is LoginStart -> handleLoginStart(handler, packet)
             is CryptoResponse -> handleCryptoResponse(handler, packet)
@@ -253,12 +251,7 @@ object LoginState : MinecraftConnectionState {
         }
     }
 
-    fun handleCryptoRequest(handler: CloudMinecraftHandler, cryptoRequest: CryptoRequest) {
-        val data = handler.data
-        data.backServerId = cryptoRequest.serverId
-        data.backPublicKey = cryptoRequest.publicKey
-        data.backToken = cryptoRequest.token
-
+    fun authenticateOnlineFront(frontHandler: CloudMinecraftHandler) {
         val id = "VIAaaS" + ByteArray(10).let {
             secureRandom.nextBytes(it)
             Base64.getEncoder().withoutPadding().encodeToString(it)
@@ -269,14 +262,66 @@ object LoginState : MinecraftConnectionState {
             secureRandom.nextBytes(it)
             it
         }
-        data.frontToken = token
-        data.frontServerId = id
+        frontToken = token
+        frontServerId = id
 
+        val cryptoRequest = CryptoRequest()
         cryptoRequest.serverId = id
         cryptoRequest.publicKey = mcCryptoKey.public
         cryptoRequest.token = token
 
-        forward(handler, cryptoRequest)
+        frontHandler.data.frontChannel.writeAndFlush(cryptoRequest)
+    }
+
+    fun handleCryptoRequest(handler: CloudMinecraftHandler, cryptoRequest: CryptoRequest) {
+        val data = handler.data
+        val backServerId = cryptoRequest.serverId
+        val backPublicKey = cryptoRequest.publicKey
+        val backToken = cryptoRequest.token
+
+        if (data.frontOnline == null) {
+            authenticateOnlineFront(handler)
+        }
+
+        val backKey = ByteArray(16).let {
+            secureRandom.nextBytes(it)
+            it
+        }
+        val backHash = generateServerHash(backServerId, backKey, backPublicKey)
+
+        callbackPlayerId.whenComplete { playerId, e ->
+            if (e != null) return@whenComplete
+            val frontHandler = handler.data.frontHandler
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    val sessionJoin = viaWebServer.requestSessionJoin(
+                        parseUndashedId(playerId),
+                        handler.data.backName!!,
+                        backHash,
+                        frontHandler.remoteAddress!!, // Frontend handler
+                        backPublicKey
+                    )
+
+                    val backChan = handler.data.backChannel!!
+                    sessionJoin.whenCompleteAsync({ _, throwable ->
+                        if (throwable != null) {
+                            frontHandler.data.backHandler!!.disconnect("Online mode error: $throwable")
+                        } else {
+                            val cryptoResponse = CryptoResponse()
+                            cryptoResponse.encryptedKey = encryptRsa(backPublicKey, backKey)
+                            cryptoResponse.encryptedToken = encryptRsa(backPublicKey, backToken)
+                            forward(frontHandler, cryptoResponse, true)
+
+                            val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
+                            val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
+                            backChan.pipeline().addBefore("frame", "crypto", CloudCrypto(backAesDe, backAesEn))
+                        }
+                    }, backChan.eventLoop())
+                } catch (e: Exception) {
+                    frontHandler.disconnect("Online mode error: $e")
+                }
+            }
+        }
     }
 
     fun handleCryptoResponse(handler: CloudMinecraftHandler, cryptoResponse: CryptoResponse) {
@@ -285,22 +330,15 @@ object LoginState : MinecraftConnectionState {
             // RSA token - wat??? why is it encrypted with RSA if it was sent unencrypted?
             val decryptedToken = decryptRsa(mcCryptoKey.private, cryptoResponse.encryptedToken)
 
-            if (!decryptedToken.contentEquals(handler.data.frontToken!!)) throw IllegalStateException("invalid token!")
+            if (!decryptedToken.contentEquals(frontToken)) throw IllegalStateException("invalid token!")
 
             val aesEn = mcCfb8(frontKey, Cipher.ENCRYPT_MODE)
             val aesDe = mcCfb8(frontKey, Cipher.DECRYPT_MODE)
 
             handler.data.frontChannel.pipeline().addBefore("frame", "crypto", CloudCrypto(aesDe, aesEn))
 
-            generateServerHash(handler.data.frontServerId!!, frontKey, mcCryptoKey.public)
+            generateServerHash(frontServerId, frontKey, mcCryptoKey.public)
         }
-
-        val backKey = ByteArray(16).let {
-            secureRandom.nextBytes(it)
-            it
-        }
-
-        val backHash = generateServerHash(handler.data.backServerId!!, backKey, handler.data.backPublicKey!!)
 
         handler.data.frontChannel.setAutoRead(false)
         GlobalScope.launch(Dispatchers.IO) {
@@ -309,45 +347,40 @@ object LoginState : MinecraftConnectionState {
                     "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
                             UrlEscapers.urlFormParameterEscaper().escape(handler.data.frontName!!) +
                             "&serverId=$frontHash"
-                )
-                    ?: throw IllegalArgumentException("Couldn't authenticate with session servers")
+                ) ?: throw IllegalArgumentException("Couldn't authenticate with session servers")
 
-                val sessionJoin = viaWebServer.requestSessionJoin(
-                    fromUndashed(profile.get("id")!!.asString),
-                    handler.data.backName!!,
-                    backHash,
-                    handler.remoteAddress!!, // Frontend handler
-                    handler.data.backPublicKey!!
-                )
-
-                val backChan = handler.other!!
-                sessionJoin.whenCompleteAsync({ _, throwable ->
-                    if (throwable != null) {
-                        handler.disconnect("Online mode error: $throwable")
-                    } else {
-                        cryptoResponse.encryptedKey = encryptRsa(handler.data.backPublicKey!!, backKey)
-                        cryptoResponse.encryptedToken =
-                            encryptRsa(handler.data.backPublicKey!!, handler.data.backToken!!)
-                        forward(handler, cryptoResponse, true)
-
-                        val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
-                        val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
-                        backChan.pipeline().addBefore("frame", "crypto", CloudCrypto(backAesDe, backAesEn))
-                    }
-                }, backChan.eventLoop())
+                val id = profile.get("id")!!.asString
+                mcLogger.info("Validated front-end session: ${handler.data.frontName} $id")
+                callbackPlayerId.complete(id)
             } catch (e: Exception) {
-                handler.disconnect("Online mode error: $e")
+                callbackPlayerId.completeExceptionally(e)
             }
             handler.data.frontChannel.setAutoRead(true)
         }
     }
 
     fun handleLoginStart(handler: CloudMinecraftHandler, loginStart: LoginStart) {
+        if (loginStart.username.length > 16) throw badLength
+
         handler.data.frontName = loginStart.username
         handler.data.backName = handler.data.backName ?: handler.data.frontName
 
         loginStart.username = handler.data.backName!!
-        forward(handler, loginStart)
+
+        callbackPlayerId.whenComplete { _, e -> if (e != null) disconnect(handler, "Profile error: $e") }
+
+        if (handler.data.frontOnline == false) {
+            callbackPlayerId.complete(generateOfflinePlayerUuid(handler.data.frontName!!).toString().replace("-", ""))
+        }
+
+        if (handler.data.frontOnline == true) { // forced
+            authenticateOnlineFront(handler.data.backHandler!!)
+            callbackPlayerId.whenComplete { _, e ->
+                if (e == null) forward(handler, loginStart, true)
+            }
+        } else {
+            forward(handler, loginStart)
+        }
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
@@ -367,12 +400,12 @@ object LoginState : MinecraftConnectionState {
 }
 
 object StatusState : MinecraftConnectionState {
-    override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
-        val i = msg.readerIndex()
-        if (Type.VAR_INT.readPrimitive(msg) !in 0..1) throw IllegalArgumentException("Invalid packet id!")
-        msg.readerIndex(i)
-        forward(handler, msg.retainedSlice())
-        msg.clear()
+    override val state: State
+        get() = State.STATUS
+
+    override fun handlePacket(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
+        if ((packet as UnknownPacket).id !in 0..1) throw IllegalArgumentException("Invalid packet id!")
+        forward(handler, packet)
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
@@ -394,12 +427,12 @@ object StatusState : MinecraftConnectionState {
 }
 
 object PlayState : MinecraftConnectionState {
-    override fun handleMessage(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, msg: ByteBuf) {
-        val i = msg.readerIndex()
-        if (Type.VAR_INT.readPrimitive(msg) !in 0..127) throw IllegalArgumentException("Invalid packet id!")
-        msg.readerIndex(i)
-        forward(handler, msg.retainedSlice())
-        msg.clear()
+    override val state: State
+        get() = State.PLAY
+
+    override fun handlePacket(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
+        if ((packet as UnknownPacket).id !in 0..127) throw IllegalArgumentException("Invalid packet id!")
+        forward(handler, packet)
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
@@ -449,19 +482,14 @@ fun generateServerHash(serverId: String, sharedSecret: ByteArray?, key: PublicKe
 private fun forward(handler: CloudMinecraftHandler, packet: Packet, flush: Boolean = false) {
     val msg = ByteBufAllocator.DEFAULT.buffer()
     try {
-        PacketRegistry.encode(packet, msg, ProtocolVersion.getProtocol(handler.data.frontVer!!))
-        forward(handler, msg.retain(), flush)
+        val ch = handler.other!!
+        if (flush) {
+            ch.writeAndFlush(packet, ch.voidPromise())
+        } else {
+            ch.write(packet, ch.voidPromise())
+        }
     } finally {
         msg.release()
-    }
-}
-
-private fun forward(handler: CloudMinecraftHandler, byteBuf: ByteBuf, flush: Boolean = false) {
-    val ch = handler.other!!
-    if (flush) {
-        ch.writeAndFlush(byteBuf, ch.voidPromise())
-    } else {
-        ch.write(byteBuf, ch.voidPromise())
     }
 }
 
@@ -509,3 +537,7 @@ private fun matchAddress(addr: String, list: List<String>): Boolean {
         list.contains(query)
     }
 }
+
+// https://github.com/VelocityPowered/Velocity/blob/e3f17eeb245b8d570f16c1f2aff5e7eafb698d5e/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
+fun generateOfflinePlayerUuid(username: String) =
+    UUID.nameUUIDFromBytes("OfflinePlayer:$username".toByteArray(Charsets.UTF_8))

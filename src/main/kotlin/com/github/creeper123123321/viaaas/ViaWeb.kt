@@ -4,20 +4,15 @@ import com.google.common.base.Preconditions
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.gson.Gson
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import io.ktor.application.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
-import io.ktor.request.*
-import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
@@ -61,7 +56,7 @@ class ViaWebApp {
                         }
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    webLogger.info("${call.request.local.remoteHost} (O: ${call.request.origin.remoteHost}) exception: $e")
                     viaWebServer.onException(this, e)
                     this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, "INTERNAL ERROR"))
                 } finally {
@@ -78,7 +73,7 @@ class ViaWebApp {
 }
 
 // https://github.com/VelocityPowered/Velocity/blob/6467335f74a7d1617512a55cc9acef5e109b51ac/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
-fun fromUndashed(string: String): UUID {
+fun parseUndashedId(string: String): UUID {
     Preconditions.checkArgument(string.length == 32, "Length is incorrect")
     return UUID(
         java.lang.Long.parseUnsignedLong(string.substring(0, 16), 16),
@@ -100,7 +95,7 @@ class WebDashboardServer {
             runBlocking {
                 withContext(Dispatchers.IO) {
                     httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
-                        ?.get("id")?.asString?.let { fromUndashed(it) }
+                        ?.get("id")?.asString?.let { parseUndashedId(it) }
                 }
             }
         })
@@ -184,9 +179,23 @@ class WebLogin : WebState {
         val obj = Gson().fromJson(msg, JsonObject::class.java)
 
         when (obj.getAsJsonPrimitive("action").asString) {
+            "offline_login" -> {
+                // todo add some spam check
+                val username = obj.get("username").asString
+                val token = UUID.randomUUID()
+                val uuid = generateOfflinePlayerUuid(username)
+
+                webClient.server.loginTokens.put(token, uuid)
+                webClient.ws.send(
+                    """{"action": "login_result", "success": true,
+                        | "username": "$username", "uuid": "$uuid", "token": "$token"}""".trimMargin()
+                )
+
+                webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) generated a token for offline account $username")
+            }
             "minecraft_id_login" -> {
-                val username = obj.getAsJsonPrimitive("username").asString
-                val code = obj.getAsJsonPrimitive("code").asString
+                val username = obj.get("username").asString
+                val code = obj.get("code").asString
 
                 val check = httpClient.submitForm<JsonObject>(
                     "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
@@ -200,13 +209,13 @@ class WebLogin : WebState {
 
                     webClient.server.loginTokens.put(token, uuid)
                     webClient.ws.send(
-                        """{"action": "minecraft_id_result", "success": true,
+                        """{"action": "login_result", "success": true,
                         | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin()
                     )
 
                     webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) generated a token for account $mcIdUser $uuid")
                 } else {
-                    webClient.ws.send("""{"action": "minecraft_id_result", "success": false}""")
+                    webClient.ws.send("""{"action": "login_result", "success": false}""")
                     webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost})  failed to generated a token for account $username")
                 }
             }
