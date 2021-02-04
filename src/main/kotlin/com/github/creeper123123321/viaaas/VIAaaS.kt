@@ -184,7 +184,7 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
             if (suggestion == null) {
                 sendMessage("List of player connections: ")
                 Via.getPlatform().connectionManager.connections.forEach {
-                    val pAddr = it.channel?.remoteAddress()
+                    val backAddr = it.channel?.remoteAddress()
                     val pVer = it.protocolInfo?.protocolVersion?.let {
                         ProtocolVersion.getProtocol(it)
                     }
@@ -192,10 +192,10 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
                     val backVer = it.protocolInfo?.serverProtocolVersion?.let {
                         ProtocolVersion.getProtocol(it)
                     }
-                    val backAddr =
+                    val pAddr =
                         it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.other?.remoteAddress()
                     val pName = it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.data?.frontName
-                    sendMessage("$pAddr ($pVer) ($pName) -> ($backVer) ($backName) $backAddr")
+                    sendMessage("$pAddr $pVer ($pName) -> $backVer ($backName) $backAddr")
                 }
             }
         }
