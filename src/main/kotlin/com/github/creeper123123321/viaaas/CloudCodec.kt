@@ -201,17 +201,31 @@ class FrameCodec : ByteToMessageCodec<ByteBuf>() {
 class CloudViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         if (!info.checkIncomingPacket()) throw CancelDecoderException.generate(null)
-        if (info.shouldTransformPacket()) {
-            info.transformIncoming(bytebuf, CancelDecoderException::generate)
+        if (!info.shouldTransformPacket()) {
+            out.add(bytebuf.retain())
+            return
         }
-        out.add(bytebuf.retain())
+        val transformedBuf: ByteBuf = ctx.alloc().buffer().writeBytes(bytebuf)
+        try {
+            info.transformIncoming(transformedBuf, CancelDecoderException::generate)
+            out.add(transformedBuf.retain())
+        } finally {
+            transformedBuf.release()
+        }
     }
 
     override fun encode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         if (!info.checkOutgoingPacket()) throw CancelEncoderException.generate(null)
-        if (info.shouldTransformPacket()) {
-            info.transformOutgoing(bytebuf, CancelEncoderException::generate)
+        if (!info.shouldTransformPacket()) {
+            out.add(bytebuf.retain())
+            return
         }
-        out.add(bytebuf.retain())
+        val transformedBuf: ByteBuf = ctx.alloc().buffer().writeBytes(bytebuf)
+        try {
+            info.transformOutgoing(transformedBuf, CancelEncoderException::generate)
+            out.add(transformedBuf.retain())
+        } finally {
+            transformedBuf.release()
+        }
     }
 }
