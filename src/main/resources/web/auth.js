@@ -179,9 +179,9 @@ function refreshMojangAccount(it) {
         headers: {"content-type": "application/json"},
     }).then(data => {
         if (!isSuccess(data.status)) throw "not success";
-        console.log("refreshed " + data.selectedProfile.id);
         return data.json();
     }).then((json) => {
+        console.log("refreshed " + json.selectedProfile.id);
         removeMcAccount(data.selectedProfile.id);
         return storeMcAccount(json.accessToken, json.clientToken, json.selectedProfile.name, json.selectedProfile.id);
     });
@@ -252,6 +252,10 @@ function addAction(text, onClick) {
     actions.appendChild(p);
 }
 
+function findAccountByMcName(name) {
+    return getMcAccounts().reverse().find(it => it.name.toLowerCase() == name.toLowerCase());
+}
+
 function onSocketMsg(event) {
     console.log(event.data.toString());
     let parsed = JSON.parse(event.data);
@@ -275,7 +279,7 @@ function onSocketMsg(event) {
         }
     } else if (parsed.action == "session_hash_request") {
         if (confirm("Allow auth impersonation from VIAaaS instance? info: " + JSON.stringify(parsed))) {
-            let account = getMcAccounts().reverse().find(it => it.name.toLowerCase() == parsed.user.toLowerCase());
+            let account = findAccountByMcName(parsed.user);
             if (account) {
                 getMcUserToken(account).then((data) => {
                     return joinGame(data.accessToken, data.id, parsed.session_hash);

@@ -24,40 +24,29 @@ object PacketRegistry {
     val entries = mutableListOf<RegistryEntry>()
 
     init {
-        entries.add(
-            RegistryEntry(Range.all(), State.HANDSHAKE, 0, true, ::HandshakePacket, HandshakePacket::class.java)
-        )
-        entries.add(
-            RegistryEntry(Range.all(), State.LOGIN, 0, true, ::LoginStart, LoginStart::class.java)
-        )
-        entries.add(
-            RegistryEntry(Range.all(), State.LOGIN, 1, true, ::CryptoResponse, CryptoResponse::class.java)
-        )
-        entries.add(
-            RegistryEntry(
-                Range.atLeast(ProtocolVersion.v1_13.version),
-                State.LOGIN,
-                2,
-                true,
-                ::PluginResponse,
-                PluginResponse::class.java
-            )
-        )
-        entries.add(
-            RegistryEntry(Range.all(), State.LOGIN, 0, false, ::LoginDisconnect, LoginDisconnect::class.java)
-        )
-        entries.add(
-            RegistryEntry(Range.all(), State.LOGIN, 1, false, ::CryptoRequest, CryptoRequest::class.java)
-        )
-        entries.add(
-            RegistryEntry(Range.all(), State.LOGIN, 2, false, ::LoginSuccess, LoginSuccess::class.java)
-        )
-        entries.add(
-            RegistryEntry(Range.all(), State.LOGIN, 3, false, ::SetCompression, SetCompression::class.java)
-        )
-        entries.add(
-            RegistryEntry(Range.all(), State.LOGIN, 4, false, ::PluginRequest, PluginRequest::class.java)
-        )
+        register(Range.all(), State.HANDSHAKE, 0, true, ::HandshakePacket)
+        register(Range.all(), State.LOGIN, 0, true, ::LoginStart)
+        register(Range.all(), State.LOGIN, 1, true, ::CryptoResponse)
+        register(Range.atLeast(ProtocolVersion.v1_13.version), State.LOGIN, 2, true, ::PluginResponse)
+        register(Range.all(), State.LOGIN, 0, false, ::LoginDisconnect)
+        register(Range.all(), State.LOGIN, 1, false, ::CryptoRequest)
+        register(Range.all(), State.LOGIN, 2, false, ::LoginSuccess)
+        register(Range.all(), State.LOGIN, 3, false, ::SetCompression)
+        register(Range.all(), State.LOGIN, 4, false, ::PluginRequest)
+        register(Range.all(), State.STATUS, 0, true, ::StatusRequest)
+        register(Range.all(), State.STATUS, 1, true, ::StatusPing)
+        register(Range.all(), State.STATUS, 0, false, ::StatusResponse)
+        register(Range.all(), State.STATUS, 1, false, ::StatusPong)
+    }
+
+    inline fun <reified P : Packet> register(
+        protocol: Range<Int>,
+        state: State,
+        id: Int,
+        serverBound: Boolean,
+        constructor: Supplier<P>
+    ) {
+        entries.add(RegistryEntry(protocol, state, id, serverBound, constructor, P::class.java))
     }
 
     data class RegistryEntry(
@@ -65,7 +54,7 @@ object PacketRegistry {
         val state: State,
         val id: Int,
         val serverBound: Boolean,
-        val constructor: Supplier<Packet>,
+        val constructor: Supplier<out Packet>,
         val packetClass: Class<out Packet>
     )
 
@@ -302,5 +291,46 @@ class PluginRequest : Packet {
         Type.VAR_INT.writePrimitive(byteBuf, id)
         Type.STRING.write(byteBuf, channel)
         byteBuf.writeBytes(data)
+    }
+}
+
+class StatusResponse : Packet {
+    lateinit var json: String
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+        json = Type.STRING.read(byteBuf)
+    }
+
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+        Type.STRING.write(byteBuf, json)
+    }
+}
+
+class StatusRequest: Packet {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+    }
+
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+    }
+}
+
+class StatusPing: Packet {
+    var number by Delegates.notNull<Long>()
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+        number = byteBuf.readLong()
+    }
+
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+        byteBuf.writeLong(number)
+    }
+}
+
+class StatusPong: Packet {
+    var number by Delegates.notNull<Long>()
+    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+        number = byteBuf.readLong()
+    }
+
+    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+        byteBuf.writeLong(number)
     }
 }

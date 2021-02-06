@@ -51,7 +51,7 @@ class BackendInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
     }
 }
 
-class CloudMinecraftCodec: MessageToMessageCodec<ByteBuf, Packet>() {
+class CloudMinecraftCodec : MessageToMessageCodec<ByteBuf, Packet>() {
     override fun encode(ctx: ChannelHandlerContext, msg: Packet, out: MutableList<Any>) {
         if (!ctx.channel().isActive) return
         val buf = ByteBufAllocator.DEFAULT.buffer()
@@ -67,9 +67,13 @@ class CloudMinecraftCodec: MessageToMessageCodec<ByteBuf, Packet>() {
     override fun decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
         if (!ctx.channel().isActive || !msg.isReadable) return
         val handler = ctx.pipeline().get(CloudMinecraftHandler::class.java)
-        out.add(PacketRegistry.decode(msg,
-            handler.data.frontVer ?: 0,
-            handler.data.state.state, handler.frontEnd))
+        out.add(
+            PacketRegistry.decode(
+                msg,
+                handler.data.frontVer ?: 0,
+                handler.data.state.state, handler.frontEnd
+            )
+        )
         if (msg.isReadable) throw IllegalStateException("Remaining bytes!!!")
     }
 }
@@ -197,31 +201,17 @@ class FrameCodec : ByteToMessageCodec<ByteBuf>() {
 class CloudViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         if (!info.checkIncomingPacket()) throw CancelDecoderException.generate(null)
-        if (!info.shouldTransformPacket()) {
-            out.add(bytebuf.retain())
-            return
+        if (info.shouldTransformPacket()) {
+            info.transformIncoming(bytebuf, CancelDecoderException::generate)
         }
-        val transformedBuf: ByteBuf = ctx.alloc().buffer().writeBytes(bytebuf)
-        try {
-            info.transformIncoming(transformedBuf, CancelDecoderException::generate)
-            out.add(transformedBuf.retain())
-        } finally {
-            transformedBuf.release()
-        }
+        out.add(bytebuf.retain())
     }
 
     override fun encode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         if (!info.checkOutgoingPacket()) throw CancelEncoderException.generate(null)
-        if (!info.shouldTransformPacket()) {
-            out.add(bytebuf.retain())
-            return
+        if (info.shouldTransformPacket()) {
+            info.transformOutgoing(bytebuf, CancelEncoderException::generate)
         }
-        val transformedBuf: ByteBuf = ctx.alloc().buffer().writeBytes(bytebuf)
-        try {
-            info.transformOutgoing(transformedBuf, CancelEncoderException::generate)
-            out.add(transformedBuf.retain())
-        } finally {
-            transformedBuf.release()
-        }
+        out.add(bytebuf.retain())
     }
 }

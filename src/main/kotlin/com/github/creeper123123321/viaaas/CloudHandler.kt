@@ -6,14 +6,12 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.ktor.client.request.*
 import io.netty.bootstrap.Bootstrap
-import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.*
 import io.netty.channel.socket.SocketChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.exception.CancelCodecException
 import us.myles.ViaVersion.packets.State
 import java.math.BigInteger
@@ -270,7 +268,7 @@ class LoginState : MinecraftConnectionState {
         cryptoRequest.publicKey = mcCryptoKey.public
         cryptoRequest.token = token
 
-        frontHandler.data.frontChannel.writeAndFlush(cryptoRequest)
+        sendPacket(frontHandler.data.frontChannel, cryptoRequest, true)
     }
 
     fun handleCryptoRequest(handler: CloudMinecraftHandler, cryptoRequest: CryptoRequest) {
@@ -386,16 +384,9 @@ class LoginState : MinecraftConnectionState {
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
 
-        val packet = ByteBufAllocator.DEFAULT.buffer()
-        try {
-            packet.writeByte(0) // id 0 disconnect
-            Type.STRING.write(packet, Gson().toJson("[VIAaaS] §c$msg"))
-            handler.data.frontChannel
-                .writeAndFlush(packet.retain())
-                .addListener { handler.data.frontChannel.close() }
-        } finally {
-            packet.release()
-        }
+        val packet = LoginDisconnect()
+        packet.msg = Gson().toJson("[VIAaaS] §c$msg")
+        sendFlushPacketClose(handler.data.frontChannel, packet)
     }
 }
 
@@ -404,25 +395,17 @@ object StatusState : MinecraftConnectionState {
         get() = State.STATUS
 
     override fun handlePacket(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
-        if ((packet as UnknownPacket).id !in 0..1) throw IllegalArgumentException("Invalid packet id!")
+        if (packet is UnknownPacket) throw IllegalArgumentException("Invalid packet")
         forward(handler, packet)
     }
 
     override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
 
-        val packet = ByteBufAllocator.DEFAULT.buffer()
-        try {
-            packet.writeByte(0) // id 0 disconnect
-            Type.STRING.write(
-                packet, """{"version": {"name": "VIAaaS", "protocol": -1}, "players":
-| {"max": 0, "online": 0, "sample": []}, "description": {"text": ${Gson().toJson("§c$msg")}}}""".trimMargin()
-            )
-            handler.data.frontChannel.writeAndFlush(packet.retain())
-                .addListener { handler.data.frontChannel.close() }
-        } finally {
-            packet.release()
-        }
+        val packet = StatusResponse()
+        packet.json = """{"version": {"name": "VIAaaS", "protocol": -1}, "players": {"max": 0, "online": 0,
+            | "sample": []}, "description": {"text": ${Gson().toJson("§c$msg")}}}""".trimMargin()
+        sendFlushPacketClose(handler.data.frontChannel, packet)
     }
 }
 
@@ -479,17 +462,19 @@ fun generateServerHash(serverId: String, sharedSecret: ByteArray?, key: PublicKe
     return twosComplementHexdigest(digest.digest())
 }
 
+private fun sendFlushPacketClose(ch: Channel, packet: Packet) {
+    ch.writeAndFlush(packet).addListener { ch.close() }
+}
+
 private fun forward(handler: CloudMinecraftHandler, packet: Packet, flush: Boolean = false) {
-    val msg = ByteBufAllocator.DEFAULT.buffer()
-    try {
-        val ch = handler.other!!
-        if (flush) {
-            ch.writeAndFlush(packet, ch.voidPromise())
-        } else {
-            ch.write(packet, ch.voidPromise())
-        }
-    } finally {
-        msg.release()
+    sendPacket(handler.other!!, packet, flush)
+}
+
+private fun sendPacket(ch: Channel, packet: Packet, flush: Boolean = false) {
+    if (flush) {
+        ch.writeAndFlush(packet, ch.voidPromise())
+    } else {
+        ch.write(packet, ch.voidPromise())
     }
 }
 
