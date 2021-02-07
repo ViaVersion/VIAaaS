@@ -359,6 +359,7 @@ class LoginState : MinecraftConnectionState {
 
     fun handleLoginStart(handler: CloudMinecraftHandler, loginStart: LoginStart) {
         if (loginStart.username.length > 16) throw badLength
+        if (handler.data.frontName != null) throw IllegalStateException("Login already started")
 
         handler.data.frontName = loginStart.username
         handler.data.backName = handler.data.backName ?: handler.data.frontName
