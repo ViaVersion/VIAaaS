@@ -294,68 +294,68 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
 }
 
 class VIAaaSAddress {
-    var protocol: Int? = null
+    var serverAddress: String? = null
     var viaSuffix: String? = null
-    var realAddress: String? = null
+    var viaOptions: String? = null
+    var protocol: Int? = null
     var port: Int? = null
-    var online = true
-    var altUsername: String? = null
+    var online: Boolean? = null
+    var username: String? = null
     fun parse(address: String, viaHostName: String): VIAaaSAddress {
-        val parts = address.split('.')
-        var foundDomain = false
-        var foundOptions = false
-        val ourParts = StringBuilder()
-        val realAddrBuilder = StringBuilder()
-        for (i in parts.indices.reversed()) {
-            val part = parts[i]
-            var realAddrPart = false
-            if (foundDomain) {
-                if (!foundOptions) {
-                    if (part.startsWith("_")) {
-                        val arg = part.substring(2)
-                        when {
-                            part.startsWith("_p", ignoreCase = true) -> port = arg.toInt()
-                            part.startsWith("_o", ignoreCase = true) -> online = arg.toBoolean()
-                            part.startsWith("_v", ignoreCase = true) -> {
-                                try {
-                                    protocol = arg.toInt()
-                                } catch (e: NumberFormatException) {
-                                    val closest = ProtocolVersion.getClosest(arg.replace("_", "."))
-                                    if (closest != null) {
-                                        protocol = closest.version
-                                    }
-                                }
-                            }
-                            part.startsWith("_u", ignoreCase = true) -> {
-                                if (arg.length > 16) throw IllegalArgumentException("Invalid alt username")
-                                altUsername = arg
-                            }
-                        }
-                    } else {
-                        foundOptions = true
+        val suffixRemoved = address.removeSuffix(".$viaHostName")
+
+        if (suffixRemoved == address) {
+            serverAddress = address
+            return this
+        }
+
+        var endOfOptions = false
+        val optionsList = arrayListOf<String>()
+        serverAddress = suffixRemoved.split('.').asReversed().filter {
+            if (endOfOptions || !parseOption(it)) {
+                endOfOptions = true
+                true
+            } else {
+                optionsList.add(it)
+                false
+            }
+        }.asReversed().joinToString(".")
+
+        viaOptions = optionsList.asReversed().joinToString(".")
+
+        viaSuffix = viaHostName
+
+        return this
+    }
+
+    fun parseOption(part: String): Boolean {
+        if (part.startsWith("_")) {
+            val arg = part.substring(2)
+            when {
+                part.startsWith("_p", ignoreCase = true) -> port = arg.toInt()
+                part.startsWith("_o", ignoreCase = true) -> {
+                    online = when {
+                        arg.startsWith("t", ignoreCase = true) -> true
+                        arg.startsWith("f", ignoreCase = true) -> false
+                        else -> null
                     }
                 }
-                if (foundOptions) {
-                    realAddrPart = true
+                part.startsWith("_v", ignoreCase = true) -> {
+                    try {
+                        protocol = arg.toInt()
+                    } catch (e: NumberFormatException) {
+                        ProtocolVersion.getClosest(arg.replace("_", "."))?.also {
+                            protocol = it.version
+                        }
+                    }
                 }
-            } else if (parts.filterIndexed { a, _ -> a >= i }
-                    .joinToString(".").equals(viaHostName, ignoreCase = true)) {
-                foundDomain = true
+                part.startsWith("_u", ignoreCase = true) -> {
+                    if (arg.length > 16) throw IllegalArgumentException("Invalid username")
+                    username = arg
+                }
             }
-            if (realAddrPart) {
-                realAddrBuilder.insert(0, "$part.")
-            } else {
-                ourParts.insert(0, "$part.")
-            }
+            return true
         }
-        val realAddr = realAddrBuilder.toString().replace("\\.$".toRegex(), "")
-        val suffix = ourParts.toString().replace("\\.$".toRegex(), "")
-        if (realAddr.isEmpty()) {
-            realAddress = address
-        } else {
-            realAddress = realAddr
-            viaSuffix = suffix
-        }
-        return this
+        return false
     }
 }

@@ -133,7 +133,7 @@ class HandshakeState : MinecraftConnectionState {
         val backProto = parsed.protocol ?: 47 // todo autodetection
         val hadHostname = parsed.viaSuffix != null
 
-        packet.address = parsed.realAddress!!
+        packet.address = parsed.serverAddress!!
         packet.port = parsed.port ?: if (VIAaaSConfig.defaultBackendPort == -1) {
             packet.port
         } else {
@@ -142,7 +142,7 @@ class HandshakeState : MinecraftConnectionState {
 
         handler.data.backVer = backProto
         handler.data.frontOnline = parsed.online
-        handler.data.backName = parsed.altUsername
+        handler.data.backName = parsed.username
 
         val playerAddr = handler.data.frontHandler.remoteAddress
         mcLogger.info("Connecting $playerAddr (${handler.data.frontVer}) -> ${packet.address}:${packet.port} ($backProto)")
