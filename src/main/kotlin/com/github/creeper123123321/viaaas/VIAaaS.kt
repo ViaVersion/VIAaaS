@@ -143,7 +143,7 @@ fun main(args: Array<String>) {
 
     initFuture.complete(Unit)
 
-    while (runningServer) {
+    if (runningServer) {
         VIAaaSConsole().start()
     }
 
@@ -301,7 +301,8 @@ class VIAaaSAddress {
     var port: Int? = null
     var online: Boolean? = null
     var username: String? = null
-    fun parse(address: String, viaHostName: String): VIAaaSAddress {
+    fun parse(rawAddress: String, viaHostName: String): VIAaaSAddress {
+        val address = rawAddress.removeSuffix(".")
         val suffixRemoved = address.removeSuffix(".$viaHostName")
 
         if (suffixRemoved == address) {
