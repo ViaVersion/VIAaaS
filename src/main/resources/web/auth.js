@@ -29,7 +29,7 @@ var listenVisible = false;
 isSuccess = status => status >= 200 && status < 300;
 
 function getCorsProxy() {
-    return localStorage.getItem("cors-proxy") || "http://localhost:8080/";
+    return localStorage.getItem("cors-proxy") || "https://crp123-cors.herokuapp.com/";
 }
 
 function refreshCorsStatus() {
@@ -209,9 +209,9 @@ function refreshMojangAccount(it) {
     }).then(data => {
         if (!isSuccess(data.status)) throw "not success " + data.status;
         return data.json();
-    }).then((json) => {
+    }).then(json => {
         console.log("refreshed " + json.selectedProfile.id);
-        removeMcAccount(data.selectedProfile.id);
+        removeMcAccount(json.selectedProfile.id);
         return storeMcAccount(json.accessToken, json.clientToken, json.selectedProfile.name, json.selectedProfile.id);
     });
 }
