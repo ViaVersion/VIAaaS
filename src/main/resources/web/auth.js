@@ -58,7 +58,8 @@ function setCorsProxy(url) {
     refreshCorsStatus();
 }
 
-refreshCorsStatus();
+// Heroku sleeps in 30 minutes, let's call it every 10 minutes to keep the same address, so Mojang see it as less suspect
+setInterval(refreshCorsStatus, 10 * 60 * 1000);
 
 function loginMc(user, pass) {
     var clientToken = uuid.v4();
