@@ -57,3 +57,6 @@ VIAaaS may trigger anti-cheats, due to block, item, movement and other differenc
 ## FAQ
 VIAaaS is stuck when connecting with online mode:
 - Your system may have low entropy, see https://wiki.archlinux.org/index.php/Rng-tools
+
+My Microsoft account <18 years old is not able to log in, it's giving XSTS error:
+- Add your account to a family (see https://wiki.vg/Microsoft_Authentication_Scheme#Authenticate_with_XSTS)
