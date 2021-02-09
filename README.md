@@ -40,7 +40,9 @@ Usage for offline mode:
 
 Usage for online mode:
 - You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections or use ```_ofalse``` (offline mode in frontend, not encrypted).
-- You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere, ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```) on the machine you are using the VIAaaS authenticator webpage.
+- You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere, ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```)
+  on the machine you are using the VIAaaS authenticator webpage. You can use my CORS Anywhere instance https://crp123-cors.herokuapp.com/ when using
+  https://viaversion.github.io/VIAaaS/ but Mojang may look it as suspect.
 - Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username A that you're using to connect to the proxy.
 - Add the account B you'll use in ```_u``` parameter to browser auth page.
