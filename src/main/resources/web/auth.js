@@ -46,7 +46,7 @@ function refreshCorsStatus() {
 }
 
 function icanhazip(cors) {
-    return fetch((cors ? getCorsProxy() : "") + "https://icanhazip.com")
+    return fetch((cors ? getCorsProxy() : "") + "https://ipv4.icanhazip.com")
         .then(it => {
              if (!isSuccess(it.status)) throw "not success " + it.status
              return it.text();
