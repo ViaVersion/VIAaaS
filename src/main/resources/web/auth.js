@@ -20,6 +20,7 @@ var wsUrl = getWsUrl();
 
 var socket = null;
 var connectionStatus = document.getElementById("connection_status");
+var corsStatus = document.getElementById("cors_status");
 var listening = document.getElementById("listening");
 var actions = document.getElementById("actions");
 var accounts = document.getElementById("accounts-list");
@@ -30,6 +31,34 @@ isSuccess = status => status >= 200 && status < 300;
 function getCorsProxy() {
     return localStorage.getItem("cors-proxy") || "http://localhost:8080/";
 }
+
+function refreshCorsStatus() {
+    corsStatus.innerText = "...";
+    icanhazip(true)
+        .then(ip => {
+            return icanhazip(false).then(ip2 => {
+                corsStatus.innerText = "OK " + ip + (ip != ip2 ? " (different IP)" : "");
+            });
+        })
+        .catch(e => {
+            corsStatus.innerText = "error: " + e;
+        });
+}
+
+function icanhazip(cors) {
+    return fetch((cors ? getCorsProxy() : "") + "https://icanhazip.com")
+        .then(it => {
+             if (!isSuccess(it.status)) throw "not success " + it.status
+             return it.text();
+        }).then(it => it.trim());
+}
+
+function setCorsProxy(url) {
+    localStorage.setItem("cors-proxy", url);
+    refreshCorsStatus();
+}
+
+refreshCorsStatus();
 
 function loginMc(user, pass) {
     var clientToken = uuid.v4();
@@ -43,7 +72,7 @@ function loginMc(user, pass) {
         }),
         headers: {"content-type": "application/json"}
     }).then((data) => {
-        if (!isSuccess(data.status)) throw "not success code";
+        if (!isSuccess(data.status)) throw "not success " + data.status;
         return data.json();
     }).then((data) => {
         storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id);
@@ -88,7 +117,7 @@ function logoutMojang(id) {
             }),
             headers: {"content-type": "application/json"},
         }).then((data) => {
-            if (!isSuccess(data.status)) throw "not success logout";
+            if (!isSuccess(data.status)) throw "not success logout " + data.status;
             removeMcAccount(id);
         }).catch((e) => {
             if (confirm("failed to invalidate token! error: " + e + " remove account?")) {
@@ -178,7 +207,7 @@ function refreshMojangAccount(it) {
         }),
         headers: {"content-type": "application/json"},
     }).then(data => {
-        if (!isSuccess(data.status)) throw "not success";
+        if (!isSuccess(data.status)) throw "not success " + data.status;
         return data.json();
     }).then((json) => {
         console.log("refreshed " + json.selectedProfile.id);
@@ -284,7 +313,7 @@ function onSocketMsg(event) {
                 getMcUserToken(account).then((data) => {
                     return joinGame(data.accessToken, data.id, parsed.session_hash);
                 }).then((data) => {
-                    if (!isSuccess(data.status)) throw "not success join";
+                    if (!isSuccess(data.status)) throw "not success join " + data.status;
                 }).finally(() => confirmJoin(parsed.session_hash))
                 .catch((e) => {
                     confirmJoin(parsed.session_hash);
@@ -334,7 +363,7 @@ function connect() {
 
 
 $(() => {
-    $("#cors-proxy").on("change", () => localStorage.setItem("cors-proxy", $("#cors-proxy").val()));
+    $("#cors-proxy").on("change", () => setCorsProxy($("#cors-proxy").val()));
     $("#cors-proxy").val(getCorsProxy());
     $("#ws-url").on("change", () => {
        localStorage.setItem("ws-url", $("#ws-url").val());
