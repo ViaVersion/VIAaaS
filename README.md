@@ -14,9 +14,9 @@ Parts:
 - ```viaaas.example.com```: hostname suffix (defined in config)
 
 
-Default Minecraft: viaaas.localhost with port 25565
+Default Minecraft: ```viaaas.localhost``` with port 25565
 
-Default WS URL: wss://localhost:25543/ws
+Default WS URL: ```wss://localhost:25543/ws```
 
 - VIAaaS auth page is designed for storing accounts in the player's browser local storage.
  It requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that
@@ -36,20 +36,22 @@ How to start VIAaaS server:
 - ```java -jar VIAaaS-all.jar```
 
 Usage for offline mode:
-- Connect to mc.example.com._v1_8.viaaas.localhost
+- Connect to ```mc.example.com._v1_8.viaaas.localhost```
 
 Usage for online mode:
-- You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections or use ```_ofalse``` (offline mode in frontend, not encrypted).
-- You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere, ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```)
-  on the machine you are using the VIAaaS authenticator webpage. You can use my CORS Anywhere instance https://crp123-cors.herokuapp.com/ when using
-  https://viaversion.github.io/VIAaaS/ but Mojang may look it as suspect.
+- You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections or use ```_of```
+  (offline mode in frontend, unencrypted).
+- You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere,
+  ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```)
+  on the machine you are using the VIAaaS authenticator webpage. You can use my CORS Anywhere instance ```https://crp123-cors.herokuapp.com/``` when using
+  this page https://viaversion.github.io/VIAaaS/ but Mojang may see it as suspect.
 - Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username A that you're using to connect to the proxy.
-- Add the account B you'll use in ```_u``` parameter to browser auth page.
-- Connect to ```mc.example.com._v1_8._u(account B).viaaas.localhost``` (```_u(account B)``` parameter can be removed if you are using the same account)
+- Add the account B you'll use in ```_u(account B)``` parameter to browser auth page.
+- Connect to ```mc.example.com._v1_8._u(account B).viaaas.localhost``` (```_u``` parameter can be removed if you are using the same username)
 - Approve the login in auth webpage
-- Minecraft client will give Bad Login after you approve the login in your browser if you are using the same account. You can use
-  https://www.curseforge.com/minecraft/mc-mods/auth-me for reauthenticate the client.
+- If you use the same online mode account, your client will give Bad Login after you approve it in your browser. You can use
+  https://www.curseforge.com/minecraft/mc-mods/auth-me for reauthenticating the client.
 
 ## WARNING
 VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
@@ -60,3 +62,7 @@ VIAaaS is stuck when connecting with online mode:
 
 My Microsoft account <18 years old is not able to log in, it's giving XSTS error:
 - Add your account to a family (see https://wiki.vg/Microsoft_Authentication_Scheme#Authenticate_with_XSTS)
+
+Why a online webpage for online mode?:
+- It's easier to maintain in that way, because providing a chat with login requires encoding and decoding more packets which change through versions.
+- It allows your account password and token to be kept with you
