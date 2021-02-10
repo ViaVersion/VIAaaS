@@ -8,8 +8,8 @@ How to use: server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.ex
 Parts:
 - ```server.example.com```: backend server address
 - ```_p```: backend port
-- ```_v```: backend version (protocol id https://wiki.vg/Protocol_version_numbers or name with underline instead of dots)
-- ```_o```: true to force online mode in frontend, false to disable online mode in frontend. if not set, it will be based on backend online mode.
+- ```_v```: backend version (protocol id https://wiki.vg/Protocol_version_numbers or name with underline instead of dots). Current default is 1.8, may change to auto detection in the future
+- ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be based on backend online mode.
 - ```_u```: username to use in backend connection
 - ```viaaas.example.com```: hostname suffix (defined in config)
 
