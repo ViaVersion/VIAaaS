@@ -19,7 +19,7 @@ object FrontEndInit : ChannelInitializer<Channel>() {
             .addLast("mc", MinecraftCodec())
             .addLast(
                 "handler", MinecraftHandler(
-                    ConnectionData(frontChannel = ch), other = null, frontEnd = true
+                    ConnectionData(frontChannel = ch), frontEnd = true
                 )
             )
     }

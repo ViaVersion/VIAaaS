@@ -89,9 +89,7 @@ class HandshakeState : MinecraftConnectionState {
                     if (it.isSuccess) {
                         mcLogger.info("Connected ${handler.remoteAddress} -> $socketAddr")
 
-                        val backChan = future.channel() as SocketChannel
-                        handler.data.backChannel = backChan
-                        handler.other = backChan
+                        handler.data.backChannel = future.channel() as SocketChannel
 
                         forward(handler, packet, true)
 

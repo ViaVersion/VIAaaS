@@ -19,6 +19,6 @@ class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
             // compress
             .addLast("via-codec", ViaCodec(user))
             .addLast("mc", MinecraftCodec())
-            .addLast("handler", MinecraftHandler(connectionData, connectionData.frontChannel, frontEnd = false))
+            .addLast("handler", MinecraftHandler(connectionData, frontEnd = false))
     }
 }

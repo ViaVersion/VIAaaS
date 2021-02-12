@@ -11,10 +11,10 @@ import java.net.SocketAddress
 
 class MinecraftHandler(
     val data: ConnectionData,
-    var other: Channel?,
     val frontEnd: Boolean
 ) : SimpleChannelInboundHandler<Packet>() {
     var remoteAddress: SocketAddress? = null
+    val other: Channel? get() = if (frontEnd) data.backChannel else data.frontChannel
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         if (ctx.channel().isActive) {
