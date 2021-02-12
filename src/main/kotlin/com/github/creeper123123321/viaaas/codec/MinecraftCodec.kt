@@ -1,6 +1,6 @@
 package com.github.creeper123123321.viaaas.codec
 
-import com.github.creeper123123321.viaaas.handler.CloudMinecraftHandler
+import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.packet.PacketRegistry
 import io.netty.buffer.ByteBuf
@@ -13,7 +13,7 @@ class MinecraftCodec : MessageToMessageCodec<ByteBuf, Packet>() {
         if (!ctx.channel().isActive) return
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
-            val handler = ctx.pipeline().get(CloudMinecraftHandler::class.java)
+            val handler = ctx.pipeline().get(MinecraftHandler::class.java)
             PacketRegistry.encode(msg, buf, handler.data.frontVer!!)
             out.add(buf.retain())
         } finally {
@@ -23,7 +23,7 @@ class MinecraftCodec : MessageToMessageCodec<ByteBuf, Packet>() {
 
     override fun decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
         if (!ctx.channel().isActive || !msg.isReadable) return
-        val handler = ctx.pipeline().get(CloudMinecraftHandler::class.java)
+        val handler = ctx.pipeline().get(MinecraftHandler::class.java)
         out.add(
             PacketRegistry.decode(
                 msg,

@@ -34,4 +34,5 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
             List::class.java,
             emptyList<String>()
         )!!.map { it as String }
+    val forceOnlineMode: Boolean get() = this.getBoolean("force-online-mode", false)
 }

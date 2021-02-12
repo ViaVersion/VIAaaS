@@ -9,7 +9,7 @@ import io.netty.channel.SimpleChannelInboundHandler
 import us.myles.ViaVersion.exception.CancelCodecException
 import java.net.SocketAddress
 
-class CloudMinecraftHandler(
+class MinecraftHandler(
     val data: ConnectionData,
     var other: Channel?,
     val frontEnd: Boolean

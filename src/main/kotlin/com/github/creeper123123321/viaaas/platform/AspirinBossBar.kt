@@ -4,5 +4,5 @@ import us.myles.ViaVersion.api.boss.BossColor
 import us.myles.ViaVersion.api.boss.BossStyle
 import us.myles.ViaVersion.boss.CommonBoss
 
-class CloudBossBar(title: String, health: Float, style: BossStyle, color: BossColor) :
+class AspirinBossBar(title: String, health: Float, style: BossStyle, color: BossColor) :
     CommonBoss<Unit>(title, health, color, style)

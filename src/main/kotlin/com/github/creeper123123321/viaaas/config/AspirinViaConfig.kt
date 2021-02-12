@@ -4,7 +4,7 @@ import us.myles.ViaVersion.AbstractViaConfig
 import java.io.File
 import java.net.URL
 
-object CloudViaConfig : AbstractViaConfig(File("config/viaversion.yml")) {
+object AspirinViaConfig : AbstractViaConfig(File("config/viaversion.yml")) {
     // https://github.com/ViaVersion/ViaFabric/blob/mc-1.16/src/main/java/com/github/creeper123123321/viafabric/platform/VRViaConfig.java
     override fun getDefaultConfigURL(): URL = javaClass.classLoader.getResource("assets/viaversion/config.yml")!!
 

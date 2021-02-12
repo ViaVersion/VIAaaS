@@ -26,3 +26,5 @@ default-backend-port: 25565
 blocked-back-addresses: ["*.hypixel.net", "hypixel.net"]
 # VIAaaS will only allow if it matches an address in this list
 allowed-back-addresses: ["*"]
+# Requires online mode for front-end connections. May be useful for stopping bots.
+force-online-mode: false

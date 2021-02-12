@@ -5,7 +5,7 @@ import com.github.creeper123123321.viaaas.packet.handshake.Handshake
 import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
 import com.github.creeper123123321.viaaas.handler.BackEndInit
-import com.github.creeper123123321.viaaas.handler.CloudMinecraftHandler
+import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import com.github.creeper123123321.viaaas.handler.forward
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
@@ -20,7 +20,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 
 class HandshakeState : MinecraftConnectionState {
-    fun connectBack(handler: CloudMinecraftHandler, socketAddr: InetSocketAddress): ChannelFuture {
+    fun connectBack(handler: MinecraftHandler, socketAddr: InetSocketAddress): ChannelFuture {
         return Bootstrap()
             .handler(BackEndInit(handler.data))
             .channelFactory(channelSocketFactory())
@@ -34,7 +34,7 @@ class HandshakeState : MinecraftConnectionState {
     override val state: State
         get() = State.HANDSHAKE
 
-    override fun handlePacket(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
+    override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         if (packet !is Handshake) throw IllegalArgumentException("Invalid packet!")
 
         handler.data.frontVer = packet.protocolId
@@ -57,6 +57,7 @@ class HandshakeState : MinecraftConnectionState {
 
         handler.data.backVer = backProto
         handler.data.frontOnline = parsed.online
+        if (VIAaaSConfig.forceOnlineMode) handler.data.frontOnline = true
         handler.data.backName = parsed.username
 
         val playerAddr = handler.data.frontHandler.remoteAddress
@@ -108,11 +109,11 @@ class HandshakeState : MinecraftConnectionState {
         }
     }
 
-    override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
+    override fun disconnect(handler: MinecraftHandler, msg: String) {
         handler.data.frontChannel.close() // Not worth logging
     }
 
-    override fun onInactivated(handler: CloudMinecraftHandler) {
+    override fun onInactivated(handler: MinecraftHandler) {
         // Not worth logging
     }
 }

@@ -5,7 +5,7 @@ import com.github.creeper123123321.viaaas.codec.CompressionCodec
 import com.github.creeper123123321.viaaas.codec.CryptoCodec
 import com.github.creeper123123321.viaaas.packet.*
 import com.github.creeper123123321.viaaas.packet.login.*
-import com.github.creeper123123321.viaaas.handler.CloudMinecraftHandler
+import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import com.github.creeper123123321.viaaas.handler.forward
 import com.google.common.net.UrlEscapers
 import com.google.gson.Gson
@@ -27,7 +27,7 @@ class LoginState : MinecraftConnectionState {
     override val state: State
         get() = State.LOGIN
 
-    override fun handlePacket(handler: CloudMinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
+    override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         when (packet) {
             is LoginStart -> handleLoginStart(handler, packet)
             is CryptoResponse -> handleCryptoResponse(handler, packet)
@@ -41,16 +41,16 @@ class LoginState : MinecraftConnectionState {
         }
     }
 
-    private fun handleLoginSuccess(handler: CloudMinecraftHandler, loginSuccess: LoginSuccess) {
+    private fun handleLoginSuccess(handler: MinecraftHandler, loginSuccess: LoginSuccess) {
         handler.data.state = PlayState
         forward(handler, loginSuccess)
     }
 
-    private fun handleCompression(handler: CloudMinecraftHandler, setCompression: SetCompression) {
+    private fun handleCompression(handler: MinecraftHandler, setCompression: SetCompression) {
         val pipe = handler.data.frontChannel.pipeline()
         val threshold = setCompression.threshold
 
-        val backPipe = pipe.get(CloudMinecraftHandler::class.java).other!!.pipeline()
+        val backPipe = pipe.get(MinecraftHandler::class.java).other!!.pipeline()
         if (threshold != -1) {
             backPipe.addAfter("frame", "compress", CompressionCodec(threshold))
         } else if (backPipe.get("compress") != null) {
@@ -67,7 +67,7 @@ class LoginState : MinecraftConnectionState {
         }
     }
 
-    fun authenticateOnlineFront(frontHandler: CloudMinecraftHandler) {
+    fun authenticateOnlineFront(frontHandler: MinecraftHandler) {
         val id = "VIAaaS" + ByteArray(10).let {
             secureRandom.nextBytes(it)
             Base64.getEncoder().withoutPadding().encodeToString(it)
@@ -89,7 +89,7 @@ class LoginState : MinecraftConnectionState {
         send(frontHandler.data.frontChannel, cryptoRequest, true)
     }
 
-    fun handleCryptoRequest(handler: CloudMinecraftHandler, cryptoRequest: CryptoRequest) {
+    fun handleCryptoRequest(handler: MinecraftHandler, cryptoRequest: CryptoRequest) {
         val data = handler.data
         val backServerId = cryptoRequest.serverId
         val backPublicKey = cryptoRequest.publicKey
@@ -140,7 +140,7 @@ class LoginState : MinecraftConnectionState {
         }
     }
 
-    fun handleCryptoResponse(handler: CloudMinecraftHandler, cryptoResponse: CryptoResponse) {
+    fun handleCryptoResponse(handler: MinecraftHandler, cryptoResponse: CryptoResponse) {
         val frontHash = let {
             val frontKey = decryptRsa(mcCryptoKey.private, cryptoResponse.encryptedKey)
             // RSA token - wat??? why is it encrypted with RSA if it was sent unencrypted?
@@ -175,7 +175,7 @@ class LoginState : MinecraftConnectionState {
         }
     }
 
-    fun handleLoginStart(handler: CloudMinecraftHandler, loginStart: LoginStart) {
+    fun handleLoginStart(handler: MinecraftHandler, loginStart: LoginStart) {
         if (loginStart.username.length > 16) throw badLength
         if (handler.data.frontName != null) throw IllegalStateException("Login already started")
 
@@ -200,7 +200,7 @@ class LoginState : MinecraftConnectionState {
         }
     }
 
-    override fun disconnect(handler: CloudMinecraftHandler, msg: String) {
+    override fun disconnect(handler: MinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
 
         val packet = LoginDisconnect()

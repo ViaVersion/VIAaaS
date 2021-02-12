@@ -1,6 +1,6 @@
 package com.github.creeper123123321.viaaas
 
-import com.github.creeper123123321.viaaas.command.CloudCommands
+import com.github.creeper123123321.viaaas.command.AspirinCommands
 import com.github.creeper123123321.viaaas.command.VIAaaSConsole
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
 import com.github.creeper123123321.viaaas.handler.FrontEndInit
@@ -12,7 +12,6 @@ import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import io.ktor.client.request.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -45,7 +44,7 @@ import java.security.KeyPairGenerator
 import java.util.concurrent.CompletableFuture
 
 val viaaasVer = GsonUtil.getGson().fromJson(
-    CloudPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!.reader(Charsets.UTF_8).readText(),
+    AspirinPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!.reader(Charsets.UTF_8).readText(),
     JsonObject::class.java
 ).get("version").asString
 val viaWebServer = WebDashboardServer()
@@ -103,15 +102,15 @@ fun main(args: Array<String>) {
 
     Via.init(
         ViaManager.builder()
-            .injector(CloudInjector)
-            .loader(CloudLoader)
-            .commandHandler(CloudCommands)
-            .platform(CloudPlatform).build()
+            .injector(AspirinInjector)
+            .loader(AspirinLoader)
+            .commandHandler(AspirinCommands)
+            .platform(AspirinPlatform).build()
     )
     MappingDataLoader.enableMappingsCache()
     Via.getManager().init()
-    CloudRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
-    CloudBackwards.init(File("config/viabackwards"))
+    AspirinRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
+    AspirinBackwards.init(File("config/viabackwards"))
 
     val parent = eventLoopGroup()
     val child = eventLoopGroup()
@@ -135,7 +134,7 @@ fun main(args: Array<String>) {
 
     initFuture.complete(Unit)
 
-    VIAaaSConsole().start()
+    VIAaaSConsole.start()
 
     ktorServer?.stop(1000, 1000)
     httpClient.close()

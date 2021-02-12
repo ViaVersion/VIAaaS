@@ -6,7 +6,7 @@ import us.myles.ViaVersion.sponge.util.LoggerWrapper
 import java.io.File
 import java.util.logging.Logger
 
-object CloudBackwards : ViaBackwardsPlatform {
+object AspirinBackwards : ViaBackwardsPlatform {
     val log = LoggerWrapper(LoggerFactory.getLogger("ViaBackwards"))
     override fun getDataFolder() = File("config/viabackwards")
     override fun getLogger(): Logger = log

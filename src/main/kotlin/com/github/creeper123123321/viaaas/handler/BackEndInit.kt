@@ -17,8 +17,8 @@ class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
             // "crypto"
             .addLast("frame", FrameCodec())
             // compress
-            .addLast("via-codec", CloudViaCodec(user))
+            .addLast("via-codec", ViaCodec(user))
             .addLast("mc", MinecraftCodec())
-            .addLast("handler", CloudMinecraftHandler(connectionData, connectionData.frontChannel, frontEnd = false))
+            .addLast("handler", MinecraftHandler(connectionData, connectionData.frontChannel, frontEnd = false))
     }
 }

@@ -1,9 +1,7 @@
 package com.github.creeper123123321.viaaas.command
 
-import com.github.creeper123123321.viaaas.handler.CloudMinecraftHandler
 import com.github.creeper123123321.viaaas.runningServer
 import com.github.creeper123123321.viaaas.viaaasLogger
-import com.github.creeper123123321.viaaas.viaaasVer
 import net.minecrell.terminalconsole.SimpleTerminalConsole
 import org.jline.reader.Candidate
 import org.jline.reader.LineReader
@@ -11,16 +9,13 @@ import org.jline.reader.LineReaderBuilder
 import org.slf4j.LoggerFactory
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.command.ViaCommandSender
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import java.util.*
 
-class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
+object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
     val commands = hashMapOf<String, (MutableList<String>?, String, Array<String>) -> Unit>()
     override fun isRunning(): Boolean = runningServer
 
     init {
-        commands["stop"] = { suggestion, _, _ -> if (suggestion == null) this.shutdown() }
-        commands["end"] = commands["stop"]!!
         commands["viaversion"] = { suggestion, _, args ->
             if (suggestion == null) {
                 Via.getManager().commandHandler.onCommand(this, args)
@@ -30,34 +25,15 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
         }
         commands["viaver"] = commands["viaversion"]!!
         commands["vvcloud"] = commands["viaversion"]!!
+        commands["vvaas"] = commands["viaversion"]!!
+        commands["vvaspirin"] = commands["viaversion"]!!
+        commands["viaaas"] = commands["viaversion"]!!
         commands["help"] = { suggestion, _, _ ->
             if (suggestion == null) sendMessage(commands.entries.groupBy { it.value }.entries.joinToString(", ") {
                 it.value.joinToString("/") { it.key }
             })
         }
         commands["?"] = commands["help"]!!
-        commands["ver"] = { suggestion, _, _ ->
-            if (suggestion == null) sendMessage(viaaasVer)
-        }
-        commands["list"] = { suggestion, _, _ ->
-            if (suggestion == null) {
-                sendMessage("List of player connections: ")
-                Via.getPlatform().connectionManager.connections.forEach {
-                    val backAddr = it.channel?.remoteAddress()
-                    val pVer = it.protocolInfo?.protocolVersion?.let {
-                        ProtocolVersion.getProtocol(it)
-                    }
-                    val backName = it.protocolInfo?.username
-                    val backVer = it.protocolInfo?.serverProtocolVersion?.let {
-                        ProtocolVersion.getProtocol(it)
-                    }
-                    val pAddr =
-                        it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.other?.remoteAddress()
-                    val pName = it.channel?.pipeline()?.get(CloudMinecraftHandler::class.java)?.data?.frontName
-                    sendMessage("$pAddr $pVer ($pName) -> $backVer ($backName) $backAddr")
-                }
-            }
-        }
     }
 
     override fun buildReader(builder: LineReaderBuilder): LineReader {
@@ -100,7 +76,7 @@ class VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
         }
     }
 
-    override fun shutdown() {
+    public override fun shutdown() {
         viaaasLogger.info("Shutting down...")
         runningServer = false
     }

@@ -14,6 +14,6 @@ class ConnectionData(
     var frontVer: Int? = null,
     var backVer: Int? = null,
 ) {
-    val frontHandler get() = frontChannel.pipeline().get(CloudMinecraftHandler::class.java)
-    val backHandler get() = backChannel?.pipeline()?.get(CloudMinecraftHandler::class.java)
+    val frontHandler get() = frontChannel.pipeline().get(MinecraftHandler::class.java)
+    val backHandler get() = backChannel?.pipeline()?.get(MinecraftHandler::class.java)
 }

@@ -18,7 +18,7 @@ object FrontEndInit : ChannelInitializer<Channel>() {
             .addLast("flow-handler", FlowControlHandler())
             .addLast("mc", MinecraftCodec())
             .addLast(
-                "handler", CloudMinecraftHandler(
+                "handler", MinecraftHandler(
                     ConnectionData(frontChannel = ch), other = null, frontEnd = true
                 )
             )

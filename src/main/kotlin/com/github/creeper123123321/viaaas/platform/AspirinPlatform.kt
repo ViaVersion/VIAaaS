@@ -1,7 +1,8 @@
 package com.github.creeper123123321.viaaas.platform
 
-import com.github.creeper123123321.viaaas.*
-import com.github.creeper123123321.viaaas.config.CloudViaConfig
+import com.github.creeper123123321.viaaas.config.AspirinViaConfig
+import com.github.creeper123123321.viaaas.initFuture
+import com.github.creeper123123321.viaaas.viaaasVer
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.netty.channel.DefaultEventLoop
 import org.slf4j.LoggerFactory
@@ -22,7 +23,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
-object CloudPlatform : ViaPlatform<Unit> {
+object AspirinPlatform : ViaPlatform<Unit> {
     val connMan = ViaConnectionManager()
     val executor = Executors.newCachedThreadPool(ThreadFactoryBuilder().setNameFormat("Via-%d").setDaemon(true).build())
     val eventLoop = DefaultEventLoop(executor)
@@ -35,32 +36,31 @@ object CloudPlatform : ViaPlatform<Unit> {
         // todo
     }
 
-    override fun kickPlayer(p0: UUID, p1: String): Boolean = false // todo
-    override fun getApi(): ViaAPI<Unit> = CloudViaAPI
-    override fun getDataFolder(): File = File("viaversion")
-    override fun getConf(): ViaVersionConfig = CloudViaConfig
     override fun onReload() {
+    }
+    
+    override fun runSync(runnable: Runnable): TaskId = AspirinTask(eventLoop.submit(runnable))
+    override fun runSync(p0: Runnable, p1: Long): TaskId =
+        AspirinTask(eventLoop.schedule(p0, p1 * 50L, TimeUnit.MILLISECONDS))
+
+    override fun runRepeatingSync(p0: Runnable, p1: Long): TaskId =
+        AspirinTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
+
+    override fun cancelTask(p0: TaskId?) {
+        (p0 as AspirinTask).obj.cancel(false)
     }
 
     override fun getDump(): JsonObject = JsonObject()
-    override fun runSync(runnable: Runnable): TaskId = CloudTask(eventLoop.submit(runnable))
-    override fun runSync(p0: Runnable, p1: Long): TaskId =
-        CloudTask(eventLoop.schedule(p0, p1 * 50L, TimeUnit.MILLISECONDS))
-
-    override fun runRepeatingSync(p0: Runnable, p1: Long): TaskId =
-        CloudTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
-
-    override fun runAsync(p0: Runnable): TaskId = CloudTask(CompletableFuture.runAsync(p0, executor))
+    override fun kickPlayer(p0: UUID, p1: String): Boolean = false
+    override fun getApi(): ViaAPI<Unit> = AspirinViaAPI
+    override fun getDataFolder(): File = File("viaversion")
+    override fun getConf(): ViaVersionConfig = AspirinViaConfig
+    override fun runAsync(p0: Runnable): TaskId = AspirinTask(CompletableFuture.runAsync(p0, executor))
     override fun getLogger(): Logger = LoggerWrapper(LoggerFactory.getLogger("ViaVersion"))
     override fun getConnectionManager(): ViaConnectionManager = connMan
     override fun getOnlinePlayers(): Array<ViaCommandSender> = arrayOf()
-    override fun cancelTask(p0: TaskId?) {
-        (p0 as CloudTask).obj.cancel(false)
-    }
-
     override fun isPluginEnabled(): Boolean = true
-    override fun getConfigurationProvider(): ConfigurationProvider = CloudViaConfig
-
+    override fun getConfigurationProvider(): ConfigurationProvider = AspirinViaConfig
     override fun getPlatformName(): String = "VIAaaS"
     override fun getPlatformVersion(): String = viaaasVer
     override fun getPluginVersion(): String = VersionInfo.VERSION
