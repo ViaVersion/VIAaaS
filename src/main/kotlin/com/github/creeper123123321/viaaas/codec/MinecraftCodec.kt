@@ -14,7 +14,7 @@ class MinecraftCodec : MessageToMessageCodec<ByteBuf, Packet>() {
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
             val handler = ctx.pipeline().get(MinecraftHandler::class.java)
-            PacketRegistry.encode(msg, buf, handler.data.frontVer!!)
+            PacketRegistry.encode(msg, buf, handler.data.frontVer!!, serverBound = !handler.frontEnd)
             out.add(buf.retain())
         } finally {
             buf.release()

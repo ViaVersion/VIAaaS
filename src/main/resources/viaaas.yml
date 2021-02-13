@@ -28,3 +28,7 @@ blocked-back-addresses: ["*.hypixel.net", "hypixel.net"]
 allowed-back-addresses: ["*"]
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
+# Shows player and server version in player list
+show-version-ping: true
+# Shows info in server brand (F3)
+show-brand-info: true

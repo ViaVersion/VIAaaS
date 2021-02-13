@@ -7,6 +7,7 @@ import com.github.creeper123123321.viaaas.handler.FrontEndInit
 import com.github.creeper123123321.viaaas.platform.*
 import com.github.creeper123123321.viaaas.web.ViaWebApp
 import com.github.creeper123123321.viaaas.web.WebDashboardServer
+import com.google.gson.JsonParser
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
 import io.ktor.client.*
@@ -36,17 +37,15 @@ import io.netty.util.concurrent.Future
 import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
-import us.myles.ViaVersion.util.GsonUtil
-import us.myles.viaversion.libs.gson.JsonObject
+import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator
 import java.util.concurrent.CompletableFuture
 
-val viaaasVer = GsonUtil.getGson().fromJson(
-    AspirinPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!.reader(Charsets.UTF_8).readText(),
-    JsonObject::class.java
-).get("version").asString
+val viaaasVer = JsonParser.parseString(
+    AspirinPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!.reader(Charsets.UTF_8).readText()
+).asJsonObject.get("version").asString
 val viaWebServer = WebDashboardServer()
 var runningServer = true
 val httpClient = HttpClient {
@@ -89,6 +88,9 @@ fun channelSocketFactory(): ChannelFactory<SocketChannel> {
     return ChannelFactory { NioSocketChannel() }
 }
 
+val parentLoop = eventLoopGroup()
+val childLoop = eventLoopGroup()
+
 fun main(args: Array<String>) {
     // Stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/Velocity.java
     if (System.getProperty("io.netty.allocator.maxOrder") == null) {
@@ -109,14 +111,12 @@ fun main(args: Array<String>) {
     )
     MappingDataLoader.enableMappingsCache()
     Via.getManager().init()
+    ProtocolVersion.register(-2, "AUTO")
     AspirinRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
     AspirinBackwards.init(File("config/viabackwards"))
 
-    val parent = eventLoopGroup()
-    val child = eventLoopGroup()
-
     val future = ServerBootstrap()
-        .group(parent, child)
+        .group(parentLoop, childLoop)
         .channelFactory(channelServerSocketFactory())
         .childHandler(FrontEndInit)
         .childOption(ChannelOption.IP_TOS, 0x18)
@@ -138,7 +138,7 @@ fun main(args: Array<String>) {
 
     ktorServer?.stop(1000, 1000)
     httpClient.close()
-    listOf<Future<*>>(future.channel().close(), parent.shutdownGracefully(), child.shutdownGracefully())
+    listOf<Future<*>>(future.channel().close(), parentLoop.shutdownGracefully(), childLoop.shutdownGracefully())
         .forEach { it.sync() }
 
     Via.getManager().destroy()

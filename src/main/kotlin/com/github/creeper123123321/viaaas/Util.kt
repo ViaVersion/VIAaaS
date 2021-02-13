@@ -3,6 +3,7 @@ package com.github.creeper123123321.viaaas
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
 import com.google.common.base.Preconditions
 import com.google.common.primitives.Ints
+import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
 import io.netty.handler.codec.DecoderException
 import org.slf4j.LoggerFactory
@@ -133,3 +134,5 @@ fun writeFlushClose(ch: Channel, obj: Any) {
 }
 
 val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()
+
+fun readableToByteArray(byteBuf: ByteBuf) = ByteArray(byteBuf.readableBytes()).also { byteBuf.readBytes(it) }

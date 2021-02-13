@@ -2,6 +2,7 @@ package com.github.creeper123123321.viaaas.handler
 
 import com.github.creeper123123321.viaaas.codec.FrameCodec
 import com.github.creeper123123321.viaaas.codec.MinecraftCodec
+import com.github.creeper123123321.viaaas.handler.autoprotocol.ProtocolDetectorHandler
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.ReadTimeoutHandler
@@ -19,6 +20,11 @@ class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
             // compress
             .addLast("via-codec", ViaCodec(user))
             .addLast("mc", MinecraftCodec())
+            .also {
+                if (connectionData.backVer == null) {
+                    it.addLast("protocol-detector", ProtocolDetectorHandler(connectionData))
+                }
+            }
             .addLast("handler", MinecraftHandler(connectionData, frontEnd = false))
     }
 }

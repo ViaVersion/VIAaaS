@@ -8,7 +8,7 @@ How to use: server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.ex
 Parts:
 - ```server.example.com```: backend server address
 - ```_p```: backend port
-- ```_v```: backend version (protocol id https://wiki.vg/Protocol_version_numbers or name with underline instead of dots). Current default is 1.8, may change to auto detection in the future
+- ```_v```: backend version (protocol id https://wiki.vg/Protocol_version_numbers or name with underline instead of dots). ```AUTO``` is default and 1.8 is fallback if it fails.
 - ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be based on backend online mode.
 - ```_u```: username to use in backend connection
 - ```viaaas.example.com```: hostname suffix (defined in config)
@@ -36,7 +36,7 @@ How to start VIAaaS server:
 - ```java -jar VIAaaS-all.jar```
 
 Usage for offline mode:
-- Connect to ```mc.example.com._v1_8.viaaas.localhost```
+- Connect to ```mc.example.com.viaaas.localhost```
 
 Usage for online mode:
 - You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections or use ```_of```
@@ -48,7 +48,7 @@ Usage for online mode:
 - Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like http://localhost:8080/,
   note the ending slash) and listen to the username A that you're using to connect to the proxy.
 - Add the account B you'll use in ```_u(account B)``` parameter to browser auth page.
-- Connect to ```mc.example.com._v1_8._u(account B).viaaas.localhost``` (```_u``` parameter can be removed if you are using the same username)
+- Connect to ```mc.example.com._u(account B).viaaas.localhost``` (```_u``` parameter can be removed if you are using the same username)
 - Approve the login in auth webpage
 - If you use the same online mode account, your client will give Bad Login after you approve it in your browser. You can use
   https://www.curseforge.com/minecraft/mc-mods/auth-me for reauthenticating the client.

@@ -17,10 +17,6 @@ object FrontEndInit : ChannelInitializer<Channel>() {
             // "compress"
             .addLast("flow-handler", FlowControlHandler())
             .addLast("mc", MinecraftCodec())
-            .addLast(
-                "handler", MinecraftHandler(
-                    ConnectionData(frontChannel = ch), frontEnd = true
-                )
-            )
+            .addLast("handler", MinecraftHandler(ConnectionData(frontChannel = ch), frontEnd = true))
     }
 }

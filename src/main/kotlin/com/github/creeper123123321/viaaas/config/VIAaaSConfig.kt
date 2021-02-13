@@ -35,4 +35,6 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
             emptyList<String>()
         )!!.map { it as String }
     val forceOnlineMode: Boolean get() = this.getBoolean("force-online-mode", false)
+    val showVersionPing: Boolean get() = this.getBoolean("show-version-ping", true)
+    val showBrandInfo: Boolean get() = this.getBoolean("show-brand-info", true)
 }

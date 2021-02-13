@@ -2,6 +2,7 @@ package com.github.creeper123123321.viaaas.packet
 
 import com.github.creeper123123321.viaaas.packet.handshake.Handshake
 import com.github.creeper123123321.viaaas.packet.login.*
+import com.github.creeper123123321.viaaas.packet.play.PluginMessage
 import com.github.creeper123123321.viaaas.packet.status.StatusPing
 import com.github.creeper123123321.viaaas.packet.status.StatusPong
 import com.github.creeper123123321.viaaas.packet.status.StatusRequest
@@ -17,6 +18,7 @@ object PacketRegistry {
     val entries = mutableListOf<RegistryEntry>()
 
     init {
+        // Obviosly stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java
         register(Range.all(), State.HANDSHAKE, 0, true, ::Handshake)
         register(Range.all(), State.LOGIN, 0, true, ::LoginStart)
         register(Range.all(), State.LOGIN, 1, true, ::CryptoResponse)
@@ -25,11 +27,33 @@ object PacketRegistry {
         register(Range.all(), State.LOGIN, 1, false, ::CryptoRequest)
         register(Range.all(), State.LOGIN, 2, false, ::LoginSuccess)
         register(Range.all(), State.LOGIN, 3, false, ::SetCompression)
-        register(Range.all(), State.LOGIN, 4, false, ::PluginRequest)
+        register(Range.atLeast(ProtocolVersion.v1_13.version), State.LOGIN, 4, false, ::PluginRequest)
         register(Range.all(), State.STATUS, 0, true, ::StatusRequest)
         register(Range.all(), State.STATUS, 1, true, ::StatusPing)
         register(Range.all(), State.STATUS, 0, false, ::StatusResponse)
         register(Range.all(), State.STATUS, 1, false, ::StatusPong)
+        register(
+            ::PluginMessage, State.PLAY, true, mapOf(
+                Range.closed(ProtocolVersion.v1_7_1.version, ProtocolVersion.v1_8.version) to 0x17,
+                Range.closed(ProtocolVersion.v1_9.version, ProtocolVersion.v1_11_1.version) to 0x09,
+                Range.singleton(ProtocolVersion.v1_12.version) to 0x0A,
+                Range.closed(ProtocolVersion.v1_12_1.version, ProtocolVersion.v1_12_2.version) to 0x09,
+                Range.closed(ProtocolVersion.v1_13.version, ProtocolVersion.v1_13_2.version) to 0x0A,
+                Range.closed(ProtocolVersion.v1_14.version, ProtocolVersion.v1_16_4.version) to 0x0B
+            )
+        )
+        register(
+            ::PluginMessage, State.PLAY, false,
+            mapOf(
+                Range.closed(ProtocolVersion.v1_7_1.version, ProtocolVersion.v1_8.version) to 0x3F,
+                Range.closed(ProtocolVersion.v1_9.version, ProtocolVersion.v1_12_2.version) to 0x18,
+                Range.closed(ProtocolVersion.v1_13.version, ProtocolVersion.v1_13_2.version) to 0x19,
+                Range.closed(ProtocolVersion.v1_14.version, ProtocolVersion.v1_14_4.version) to 0x18,
+                Range.closed(ProtocolVersion.v1_15.version, ProtocolVersion.v1_15_2.version) to 0x19,
+                Range.closed(ProtocolVersion.v1_16.version, ProtocolVersion.v1_16_1.version) to 0x18,
+                Range.closed(ProtocolVersion.v1_16_2.version, ProtocolVersion.v1_16_4.version) to 0x17
+            )
+        )
     }
 
     inline fun <reified P : Packet> register(
@@ -40,6 +64,15 @@ object PacketRegistry {
         constructor: Supplier<P>
     ) {
         entries.add(RegistryEntry(protocol, state, id, serverBound, constructor, P::class.java))
+    }
+
+    inline fun <reified P : Packet> register(
+        constructor: Supplier<P>,
+        state: State,
+        serverBound: Boolean,
+        idByProtocol: Map<Range<Int>, Int>
+    ) {
+        idByProtocol.forEach { (protocol, id) -> register(protocol, state, id, serverBound, constructor) }
     }
 
     data class RegistryEntry(
@@ -63,9 +96,9 @@ object PacketRegistry {
         }?.constructor
     }
 
-    fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int): Int? {
+    fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int, serverBound: Boolean): Int? {
         return entries.firstOrNull {
-            it.versionRange.contains(protocolVersion) && it.packetClass == packetClass
+            it.versionRange.contains(protocolVersion) && it.packetClass == packetClass && it.serverBound == serverBound
         }?.id
     }
 
@@ -78,11 +111,11 @@ object PacketRegistry {
         return packet
     }
 
-    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: Int) {
+    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: Int, serverBound: Boolean) {
         val id = if (packet is UnknownPacket) {
             packet.id
         } else {
-            getPacketId(packet.javaClass, protocolVersion)!!
+            getPacketId(packet.javaClass, protocolVersion, serverBound)!!
         }
         Type.VAR_INT.writePrimitive(byteBuf, id)
         packet.encode(byteBuf, protocolVersion)

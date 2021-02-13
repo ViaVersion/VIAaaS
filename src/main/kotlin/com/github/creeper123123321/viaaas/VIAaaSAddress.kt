@@ -32,7 +32,6 @@ class VIAaaSAddress {
         }.asReversed().joinToString(".")
 
         viaOptions = optionsList.asReversed().joinToString(".")
-
         viaSuffix = viaHostName
 
         return this
@@ -57,6 +56,9 @@ class VIAaaSAddress {
                         ProtocolVersion.getClosest(arg.replace("_", "."))?.also {
                             protocol = it.version
                         }
+                    }
+                    if (protocol == -2) {
+                        protocol = null
                     }
                 }
                 part.startsWith("_u", ignoreCase = true) -> {

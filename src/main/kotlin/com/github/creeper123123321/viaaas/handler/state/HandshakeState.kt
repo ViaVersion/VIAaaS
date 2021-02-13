@@ -45,7 +45,7 @@ class HandshakeState : MinecraftConnectionState {
         }
 
         val parsed = VIAaaSAddress().parse(packet.address.substringBefore(0.toChar()), VIAaaSConfig.hostName)
-        val backProto = parsed.protocol ?: 47 // todo autodetection
+        val backProto = parsed.protocol
         val hadHostname = parsed.viaSuffix != null
 
         packet.address = parsed.serverAddress!!
@@ -61,7 +61,7 @@ class HandshakeState : MinecraftConnectionState {
         handler.data.backName = parsed.username
 
         val playerAddr = handler.data.frontHandler.remoteAddress
-        mcLogger.info("Connecting $playerAddr (${handler.data.frontVer}) -> ${packet.address}:${packet.port} ($backProto)")
+        mcLogger.info("Connecting ${handler.data.state.state} $playerAddr (${handler.data.frontVer}) -> ${packet.address}:${packet.port} ($backProto)")
 
         if (!hadHostname && VIAaaSConfig.requireHostName) {
             throw UnsupportedOperationException("This VIAaaS instance requires you to use the hostname")

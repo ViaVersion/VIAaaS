@@ -1,6 +1,7 @@
 package com.github.creeper123123321.viaaas.packet.login
 
 import com.github.creeper123123321.viaaas.packet.Packet
+import com.github.creeper123123321.viaaas.readableToByteArray
 import io.netty.buffer.ByteBuf
 import us.myles.ViaVersion.api.type.Type
 import kotlin.properties.Delegates
@@ -13,7 +14,7 @@ class PluginResponse : Packet {
         id = Type.VAR_INT.readPrimitive(byteBuf)
         success = byteBuf.readBoolean()
         if (success) {
-            data = ByteArray(byteBuf.readableBytes()).also { byteBuf.readBytes(it) }
+            data = readableToByteArray(byteBuf)
         }
     }
 
