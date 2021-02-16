@@ -31,7 +31,7 @@ object ProtocolDetector {
             try {
                 val ch: ChannelFuture = Bootstrap()
                     .group(childLoop)
-                    .channel(NioSocketChannel::class.java)
+                    .channelFactory(channelSocketFactory())
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.IP_TOS, 0x18)
                     .handler(object : ChannelInitializer<Channel>() {
