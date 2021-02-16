@@ -1,5 +1,6 @@
 package com.github.creeper123123321.viaaas.handler.autoprotocol
 
+import com.github.creeper123123321.viaaas.channelSocketFactory
 import com.github.creeper123123321.viaaas.childLoop
 import com.github.creeper123123321.viaaas.codec.FrameCodec
 import com.github.creeper123123321.viaaas.codec.MinecraftCodec
