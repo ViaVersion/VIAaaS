@@ -6,7 +6,7 @@ import us.myles.ViaVersion.protocols.base.VersionProvider
 
 object AspirinVersionProvider : VersionProvider() {
     override fun getServerProtocol(connection: UserConnection): Int {
-        val ver = connection.channel!!.pipeline().get(MinecraftHandler::class.java).data.backVer
+        val ver = connection.channel!!.pipeline().get(MinecraftHandler::class.java).data.viaBackServerVer
         if (ver != null) return ver
         return super.getServerProtocol(connection)
     }

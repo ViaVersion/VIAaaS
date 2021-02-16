@@ -37,7 +37,7 @@ object PlayState : MinecraftConnectionState {
                     Type.STRING.read(Unpooled.wrappedBuffer(pluginMessage.data))
                 } + " (VIAaaS C: ${ProtocolVersion.getProtocol(handler.data.frontVer!!)} S: ${
                     ProtocolVersion.getProtocol(
-                        handler.data.backVer!!
+                        handler.data.viaBackServerVer!!
                     )
                 })"
 

@@ -1,36 +1,15 @@
 package com.github.creeper123123321.viaaas.handler.state
 
-import com.github.creeper123123321.viaaas.*
-import com.github.creeper123123321.viaaas.packet.handshake.Handshake
-import com.github.creeper123123321.viaaas.packet.Packet
+import com.github.creeper123123321.viaaas.VIAaaSAddress
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
-import com.github.creeper123123321.viaaas.handler.BackEndInit
 import com.github.creeper123123321.viaaas.handler.MinecraftHandler
-import com.github.creeper123123321.viaaas.handler.forward
-import io.netty.bootstrap.Bootstrap
-import io.netty.channel.ChannelFuture
+import com.github.creeper123123321.viaaas.mcLogger
+import com.github.creeper123123321.viaaas.packet.Packet
+import com.github.creeper123123321.viaaas.packet.handshake.Handshake
 import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelOption
-import io.netty.channel.socket.SocketChannel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import us.myles.ViaVersion.packets.State
-import java.net.InetAddress
-import java.net.InetSocketAddress
 
 class HandshakeState : MinecraftConnectionState {
-    fun connectBack(handler: MinecraftHandler, socketAddr: InetSocketAddress): ChannelFuture {
-        return Bootstrap()
-            .handler(BackEndInit(handler.data))
-            .channelFactory(channelSocketFactory())
-            .group(handler.data.frontChannel.eventLoop())
-            .option(ChannelOption.IP_TOS, 0x18)
-            .option(ChannelOption.TCP_NODELAY, true)
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
-            .connect(socketAddr)
-    }
-
     override val state: State
         get() = State.HANDSHAKE
 
@@ -55,55 +34,30 @@ class HandshakeState : MinecraftConnectionState {
             VIAaaSConfig.defaultBackendPort
         }
 
-        handler.data.backVer = backProto
-        handler.data.frontOnline = parsed.online
-        if (VIAaaSConfig.forceOnlineMode) handler.data.frontOnline = true
-        handler.data.backName = parsed.username
+        handler.data.viaBackServerVer = backProto
+        var frontOnline = parsed.online
+        if (VIAaaSConfig.forceOnlineMode) frontOnline = true
+
+        (handler.data.state as? LoginState)?.also {
+            it.frontOnline = frontOnline
+            it.backName = parsed.username
+            it.backAddress = packet.address to packet.port
+        }
 
         val playerAddr = handler.data.frontHandler.remoteAddress
-        mcLogger.info("Connecting ${handler.data.state.state} $playerAddr (${handler.data.frontVer}) -> ${packet.address}:${packet.port} ($backProto)")
+        mcLogger.info(
+            "Handshake: ${handler.data.state.state} $playerAddr (${handler.data.frontVer}," +
+                    " O: ${
+                        frontOnline.toString().substring(0, 1)
+                    }) -> ${packet.address}:${packet.port} (${backProto ?: "AUTO"})"
+        )
 
         if (!hadHostname && VIAaaSConfig.requireHostName) {
             throw UnsupportedOperationException("This VIAaaS instance requires you to use the hostname")
         }
 
-        handler.data.frontChannel.setAutoRead(false)
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                val srvResolved = resolveSrv(packet.address, packet.port)
-                packet.address = srvResolved.first
-                packet.port = srvResolved.second
-
-                val socketAddr = InetSocketAddress(InetAddress.getByName(packet.address), packet.port)
-
-                if (checkLocalAddress(socketAddr.address)
-                    || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
-                    || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)
-                ) {
-                    throw SecurityException("Not allowed")
-                }
-
-                val future = connectBack(handler, socketAddr)
-
-                future.addListener {
-                    if (it.isSuccess) {
-                        mcLogger.info("Connected ${handler.remoteAddress} -> $socketAddr")
-
-                        handler.data.backChannel = future.channel() as SocketChannel
-
-                        forward(handler, packet, true)
-
-                        handler.data.frontChannel.setAutoRead(true)
-                    } else {
-                        // We're in the event loop
-                        handler.disconnect("Couldn't connect: " + it.cause().toString())
-                    }
-                }
-            } catch (e: Exception) {
-                handler.data.frontChannel.eventLoop().submit {
-                    handler.disconnect("Couldn't connect: $e")
-                }
-            }
+        if (packet.nextState == State.STATUS) {
+            connectBack(handler, packet.address, packet.port, packet.nextState) {}
         }
     }
 

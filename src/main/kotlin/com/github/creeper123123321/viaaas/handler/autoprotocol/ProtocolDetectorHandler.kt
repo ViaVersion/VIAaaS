@@ -32,9 +32,9 @@ class ProtocolDetectorHandler(val connectionData: ConnectionData) : ChannelDuple
             ProtocolDetector.detectVersion(ctx.channel().remoteAddress() as InetSocketAddress)
                 .whenComplete { protocol, _ ->
                     if (protocol != null && protocol.version != -1) {
-                        connectionData.backVer = protocol.version
+                        connectionData.viaBackServerVer = protocol.version
                     } else {
-                        connectionData.backVer = 47 // fallback
+                        connectionData.viaBackServerVer = 47 // fallback
                     }
 
                     ctx.pipeline().remove(this)

@@ -2,7 +2,10 @@ package com.github.creeper123123321.viaaas
 
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
 import com.google.common.base.Preconditions
+import com.google.common.net.UrlEscapers
 import com.google.common.primitives.Ints
+import com.google.gson.JsonObject
+import io.ktor.client.request.*
 import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
 import io.netty.handler.codec.DecoderException
@@ -136,3 +139,19 @@ fun writeFlushClose(ch: Channel, obj: Any) {
 val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()
 
 fun readableToByteArray(byteBuf: ByteBuf) = ByteArray(byteBuf.readableBytes()).also { byteBuf.readBytes(it) }
+
+suspend fun hasJoined(username: String, hash: String): JsonObject {
+    return httpClient.get(
+        "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
+                UrlEscapers.urlFormParameterEscaper().escape(username) +
+                "&serverId=$hash"
+    ) ?: throw IllegalArgumentException("Couldn't authenticate with session servers")
+}
+
+fun generate128Bits() = ByteArray(16).also { secureRandom.nextBytes(it) }
+
+fun generateServerId() = "VIAaaS" + ByteArray(10).let {
+    secureRandom.nextBytes(it)
+    Base64.getEncoder().withoutPadding().encodeToString(it)
+    // https://developer.mozilla.org/en-US/docs/Glossary/Base64 133% of original
+}

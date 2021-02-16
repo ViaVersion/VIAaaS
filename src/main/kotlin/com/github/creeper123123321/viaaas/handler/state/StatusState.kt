@@ -38,7 +38,7 @@ object StatusState : MinecraftConnectionState {
                 it.addProperty(
                     "name",
                     "§9VIAaaS§r (C: §7${ProtocolVersion.getProtocol(handler.data.frontVer!!)}§r S: §7${
-                        ProtocolVersion.getProtocol(handler.data.backVer!!)
+                        ProtocolVersion.getProtocol(handler.data.viaBackServerVer!!)
                     }§r)"
                 )
             })

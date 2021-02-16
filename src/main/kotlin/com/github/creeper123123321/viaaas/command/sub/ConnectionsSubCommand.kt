@@ -1,6 +1,5 @@
 package com.github.creeper123123321.viaaas.command.sub
 
-import com.github.creeper123123321.viaaas.command.VIAaaSConsole
 import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.command.ViaCommandSender
@@ -23,8 +22,7 @@ object ConnectionsSubCommand : ViaSubCommand() {
             }
             val pAddr =
                 it.channel?.pipeline()?.get(MinecraftHandler::class.java)?.other?.remoteAddress()
-            val pName = it.channel?.pipeline()?.get(MinecraftHandler::class.java)?.data?.frontName
-            p0.sendMessage("$pAddr $pVer ($pName) -> $backVer ($backName) $backAddr")
+            p0.sendMessage("$pAddr $pVer -> $backVer ($backName) $backAddr")
         }
         return true
     }

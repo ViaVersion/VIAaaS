@@ -21,7 +21,7 @@ class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
             .addLast("via-codec", ViaCodec(user))
             .addLast("mc", MinecraftCodec())
             .also {
-                if (connectionData.backVer == null) {
+                if (connectionData.viaBackServerVer == null) {
                     it.addLast("protocol-detector", ProtocolDetectorHandler(connectionData))
                 }
             }
