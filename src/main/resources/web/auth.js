@@ -32,8 +32,11 @@ isNotMojang = it => !it.clientToken;
 isSuccess = status => status >= 200 && status < 300;
 
 // Proxy
+function defaultCors() {
+    return window.location.host == "viaversion.github.io" ? "https://crp123-cors.herokuapp.com/" : "http://localhost:8080/";
+}
 function getCorsProxy() {
-    return localStorage.getItem("cors-proxy") || "https://crp123-cors.herokuapp.com/";
+    return localStorage.getItem("cors-proxy") || defaultCors();
 }
 function setCorsProxy(url) {
     localStorage.setItem("cors-proxy", url);
