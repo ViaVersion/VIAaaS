@@ -8,7 +8,7 @@ How to use: server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.ex
 Parts:
 - ```server.example.com```: backend server address
 - ```_p```: backend port
-- ```_v```: backend version (protocol id https://wiki.vg/Protocol_version_numbers or name with underline instead of dots). ```AUTO``` is default and 1.8 is fallback if it fails.
+- ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name with underline instead of dots). ```AUTO``` is default and 1.8 is fallback if it fails.
 - ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be based on backend online mode.
 - ```_u```: username to use in backend connection
 - ```viaaas.example.com```: hostname suffix (defined in config)
@@ -28,12 +28,18 @@ Default WS URL: ```wss://localhost:25543/ws```
 
 - VIAaaS may have security vulnerabilities, make sure to block the ports in firewall and take care of browser local storage.
 
-Download: https://github.com/ViaVersion/VIAaaS/actions (needs to be logged into GitHub)
+Download: [GitHub Actions](https://github.com/ViaVersion/VIAaaS/actions) (needs to be logged into GitHub)
 
 Requires Java 11
 
 How to start VIAaaS server:
 - ```java -jar VIAaaS-all.jar```
+
+Setting up cors-anywhere on local machine:
+- ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```
+
+My cors-anywhere instance:
+- https://crp123-cors.herokuapp.com/ for using with https://viaversion.github.io/VIAaaS/ page.
 
 Usage for offline mode:
 - Connect to ```mc.example.com.viaaas.localhost```
@@ -41,17 +47,15 @@ Usage for offline mode:
 Usage for online mode:
 - You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections or use ```_of```
   (offline mode in frontend, unencrypted).
-- You should set up a CORS Proxy (something like https://www.npmjs.com/package/cors-anywhere,
-  ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```)
-  on the machine you are using the VIAaaS authenticator webpage. You can use my CORS Anywhere instance ```https://crp123-cors.herokuapp.com/``` when using
-  this page https://viaversion.github.io/VIAaaS/ but Mojang may see it as suspect.
-- Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like http://localhost:8080/,
-  note the ending slash) and listen to the username A that you're using to connect to the proxy.
+- You should set up a CORS Proxy (something like [cors-anywhere](https://www.npmjs.com/package/cors-anywhere)) on the machine you are using the
+  VIAaaS authenticator webpage. You can use a remote proxy but Mojang may see it as suspect.
+- Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like ```http://localhost:8080/```, note
+  the ending slash) and listen to the username A you'll use to connect to the proxy.
 - Add the account B you'll use in ```_u(account B)``` parameter to browser auth page.
 - Connect to ```mc.example.com._u(account B).viaaas.localhost``` (```_u``` parameter can be removed if you are using the same username)
 - Approve the login in auth webpage
-- If you use the same online mode account, your client will give Bad Login after you approve it in your browser. You can use
-  https://www.curseforge.com/minecraft/mc-mods/auth-me for reauthenticating the client.
+- If you use the same online mode account, your client will show Bad Login. You can use a mod like
+  [Auth Me](https://www.curseforge.com/minecraft/mc-mods/auth-me) or [ReAuth](https://www.curseforge.com/minecraft/mc-mods/reauth) for reauthenticating the client.
 
 ## WARNING
 VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
