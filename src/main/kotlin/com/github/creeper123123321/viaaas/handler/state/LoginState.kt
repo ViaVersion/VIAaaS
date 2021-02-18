@@ -107,8 +107,8 @@ class LoginState : MinecraftConnectionState {
                         parseUndashedId(playerId),
                         backName!!,
                         backHash,
-                        frontHandler.remoteAddress!!,
-                        backPublicKey
+                        frontHandler.remoteAddress,
+                        handler.data.backHandler!!.remoteAddress
                     ).whenCompleteAsync({ _, throwable ->
                         if (throwable != null) {
                             frontHandler.data.backHandler!!.disconnect("Online mode error: $throwable")

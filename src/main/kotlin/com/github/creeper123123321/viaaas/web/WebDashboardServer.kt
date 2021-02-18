@@ -13,8 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import us.myles.ViaVersion.api.Via
+import java.net.InetSocketAddress
 import java.net.SocketAddress
-import java.security.PublicKey
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -46,14 +46,18 @@ class WebDashboardServer {
 
     suspend fun requestSessionJoin(
         id: UUID, name: String, hash: String,
-        address: SocketAddress, backKey: PublicKey
-    )
-            : CompletableFuture<Unit> {
+        address: SocketAddress, backAddress: SocketAddress
+    ): CompletableFuture<Unit> {
         val future = viaWebServer.pendingSessionHashes.get(hash)
         var sent = 0
         viaWebServer.listeners[id]?.forEach {
             it.ws.send(
-                """{"action": "session_hash_request", "user": "$name", "session_hash": "$hash", "message": "Client is $address"}""".trimMargin()
+                JsonObject().also {
+                    it.addProperty("action", "session_hash_request")
+                    it.addProperty("user", name)
+                    it.addProperty("session_hash", hash)
+                    it.addProperty("message", "Client is $address, backend is $backAddress")
+                }.toString()
             )
             it.ws.flush()
             sent++

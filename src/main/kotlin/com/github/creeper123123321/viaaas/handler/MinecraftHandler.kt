@@ -13,7 +13,7 @@ class MinecraftHandler(
     val data: ConnectionData,
     val frontEnd: Boolean
 ) : SimpleChannelInboundHandler<Packet>() {
-    var remoteAddress: SocketAddress? = null
+    lateinit var remoteAddress: SocketAddress
     val other: Channel? get() = if (frontEnd) data.backChannel else data.frontChannel
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
