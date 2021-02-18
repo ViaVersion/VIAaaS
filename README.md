@@ -3,44 +3,30 @@ VIAaaS
 
 VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersion proxy
 
-How to use: server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
+## How does it work?
+- VIAaaS auth page stores account credentials in the player's browser local storage.
+- Due to technical/security reasons, it requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that
+ as suspicious and reset/block your account password if the IP address seems suspect.
+- Account credentials aren't sent to VIAaaS instance, though it could be intermediated by CORS Proxy.
+- VIAaaS receives a session hash from instance and then authenticates the session hash with Mojang.
 
-Parts:
-- ```server.example.com```: backend server address
-- ```_p```: backend port
-- ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name with underline instead of dots). ```AUTO``` is default and 1.8 is fallback if it fails.
-- ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be based on backend online mode.
-- ```_u```: username to use in backend connection
-- ```viaaas.example.com```: hostname suffix (defined in config)
-
-
-Default Minecraft: ```viaaas.localhost``` with port 25565
-
-Default WS URL: ```wss://localhost:25543/ws```
-
-- VIAaaS auth page is designed for storing accounts in the player's browser local storage.
- It requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that
- as suspicious and reset/block your account password if the IP address is suspect.
-
-- There are some information about Mojang password resetting:
-  https://github.com/GeyserMC/Geyser/wiki/Common-Issues#mojang-resetting-account-credentials and
-  https://mobile.twitter.com/MojangSupport/status/863697596350517248
-
-- VIAaaS may have security vulnerabilities, make sure to block the ports in firewall and take care of browser local storage.
-
+## Setting up server instance
 Download: [GitHub Actions](https://github.com/ViaVersion/VIAaaS/actions) (needs to be logged into GitHub)
 
-Requires Java 11
-
 How to start VIAaaS server:
+- Requires Java 11
 - ```java -jar VIAaaS-all.jar```
+- Default Minecraft: ```viaaas.localhost``` with port 25565
+- Default WS URL: ```wss://localhost:25543/ws```
 
+## CORS Proxy
 Setting up cors-anywhere on local machine:
 - ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```
 
 My cors-anywhere instance:
-- https://crp123-cors.herokuapp.com/ for using with https://viaversion.github.io/VIAaaS/ page.
+- If you trust me, you can use https://crp123-cors.herokuapp.com/ in https://viaversion.github.io/VIAaaS/ page.
 
+## Usage for players
 Usage for offline mode:
 - Connect to ```mc.example.com.viaaas.localhost```
 
@@ -57,8 +43,22 @@ Usage for online mode:
 - If you use the same online mode account, your client will show Bad Login. You can use a mod like
   [Auth Me](https://www.curseforge.com/minecraft/mc-mods/auth-me) or [ReAuth](https://www.curseforge.com/minecraft/mc-mods/reauth) for reauthenticating the client.
 
+Example address: server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
+
+Address parts:
+- ```server.example.com```: backend server address
+- ```_p```: backend port
+- ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name with underline instead of dots). ```AUTO``` is default and 1.8 is fallback if it fails.
+- ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be based on backend online mode.
+- ```_u```: username to use in backend connection
+- ```viaaas.example.com```: hostname suffix (defined in config)
+
 ## WARNING
-VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
+- VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
+- VIAaaS server instance may have security vulnerabilities, make sure to block the ports in firewall
+- Take care of browser local storage.
+- Check the security of CORS proxy, it will intermediate Mojang API calls.
+- Mojang may lock your account when API is called from a suspect IP address
 
 ## FAQ
 VIAaaS is stuck when connecting with online mode:
