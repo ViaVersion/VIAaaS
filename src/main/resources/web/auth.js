@@ -9,7 +9,9 @@ if (urlParams.get("mcauth_success") == "false") {
 
 // WS
 function defaultWs() {
-    return window.location.host == "viaversion.github.io" || !window.location.host ? "wss://localhost:25543/ws" : "wss://" + window.location.host + "/ws";
+    let url = new URL("ws", new URL(location));
+    url.protocol = "wss";
+    return window.location.host == "viaversion.github.io" || !window.location.host ? "wss://localhost:25543/ws" : url.toString();
 }
 function getWsUrl() {
     let url = localStorage.getItem("ws-url") || defaultWs();
