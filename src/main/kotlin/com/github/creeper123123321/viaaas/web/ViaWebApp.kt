@@ -20,6 +20,8 @@ class ViaWebApp {
         }
         install(WebSockets) {
             maxFrameSize = Short.MAX_VALUE.toLong()
+            pingPeriod = Duration.ofSeconds(60)
+            timeout = Duration.ofSeconds(15)
         }
 
         routing {
