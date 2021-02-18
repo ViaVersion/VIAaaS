@@ -53,9 +53,7 @@ class WebDashboardServer {
         var sent = 0
         viaWebServer.listeners[id]?.forEach {
             it.ws.send(
-                """{"action": "session_hash_request", "user": "$name", "session_hash": "$hash",
-                                        | "client_address": "$address", "backend_public_key":
-                                        | "${Base64.getEncoder().encodeToString(backKey.encoded)}"}""".trimMargin()
+                """{"action": "session_hash_request", "user": "$name", "session_hash": "$hash", "message": "Client is $address"}""".trimMargin()
             )
             it.ws.flush()
             sent++
