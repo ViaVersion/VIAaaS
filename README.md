@@ -7,7 +7,7 @@ VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersio
 - VIAaaS auth page stores account credentials in the player's browser local storage.
 - Due to technical/security reasons, it requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that
  as suspicious and reset/block your account password if the IP address seems suspect.
-- Account credentials aren't sent to VIAaaS instance, though it could be intermediated by CORS Proxy.
+- Account credentials aren't sent to VIAaaS instance, though it's intermediated by CORS Proxy.
 - VIAaaS receives a session hash from instance and then authenticates the session hash with Mojang.
 
 ## Setting up server instance
@@ -20,8 +20,12 @@ How to start VIAaaS server:
 - Default WS URL: ```wss://localhost:25543/ws```
 
 ## CORS Proxy
-Setting up cors-anywhere on local machine:
+- For less chance of Mojang seeing the login as suspect, you (the player) should set up a CORS proxy on your machine.
+- Note the ending slash in cors-anywhere address
+
+Setting up [cors-anywhere](https://www.npmjs.com/package/cors-anywhere) on local machine:
 - ```git clone https://github.com/Rob--W/cors-anywhere && cd cors-anywhere && npm install && node server.js```
+- It will be available at ```http://localhost:8080/```
 
 My cors-anywhere instance:
 - If you trust me, you can use https://crp123-cors.herokuapp.com/ in https://viaversion.github.io/VIAaaS/ page.
@@ -31,19 +35,18 @@ Usage for offline mode:
 - Connect to ```mc.example.com.viaaas.localhost```
 
 Usage for online mode:
-- You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections or use ```_of```
-  (offline mode in frontend, unencrypted).
-- You should set up a CORS Proxy (something like [cors-anywhere](https://www.npmjs.com/package/cors-anywhere)) on the machine you are using the
-  VIAaaS authenticator webpage. You can use a remote proxy but Mojang may see it as suspect.
-- Go to VIAaaS auth webpage (https://localhost:25543/), configure the CORS Proxy URL (something like ```http://localhost:8080/```, note
-  the ending slash) and listen to the username A you'll use to connect to the proxy.
-- Add the account B you'll use in ```_u(account B)``` parameter to browser auth page.
+- You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections, or use ```_of```
+  (offline mode in frontend, unencrypted and no username verification).
+- Go to VIAaaS auth webpage (https://localhost:25543/)
+- Configure CORS proxy, see above in "CORS Proxy" section
+- Listen to the username A you'll use to connect to the proxy.
+- Add the account B to VIAaaS page which you'll use in ```_u(account B)``` parameter below.
 - Connect to ```mc.example.com._u(account B).viaaas.localhost``` (```_u``` parameter can be removed if you are using the same username)
 - Approve the login in auth webpage
 - If you use the same online mode account, your client will show Bad Login. You can use a mod like
   [Auth Me](https://www.curseforge.com/minecraft/mc-mods/auth-me) or [ReAuth](https://www.curseforge.com/minecraft/mc-mods/reauth) for reauthenticating the client.
 
-Example address: server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.example.com (similar to tor to web proxies)
+Example address: ```server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.example.com``` (similar to tor to web proxies)
 
 Address parts:
 - ```server.example.com```: backend server address
