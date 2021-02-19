@@ -11,7 +11,7 @@ VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersio
 - VIAaaS receives a session hash from instance and then authenticates the session hash with Mojang.
 
 ## Setting up server instance
-Download: [GitHub Actions](https://github.com/ViaVersion/VIAaaS/actions) (needs to be logged into GitHub)
+Download: [GitHub Actions](https://github.com/ViaVersion/VIAaaS/actions) (needs to be logged into GitHub) or [JitPack](https://jitpack.io/com/github/viaversion/viaaas/master-SNAPSHOT/viaaas-master-SNAPSHOT-all.jar)
 
 How to start VIAaaS server:
 - Requires Java 11
