@@ -39,6 +39,7 @@ import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import java.io.File
+import java.lang.Thread
 import java.net.InetAddress
 import java.security.KeyPairGenerator
 import java.util.concurrent.CompletableFuture
@@ -135,6 +136,7 @@ fun main(args: Array<String>) {
     initFuture.complete(Unit)
 
     VIAaaSConsole.start()
+    while(runningServer) { Thread.sleep(1000L) }
 
     ktorServer?.stop(1000, 1000)
     httpClient.close()
