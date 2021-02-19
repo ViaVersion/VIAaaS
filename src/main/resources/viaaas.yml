@@ -32,3 +32,9 @@ force-online-mode: false
 show-version-ping: true
 # Shows info in server brand (F3)
 show-brand-info: true
+# Rates limits websocket messages per second. Messages will be waiting for process
+rate-limit-ws: 1.5
+# Rate limits new front-end connections per second per ip. Will disconnect when hit
+rate-limit-connection-mc: 10.0
+# Limits how many usernames a websocket connection can listen to.
+listening-ws-limit: 10

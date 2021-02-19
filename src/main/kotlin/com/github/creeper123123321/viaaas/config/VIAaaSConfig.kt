@@ -37,4 +37,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val forceOnlineMode: Boolean get() = this.getBoolean("force-online-mode", false)
     val showVersionPing: Boolean get() = this.getBoolean("show-version-ping", true)
     val showBrandInfo: Boolean get() = this.getBoolean("show-brand-info", true)
+    val rateLimitWs: Double get() = this.getDouble("rate-limit-ws", 1.0)
+    val rateLimitConnectionMc: Double get() = this.getDouble("rate-limit-connection-mc", 10.0)
+    val listeningWsLimit: Int get() = this.getInt("listening-ws-limit", 16)
 }

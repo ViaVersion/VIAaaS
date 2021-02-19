@@ -11,7 +11,6 @@ import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import java.net.URLEncoder
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 class WebLogin : WebState {
     override suspend fun start(webClient: WebClient) {
@@ -26,10 +25,9 @@ class WebLogin : WebState {
             "offline_login" -> {
                 // todo add some spam check
                 val username = obj.get("username").asString
-                val token = UUID.randomUUID()
                 val uuid = generateOfflinePlayerUuid(username)
 
-                webClient.server.loginTokens.put(token, uuid)
+                val token = webClient.server.generateToken(uuid)
                 webClient.ws.send(
                     """{"action": "login_result", "success": true,
                         | "username": "$username", "uuid": "$uuid", "token": "$token"}""".trimMargin()
@@ -47,11 +45,10 @@ class WebLogin : WebState {
                 )
 
                 if (check.getAsJsonPrimitive("valid").asBoolean) {
-                    val token = UUID.randomUUID()
                     val mcIdUser = check.get("username").asString
                     val uuid = webClient.server.usernameIdCache.get(mcIdUser)
 
-                    webClient.server.loginTokens.put(token, uuid)
+                    val token = webClient.server.generateToken(uuid)
                     webClient.ws.send(
                         """{"action": "login_result", "success": true,
                         | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin()
@@ -66,17 +63,22 @@ class WebLogin : WebState {
             "listen_login_requests" -> {
                 val token = UUID.fromString(obj.getAsJsonPrimitive("token").asString)
                 val user = webClient.server.loginTokens.getIfPresent(token)
-                if (user != null) {
+                if (user != null && webClient.listenId(user)) {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": true, "user": "$user"}""")
-                    webClient.listenedIds.add(user)
-                    webClient.server.listeners.computeIfAbsent(user) { Collections.newSetFromMap(ConcurrentHashMap()) }
-                        .add(webClient)
-
                     webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) listening for logins for $user")
                 } else {
+                    webClient.server.loginTokens.invalidate(token)
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
                     webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) failed token")
                 }
+            }
+            "unlisten_login_requests" -> {
+                val uuid = UUID.fromString(obj.getAsJsonPrimitive("uuid").asString)
+                webClient.unlistenId(uuid)
+            }
+            "invalidate_token" -> {
+                val token = UUID.fromString(obj.getAsJsonPrimitive("token").asString)
+                webClient.server.loginTokens.invalidate(token)
             }
             "session_hash_response" -> {
                 val hash = obj.get("session_hash").asString
@@ -89,7 +91,7 @@ class WebLogin : WebState {
     }
 
     override suspend fun disconnected(webClient: WebClient) {
-        webClient.listenedIds.forEach { webClient.server.listeners[it]?.remove(webClient) }
+        webClient.listenedIds.forEach { webClient.unlistenId(it) }
     }
 
     override suspend fun onException(webClient: WebClient, exception: java.lang.Exception) {

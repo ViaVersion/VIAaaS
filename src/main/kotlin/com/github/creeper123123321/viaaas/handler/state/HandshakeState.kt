@@ -6,10 +6,23 @@ import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import com.github.creeper123123321.viaaas.mcLogger
 import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.packet.handshake.Handshake
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import com.google.common.util.concurrent.RateLimiter
 import io.netty.channel.ChannelHandlerContext
 import us.myles.ViaVersion.packets.State
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
 
 class HandshakeState : MinecraftConnectionState {
+    object RateLimit {
+        val rateLimitByIp = CacheBuilder.newBuilder()
+            .expireAfterAccess(1, TimeUnit.MINUTES)
+            .build(CacheLoader.from<InetAddress, RateLimiter> {
+                RateLimiter.create(VIAaaSConfig.rateLimitConnectionMc)
+            })
+    }
     override val state: State
         get() = State.HANDSHAKE
 
@@ -21,6 +34,10 @@ class HandshakeState : MinecraftConnectionState {
             1 -> handler.data.state = StatusState
             2 -> handler.data.state = LoginState()
             else -> throw IllegalStateException("Invalid next state")
+        }
+
+        if (!RateLimit.rateLimitByIp.get((handler.remoteAddress as InetSocketAddress).address).tryAcquire()) {
+            throw IllegalStateException("Rate-limited")
         }
 
         val parsed = VIAaaSAddress().parse(packet.address.substringBefore(0.toChar()), VIAaaSConfig.hostName)

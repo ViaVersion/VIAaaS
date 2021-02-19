@@ -27,6 +27,10 @@ class WebDashboardServer {
         .expireAfterAccess(10, TimeUnit.DAYS)
         .build<UUID, UUID>()
 
+    fun generateToken(account: UUID): UUID {
+        return UUID.randomUUID().also { loginTokens.put(it, account) }
+    }
+
     // Minecraft account -> WebClient
     val listeners = ConcurrentHashMap<UUID, MutableSet<WebClient>>()
     val usernameIdCache = CacheBuilder.newBuilder()
@@ -81,6 +85,7 @@ class WebDashboardServer {
 
     suspend fun onMessage(ws: WebSocketSession, msg: String) {
         val client = clients[ws]!!
+        client.rateLimiter.acquire()
         client.state.onMessage(client, msg)
     }
 
