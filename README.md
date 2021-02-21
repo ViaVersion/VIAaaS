@@ -85,4 +85,4 @@ How to use with Geyser?
     # The IP address of the remote (Java Edition) server
     address: 2b2t.org._v1_12_2.viaaas.localhost
   ```
-- Remember to use GeyserConnect if you are on a console
+- Remember to use BedrockConnect if you are on a console
