@@ -79,4 +79,11 @@ How to use IPv6?:
 - To use IPv6 in backend address, you need to use a instance with IPv6 connectivity. The hostname parser currently doesn't support direct IPv6, but you can use a DNS name.
 
 How to use with Geyser?
-- Currently you need to use GeyserConnect
+- Currently you need to set the parameters (at least the hostname) in Geyser's `address` field:
+  ```yml
+  remote:
+    # The IP address of the remote (Java Edition) server
+    address: 2b2t.org._v1_12_2.viaaas.localhost
+  ```
+- If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance ```mc.example.com.viaaas.example.net```,
+ replace ```viaaas.example.net``` with the VIAaaS address. Set as a Java Edition server.
