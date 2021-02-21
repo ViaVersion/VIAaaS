@@ -16,7 +16,7 @@ mc-rsa-size: 4096
 use-strong-random: true
 # Blocks connection to local addresses
 block-local-address: true
-# Requires virtual host to contain the value from "host-name"
+# Requires virtual host to contain the value from "host-name" as a suffix
 # A false value could be used for transparent proxying.
 require-host-name: true
 # Default port to be used to connect to backend server

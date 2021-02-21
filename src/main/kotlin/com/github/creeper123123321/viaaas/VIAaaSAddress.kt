@@ -1,6 +1,7 @@
 package com.github.creeper123123321.viaaas
 
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
+import java.util.*
 
 class VIAaaSAddress {
     var serverAddress: String? = null
@@ -38,30 +39,23 @@ class VIAaaSAddress {
     }
 
     fun parseOption(part: String): Boolean {
-        if (part.startsWith("_")) {
+        val option = when {
+                part.length < 2 -> null
+                part.startsWith("_") -> part[1]
+                part[1] == '_' -> part[0]
+                else -> null
+            }?.toString()
+        if (option != null) {
             val arg = part.substring(2)
-            when {
-                part.startsWith("_p", ignoreCase = true) -> port = arg.toInt()
-                part.startsWith("_o", ignoreCase = true) -> {
-                    online = when {
+            when (option.toLowerCase(Locale.ROOT)) {
+                "p" -> port = arg.toInt()
+                "o" -> online = when {
                         arg.startsWith("t", ignoreCase = true) -> true
                         arg.startsWith("f", ignoreCase = true) -> false
                         else -> null
                     }
-                }
-                part.startsWith("_v", ignoreCase = true) -> {
-                    try {
-                        protocol = arg.toInt()
-                    } catch (e: NumberFormatException) {
-                        ProtocolVersion.getClosest(arg.replace("_", "."))?.also {
-                            protocol = it.version
-                        }
-                    }
-                    if (protocol == -2) {
-                        protocol = null
-                    }
-                }
-                part.startsWith("_u", ignoreCase = true) -> {
+                "v" -> parseProtocol(arg)
+                "u" -> {
                     if (arg.length > 16) throw IllegalArgumentException("Invalid username")
                     username = arg
                 }
@@ -69,5 +63,18 @@ class VIAaaSAddress {
             return true
         }
         return false
+    }
+
+    private fun parseProtocol(arg: String) {
+        try {
+            protocol = arg.toInt()
+        } catch (e: NumberFormatException) {
+            ProtocolVersion.getClosest(arg.replace("_", "."))?.also {
+                protocol = it.version
+            }
+        }
+        if (protocol == -2) {
+            protocol = null
+        }
     }
 }

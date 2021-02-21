@@ -70,7 +70,7 @@ class HandshakeState : MinecraftConnectionState {
         )
 
         if (!hadHostname && VIAaaSConfig.requireHostName) {
-            throw UnsupportedOperationException("This VIAaaS instance requires you to use the hostname")
+            throw UnsupportedOperationException("Missing domain suffix in hostname")
         }
 
         if (packet.nextState == State.STATUS) {
