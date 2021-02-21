@@ -77,3 +77,6 @@ Why a online webpage for online mode?:
 How to use IPv6?:
 - When listening to 0.0.0.0, it should listen on IPv6 too.
 - To use IPv6 in backend address, you need to use a instance with IPv6 connectivity. The hostname parser currently doesn't support direct IPv6, but you can use a DNS name.
+
+How to use with Geyser?
+- Currently you need to use GeyserConnect
