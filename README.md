@@ -28,7 +28,7 @@ Setting up [cors-anywhere](https://www.npmjs.com/package/cors-anywhere) on local
 - It will be available at ```http://localhost:8080/```
 
 My cors-anywhere instance:
-- If you trust me, you can use https://crp123-cors.herokuapp.com/ in https://viaversion.github.io/VIAaaS/ page.
+- If you trust me, you can use https://crp123-cors.herokuapp.com/
 
 ## Usage for players
 Usage for offline mode:
@@ -85,5 +85,4 @@ How to use with Geyser?
     # The IP address of the remote (Java Edition) server
     address: 2b2t.org._v1_12_2.viaaas.localhost
   ```
-- If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance ```mc.example.com.viaaas.example.net```,
- replace ```viaaas.example.net``` with the VIAaaS address. Set as a Java Edition server.
+- If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance, like ```mc.example.com.viaaas.example.net``` as a Java Edition server.
