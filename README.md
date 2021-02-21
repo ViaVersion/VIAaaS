@@ -46,7 +46,7 @@ Usage for online mode:
 - If you use the same online mode account, your client will show Bad Login. You can use a mod like
   [Auth Me](https://www.curseforge.com/minecraft/mc-mods/auth-me) or [ReAuth](https://www.curseforge.com/minecraft/mc-mods/reauth) for reauthenticating the client.
 
-Example address: ```server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.example.com``` (similar to tor to web proxies)
+Example address: ```server.example.com._p25565._v1_12_2._ofalse._uBACKUSERNAME.viaaas.example.com``` (similar to [Tor2web](https://www.tor2web.org/) proxies)
 
 Address parts:
 - ```server.example.com```: backend server address
