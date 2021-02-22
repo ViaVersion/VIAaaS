@@ -9,6 +9,7 @@ plugins {
 
 application {
     mainClassName = "com.github.creeper123123321.viaaas.VIAaaSKt"
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
 java {

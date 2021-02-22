@@ -16,14 +16,21 @@ import java.time.Duration
 class ViaWebApp {
     fun Application.main() {
         install(DefaultHeaders)
+        install(ConditionalHeaders)
         install(CallLogging) {
             level = Level.INFO
+            this.format {
+                "${it.request.local.method.value} ${it.response.status()?.value} ${it.request.local.remoteHost} (O: ${it.request.origin.remoteHost}) " +
+                        "${it.request.local.scheme}://${it.request.local.host}:${it.request.local.port}${it.request.local.uri}"
+            }
         }
         install(WebSockets) {
             maxFrameSize = Short.MAX_VALUE.toLong()
             pingPeriod = Duration.ofSeconds(60)
             timeout = Duration.ofSeconds(15)
         }
+        install(XForwardedHeaderSupport)
+        install(ForwardedHeaderSupport)
 
         routing {
             webSocket("/ws") {
