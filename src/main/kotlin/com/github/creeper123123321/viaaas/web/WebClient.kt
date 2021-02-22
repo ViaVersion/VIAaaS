@@ -11,7 +11,7 @@ data class WebClient(
     val ws: WebSocketServerSession,
     val state: WebState,
 ) {
-    val listenedIds: MutableSet<UUID> = mutableSetOf()
+    val listenedIds: MutableSet<UUID> = Collections.newSetFromMap(ConcurrentHashMap())
     val rateLimiter = RateLimiter.create(VIAaaSConfig.rateLimitWs)
 
     fun listenId(uuid: UUID): Boolean {
