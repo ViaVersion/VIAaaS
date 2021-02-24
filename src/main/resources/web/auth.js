@@ -290,7 +290,7 @@ function confirmJoin(hash) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 function handleJoinRequest(parsed) {
-    if (confirm("Allow auth impersonation from VIAaaS instance for username " + parsed.user + "?\nSession Hash: " + parsed.session_hash + "\nServer Message: " + parsed.message)) {
+    if (confirm("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "?\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'")) {
         let account = findAccountByMcName(parsed.user);
         if (account) {
             getMcUserToken(account).then(data => {
