@@ -1,4 +1,7 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
+    `java-library`
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("com.github.ben-manes.versions") version "0.36.0"
     id("com.palantir.git-version") version "0.12.3"
@@ -13,9 +16,14 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+    withSourcesJar()
 }
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions.jvmTarget = "11"
 
 val gitVersion: groovy.lang.Closure<String> by extra
 
@@ -36,9 +44,9 @@ repositories {
 }
 
 dependencies {
-    implementation("us.myles:viaversion:3.3.0-21w07a") { isTransitive = false }
-    implementation("nl.matsv:viabackwards-all:3.3.0-21w07a") { isTransitive = false }
-    implementation("de.gerrygames:viarewind-all:1.5.4-SNAPSHOT") { isTransitive = false }
+    implementation("us.myles:viaversion:3.2.1") { isTransitive = false }
+    implementation("nl.matsv:viabackwards-all:3.2.0") { isTransitive = false }
+    implementation("de.gerrygames:viarewind-all:1.5.3") { isTransitive = false }
     implementation("io.netty:netty-all:4.1.58.Final")
     implementation("org.yaml:snakeyaml:1.26")
     implementation("com.google.guava:guava:30.0-jre")
@@ -70,8 +78,6 @@ val run: JavaExec by tasks
 run.standardInput = System.`in`
 
 project.configurations.implementation.get().isCanBeResolved = true
-
-
 tasks {
     named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
         configurations = listOf(project.configurations.implementation.get())
@@ -90,9 +96,6 @@ tasks.named<ProcessResources>("processResources") {
         ))
     }
 }
-
-val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "11"
 
 publishing {
     publications {
