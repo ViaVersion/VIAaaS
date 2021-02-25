@@ -13,8 +13,8 @@ import us.myles.ViaVersion.api.configuration.ConfigurationProvider
 import us.myles.ViaVersion.api.platform.TaskId
 import us.myles.ViaVersion.api.platform.ViaConnectionManager
 import us.myles.ViaVersion.api.platform.ViaPlatform
-import us.myles.ViaVersion.sponge.VersionInfo
 import us.myles.ViaVersion.sponge.util.LoggerWrapper
+import us.myles.ViaVersion.util.VersionInfo
 import us.myles.viaversion.libs.gson.JsonObject
 import java.io.File
 import java.util.*
