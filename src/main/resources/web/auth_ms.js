@@ -39,25 +39,22 @@ function refreshTokenMs(username) {
             return fetch("https://user.auth.xboxlive.com/user/authenticate", {method: "post",
                 body: JSON.stringify({Properties: {AuthMethod: "RPS", SiteName: "user.auth.xboxlive.com",
                         RpsTicket: "d=" + response.accessToken}, RelyingParty: "http://auth.xboxlive.com", TokenType: "JWT"}),
-                    headers: {"content-type": "application/json"}});
-        }).then(xboxResponse => {
-            if (!isSuccess(xboxResponse.status)) throw "xbox response not success";
-            return xboxResponse.json();
+                    headers: {"content-type": "application/json"}})
+                .then(checkFetchSuccess("xbox response not success"))
+                .then(r => r.json());
         }).then(json => {
             return fetch("https://xsts.auth.xboxlive.com/xsts/authorize", {method: "post",
                    body: JSON.stringify({Properties: {SandboxId: "RETAIL", UserTokens: [json.Token]},
                        RelyingParty: "rp://api.minecraftservices.com/", TokenType: "JWT"}),
-                   headers: {"content-type": "application/json"}});
-        }).then(xstsResponse => {
-            if (!isSuccess(xstsResponse.status)) throw "xsts response not success";
-            return xstsResponse.json();
+                   headers: {"content-type": "application/json"}})
+                .then(checkFetchSuccess("xsts response not success"))
+                .then(r => r.json());
         }).then(json => {
             return fetch(getCorsProxy() + "https://api.minecraftservices.com/authentication/login_with_xbox", {method: "post",
-                body: JSON.stringify({identityToken: "XBL3.0 x=" + json.DisplayClaims.xui[0].uhs + ";" + json.Token}),
-                headers: {"content-type": "application/json"}});
-        }).then(mcResponse => {
-            if (!isSuccess(mcResponse.status)) throw "mc response not success";
-            return mcResponse.json();
+                    body: JSON.stringify({identityToken: "XBL3.0 x=" + json.DisplayClaims.xui[0].uhs + ";" + json.Token}),
+                    headers: {"content-type": "application/json"}})
+                .then(checkFetchSuccess("mc response not success"))
+                .then(r => r.json());
         }).then(json => {
             return fetch(getCorsProxy() + "https://api.minecraftservices.com/minecraft/profile", {
                 method: "get", headers: {"content-type": "application/json", "authorization": "Bearer " + json.access_token}}).then(profile => {
@@ -78,16 +75,10 @@ function getTokenPopup(username, request) {
      */
     request.account = myMSALObj.getAccountByUsername(username);
     return myMSALObj.acquireTokenSilent(request).catch(error => {
-        console.warn("silent token acquisition fails. acquiring token using redirect");
+        console.warn("silent token acquisition fails.");
         if (error instanceof msal.InteractionRequiredAuthError) {
             // fallback to interaction when silent call fails
-            return myMSALObj.acquireTokenPopup(request).then(tokenResponse => {
-                console.log(tokenResponse);
-
-                return tokenResponse;
-            }).catch(error => {
-                console.error(error);
-            });
+            return myMSALObj.acquireTokenPopup(request).catch(error => console.error(error));
         } else {
             console.warn(error);
         }

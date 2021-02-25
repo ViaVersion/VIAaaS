@@ -3,39 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VIAaaS</title>
     <meta name="application-name" content="VIAaaS">
     <meta property="og:site_name" content="VIAaaS">
     <meta name="description" content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy">
     <meta property="og:title" content="VIAaaS">
     <meta property="og:description" content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy">
-    <meta property="og:image" content="https://raw.githubusercontent.com/ViaVersion/ViaVersion/a13c417352298c2269aed8736a76205f0040b705/fabric/src/main/resources/assets/viaversion/textures/squarelogo.png">
     <meta property="og:type" content="game">
+    <meta property="og:image" content="https://raw.githubusercontent.com/ViaVersion/ViaVersion/a13c417352298c2269aed8736a76205f0040b705/fabric/src/main/resources/assets/viaversion/textures/squarelogo.png">
     <link rel="icon" href="https://raw.githubusercontent.com/ViaVersion/ViaVersion/a13c417352298c2269aed8736a76205f0040b705/fabric/src/main/resources/assets/viaversion/textures/squarelogo.png">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ajax.cloudflare.com/ https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/; img-src data: https://*; connect-src 'self' http://localhost:*/ https: wss:">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self';
+ style-src https://cdnjs.cloudflare.com/ 'self';
+ img-src data: https://*;
+ connect-src 'self' http://localhost:*/ https: wss:;
+ script-src 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'self' https://ajax.cloudflare.com/ https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/">
     <meta name="referrer" content="no-referrer">
-    <!-- only accept http from localhost -->
     <meta name="robots" content="noindex">
-    <title>VIAaaS</title>
     <meta name="theme-color" content="#0468a1">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/js/bootstrap.bundle.min.js" integrity="sha512-q2vREMvON/xrz1KuOj5QKWmdvcHtM4XNbNer+Qbf4TOj+RMDnul0Fg3VmmYprdf3fnL1gZgzKhZszsp62r5Ugg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.js" integrity="sha512-1lagjLfnC1I0iqH9plHYIUq3vDMfjhZsLy9elfK89RBcpcRcx4l+kRJBSnHh2Mh6kLxRHoObD1M5UTUbgFy6nA==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js" integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ==" crossorigin="anonymous"></script>
     <script src="https://alcdn.msauth.net/browser/2.7.0/js/msal-browser.js" integrity="sha384-5Fqyq1ncNYhL2mXCdWAFXkf2wWtKeA0mXYp++ryAX1lowD0ctAHFdity37L/ULXh" crossorigin="anonymous"></script>
-    <script src="auth_ms.js"></script>
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">VIAaaS</a>
+    <a class="navbar-brand" href="javascript:">VIAaaS</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav nav" role="tablist">
         <li class="nav-item" role="presentation">
-          <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+          <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Status</a>
         </li>
         <li class="nav-item" role="presentation">
           <a class="nav-link" id="accounts-tab" data-bs-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
@@ -65,40 +67,51 @@
     </div>
 
     <div id="settings" class="tab-pane fade" role="tabpanel" aria-labelledby="settings-tab">
-        <p>See <a href="https://github.com/ViaVersion/VIAaaS#cors-proxy">VIAaaS README</a>
-            for setting up one. Calling Mojang APIs are called through this proxy, and a remote IP address may block your account. It will receive
-            sensitive data like email, passwords and tokens. HTTPS is required for non-localhost addresses.
-        </p>
         <div class="mb-3">
           <label for="cors-proxy" class="form-label">CORS Proxy URL Prefix</label>
+          <p>See <a href="https://github.com/ViaVersion/VIAaaS#cors-proxy">README</a>
+            for setting up one. Mojang APIs are called through this proxy, and a remote IP address may look suspicious and block your account.
+            It will receive sensitive data like email, passwords and tokens. HTTPS is required for non-localhost addresses.</p>
           <input type="url" class="form-control" id="cors-proxy" placeholder="http://localhost:8080/">
         </div>
-        <p>VIAaaS instance websocket URL. It exchanges sensitive data like minecraft.id tokens, server hashes and usernames. WSS is required.</p>
         <div class="mb-3">
           <label for="ws-url" class="form-label">WebSocket URL</label>
+          <p>It exchanges sensitive data like minecraft.id tokens, server session hashes and usernames. WSS is required.</p>
           <input type="url" class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws">
         </div>
     </div>
 
     <div id="accounts" class="tab-pane fade" role="tabpanel" aria-labelledby="accounts-tab">
-        <p>Browser Minecraft accounts:</p>
-        <div id="accounts-list"></div>
-        <hr>
+	<div>
+          <p>Browser Minecraft accounts:</p>
+          <div id="accounts-list"></div>
+          <hr>
+	</div>
         <div id="add-account">
-            <button id="login_submit_ms" type="submit" class="btn btn-primary mb-3">Login with Microsoft</button>
-            <hr>
-            <div class="mb-3">
-              <label for="email" class="form-label">Email/Username</label>
-              <input type="text" id="email" name="email" class="form-control" placeholder="example@example.com">
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password:</label>
+            <label for="form_add_ms" class="mb-3">Add Microsoft account:</label>
+            <form id="form_add_ms" class="row">
+              <div class="col-auto">
+                <button id="login_submit_ms" type="submit" class="btn btn-primary mb-3">Login with Microsoft</button>
+              </div>
+            </form>
+            <label for="form_add_mc" class="mb-3">Add Mojang account:</label>
+            <form id="form_add_mc" class="row g-3">
+              <div class="col-auto">
+                <label for="email" class="visually-hidden">Username/Email</label>
+                <input type="text" id="email" name="email" class="form-control" placeholder="mc@example.com">
+              </div>
+              <div class="col-auto">
+                <label for="password" class="visually-hidden">Password</label>
                 <input type="password" id="password" name="password" class="form-control" placeholder="password">
-            </div>
-            <button id="login_submit_mc" type="submit" class="btn btn-primary mb-3">Login with Minecraft</button>
+              </div>
+              <div class="col-auto">
+                <button id="login_submit_mc" type="submit" class="btn btn-primary mb-3">Login with Minecraft</button>
+              </div>
+            </form>
         </div>
     </div>
 </div>
+<script src="auth_ms.js"></script>
 <script src="auth.js"></script>
 </body>
 </html>

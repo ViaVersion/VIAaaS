@@ -7,7 +7,7 @@ if (urlParams.get("mcauth_success") == "false") {
     alert("Couldn't authenticate with Minecraft.ID: " + urlParams.get("mcauth_msg"));
 }
 
-// WS
+// WS url
 function defaultWs() {
     let url = new URL("ws", new URL(location));
     url.protocol = "wss";
@@ -32,6 +32,14 @@ var listenVisible = false;
 isMojang = it => !!it.clientToken;
 isNotMojang = it => !it.clientToken;
 isSuccess = status => status >= 200 && status < 300;
+checkFetchSuccess = msg => r => {
+    if (!isSuccess(r.status)) throw r.status + " " + msg;
+    return r;
+};
+function icanhazip(cors) {
+    return fetch((cors ? getCorsProxy() : "") + "https://ipv4.icanhazip.com").then(checkFetchSuccess("code"))
+        .then(r => r.text()).then(it => it.trim());
+}
 
 // Proxy
 function defaultCors() {
@@ -101,14 +109,12 @@ function loginMc(user, pass) {
             clientToken: clientToken,
         }),
         headers: {"content-type": "application/json"}
-    }).then((data) => {
-        if (!isSuccess(data.status)) throw "not success " + data.status;
-        return data.json();
-    }).then((data) => {
+    }).then(checkFetchSuccess("code"))
+    .then(r => r.json())
+    .then(data => {
         storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id);
-    }).catch((e) => alert("Failed to login: " + e));
-    $("#email").val("");
-    $("#password").val("");
+    }).catch(e => alert("Failed to login: " + e));
+    $("#form_add_mc input").val("");
 }
 function logoutMojang(id) {
     getMcAccounts().filter(isMojang).filter(it => it.id == id).forEach(it => {
@@ -117,11 +123,11 @@ function logoutMojang(id) {
                 accessToken: it.accessToken,
                 clientToken: it.clientToken
             }),
-            headers: {"content-type": "application/json"},
-        }).then((data) => {
-            if (!isSuccess(data.status)) throw "not success logout " + data.status;
-            removeMcAccount(id);
-        }).catch((e) => {
+            headers: {"content-type": "application/json"}
+        })
+        .then(checkFetchSuccess("not success logout"))
+        .then(data => removeMcAccount(id))
+        .catch(e => {
             if (confirm("failed to invalidate token! error: " + e + " remove account?")) {
                 removeMcAccount(id);
             }
@@ -137,10 +143,9 @@ function refreshMojangAccount(it) {
             clientToken: it.clientToken
         }),
         headers: {"content-type": "application/json"},
-    }).then(data => {
-        if (!isSuccess(data.status)) throw "not success " + data.status;
-        return data.json();
-    }).then(json => {
+    }).then(checkFetchSuccess("code"))
+    .then(r => r.json())
+    .then(json => {
         console.log("refreshed " + json.selectedProfile.id);
         removeMcAccount(json.selectedProfile.id);
         return storeMcAccount(json.accessToken, json.clientToken, json.selectedProfile.name, json.selectedProfile.id);
@@ -149,7 +154,7 @@ function refreshMojangAccount(it) {
 
 // Minecraft api
 function getMcUserToken(account) {
-    return validateToken(account).then((data) => {
+    return validateToken(account).then(data => {
         if (!isSuccess(data.status)) {
             if (isMojang(account)) {
                 return refreshMojangAccount(account);
@@ -158,9 +163,7 @@ function getMcUserToken(account) {
             }
         }
         return account;
-    }).catch((e) => {
-        alert("failed to refresh token! " + e);
-    });
+    }).catch(e => alert("failed to refresh token! " + e));
 }
 function validateToken(account) {
     return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {method: "post",
@@ -183,28 +186,13 @@ function joinGame(token, id, hash) {
     });
 }
 
-// Proxy status
+// html
 function refreshCorsStatus() {
     corsStatus.innerText = "...";
-    icanhazip(true)
-        .then(ip => {
-            return icanhazip(false).then(ip2 => {
-                corsStatus.innerText = "OK " + ip + (ip != ip2 ? " (different IP)" : "");
-            });
-        })
-        .catch(e => {
-            corsStatus.innerText = "error: " + e;
-        });
+    icanhazip(true).then(ip => {
+            return icanhazip(false).then(ip2 => corsStatus.innerText = "OK " + ip + (ip != ip2 ? " (different IP)" : ""));
+        }).catch(e => corsStatus.innerText = "error: " + e);
 }
-function icanhazip(cors) {
-    return fetch((cors ? getCorsProxy() : "") + "https://ipv4.icanhazip.com")
-        .then(it => {
-             if (!isSuccess(it.status)) throw "not success " + it.status
-             return it.text();
-        }).then(it => it.trim());
-}
-
-// HTML
 function addMcAccountToList(id, name, msUser = null) {
     let p = document.createElement("p");
     let head = document.createElement("img");
@@ -212,7 +200,7 @@ function addMcAccountToList(id, name, msUser = null) {
     let remove = document.createElement("a");
     n.innerText = " " + name + " " + (msUser == null ? "" : "(" + msUser + ") ");
     remove.innerText = "Logout";
-    remove.href = "#";
+    remove.href = "javascript:";
     remove.onclick = () => {
         if (msUser == null) {
             logoutMojang(id);
@@ -267,7 +255,7 @@ function addAction(text, onClick) {
     let link = document.createElement("a");
     p.appendChild(link);
     link.innerText = text;
-    link.href = "#";
+    link.href = "javascript:";
     link.onclick = onClick;
     actions.appendChild(p);
 }
@@ -290,18 +278,15 @@ function confirmJoin(hash) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 function handleJoinRequest(parsed) {
-    if (confirm("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "?\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'")) {
+    if (confirm("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'")) {
         let account = findAccountByMcName(parsed.user);
         if (account) {
             getMcUserToken(account).then(data => {
                 return joinGame(data.accessToken, data.id, parsed.session_hash);
-            }).then(data => {
-                if (!isSuccess(data.status)) throw "not success join " + data.status;
-            }).finally(() => confirmJoin(parsed.session_hash))
-            .catch((e) => {
-                confirmJoin(parsed.session_hash);
-                alert("Couldn't contact session server for " + parsed.user + " account in browser. error: " + e);
-            });
+            })
+            .then(checkFetchSuccess("code"))
+            .finally(() => confirmJoin(parsed.session_hash))
+            .catch((e) => alert("Couldn't contact session server for " + parsed.user + " account in browser. error: " + e));
         } else {
             alert("Couldn't find " + parsed.user + " account in browser.");
             confirmJoin(parsed.session_hash);
@@ -369,8 +354,13 @@ $(() => {
        location.reload();
     });
     $("#ws-url").val(getWsUrl());
-    $("#login_submit_mc").on("click", () => loginMc($("#email").val(), $("#password").val()));
-    $("#login_submit_ms").on("click", loginMs);
+    $("form").on("submit", e => e.preventDefault());
+    $("#form_add_mc").on("submit", e => {
+        loginMc($("#email").val(), $("#password").val());
+    });
+    $("#form_add_ms").on("submit", e => {
+        loginMs();
+    });
 
     refreshAccountList();
     // Heroku sleeps in 30 minutes, let's call it every 10 minutes to keep the same address, so Mojang see it as less suspect
