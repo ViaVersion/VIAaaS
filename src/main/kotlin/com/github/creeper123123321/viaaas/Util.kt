@@ -93,10 +93,14 @@ fun mcCfb8(key: ByteArray, mode: Int): Cipher {
 }
 
 fun checkLocalAddress(inetAddress: InetAddress): Boolean {
-    return VIAaaSConfig.blockLocalAddress && (inetAddress.isSiteLocalAddress
-            || inetAddress.isLoopbackAddress
+    return VIAaaSConfig.blockLocalAddress && (inetAddress.isAnyLocalAddress
             || inetAddress.isLinkLocalAddress
-            || inetAddress.isAnyLocalAddress
+            || inetAddress.isLoopbackAddress
+            || inetAddress.isSiteLocalAddress
+            || inetAddress.isMCLinkLocal
+            || inetAddress.isMCNodeLocal
+            || inetAddress.isMCOrgLocal
+            || inetAddress.isMCSiteLocal
             || NetworkInterface.networkInterfaces().flatMap { it.inetAddresses() }
         .anyMatch {
             // This public address acts like a localhost, let's block it
