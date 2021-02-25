@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.NetworkInterface
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -95,7 +96,12 @@ fun checkLocalAddress(inetAddress: InetAddress): Boolean {
     return VIAaaSConfig.blockLocalAddress && (inetAddress.isSiteLocalAddress
             || inetAddress.isLoopbackAddress
             || inetAddress.isLinkLocalAddress
-            || inetAddress.isAnyLocalAddress)
+            || inetAddress.isAnyLocalAddress
+            || NetworkInterface.networkInterfaces().flatMap { it.inetAddresses() }
+        .anyMatch {
+            // This public address acts like a localhost, let's block it
+            it == inetAddress
+        })
 }
 
 fun matchesAddress(addr: InetSocketAddress, list: List<String>): Boolean {
