@@ -218,8 +218,8 @@ function addMcAccountToList(id, name, msUser = null) {
 }
 function refreshAccountList() {
     accounts.innerHTML = "";
-    getMcAccounts().filter(isMojang).forEach(it => addMcAccountToList(it.id, it.name));
-    (myMSALObj.getAllAccounts() || []).forEach(msAccount => {
+    getMcAccounts().filter(isMojang).sort((a, b) => a.name.localeCompare(b.name)).forEach(it => addMcAccountToList(it.id, it.name));
+    (myMSALObj.getAllAccounts() || []).sort((a, b) => a.username.localeCompare(b.username)).forEach(msAccount => {
         let mcAcc = findAccountByMs(msAccount.username) || {id: "MHF_Question", name: "..."};
         addMcAccountToList(mcAcc.id, mcAcc.name, msAccount.username);
     });
