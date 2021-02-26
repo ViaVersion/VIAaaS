@@ -1,0 +1,13 @@
+sudo apt install apache2 python3-certbot-apache
+sudo a2enmod rewrite ssl proxy_http proxy_connect proxy_wstunnel
+
+# https://stackoverflow.com/questions/19294816/is-it-possible-to-ignore-an-apache-proxyd-certificate
+# https://stackoverflow.com/questions/27526281/websockets-and-apache-proxy-how-to-configure-mod-proxy-wstunnel
+SSLProxyEngine on
+SSLProxyCheckPeerCN off
+SSLProxyCheckPeerExpire off
+RewriteEngine On
+RewriteCond %{HTTP:Upgrade} =websocket [NC]
+RewriteRule /viaaas/(.*)           wss://localhost:25543/$1 [P,L]
+RewriteCond %{HTTP:Upgrade} !=websocket [NC]
+RewriteRule /viaaas/(.*)           https://localhost:25543/$1 [P,L]
