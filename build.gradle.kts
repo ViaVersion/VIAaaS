@@ -6,7 +6,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.36.0"
     id("com.palantir.git-version") version "0.12.3"
     application
-    kotlin("jvm") version "1.4.30"
+    kotlin("jvm") version "1.4.31"
     id("maven-publish")
 }
 
@@ -47,19 +47,19 @@ dependencies {
     implementation("us.myles:viaversion:3.2.1") { isTransitive = false }
     implementation("nl.matsv:viabackwards-all:3.2.0") { isTransitive = false }
     implementation("de.gerrygames:viarewind-all:1.5.3") { isTransitive = false }
-    implementation("io.netty:netty-all:4.1.58.Final")
-    implementation("org.yaml:snakeyaml:1.26")
-    implementation("com.google.guava:guava:30.0-jre")
-    implementation("co.aikar:fastutil-lite:1.0")
+    implementation("io.netty:netty-all:4.1.59.Final")
+    implementation("org.yaml:snakeyaml:1.28")
+    implementation("com.google.guava:guava:30.1-jre")
+    implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
 
-    implementation("org.apache.logging.log4j:log4j-core:2.13.3")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.3")
+    val log4jVer = "2.14.0"
+    implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVer")
     implementation("org.slf4j:slf4j-api:1.7.30")
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
-    implementation("org.jline:jline-terminal-jansi:3.12.1")
+    implementation("org.jline:jline-terminal-jansi:3.19.0")
 
-    val ktorVersion = "1.5.1"
-
+    val ktorVersion = "1.5.2"
     implementation(kotlin("stdlib-jdk8"))
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

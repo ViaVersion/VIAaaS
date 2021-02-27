@@ -18,6 +18,6 @@ interface MinecraftConnectionState {
     }
 
     fun onInactivated(handler: MinecraftHandler) {
-        mcLogger.info(handler.remoteAddress?.toString() + " inactivated")
+        mcLogger.info(handler.remoteAddress.toString() + " inactivated")
     }
 }
