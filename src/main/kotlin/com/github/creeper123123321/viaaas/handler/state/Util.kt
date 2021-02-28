@@ -15,17 +15,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import us.myles.ViaVersion.packets.State
+import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.InetSocketAddress
 
-fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketAddress, state: State): ChannelFuture {
+private fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketAddress, state: State): ChannelFuture {
     return Bootstrap()
         .handler(BackEndInit(handler.data))
         .channelFactory(channelSocketFactory())
         .group(handler.data.frontChannel.eventLoop())
         .option(ChannelOption.IP_TOS, 0x18)
         .option(ChannelOption.TCP_NODELAY, true)
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000) // Half of mc timeout
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // We need to show the error before the client timeout
         .connect(socketAddr)
         .addListener(ChannelFutureListener {
             if (it.isSuccess) {
@@ -41,11 +42,47 @@ fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketAddress, 
                 forward(handler, packet, true)
 
                 handler.data.frontChannel.setAutoRead(true)
-            } else {
-                // We're in the event loop
-                handler.disconnect("Couldn't connect: " + it.cause().toString())
             }
         })
+}
+
+private fun tryBackAddress(
+    handler: MinecraftHandler,
+    iterator: Iterator<InetAddress>,
+    port: Int,
+    state: State,
+    success: () -> Unit,
+) {
+    val fail = { e: Throwable ->
+        if (!iterator.hasNext()) {
+            // We're in the event loop
+            handler.disconnect("Couldn't connect: $e")
+        } else if (handler.data.frontChannel.isActive) {
+            tryBackAddress(handler, iterator, port, state, success)
+        }
+    }
+    try {
+        val socketAddr = InetSocketAddress(iterator.next(), port)
+
+        if (checkLocalAddress(socketAddr.address)
+            || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
+            || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)
+        ) {
+            throw SecurityException("Not allowed")
+        }
+
+        createBackChannel(handler, socketAddr, state).addListener {
+            if (it.isSuccess) {
+                success()
+            } else {
+                fail(it.cause())
+            }
+        }
+    } catch (e: Exception) {
+        handler.data.frontChannel.eventLoop().submit {
+            fail(e)
+        }
+    }
 }
 
 fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: State, success: () -> Unit) {
@@ -54,16 +91,14 @@ fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: St
         try {
             val srvResolved = resolveSrv(address, port)
 
-            val socketAddr = InetSocketAddress(InetAddress.getByName(srvResolved.first), srvResolved.second)
+            val iterator = InetAddress.getAllByName(srvResolved.first)
+                .groupBy { it is Inet4Address }
+                .toSortedMap() // I'm sorry, IPv4, but my true love is IPv6... We can still be friends though...
+                .map { it.value.random() }
+                .iterator()
 
-            if (checkLocalAddress(socketAddr.address)
-                || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
-                || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)
-            ) {
-                throw SecurityException("Not allowed")
-            }
-
-            createBackChannel(handler, socketAddr, state).addListener { if (it.isSuccess) success() }
+            if (!iterator.hasNext()) throw IllegalArgumentException("Hostname has no IP address")
+            tryBackAddress(handler, iterator, srvResolved.second, state, success)
         } catch (e: Exception) {
             handler.data.frontChannel.eventLoop().submit {
                 handler.disconnect("Couldn't connect: $e")
