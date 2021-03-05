@@ -87,6 +87,9 @@ tasks {
         dependsOn(shadowJar)
         dependsOn(named("dependencyUpdates"))
     }
+    jar {
+        manifest.attributes("Multi-Release" to "true")
+    }
 }
 
 tasks.named<ProcessResources>("processResources") {
