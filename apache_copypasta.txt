@@ -8,6 +8,6 @@ SSLProxyCheckPeerCN off
 SSLProxyCheckPeerExpire off
 RewriteEngine On
 RewriteCond %{HTTP:Upgrade} =websocket [NC]
-RewriteRule /viaaas/(.*)           wss://localhost:25543/$1 [P,L]
+RewriteRule ^/viaaas/(.*)           wss://localhost:25543/$1 [P,L]
 RewriteCond %{HTTP:Upgrade} !=websocket [NC]
-RewriteRule /viaaas/(.*)           https://localhost:25543/$1 [P,L]
+RewriteRule ^/viaaas/(.*)           https://localhost:25543/$1 [P,L]
