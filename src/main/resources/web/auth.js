@@ -1,7 +1,3 @@
-if (Notification.permission == "default") {
-    Notification.requestPermission();
-}
-
 // Minecraft.id
 let urlParams = new URLSearchParams();
 window.location.hash.substr(1).split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
@@ -401,5 +397,9 @@ $(() => {
     setInterval(refreshCorsStatus, 10 * 60 * 1000);
     refreshCorsStatus();
 
+    if (Notification.permission == "default") {
+        Notification.requestPermission();
+    }
+    
     connect();
 });
