@@ -1,4 +1,6 @@
-navigator.serviceWorker.register("sw.js");
+// SW
+navigator.serviceWorker.register("sw.js")
+new BroadcastChannel('viaaas-notification').addEventListener("message", e => handleSWMsg(e));
 
 // Minecraft.id
 let urlParams = new URLSearchParams();
@@ -296,7 +298,6 @@ function handleSWMsg(event) {
     if (callback == null) return;
     callback(data.action);
 }
-navigator.serviceWorker.addEventListener("message", handleSWMsg);
 function authNotification(msg, yes, no) {
     if ((!pageBlur && !document.hidden) || Notification.permission != "granted") {
         if (confirm(msg)) yes(); else no();
