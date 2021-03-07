@@ -291,7 +291,7 @@ function confirmJoin(hash) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 function authNotification(msg, yes, no) {
-    if (!pageBlur || Notification.permission != "granted") {
+    if ((!pageBlur && !document.hidden) || Notification.permission != "granted") {
         if (confirm(msg)) yes(); else no();
         return;
     }
