@@ -400,6 +400,7 @@ $(() => {
     if (Notification.permission == "default") {
         Notification.requestPermission();
     }
-    
+    $("#notificate").on("click", e => Notification.requestPermission());
+
     connect();
 });
