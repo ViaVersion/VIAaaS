@@ -299,6 +299,7 @@ function authNotification(msg, yes, no) {
         //]
     });
     notification.onclick = e => {
+        e.preventDefault();
         if (e.action == "reject") {
             no();
         } else if (!e.action || e.action == "confirm") {
