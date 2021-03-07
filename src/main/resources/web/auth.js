@@ -1,3 +1,7 @@
+if (Notification.permission == "default") {
+    Notification.requestPermission();
+}
+
 // Minecraft.id
 let urlParams = new URLSearchParams();
 window.location.hash.substr(1).split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
@@ -27,6 +31,13 @@ var listening = document.getElementById("listening");
 var actions = document.getElementById("actions");
 var accounts = document.getElementById("accounts-list");
 var listenVisible = false;
+var pageBlur = false;
+document.addEventListener("focus", () => {
+    pageBlur = false;
+});
+document.addEventListener("blur", () => {
+    pageBlur = true;
+});
 
 // Util
 isMojang = it => !!it.clientToken;
@@ -239,7 +250,9 @@ function renderActions() {
         addAction("Listen to premium login in VIAaaS instance", () => {
             let user = prompt("Premium username (case-sensitive): ", "");
             if (!user) return;
-            let callbackUrl = new URL(location.origin + location.pathname + "#username=" + encodeURIComponent(user));
+            let callbackUrl = new URL(location);
+            callbackUrl.search = "";
+            callbackUrl.hash = "#username=" + encodeURIComponent(user);
             location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
                 + "?callback=" + encodeURIComponent(callbackUrl);
         });
@@ -277,8 +290,31 @@ function listen(token) {
 function confirmJoin(hash) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
+function authNotification(msg, yes, no) {
+    if (!pageBlur || (false && Notification.permission != "granted")) {
+        if (confirm(msg)) yes(); else no();
+        return;
+    }
+    let notification = new Notification("Click to allow auth impersionation", {
+        body: msg,
+        //actions: [
+        //    {action: "reject", title: "Reject"},
+        //    {action: "confirm", title: "Confirm"}
+        //]
+    });
+    notification.onclick = e => {
+        if (e.action == "reject") {
+            no();
+        } else if (!e.action || e.action == "confirm") {
+            yes();
+        } else {
+            return;
+        }
+        notification.close();
+    };
+}
 function handleJoinRequest(parsed) {
-    if (confirm("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'")) {
+    authNotification("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'", () => {
         let account = findAccountByMcName(parsed.user);
         if (account) {
             getMcUserToken(account).then(data => {
@@ -288,12 +324,10 @@ function handleJoinRequest(parsed) {
             .finally(() => confirmJoin(parsed.session_hash))
             .catch((e) => alert("Couldn't contact session server for " + parsed.user + " account in browser. error: " + e));
         } else {
-            alert("Couldn't find " + parsed.user + " account in browser.");
             confirmJoin(parsed.session_hash);
+            alert("Couldn't find " + parsed.user + " account in browser.");
         }
-    } else {
-        confirmJoin(parsed.session_hash);
-    }
+    }, () => confirmJoin(parsed.session_hash));
 }
 function onSocketMsg(event) {
     let parsed = JSON.parse(event.data);
