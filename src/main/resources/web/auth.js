@@ -1,3 +1,5 @@
+navigator.serviceWorker.register("sw.js");
+
 // Minecraft.id
 let urlParams = new URLSearchParams();
 window.location.hash.substr(1).split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
@@ -286,29 +288,40 @@ function listen(token) {
 function confirmJoin(hash) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
+var notificationCallbacks = {};
+function handleSWMsg(event) {
+    console.log("sw msg: " + event);
+    let data = event.data;
+    let callback = notificationCallbacks[data.tag];
+    if (callback == null) return;
+    callback(data.action);
+}
+navigator.serviceWorker.addEventListener("message", handleSWMsg);
 function authNotification(msg, yes, no) {
     if ((!pageBlur && !document.hidden) || Notification.permission != "granted") {
         if (confirm(msg)) yes(); else no();
         return;
     }
-    let notification = new Notification("Click to allow auth impersionation", {
-        body: msg,
-        //actions: [
-        //    {action: "reject", title: "Reject"},
-        //    {action: "confirm", title: "Confirm"}
-        //]
+    let tag = uuid.v4();
+    navigator.serviceWorker.ready.then(r => {
+        r.showNotification("Click to allow auth impersionation", {
+            body: msg,
+            tag: tag,
+            actions: [
+                {action: "reject", title: "Reject"},
+                {action: "confirm", title: "Confirm"}
+            ]
+        });
+        notificationCallbacks[tag] = action => {
+            if (action == "reject") {
+                no();
+            } else if (!action || action == "confirm") {
+                yes();
+            } else {
+                return;
+            }
+        };
     });
-    notification.onclick = e => {
-        e.preventDefault();
-        if (e.action == "reject") {
-            no();
-        } else if (!e.action || e.action == "confirm") {
-            yes();
-        } else {
-            return;
-        }
-        notification.close();
-    };
 }
 function handleJoinRequest(parsed) {
     authNotification("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'", () => {
@@ -398,9 +411,6 @@ $(() => {
     setInterval(refreshCorsStatus, 10 * 60 * 1000);
     refreshCorsStatus();
 
-    if (Notification.permission == "default") {
-        Notification.requestPermission();
-    }
     $("#notificate").on("click", e => Notification.requestPermission());
 
     connect();

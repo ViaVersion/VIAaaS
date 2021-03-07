@@ -30,7 +30,7 @@ private fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketA
         .connect(socketAddr)
         .addListener(ChannelFutureListener {
             if (it.isSuccess) {
-                mcLogger.info("Connected ${handler.remoteAddress} -> $socketAddr")
+                mcLogger.info("+ ${handler.remoteAddress} -> $socketAddr")
                 handler.data.backChannel = it.channel() as SocketChannel
 
                 val packet = Handshake()

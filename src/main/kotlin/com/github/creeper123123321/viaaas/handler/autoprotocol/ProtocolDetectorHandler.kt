@@ -22,8 +22,7 @@ class ProtocolDetectorHandler(val connectionData: ConnectionData) : ChannelDuple
         if (ctx.channel().remoteAddress() is InetSocketAddress) {
             val timeoutRun = ctx.executor().schedule({
                 mcLogger.warn(
-                    "Timeout for protocol auto-detection in "
-                            + ctx.channel().remoteAddress() + " server"
+                    "Timeout protocol A.D. " + ctx.channel().remoteAddress()
                 )
                 hold = false
                 drainQueue(ctx)

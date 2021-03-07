@@ -14,10 +14,10 @@ interface MinecraftConnectionState {
     )
 
     fun disconnect(handler: MinecraftHandler, msg: String) {
-        mcLogger.info("Disconnected ${handler.remoteAddress}: $msg")
+        mcLogger.info("DC ${handler.remoteAddress}: $msg")
     }
 
     fun onInactivated(handler: MinecraftHandler) {
-        mcLogger.info(handler.remoteAddress.toString() + " inactivated")
+        mcLogger.info("- ${handler.remoteAddress}")
     }
 }

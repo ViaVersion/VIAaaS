@@ -63,7 +63,7 @@ class HandshakeState : MinecraftConnectionState {
 
         val playerAddr = handler.data.frontHandler.remoteAddress
         mcLogger.info(
-            "Handshake: ${handler.data.state.state} $playerAddr (${handler.data.frontVer}," +
+            "HS: $playerAddr (P: ${handler.data.frontVer}, S: ${handler.data.state.state.toString().substring(0, 1)}" +
                     " O: ${
                         frontOnline.toString().substring(0, 1)
                     }) -> ${packet.address}:${packet.port} (${backProto ?: "AUTO"})"

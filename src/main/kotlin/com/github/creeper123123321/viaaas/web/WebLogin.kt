@@ -24,7 +24,7 @@ class WebLogin : WebState {
         when (obj.getAsJsonPrimitive("action").asString) {
             "offline_login" -> {
                 // todo add some spam check
-                val username = obj.get("username").asString
+                val username = obj.get("username").asString.trim()
                 val uuid = generateOfflinePlayerUuid(username)
 
                 val token = webClient.server.generateToken(uuid)
@@ -33,7 +33,7 @@ class WebLogin : WebState {
                         | "username": "$username", "uuid": "$uuid", "token": "$token"}""".trimMargin()
                 )
 
-                webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) generated a token for offline account $username")
+                webLogger.info("Token gen: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): offline $username")
             }
             "minecraft_id_login" -> {
                 val username = obj.get("username").asString
@@ -54,10 +54,10 @@ class WebLogin : WebState {
                         | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin()
                     )
 
-                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) generated a token for account $mcIdUser $uuid")
+                    webLogger.info("Token gen: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): $mcIdUser $uuid")
                 } else {
                     webClient.ws.send("""{"action": "login_result", "success": false}""")
-                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost})  failed to generated a token for account $username")
+                    webLogger.info("Token gen fail: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): $username")
                 }
             }
             "listen_login_requests" -> {
@@ -65,11 +65,11 @@ class WebLogin : WebState {
                 val user = webClient.server.loginTokens.getIfPresent(token)
                 if (user != null && webClient.listenId(user)) {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": true, "user": "$user"}""")
-                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) listening for logins for $user")
+                    webLogger.info("Listen: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): $user")
                 } else {
                     webClient.server.loginTokens.invalidate(token)
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
-                    webLogger.info("${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}) failed token")
+                    webLogger.info("Token fail: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost})")
                 }
             }
             "unlisten_login_requests" -> {
