@@ -1,6 +1,5 @@
 // SW
 navigator.serviceWorker.register("sw.js")
-new BroadcastChannel('viaaas-notification').addEventListener("message", e => handleSWMsg(e));
 
 // Minecraft.id
 let urlParams = new URLSearchParams();
@@ -283,18 +282,13 @@ function resetHtml() {
     renderActions();
 }
 
-// Websocket
-function listen(token) {
-    socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
-}
-function confirmJoin(hash) {
-    socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
-}
+// Notification
 var notificationCallbacks = {};
 function handleSWMsg(event) {
     console.log("sw msg: " + event);
     let data = event.data;
     let callback = notificationCallbacks[data.tag];
+    delete notificationCallbacks[data.tag];
     if (callback == null) return;
     callback(data.action);
 }
@@ -322,7 +316,17 @@ function authNotification(msg, yes, no) {
                 return;
             }
         };
+        setTimeout(() => { delete notificationCallbacks[tag] }, 30_000);
     });
+}
+new BroadcastChannel("viaaas-notification").addEventListener("message", handleSWMsg);
+
+// Websocket
+function listen(token) {
+    socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
+}
+function confirmJoin(hash) {
+    socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 function handleJoinRequest(parsed) {
     authNotification("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'", () => {
