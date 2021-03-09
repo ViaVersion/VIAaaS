@@ -58,6 +58,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:1.7.30")
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.19.0")
+    implementation("org.apache.commons:commons-compress:1.20")
+    implementation("org.tukaani:xz:1.8")
 
     val ktorVersion = "1.5.2"
     implementation(kotlin("stdlib-jdk8"))
