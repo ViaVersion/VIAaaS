@@ -10,6 +10,7 @@
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="200 MB"/>
                 <OnStartupTriggeringPolicy/>
             </Policies>
         </RollingRandomAccessFile>
