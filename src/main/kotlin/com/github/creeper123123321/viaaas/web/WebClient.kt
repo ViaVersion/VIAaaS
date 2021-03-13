@@ -18,7 +18,7 @@ data class WebClient(
         val atInt = AtomicInteger()
         fun next() = atInt.getAndAdd(1)
     }
-    val id = "${ws.call.request.local.host}(${ws.call.request.origin.host})-${IdGen.next()}"
+    val id = "${ws.call.request.local.remoteHost}(${ws.call.request.origin.remoteHost})-${IdGen.next()}"
     val listenedIds: MutableSet<UUID> = Sets.newConcurrentHashSet()
     val rateLimiter = RateLimiter.create(VIAaaSConfig.rateLimitWs)
 
