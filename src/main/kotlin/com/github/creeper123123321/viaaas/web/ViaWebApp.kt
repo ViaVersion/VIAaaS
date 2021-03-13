@@ -31,6 +31,9 @@ class ViaWebApp {
         }
         install(XForwardedHeaderSupport)
         install(ForwardedHeaderSupport)
+        // i think we aren't vulnerable to breach, dynamic things are websockets
+        // https://ktor.io/docs/compression.html#security
+        install(Compression)
 
         routing {
             webSocket("/ws") {
