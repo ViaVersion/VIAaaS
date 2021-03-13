@@ -8,10 +8,8 @@ import us.myles.ViaVersion.api.type.Type
 
 class FrameCodec : ByteToMessageCodec<ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
-        if (!ctx.channel().isActive) {
-            input.clear() // Ignore, should prevent DoS https://github.com/SpigotMC/BungeeCord/pull/2908
-            return
-        }
+        if (!ctx.channel().isActive) return
+        // Ignore, should prevent DoS https://github.com/SpigotMC/BungeeCord/pull/2908
 
         val index = input.readerIndex()
         var nByte = 0
