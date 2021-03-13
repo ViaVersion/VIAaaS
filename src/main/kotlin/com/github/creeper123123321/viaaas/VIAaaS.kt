@@ -103,6 +103,12 @@ fun main(args: Array<String>) {
     System.setOut(IoBuilder.forLogger("STDOUT").setLevel(Level.INFO).buildPrintStream());
     System.setErr(IoBuilder.forLogger("STDERR").setLevel(Level.ERROR).buildPrintStream());
 
+    println("""\\        // // //\\  =>     //||     //||   /=====/ PROXY
+              | \\      // // //  \\       // ||    // ||  //
+              |  \\    // // //====\\     //==||   //==||  \====\   $viaaasVer
+              |   \\  // // //      \\   //   ||  //   ||      //
+              |<=  \\// // //        \\ //    || //    || /====/""".trimMargin())
+
     File("config/https.jks").apply {
         parentFile.mkdirs()
         if (!exists()) generateCertificate(this)
