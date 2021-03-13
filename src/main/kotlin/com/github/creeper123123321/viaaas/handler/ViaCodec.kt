@@ -9,6 +9,7 @@ import us.myles.ViaVersion.exception.CancelEncoderException
 
 class ViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
+        if (!ctx.channel().isActive) return
         if (!info.checkIncomingPacket()) throw CancelDecoderException.generate(null)
         if (!info.shouldTransformPacket()) {
             out.add(bytebuf.retain())

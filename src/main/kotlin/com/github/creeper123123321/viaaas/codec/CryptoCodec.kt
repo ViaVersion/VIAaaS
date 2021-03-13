@@ -7,6 +7,7 @@ import javax.crypto.Cipher
 
 class CryptoCodec(val cipherDecode: Cipher, var cipherEncode: Cipher) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
+        if (!ctx.channel().isActive) return
         val i = msg.readerIndex()
         val size = msg.readableBytes()
         msg.writerIndex(i + cipherDecode.update(msg.nioBuffer(), msg.nioBuffer(i, cipherDecode.getOutputSize(size))))

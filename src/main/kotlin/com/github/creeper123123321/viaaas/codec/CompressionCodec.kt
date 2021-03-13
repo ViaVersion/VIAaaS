@@ -42,33 +42,32 @@ class CompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf, Byte
 
     @Throws(Exception::class)
     override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
-        if (input.isReadable) {
-            val outLength = Type.VAR_INT.readPrimitive(input)
-            if (outLength == 0) {
-                out.add(input.retain())
-                return
-            }
+        if (!input.isReadable || !ctx.channel().isActive) return
+        val outLength = Type.VAR_INT.readPrimitive(input)
+        if (outLength == 0) {
+            out.add(input.retain())
+            return
+        }
 
-            if (outLength < threshold) {
-                throw DecoderException("Badly compressed packet - size of $outLength is below server threshold of $threshold")
-            }
-            if (outLength > 2097152) {
-                throw DecoderException("Badly compressed packet - size of $outLength is larger than protocol maximum of 2097152")
-            }
+        if (outLength < threshold) {
+            throw DecoderException("Badly compressed packet - size of $outLength is below server threshold of $threshold")
+        }
+        if (outLength > 2097152) {
+            throw DecoderException("Badly compressed packet - size of $outLength is larger than protocol maximum of 2097152")
+        }
 
-            inflater.setInput(input.nioBuffer())
-            val output = ctx.alloc().buffer(outLength, outLength)
-            try {
-                output.writerIndex(
-                    output.writerIndex() + inflater.inflate(
-                        output.nioBuffer(output.writerIndex(), output.writableBytes())
-                    )
+        inflater.setInput(input.nioBuffer())
+        val output = ctx.alloc().buffer(outLength, outLength)
+        try {
+            output.writerIndex(
+                output.writerIndex() + inflater.inflate(
+                    output.nioBuffer(output.writerIndex(), output.writableBytes())
                 )
-                out.add(output.retain())
-            } finally {
-                inflater.reset()
-                output.release()
-            }
+            )
+            out.add(output.retain())
+        } finally {
+            inflater.reset()
+            output.release()
         }
     }
 
