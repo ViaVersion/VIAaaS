@@ -25,6 +25,7 @@ class ViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBu
     }
 
     override fun encode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
+        if (!ctx.channel().isActive) throw CancelEncoderException.CACHED
         if (!info.checkOutgoingPacket()) throw CancelEncoderException.generate(null)
         if (!info.shouldTransformPacket()) {
             out.add(bytebuf.retain())

@@ -7,10 +7,11 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageCodec
+import us.myles.ViaVersion.exception.CancelEncoderException
 
 class MinecraftCodec : MessageToMessageCodec<ByteBuf, Packet>() {
     override fun encode(ctx: ChannelHandlerContext, msg: Packet, out: MutableList<Any>) {
-        if (!ctx.channel().isActive) return
+        if (!ctx.channel().isActive) throw CancelEncoderException.CACHED
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
             val handler = ctx.pipeline().get(MinecraftHandler::class.java)
