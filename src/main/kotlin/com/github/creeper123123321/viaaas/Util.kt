@@ -8,6 +8,7 @@ import com.google.gson.JsonObject
 import io.ktor.client.request.*
 import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
+import io.netty.channel.ChannelFutureListener
 import io.netty.handler.codec.DecoderException
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
@@ -143,7 +144,7 @@ fun send(ch: Channel, obj: Any, flush: Boolean = false) {
 }
 
 fun writeFlushClose(ch: Channel, obj: Any) {
-    ch.writeAndFlush(obj).addListener { ch.close() }
+    ch.writeAndFlush(obj).addListener(ChannelFutureListener.CLOSE)
 }
 
 val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()

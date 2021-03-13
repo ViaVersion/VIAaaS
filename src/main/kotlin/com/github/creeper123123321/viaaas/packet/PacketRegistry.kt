@@ -2,6 +2,7 @@ package com.github.creeper123123321.viaaas.packet
 
 import com.github.creeper123123321.viaaas.packet.handshake.Handshake
 import com.github.creeper123123321.viaaas.packet.login.*
+import com.github.creeper123123321.viaaas.packet.play.Kick
 import com.github.creeper123123321.viaaas.packet.play.PluginMessage
 import com.github.creeper123123321.viaaas.packet.status.StatusPing
 import com.github.creeper123123321.viaaas.packet.status.StatusPong
@@ -32,6 +33,17 @@ object PacketRegistry {
         register(Range.all(), State.STATUS, 1, true, ::StatusPing)
         register(Range.all(), State.STATUS, 0, false, ::StatusResponse)
         register(Range.all(), State.STATUS, 1, false, ::StatusPong)
+        register(
+            ::Kick, State.PLAY, false, mapOf(
+                Range.closed(ProtocolVersion.v1_7_1.version, ProtocolVersion.v1_8.version) to 0x40,
+                Range.closed(ProtocolVersion.v1_9.version, ProtocolVersion.v1_12_2.version) to 0x1A,
+                Range.closed(ProtocolVersion.v1_13.version, ProtocolVersion.v1_13_2.version) to 0x1B,
+                Range.closed(ProtocolVersion.v1_14.version, ProtocolVersion.v1_14_4.version) to 0x1A,
+                Range.closed(ProtocolVersion.v1_15.version, ProtocolVersion.v1_15_2.version) to 0x1B,
+                Range.closed(ProtocolVersion.v1_16.version, ProtocolVersion.v1_16_1.version) to 0x1A,
+                Range.closed(ProtocolVersion.v1_16_2.version, ProtocolVersion.v1_16_4.version) to 0x19
+            )
+        )
         register(
             ::PluginMessage, State.PLAY, true, mapOf(
                 Range.closed(ProtocolVersion.v1_7_1.version, ProtocolVersion.v1_8.version) to 0x17,

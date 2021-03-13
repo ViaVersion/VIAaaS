@@ -14,11 +14,12 @@ class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
     override fun initChannel(ch: Channel) {
         val user = UserConnection(ch, true)
         ProtocolPipeline(user)
-        ch.pipeline().addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
+        ch.pipeline()
             // "crypto"
             .addLast("frame", FrameCodec())
             // compress
             .addLast("via-codec", ViaCodec(user))
+            .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
             .addLast("mc", MinecraftCodec())
             .also {
                 if (connectionData.viaBackServerVer == null) {

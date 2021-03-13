@@ -54,7 +54,9 @@ dependencies {
 
     val log4jVer = "2.14.0"
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
+    implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVer")
+    implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
     implementation("org.slf4j:slf4j-api:1.7.30")
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.19.0")

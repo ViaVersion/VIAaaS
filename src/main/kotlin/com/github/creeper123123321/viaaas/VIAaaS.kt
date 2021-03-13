@@ -34,6 +34,8 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.Future
+import org.apache.logging.log4j.Level
+import org.apache.logging.log4j.io.IoBuilder
 import us.myles.ViaVersion.ViaManager
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
@@ -97,6 +99,9 @@ fun main(args: Array<String>) {
     if (System.getProperty("io.netty.allocator.maxOrder") == null) {
         System.setProperty("io.netty.allocator.maxOrder", "9")
     }
+    // Also stolen from Velocity
+    System.setOut(IoBuilder.forLogger("STDOUT").setLevel(Level.INFO).buildPrintStream());
+    System.setErr(IoBuilder.forLogger("STDERR").setLevel(Level.ERROR).buildPrintStream());
 
     File("config/https.jks").apply {
         parentFile.mkdirs()

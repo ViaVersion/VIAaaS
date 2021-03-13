@@ -33,7 +33,7 @@ class WebLogin : WebState {
                         | "username": "$username", "uuid": "$uuid", "token": "$token"}""".trimMargin()
                 )
 
-                webLogger.info("Token gen: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): offline $username")
+                webLogger.info("Token gen: ${webClient.id}: offline $username $uuid")
             }
             "minecraft_id_login" -> {
                 val username = obj.get("username").asString
@@ -54,10 +54,10 @@ class WebLogin : WebState {
                         | "username": "$mcIdUser", "uuid": "$uuid", "token": "$token"}""".trimMargin()
                     )
 
-                    webLogger.info("Token gen: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): $mcIdUser $uuid")
+                    webLogger.info("Token gen: ${webClient.id}: $mcIdUser $uuid")
                 } else {
                     webClient.ws.send("""{"action": "login_result", "success": false}""")
-                    webLogger.info("Token gen fail: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): $username")
+                    webLogger.info("Token gen fail: ${webClient.id}: $username")
                 }
             }
             "listen_login_requests" -> {
@@ -65,11 +65,11 @@ class WebLogin : WebState {
                 val user = webClient.server.loginTokens.getIfPresent(token)
                 if (user != null && webClient.listenId(user)) {
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": true, "user": "$user"}""")
-                    webLogger.info("Listen: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost}): $user")
+                    webLogger.info("Listen: ${webClient.id}: $user")
                 } else {
                     webClient.server.loginTokens.invalidate(token)
                     webClient.ws.send("""{"action": "listen_login_requests_result", "token": "$token", "success": false}""")
-                    webLogger.info("Token fail: ${webClient.ws.call.request.local.remoteHost} (O: ${webClient.ws.call.request.origin.remoteHost})")
+                    webLogger.info("Token fail: ${webClient.id}")
                 }
             }
             "unlisten_login_requests" -> {

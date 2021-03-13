@@ -11,12 +11,12 @@ import java.util.concurrent.TimeUnit
 object FrontEndInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         ch.pipeline()
-            .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
             // "crypto"
             .addLast("frame", FrameCodec())
             // "compress"
             .addLast("flow-handler", FlowControlHandler())
             .addLast("mc", MinecraftCodec())
+            .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
             .addLast("handler", MinecraftHandler(ConnectionData(frontChannel = ch), frontEnd = true))
     }
 }

@@ -43,7 +43,6 @@ class ViaWebApp {
                     }
                 } catch (ignored: ClosedChannelException) {
                 } catch (e: Exception) {
-                    webLogger.info("${call.request.local.remoteHost} (O: ${call.request.origin.remoteHost}) exception: $e")
                     viaWebServer.onException(this, e)
                     this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, "INTERNAL ERROR"))
                 } finally {

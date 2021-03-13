@@ -6,8 +6,11 @@ import com.github.creeper123123321.viaaas.handler.forward
 import com.github.creeper123123321.viaaas.handler.is1_7
 import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.packet.UnknownPacket
+import com.github.creeper123123321.viaaas.packet.play.Kick
 import com.github.creeper123123321.viaaas.packet.play.PluginMessage
 import com.github.creeper123123321.viaaas.readableToByteArray
+import com.github.creeper123123321.viaaas.writeFlushClose
+import com.google.gson.JsonPrimitive
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
@@ -22,7 +25,7 @@ object PlayState : MinecraftConnectionState {
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         when {
             packet is UnknownPacket && (packet.id !in 0..127) -> throw IllegalArgumentException("Invalid packet id!")
-            packet is PluginMessage -> modifyPluginMessage(handler, packet)
+            packet is PluginMessage && !handler.frontEnd -> modifyPluginMessage(handler, packet)
         }
         forward(handler, packet)
     }
@@ -58,6 +61,7 @@ object PlayState : MinecraftConnectionState {
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
-        handler.data.frontChannel.close()
+        writeFlushClose(handler.data.frontChannel,
+            Kick().also { it.msg = JsonPrimitive("[VIAaaS] $msg").toString() })
     }
 }

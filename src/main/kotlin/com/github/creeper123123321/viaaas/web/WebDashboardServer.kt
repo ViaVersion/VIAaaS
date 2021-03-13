@@ -3,10 +3,12 @@ package com.github.creeper123123321.viaaas.web
 import com.github.creeper123123321.viaaas.httpClient
 import com.github.creeper123123321.viaaas.parseUndashedId
 import com.github.creeper123123321.viaaas.viaWebServer
+import com.github.creeper123123321.viaaas.webLogger
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.gson.JsonObject
 import io.ktor.client.request.*
+import io.ktor.features.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
@@ -52,26 +54,24 @@ class WebDashboardServer {
         id: UUID, name: String, hash: String,
         address: SocketAddress, backAddress: SocketAddress
     ): CompletableFuture<Unit> {
-        val future = viaWebServer.pendingSessionHashes.get(hash)
-        var sent = 0
-        viaWebServer.listeners[id]?.forEach {
-            it.ws.send(
-                JsonObject().also {
-                    it.addProperty("action", "session_hash_request")
-                    it.addProperty("user", name)
-                    it.addProperty("session_hash", hash)
-                    it.addProperty("message", "Client is $address, backend is $backAddress")
-                }.toString()
-            )
-            it.ws.flush()
-            sent++
-        }
-        if (sent != 0) {
+        val future = pendingSessionHashes.get(hash)
+        if (listeners[id]?.isEmpty() != false) {
+            future.completeExceptionally(IllegalStateException("No browser listening"))
+        } else {
+            listeners[id]?.forEach {
+                it.ws.send(
+                    JsonObject().also {
+                        it.addProperty("action", "session_hash_request")
+                        it.addProperty("user", name)
+                        it.addProperty("session_hash", hash)
+                        it.addProperty("message", "Client is $address, backend is $backAddress")
+                    }.toString()
+                )
+                it.ws.flush()
+            }
             Via.getPlatform().runSync({
                 future.completeExceptionally(TimeoutException("No response from browser"))
             }, 15 * 20)
-        } else {
-            future.completeExceptionally(IllegalStateException("No browser listening"))
         }
         return future
     }
@@ -79,24 +79,27 @@ class WebDashboardServer {
     suspend fun connected(ws: WebSocketServerSession) {
         val loginState = WebLogin()
         val client = WebClient(this, ws, loginState)
+        webLogger.info("+ WS: ${client.id}")
         clients[ws] = client
         loginState.start(client)
     }
 
-    suspend fun onMessage(ws: WebSocketSession, msg: String) {
+    suspend fun onMessage(ws: WebSocketServerSession, msg: String) {
         val client = clients[ws]!!
         client.rateLimiter.acquire()
         client.state.onMessage(client, msg)
     }
 
-    suspend fun disconnected(ws: WebSocketSession) {
+    suspend fun disconnected(ws: WebSocketServerSession) {
         val client = clients[ws]!!
+        webLogger.info("- WS: ${client.id}")
         client.state.disconnected(client)
         clients.remove(ws)
     }
 
-    suspend fun onException(ws: WebSocketSession, exception: java.lang.Exception) {
+    suspend fun onException(ws: WebSocketServerSession, exception: Exception) {
         val client = clients[ws]!!
+        webLogger.info("WS Error: ${client.id} $exception")
         client.state.onException(client, exception)
     }
 }
