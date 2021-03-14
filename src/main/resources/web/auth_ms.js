@@ -27,7 +27,7 @@ function loginMs() {
 
 $(() => myMSALObj.handleRedirectPromise().then((resp) => {
     if (resp) {
-        refreshTokenMs(resp.account.username).catch(e => alert("failed to get mc token: " + e));
+        refreshTokenMs(resp.account.username).catch(e => addToast("Failed to get token", e));
         refreshAccountList();
     }
 }));

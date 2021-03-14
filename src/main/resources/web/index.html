@@ -58,7 +58,7 @@
   </div>
 </nav>
 <div class="container tab-content" id="content">
-    <div id="home" class="tab-pane fade show active" role="tabpanel" aria-labelledby="home-tab">
+    <div id="home" class="tab-pane fade show active" aria-labelledby="home-tab">
 	<p>WebSocket connection status: <span id="connection_status" class="text-white bg-dark">?</span></p>
         <p>CORS Proxy status: <span id="cors_status" class="text-white bg-dark">?</span></p>
 	<hr>
@@ -67,7 +67,7 @@
 	<p><span id="listening"></span></p>
     </div>
 
-    <div id="settings" class="tab-pane fade" role="tabpanel" aria-labelledby="settings-tab">
+    <div id="settings" class="tab-pane fade" aria-labelledby="settings-tab">
         <div class="mb-3">
           <label for="cors-proxy" class="form-label">CORS Proxy URL Prefix</label>
           <p>See <a href="https://github.com/ViaVersion/VIAaaS#cors-proxy">README</a>
@@ -82,7 +82,7 @@
         </div>
     </div>
 
-    <div id="accounts" class="tab-pane fade" role="tabpanel" aria-labelledby="accounts-tab">
+    <div id="accounts" class="tab-pane fade" aria-labelledby="accounts-tab">
 	<div>
           <p>Browser Minecraft accounts:</p>
           <div id="accounts-list"></div>
@@ -112,6 +112,8 @@
         </div>
     </div>
 </div>
+<div class="toast-container position-absolute top-0 end-0 p-3" id="toasts"></div>
+
 <script src="auth_ms.js"></script>
 <script src="auth.js"></script>
 </body>

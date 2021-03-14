@@ -7,7 +7,7 @@ window.location.hash.substr(1).split("?").map(it => new URLSearchParams(it).forE
 var mcIdUsername = urlParams.get("username");
 var mcauth_code = urlParams.get("mcauth_code");
 if (urlParams.get("mcauth_success") == "false") {
-    alert("Couldn't authenticate with Minecraft.ID: " + urlParams.get("mcauth_msg"));
+    addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg"));
 }
 
 // WS url
@@ -123,7 +123,7 @@ function loginMc(user, pass) {
     .then(r => r.json())
     .then(data => {
         storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id);
-    }).catch(e => alert("Failed to login: " + e));
+    }).catch(e => addToast("Failed to login", e));
     $("#form_add_mc input").val("");
 }
 function logoutMojang(id) {
@@ -173,7 +173,7 @@ function getMcUserToken(account) {
             }
         }
         return account;
-    }).catch(e => alert("failed to refresh token! " + e));
+    }).catch(e => addToast("Failed to refresh token!", e));
 }
 function validateToken(account) {
     return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {method: "post",
@@ -276,6 +276,26 @@ function addListeningList(user) {
     msg.innerText = "Listening to login: " + user;
     listening.appendChild(msg);
 }
+function addToast(title, msg) {
+    let toast = document.createElement("div");
+    document.getElementById("toasts").prepend(toast);
+    $(toast)
+        .attr("class", "toast")
+        .attr("role", "alert")
+        .attr("aria-live", "assertive")
+        .attr("aria-atomic", "true") // todo sanitize date \/
+        .html(`
+<div class="toast-header">
+  <strong class="me-auto toast_title_msg"></strong>
+  <small class="text-muted">${new Date().toLocaleString()}</small>
+  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+</div>
+<div class="toast-body"></div>
+        `);
+    $(toast).find(".toast_title_msg").text(title);
+    $(toast).find(".toast-body").text(msg);
+    new bootstrap.Toast(toast).show();
+}
 function resetHtml() {
     listening.innerHTML = "";
     listenVisible = false;
@@ -337,10 +357,10 @@ function handleJoinRequest(parsed) {
             })
             .then(checkFetchSuccess("code"))
             .finally(() => confirmJoin(parsed.session_hash))
-            .catch((e) => alert("Couldn't contact session server for " + parsed.user + " account in browser. error: " + e));
+            .catch((e) => addToast("Couldn't contact session server", "error: " + e));
         } else {
             confirmJoin(parsed.session_hash);
-            alert("Couldn't find " + parsed.user + " account in browser.");
+            addToast("Couldn't find account", parsed.user);
         }
     }, () => confirmJoin(parsed.session_hash));
 }
@@ -351,7 +371,7 @@ function onSocketMsg(event) {
         renderActions();
     } else if (parsed.action == "login_result") {
         if (!parsed.success) {
-            alert("VIAaaS instance couldn't verify Minecraft account");
+            addToast("Couldn't verify Minecraft account", "VIAaaS returned failed response");
         } else {
             listen(parsed.token);
             saveToken(parsed.token);
