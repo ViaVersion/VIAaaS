@@ -5,7 +5,7 @@ VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersio
 
 ## How does it work?
 - ViaVersion, ViaBackwards and ViaRewind translates the connections to backend server.
-- VIAaaS auth page stores account credentials in the player's browser local storage.
+- VIAaaS auth page stores account credentials in the player's browser local storage. Check for XSS vulnerabilities on your domain.
 - Due to technical/security reasons, it requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that
  as suspicious and reset/block your account password if the IP address seems suspect.
 - Account credentials aren't sent to VIAaaS instance, though it's intermediated by CORS Proxy.
