@@ -66,7 +66,7 @@ Address parts:
 ## WARNING
 - VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
 - VIAaaS server instance may have security vulnerabilities, make sure to block the ports in firewall
-- Take care of browser local storage.
+- Take care of browser local storage. Check for XSS vulnerabilities on your domain.
 - Check the security of CORS proxy, it will intermediate Mojang API calls.
 - Mojang may lock your account when API is called from a suspect IP address
 
