@@ -39,17 +39,16 @@ class HandshakeState : MinecraftConnectionState {
         if (!RateLimit.rateLimitByIp.get((handler.remoteAddress as InetSocketAddress).address).tryAcquire()) {
             throw IllegalStateException("Rate-limited")
         }
+        val virtualPort = packet.port
+        val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "") // todo
+        val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
 
-        val parsed = VIAaaSAddress().parse(packet.address.substringBefore(0.toChar()), VIAaaSConfig.hostName)
+        val parsed = VIAaaSAddress().parse(virtualHostNoExtra, VIAaaSConfig.hostName)
         val backProto = parsed.protocol
         val hadHostname = parsed.viaSuffix != null
 
         packet.address = parsed.serverAddress!!
-        packet.port = parsed.port ?: if (VIAaaSConfig.defaultBackendPort == -1) {
-            packet.port
-        } else {
-            VIAaaSConfig.defaultBackendPort
-        }
+        packet.port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
 
         handler.data.viaBackServerVer = backProto
         var frontOnline = parsed.online
@@ -63,10 +62,8 @@ class HandshakeState : MinecraftConnectionState {
 
         val playerAddr = handler.data.frontHandler.remoteAddress
         mcLogger.info(
-            "HS: $playerAddr (P: ${handler.data.frontVer}, S: ${handler.data.state.state.toString().substring(0, 1)}" +
-                    " O: ${
-                        frontOnline.toString().substring(0, 1)
-                    }) -> ${packet.address}:${packet.port} (${backProto ?: "AUTO"})"
+            "HS: $playerAddr ${handler.data.state.state.toString().substring(0, 1)} " +
+                    "$virtualHostNoExtra $virtualPort v${handler.data.frontVer}"
         )
 
         if (!hadHostname && VIAaaSConfig.requireHostName) {
