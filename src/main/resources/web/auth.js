@@ -1,5 +1,5 @@
 // SW
-navigator.serviceWorker.register("sw.js")
+navigator.serviceWorker.register("sw.js");
 
 // Minecraft.id
 let urlParams = new URLSearchParams();
@@ -236,6 +236,10 @@ function refreshAccountList() {
 }
 function renderActions() {
     actions.innerHTML = "";
+    if (Notification.permission == "default") {
+        actions.innerHTML += '<p><a href="javascript:" id="notificate">Enable notifications</a></p>';
+        $("#notificate").on("click", e => Notification.requestPermission().then(renderActions)); // i'm lazy
+    }
     if (listenVisible) {
         if (mcIdUsername != null && mcauth_code != null) {
             addAction("Listen to " + mcIdUsername, () => {
@@ -435,8 +439,7 @@ $(() => {
     // Heroku sleeps in 30 minutes, let's call it every 10 minutes to keep the same address, so Mojang see it as less suspect
     setInterval(refreshCorsStatus, 10 * 60 * 1000);
     refreshCorsStatus();
-
-    $("#notificate").on("click", e => Notification.requestPermission());
+    resetHtml();
 
     connect();
 });
