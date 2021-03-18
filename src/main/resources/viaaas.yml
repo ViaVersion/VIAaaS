@@ -10,8 +10,6 @@
 port: 25565
 # Address to bind
 bind-address: localhost
-# Host name of this instance, that will be used in the virtual host
-host-name: viaaas.localhost
 # Use Netty native transport for Minecraft connections when available.
 native-transport-mc: true
 #
@@ -28,6 +26,8 @@ use-strong-random: false
 ######
 # VIAaaS virtual hosts options
 ######
+# Host name of this instance, that will be used in the virtual host as a suffix.
+host-name: viaaas.localhost
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
 # Requires virtual host to contain the value from "host-name" as a suffix.
@@ -41,7 +41,7 @@ default-backend-port: 25565
 ######
 # Address filtering
 ######
-# Blocks connection to local addresses (localhost, 0.0.0.0, ::1, 127.(...), 10.(...), etc).
+# Blocks backend connection to local addresses (localhost, 0.0.0.0, ::1, 127.(...), 10.(...), etc).
 block-local-address: true
 # If some server is in this list, it will be blocked. This has priority over allowed-back-addresses.
 blocked-back-addresses: ["*.hypixel.net"]
@@ -55,6 +55,7 @@ allowed-back-addresses: ["*"]
 show-version-ping: true
 # Shows VIAaaS info in server brand (F3).
 show-brand-info: true
+#
 #####
 # Limits
 #####
