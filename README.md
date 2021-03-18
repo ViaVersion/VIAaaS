@@ -93,3 +93,6 @@ How to use with Geyser?
     address: 2b2t.org._v1_12_2.viaaas.localhost
   ```
 - If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance, like ```mc.example.com.viaaas.example.net``` as a Java Edition server.
+
+How to connect to 1.7.10 and lower servers with a newer client?
+- Use [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion)
