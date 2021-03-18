@@ -1,42 +1,66 @@
 #######################
-## CHANGING THIS CONFIG AT RUNTIME ISN'T SUPPORTED
-## See https://ktor.io/docs/configurations.html#command-line for https interface options
-# Port used for binding Minecraft port
+# CHANGING THIS CONFIG FILE AT RUNTIME ISN'T SUPPORTED
+# See https://ktor.io/docs/configurations.html#command-line for https interface options
 #######################
+#
+######
+# Network
+######
+# Port used for binding Minecraft port
 port: 25565
 # Address to bind
 bind-address: localhost
 # Host name of this instance, that will be used in the virtual host
 host-name: viaaas.localhost
-# Use netty native transport for Minecraft when available.
+# Use Netty native transport for Minecraft connections when available.
 native-transport-mc: true
+#
+######
+# Crypto
+######
 # Sets the RSA key size used by client for encrypting the AES symmetric key when using online mode.
 # Minecraft default is 1024. See https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
 mc-rsa-size: 4096
 # Use SecureRandom.getInstanceStrong(). May block if there's not enough entropy when using online mode.
 # See https://wiki.archlinux.org/index.php/Rng-tools
-use-strong-random: true
-# Blocks connection to local addresses
-block-local-address: true
-# Requires virtual host to contain the value from "host-name" as a suffix
-# A false value could be used for transparent proxying.
-require-host-name: true
-# Default port to be used to connect to backend server
-# Use -1 to reuse the port sent by client, useful for transparent proxying
-default-backend-port: 25565
-# If some server is in this list, it will be blocked. This has priority over allowed-back-addresses
-blocked-back-addresses: ["*.hypixel.net", "hypixel.net"]
-# VIAaaS will only allow if it matches an address in this list
-allowed-back-addresses: ["*"]
+use-strong-random: false
+#
+######
+# VIAaaS virtual hosts options
+######
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
-# Shows player and server version in player list
+# Requires virtual host to contain the value from "host-name" as a suffix.
+# A false value will allow virtual hosts with no suffix, connecting to the virtual host sent by client.
+# A false value could be used for transparent proxying.
+require-host-name: true
+# Default port to be used when connecting to the backend server.
+# Use -1 to reuse the port sent by client, useful for transparent proxying.
+default-backend-port: 25565
+#
+######
+# Address filtering
+######
+# Blocks connection to local addresses (localhost, 0.0.0.0, ::1, 127.(...), 10.(...), etc).
+block-local-address: true
+# If some server is in this list, it will be blocked. This has priority over allowed-back-addresses.
+blocked-back-addresses: ["*.hypixel.net"]
+# Only allows the backend address if it matches an address in this list.
+allowed-back-addresses: ["*"]
+#
+######
+# Info
+######
+# Shows VIAaaS info (player and server version) in player list.
 show-version-ping: true
-# Shows info in server brand (F3)
+# Shows VIAaaS info in server brand (F3).
 show-brand-info: true
-# Rates limits websocket messages per second. Messages will be waiting for process
+#####
+# Limits
+#####
+# Rates limits websocket messages per second. Message processing will be delayed.
 rate-limit-ws: 1.5
-# Rate limits new front-end connections per second per ip. Will disconnect when hit
+# Rate limits new front-end connections per second per ip. Will disconnect when hit.
 rate-limit-connection-mc: 10.0
 # Limits how many usernames a websocket connection can listen to.
 listening-ws-limit: 10
