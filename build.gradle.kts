@@ -44,8 +44,8 @@ repositories {
 }
 
 dependencies {
-    implementation("us.myles:viaversion:3.3.0-21w08b") { isTransitive = false }
-    implementation("nl.matsv:viabackwards:3.3.0-21w08b") { isTransitive = false }
+    implementation("us.myles:viaversion:3.3.0-21w11a") { isTransitive = false }
+    implementation("nl.matsv:viabackwards:3.3.0-21w11a") { isTransitive = false }
     implementation("de.gerrygames:viarewind-all:1.5.4-SNAPSHOT") { isTransitive = false }
     implementation("io.netty:netty-all:4.1.59.Final")
     implementation("org.yaml:snakeyaml:1.28")
