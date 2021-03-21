@@ -67,7 +67,7 @@ class WebDashboardServer {
                     ipInfo.lookupIP(address.address.hostAddress.substringBefore("%"))
                 } else null
             } catch (ignored: Exception) { null }
-            val msg = "Client: $address (${info?.asn?.name}, ${info?.city}, ${info?.region}, ${info?.countryCode})\nBackend: $backAddress"
+            val msg = "Client: $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})\nBackend: $backAddress"
             listeners[id]?.forEach {
                 it.ws.send(
                     JsonObject().also {
