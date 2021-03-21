@@ -326,6 +326,7 @@ function authNotification(msg, yes, no) {
         r.showNotification("Click to allow auth impersionation", {
             body: msg,
             tag: tag,
+            vibrate: [200,10,100,200,100,10,100,10,200],
             actions: [
                 {action: "reject", title: "Reject"},
                 {action: "confirm", title: "Confirm"}
