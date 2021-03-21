@@ -1,5 +1,7 @@
 // SW
-navigator.serviceWorker.register("sw.js");
+if (navigator.serviceWorker) {
+    navigator.serviceWorker.register("sw.js");
+}
 
 // Minecraft.id
 let urlParams = new URLSearchParams();
@@ -317,7 +319,7 @@ function handleSWMsg(event) {
     callback(data.action);
 }
 function authNotification(msg, yes, no) {
-    if ((!pageBlur && !document.hidden) || Notification.permission != "granted") {
+    if (!navigator.serviceWorker || (!pageBlur && !document.hidden) || Notification.permission != "granted") {
         if (confirm(msg)) yes(); else no();
         return;
     }
