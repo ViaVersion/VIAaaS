@@ -1,6 +1,7 @@
 package com.github.creeper123123321.viaaas.web
 
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
+import com.github.creeper123123321.viaaas.viaWebServer
 import com.google.common.collect.Sets
 import com.google.common.util.concurrent.RateLimiter
 import io.ktor.features.*
@@ -24,16 +25,13 @@ data class WebClient(
 
     fun listenId(uuid: UUID): Boolean {
         if (listenedIds.size >= VIAaaSConfig.listeningWsLimit) return false // This is getting insane
-        server.listeners.computeIfAbsent(uuid) { Sets.newConcurrentHashSet() }.add(this)
+        server.listeners.put(uuid, this)
         listenedIds.add(uuid)
         return true
     }
 
     fun unlistenId(uuid: UUID) {
-        server.listeners[uuid]?.remove(this)
-        if (server.listeners[uuid]?.isEmpty() == true) {
-            server.listeners.remove(uuid)
-        }
+        server.listeners.remove(uuid, this)
         listenedIds.remove(uuid)
     }
 }

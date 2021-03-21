@@ -2,10 +2,11 @@ package com.github.creeper123123321.viaaas.web
 
 import com.github.creeper123123321.viaaas.httpClient
 import com.github.creeper123123321.viaaas.parseUndashedId
-import com.github.creeper123123321.viaaas.viaWebServer
 import com.github.creeper123123321.viaaas.webLogger
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
+import com.google.common.collect.ArrayListMultimap
+import com.google.common.collect.Multimaps
 import com.google.gson.JsonObject
 import io.ktor.client.request.*
 import io.ktor.features.*
@@ -22,8 +23,11 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import io.ipinfo.api.IPInfo
 
 class WebDashboardServer {
+    // I don't think i'll need more than 1k/day
+    val ipInfo = IPInfo.builder().setToken("").build()
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val loginTokens = CacheBuilder.newBuilder()
         .expireAfterAccess(10, TimeUnit.DAYS)
@@ -34,7 +38,7 @@ class WebDashboardServer {
     }
 
     // Minecraft account -> WebClient
-    val listeners = ConcurrentHashMap<UUID, MutableSet<WebClient>>()
+    val listeners = Multimaps.synchronizedListMultimap(ArrayListMultimap.create<UUID, WebClient>())
     val usernameIdCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<String, UUID>(CacheLoader.from { name ->
@@ -55,16 +59,22 @@ class WebDashboardServer {
         address: SocketAddress, backAddress: SocketAddress
     ): CompletableFuture<Unit> {
         val future = pendingSessionHashes.get(hash)
-        if (listeners[id]?.isEmpty() != false) {
+        if (!listeners.containsKey(id)) {
             future.completeExceptionally(IllegalStateException("No browser listening"))
         } else {
+            val info = try {
+                if (address is InetSocketAddress) {
+                    ipInfo.lookupIP(address.address.hostAddress.substringBefore("%"))
+                } else null
+            } catch (ignored: Exception) { null }
+            val msg = "Client: $address (${info?.asn?.name}, ${info?.city}, ${info?.region}, ${info?.countryCode})\nBackend: $backAddress"
             listeners[id]?.forEach {
                 it.ws.send(
                     JsonObject().also {
                         it.addProperty("action", "session_hash_request")
                         it.addProperty("user", name)
                         it.addProperty("session_hash", hash)
-                        it.addProperty("message", "Client is $address, backend is $backAddress")
+                        it.addProperty("message", msg)
                     }.toString()
                 )
                 it.ws.flush()
