@@ -62,6 +62,6 @@ object PlayState : MinecraftConnectionState {
     override fun disconnect(handler: MinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
         writeFlushClose(handler.data.frontChannel,
-            Kick().also { it.msg = JsonPrimitive("[VIAaaS] $msg").toString() })
+            Kick().also { it.msg = JsonPrimitive("[VIAaaS] §c$msg").toString() })
     }
 }
