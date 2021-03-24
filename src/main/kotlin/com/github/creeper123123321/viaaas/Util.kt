@@ -161,7 +161,7 @@ suspend fun hasJoined(username: String, hash: String): JsonObject {
 
 fun generate128Bits() = ByteArray(16).also { secureRandom.nextBytes(it) }
 
-fun generateServerId() = "VIAaaS" + ByteArray(10).let {
+fun generateServerId() = ByteArray(13).let {
     secureRandom.nextBytes(it)
     Base64.getEncoder().withoutPadding().encodeToString(it)
     // https://developer.mozilla.org/en-US/docs/Glossary/Base64 133% of original
