@@ -26,14 +26,15 @@ use-strong-random: false
 ######
 # VIAaaS virtual hosts options
 ######
-# Host name of this instance, that will be used in the virtual host as a suffix.
-host-name: viaaas.localhost
-# Requires online mode for front-end connections. May be useful for stopping bots.
-force-online-mode: false
 # Requires virtual host to contain the value from "host-name" as a suffix.
 # A false value will allow virtual hosts with no suffix, connecting to the virtual host sent by client.
 # A false value could be used for transparent proxying.
 require-host-name: true
+# Host names of this instance, that will be used in the virtual host as a suffix.
+# Use commas for separating multiple hostnames.
+host-name: viaaas.localhost,via.localhost
+# Requires online mode for front-end connections. May be useful for stopping bots.
+force-online-mode: false
 # Default port to be used when connecting to the backend server.
 # Use -1 to reuse the port sent by client, useful for transparent proxying.
 default-backend-port: 25565

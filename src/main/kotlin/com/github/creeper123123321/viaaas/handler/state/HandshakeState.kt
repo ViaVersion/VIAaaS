@@ -23,6 +23,7 @@ class HandshakeState : MinecraftConnectionState {
                 RateLimiter.create(VIAaaSConfig.rateLimitConnectionMc)
             })
     }
+
     override val state: State
         get() = State.HANDSHAKE
 
@@ -43,7 +44,12 @@ class HandshakeState : MinecraftConnectionState {
         val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "") // todo
         val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
 
-        val parsed = VIAaaSAddress().parse(virtualHostNoExtra, VIAaaSConfig.hostName)
+        val parsed = VIAaaSConfig.hostName.map {
+            VIAaaSAddress().parse(virtualHostNoExtra, it)
+        }.sortedBy {
+            it.viaSuffix == null
+        }.first()
+
         val backProto = parsed.protocol
         val hadHostname = parsed.viaSuffix != null
 
