@@ -12,6 +12,10 @@ port: 25565
 bind-address: localhost
 # Use Netty native transport for Minecraft connections when available.
 native-transport-mc: true
+# Address of SOCKS5 proxy used for connecting to backend servers. Empty to disable.
+backend-socks5-proxy-address: ""
+# Port of SOCKS5 proxy used for connecting to backend servers.
+backend-socks5-proxy-port: 9050
 #
 ######
 # Crypto

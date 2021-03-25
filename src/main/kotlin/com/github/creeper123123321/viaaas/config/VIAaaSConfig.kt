@@ -40,4 +40,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val rateLimitWs: Double get() = this.getDouble("rate-limit-ws", 1.0)
     val rateLimitConnectionMc: Double get() = this.getDouble("rate-limit-connection-mc", 10.0)
     val listeningWsLimit: Int get() = this.getInt("listening-ws-limit", 16)
+    val backendSocks5ProxyAddress: String?
+        get() = this.getString("backend-socks5-proxy-address", "")!!.let { if (it.isEmpty()) null else it }
+    val backendSocks5ProxyPort: Int get() = this.getInt("backend-socks5-proxy-port", 9050)
 }

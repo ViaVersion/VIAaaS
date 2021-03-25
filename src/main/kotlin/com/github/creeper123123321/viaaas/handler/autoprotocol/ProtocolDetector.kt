@@ -6,23 +6,26 @@ import com.github.creeper123123321.viaaas.codec.FrameCodec
 import com.github.creeper123123321.viaaas.codec.MinecraftCodec
 import com.github.creeper123123321.viaaas.handler.ConnectionData
 import com.github.creeper123123321.viaaas.handler.MinecraftHandler
-import com.github.creeper123123321.viaaas.packet.handshake.Handshake
+import com.github.creeper123123321.viaaas.handler.addSocks5
 import com.github.creeper123123321.viaaas.mcLogger
+import com.github.creeper123123321.viaaas.packet.handshake.Handshake
 import com.github.creeper123123321.viaaas.packet.status.StatusRequest
 import com.github.creeper123123321.viaaas.send
-import java.util.concurrent.CompletableFuture
-import java.net.InetSocketAddress
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import io.netty.handler.timeout.ReadTimeoutHandler
-import io.netty.channel.socket.nio.NioSocketChannel
-import com.google.common.cache.CacheLoader
-import java.util.concurrent.TimeUnit
 import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
 import io.netty.bootstrap.Bootstrap
-import io.netty.channel.*
+import io.netty.channel.Channel
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelOption
+import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.util.concurrent.Future
+import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.packets.State
+import java.net.InetSocketAddress
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
 
 object ProtocolDetector {
     private val SERVER_VER = CacheBuilder.newBuilder()
@@ -38,7 +41,7 @@ object ProtocolDetector {
                     .handler(object : ChannelInitializer<Channel>() {
                         override fun initChannel(channel: Channel) {
                             val data = ConnectionData(channel, state = ProtocolDetectionState(future), frontVer = -1)
-                            channel.pipeline()
+                            channel.pipeline().also { addSocks5(it) }
                                 .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
                                 .addLast("frame", FrameCodec())
                                 .addLast("mc", MinecraftCodec())
