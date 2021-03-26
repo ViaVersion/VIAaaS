@@ -37,7 +37,7 @@ class HandshakeState : MinecraftConnectionState {
             else -> throw IllegalStateException("Invalid next state")
         }
 
-        if (!RateLimit.rateLimitByIp.get((handler.remoteAddress as InetSocketAddress).address).tryAcquire()) {
+        if (!RateLimit.rateLimitByIp.get((handler.endRemoteAddress as InetSocketAddress).address).tryAcquire()) {
             throw IllegalStateException("Rate-limited")
         }
         val virtualPort = packet.port
@@ -66,7 +66,7 @@ class HandshakeState : MinecraftConnectionState {
             it.backAddress = packet.address to packet.port
         }
 
-        val playerAddr = handler.data.frontHandler.remoteAddress
+        val playerAddr = handler.data.frontHandler.endRemoteAddress
         mcLogger.info(
             "HS: $playerAddr ${handler.data.state.state.toString().substring(0, 1)} " +
                     "$virtualHostNoExtra $virtualPort v${handler.data.frontVer}"

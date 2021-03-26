@@ -6,13 +6,13 @@ import com.github.creeper123123321.viaaas.handler.forward
 import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.packet.UnknownPacket
 import com.github.creeper123123321.viaaas.packet.status.StatusResponse
+import com.github.creeper123123321.viaaas.parseProtocol
 import com.github.creeper123123321.viaaas.writeFlushClose
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import io.netty.channel.ChannelHandlerContext
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.packets.State
 import java.util.*
 
@@ -37,8 +37,8 @@ object StatusState : MinecraftConnectionState {
                 it.addProperty("id", UUID.nameUUIDFromBytes("VIAaaS".toByteArray(Charsets.UTF_8)).toString())
                 it.addProperty(
                     "name",
-                    "§9VIAaaS§r (C: §7${ProtocolVersion.getProtocol(handler.data.frontVer!!)}§r S: §7${
-                        ProtocolVersion.getProtocol(handler.data.viaBackServerVer!!)
+                    "§9VIAaaS§r (C: §7${handler.data.frontVer!!.parseProtocol()}§r S: §7${
+                        handler.data.viaBackServerVer!!.parseProtocol()
                     }§r)"
                 )
             })

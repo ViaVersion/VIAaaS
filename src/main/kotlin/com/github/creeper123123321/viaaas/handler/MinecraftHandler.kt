@@ -1,11 +1,12 @@
 package com.github.creeper123123321.viaaas.handler
 
-import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.mcLogger
+import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.setAutoRead
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.handler.proxy.Socks5ProxyHandler
 import us.myles.ViaVersion.exception.CancelCodecException
 import java.net.SocketAddress
 
@@ -13,7 +14,7 @@ class MinecraftHandler(
     val data: ConnectionData,
     val frontEnd: Boolean
 ) : SimpleChannelInboundHandler<Packet>() {
-    lateinit var remoteAddress: SocketAddress
+    lateinit var endRemoteAddress: SocketAddress
     val other: Channel? get() = if (frontEnd) data.backChannel else data.frontChannel
     var msgDisconnected = false
 
@@ -24,7 +25,8 @@ class MinecraftHandler(
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        remoteAddress = ctx.channel().remoteAddress()
+        endRemoteAddress = ctx.channel().pipeline().get(Socks5ProxyHandler::class.java)?.destinationAddress()
+            ?: ctx.channel().remoteAddress()
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {

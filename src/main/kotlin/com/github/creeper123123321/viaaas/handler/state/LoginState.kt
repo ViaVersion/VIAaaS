@@ -107,8 +107,8 @@ class LoginState : MinecraftConnectionState {
                         parseUndashedId(playerId),
                         backName!!,
                         backHash,
-                        frontHandler.remoteAddress,
-                        handler.data.backHandler!!.remoteAddress
+                        frontHandler.endRemoteAddress,
+                        handler.data.backHandler!!.endRemoteAddress
                     ).whenCompleteAsync({ _, throwable ->
                         if (throwable != null) {
                             frontHandler.data.backHandler!!.disconnect("Online mode error: $throwable")
@@ -178,7 +178,7 @@ class LoginState : MinecraftConnectionState {
             if (e != null) {
                 disconnect(handler, "Profile error: $e")
             } else {
-                mcLogger.info("Login: ${handler.remoteAddress} $frontName $id")
+                mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
                 if (frontOnline != null) {
                     connect()
                 }

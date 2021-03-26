@@ -1,6 +1,7 @@
 package com.github.creeper123123321.viaaas.handler.autoprotocol
 
 import com.github.creeper123123321.viaaas.handler.ConnectionData
+import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import com.github.creeper123123321.viaaas.mcLogger
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
@@ -19,16 +20,16 @@ class ProtocolDetectorHandler(val connectionData: ConnectionData) : ChannelDuple
     @Throws(Exception::class)
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)
-        if (ctx.channel().remoteAddress() is InetSocketAddress) {
+        val handler = ctx.channel().pipeline().get(MinecraftHandler::class.java)
+        val address = handler.endRemoteAddress
+        if (address is InetSocketAddress) {
             val timeoutRun = ctx.executor().schedule({
-                mcLogger.warn(
-                    "Timeout protocol A.D. " + ctx.channel().remoteAddress()
-                )
+                mcLogger.warn("Timeout protocol A.D. $address")
                 hold = false
                 drainQueue(ctx)
                 ctx.pipeline().remove(this)
             }, 10, TimeUnit.SECONDS)
-            ProtocolDetector.detectVersion(ctx.channel().remoteAddress() as InetSocketAddress)
+            ProtocolDetector.detectVersion(address)
                 .whenComplete { protocol, _ ->
                     if (protocol != null && protocol.version != -1) {
                         connectionData.viaBackServerVer = protocol.version

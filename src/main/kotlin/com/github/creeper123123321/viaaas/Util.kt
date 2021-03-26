@@ -11,6 +11,7 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelFutureListener
 import io.netty.handler.codec.DecoderException
 import org.slf4j.LoggerFactory
+import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -166,3 +167,5 @@ fun generateServerId() = ByteArray(13).let {
     Base64.getEncoder().withoutPadding().encodeToString(it)
     // https://developer.mozilla.org/en-US/docs/Glossary/Base64 133% of original
 }
+
+fun Int.parseProtocol() = ProtocolVersion.getProtocol(this)

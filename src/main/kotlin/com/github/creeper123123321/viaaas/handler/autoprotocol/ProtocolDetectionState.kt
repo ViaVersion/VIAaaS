@@ -5,6 +5,7 @@ import com.github.creeper123123321.viaaas.handler.state.MinecraftConnectionState
 import com.github.creeper123123321.viaaas.mcLogger
 import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.packet.status.StatusResponse
+import com.github.creeper123123321.viaaas.parseProtocol
 import com.google.gson.JsonParser
 import io.netty.channel.ChannelHandlerContext
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
@@ -19,11 +20,10 @@ class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : M
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         handler.data.frontChannel.close()
         if (packet !is StatusResponse) throw IllegalArgumentException()
-        val ver = ProtocolVersion.getProtocol(
-            JsonParser.parseString(packet.json).asJsonObject.getAsJsonObject("version").get("protocol").asInt
-        )
+        val ver = JsonParser.parseString(packet.json).asJsonObject
+                .getAsJsonObject("version").get("protocol").asInt.parseProtocol()
         future.complete(ver)
-        mcLogger.info("A.D.: ${handler.remoteAddress} $ver")
+        mcLogger.info("A.D.: ${handler.endRemoteAddress} $ver")
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {

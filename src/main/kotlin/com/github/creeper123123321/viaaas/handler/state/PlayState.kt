@@ -8,13 +8,13 @@ import com.github.creeper123123321.viaaas.packet.Packet
 import com.github.creeper123123321.viaaas.packet.UnknownPacket
 import com.github.creeper123123321.viaaas.packet.play.Kick
 import com.github.creeper123123321.viaaas.packet.play.PluginMessage
+import com.github.creeper123123321.viaaas.parseProtocol
 import com.github.creeper123123321.viaaas.readableToByteArray
 import com.github.creeper123123321.viaaas.writeFlushClose
 import com.google.gson.JsonPrimitive
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
 
@@ -38,11 +38,8 @@ object PlayState : MinecraftConnectionState {
                     String(pluginMessage.data, Charsets.UTF_8)
                 } else {
                     Type.STRING.read(Unpooled.wrappedBuffer(pluginMessage.data))
-                } + " (VIAaaS C: ${ProtocolVersion.getProtocol(handler.data.frontVer!!)} S: ${
-                    ProtocolVersion.getProtocol(
-                        handler.data.viaBackServerVer!!
-                    )
-                })"
+                } + " (VIAaaS C: ${handler.data.frontVer!!.parseProtocol()} S: ${
+                        handler.data.viaBackServerVer!!.parseProtocol()})"
 
                 if (is1_7(handler)) {
                     pluginMessage.data = brand.toByteArray(Charsets.UTF_8)
