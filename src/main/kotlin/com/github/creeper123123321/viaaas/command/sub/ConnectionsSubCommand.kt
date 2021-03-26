@@ -11,7 +11,7 @@ object ConnectionsSubCommand : ViaSubCommand() {
     override fun description(): String = "Lists VIAaaS connections"
     override fun execute(p0: ViaCommandSender, p1: Array<out String>): Boolean {
         p0.sendMessage("List of player connections: ")
-        Via.getPlatform().connectionManager.connections.forEach {
+        Via.getManager().connectionManager.connections.forEach {
             val handler = it.channel?.pipeline()?.get(MinecraftHandler::class.java)
             val backAddr = handler?.endRemoteAddress
             val pVer = it.protocolInfo?.protocolVersion?.parseProtocol()
