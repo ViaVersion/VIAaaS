@@ -37,9 +37,9 @@ object StatusState : MinecraftConnectionState {
                 it.addProperty("id", UUID.nameUUIDFromBytes("VIAaaS".toByteArray(Charsets.UTF_8)).toString())
                 it.addProperty(
                     "name",
-                    "§9VIAaaS§r (C: §7${handler.data.frontVer!!.parseProtocol()}§r S: §7${
+                    "§9VIAaaS§r C: §7${handler.data.frontVer!!.parseProtocol()}§r S: §7${
                         handler.data.viaBackServerVer!!.parseProtocol()
-                    }§r)"
+                    }"
                 )
             })
 
