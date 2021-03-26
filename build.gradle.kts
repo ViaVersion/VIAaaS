@@ -41,12 +41,13 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://repo.viaversion.com/")
     maven("https://repo.aikar.co/content/groups/aikar/")
+    maven("https://jitpack.io")
 }
 
 dependencies {
     implementation("us.myles:viaversion:3.3.0-21w11a") { isTransitive = false }
     implementation("nl.matsv:viabackwards:3.3.0-21w11a") { isTransitive = false }
-    implementation("de.gerrygames:viarewind-all:1.5.4-SNAPSHOT") { isTransitive = false }
+    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
     implementation("io.netty:netty-all:4.1.59.Final")
     implementation("org.yaml:snakeyaml:1.28")
     implementation("com.google.guava:guava:30.1-jre")
