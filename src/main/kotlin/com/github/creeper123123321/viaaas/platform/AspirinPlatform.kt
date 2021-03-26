@@ -23,7 +23,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
-object AspirinPlatform : ViaPlatform<Unit> {
+object AspirinPlatform : ViaPlatform<UUID> {
     val connMan = ViaConnectionManager()
     val executor = Executors.newCachedThreadPool(ThreadFactoryBuilder().setNameFormat("Via-%d").setDaemon(true).build())
     val eventLoop = DefaultEventLoop(executor)
@@ -52,7 +52,7 @@ object AspirinPlatform : ViaPlatform<Unit> {
 
     override fun getDump(): JsonObject = JsonObject()
     override fun kickPlayer(p0: UUID, p1: String): Boolean = false
-    override fun getApi(): ViaAPI<Unit> = AspirinViaAPI
+    override fun getApi(): ViaAPI<UUID> = AspirinViaAPI
     override fun getDataFolder(): File = File("viaversion")
     override fun getConf(): ViaVersionConfig = AspirinViaConfig
     override fun runAsync(p0: Runnable): TaskId = AspirinTask(CompletableFuture.runAsync(p0, executor))

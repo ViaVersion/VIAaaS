@@ -36,12 +36,11 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.Future
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
-import us.myles.ViaVersion.ViaManager
+import us.myles.ViaVersion.ViaManagerImpl
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.data.MappingDataLoader
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import java.io.File
-import java.lang.Thread
 import java.net.InetAddress
 import java.security.KeyPairGenerator
 import java.util.concurrent.CompletableFuture
@@ -103,11 +102,13 @@ fun main(args: Array<String>) {
     System.setOut(IoBuilder.forLogger("STDOUT").setLevel(Level.INFO).buildPrintStream());
     System.setErr(IoBuilder.forLogger("STDERR").setLevel(Level.ERROR).buildPrintStream());
 
-    println("""\\        // // //\\  =>     //||     //||   /=====/ PROXY
+    println(
+        """\\        // // //\\  =>     //||     //||   /=====/ PROXY
               | \\      // // //  \\       // ||    // ||  //
               |  \\    // // //====\\     //==||   //==||  \====\   $viaaasVer
               |   \\  // // //      \\   //   ||  //   ||      //
-              |<=  \\// // //        \\ //    || //    || /====/""".trimMargin())
+              |<=  \\// // //        \\ //    || //    || /====/""".trimMargin()
+    )
 
     File("config/https.jks").apply {
         parentFile.mkdirs()
@@ -115,14 +116,14 @@ fun main(args: Array<String>) {
     }
 
     Via.init(
-        ViaManager.builder()
+        ViaManagerImpl.builder()
             .injector(AspirinInjector)
             .loader(AspirinLoader)
             .commandHandler(AspirinCommands)
             .platform(AspirinPlatform).build()
     )
     MappingDataLoader.enableMappingsCache()
-    Via.getManager().init()
+    (Via.getManager() as ViaManagerImpl).init()
     ProtocolVersion.register(-2, "AUTO")
     AspirinRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
     AspirinBackwards.init(File("config/viabackwards"))
@@ -147,14 +148,16 @@ fun main(args: Array<String>) {
     initFuture.complete(Unit)
 
     VIAaaSConsole.start()
-    while(runningServer) { Thread.sleep(1000L) }
+    while (runningServer) {
+        Thread.sleep(1000L)
+    }
 
     ktorServer?.stop(1000, 1000)
     httpClient.close()
     listOf<Future<*>>(future.channel().close(), parentLoop.shutdownGracefully(), childLoop.shutdownGracefully())
         .forEach { it.sync() }
 
-    Via.getManager().destroy()
+    (Via.getManager() as ViaManagerImpl).destroy()
 }
 
 fun Application.mainWeb() {
