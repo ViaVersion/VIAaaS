@@ -3,6 +3,8 @@ VIAaaS
 
 VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersion proxy
 
+Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Instances
+
 ## How does it work?
 - ViaVersion, ViaBackwards and ViaRewind translates the connections to backend server.
 - VIAaaS auth page stores account credentials in the player's browser local storage. Check for XSS vulnerabilities on your domain.
