@@ -16,9 +16,7 @@ ProtectKernelModules=true
 ProtectControlGroups=true
 
 ExecStart=/usr/bin/screen -DmS mc-%i /bin/sh start.sh
-ExecReload=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "viaver reload"\\015'
 ExecReload=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "reload"\\015'
-ExecStop=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "viaaas end"\\015'
 ExecStop=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "end"\\015'
 ExecStop=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "stop"\\015'
 ExecStop=/bin/sh -c 'sleep 10'
