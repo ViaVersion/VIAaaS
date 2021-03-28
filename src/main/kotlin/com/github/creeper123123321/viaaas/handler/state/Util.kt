@@ -20,10 +20,11 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 
 private fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketAddress, state: State): ChannelFuture {
+    val loop = handler.data.frontChannel.eventLoop()
     return Bootstrap()
         .handler(BackEndInit(handler.data))
-        .channelFactory(channelSocketFactory())
-        .group(handler.data.frontChannel.eventLoop())
+        .channelFactory(channelSocketFactory(loop.parent()))
+        .group(loop)
         .option(ChannelOption.IP_TOS, 0x18)
         .option(ChannelOption.TCP_NODELAY, true)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // We need to show the error before the client timeout

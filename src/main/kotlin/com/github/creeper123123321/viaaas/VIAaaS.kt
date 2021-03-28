@@ -1,9 +1,10 @@
 package com.github.creeper123123321.viaaas
 
-import com.github.creeper123123321.viaaas.command.AspirinCommands
 import com.github.creeper123123321.viaaas.command.VIAaaSConsole
+import com.github.creeper123123321.viaaas.command.ViaAspirinCommand
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
 import com.github.creeper123123321.viaaas.handler.FrontEndInit
+import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import com.github.creeper123123321.viaaas.platform.*
 import com.github.creeper123123321.viaaas.web.ViaWebApp
 import com.github.creeper123123321.viaaas.web.WebDashboardServer
@@ -18,6 +19,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelFactory
+import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.epoll.Epoll
@@ -49,7 +51,8 @@ val viaaasVer = JsonParser.parseString(
     AspirinPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!.reader(Charsets.UTF_8).readText()
 ).asJsonObject.get("version").asString
 val viaWebServer = WebDashboardServer()
-var runningServer = true
+var serverFinishing = CompletableFuture<Unit>()
+var finishedFuture = CompletableFuture<Unit>()
 val httpClient = HttpClient {
     install(UserAgent) {
         agent = "VIAaaS/$viaaasVer"
@@ -74,34 +77,64 @@ fun eventLoopGroup(): EventLoopGroup {
     return NioEventLoopGroup()
 }
 
-fun channelServerSocketFactory(): ChannelFactory<ServerSocketChannel> {
-    if (VIAaaSConfig.isNativeTransportMc) {
-        if (Epoll.isAvailable()) return ChannelFactory { EpollServerSocketChannel() }
-        if (KQueue.isAvailable()) return ChannelFactory { KQueueServerSocketChannel() }
+fun channelServerSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<ServerSocketChannel> {
+    return when (eventLoop) {
+        is EpollEventLoopGroup -> ChannelFactory { EpollServerSocketChannel() }
+        is KQueueEventLoopGroup -> ChannelFactory { KQueueServerSocketChannel() }
+        else -> ChannelFactory { NioServerSocketChannel() }
     }
-    return ChannelFactory { NioServerSocketChannel() }
 }
 
-fun channelSocketFactory(): ChannelFactory<SocketChannel> {
-    if (VIAaaSConfig.isNativeTransportMc) {
-        if (Epoll.isAvailable()) return ChannelFactory { EpollSocketChannel() }
-        if (KQueue.isAvailable()) return ChannelFactory { KQueueSocketChannel() }
+fun channelSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<SocketChannel> {
+    return when (eventLoop) {
+        is EpollEventLoopGroup -> ChannelFactory { EpollSocketChannel() }
+        is KQueueEventLoopGroup -> ChannelFactory { KQueueSocketChannel() }
+        else -> ChannelFactory { NioSocketChannel() }
     }
-    return ChannelFactory { NioSocketChannel() }
 }
 
 val parentLoop = eventLoopGroup()
 val childLoop = eventLoopGroup()
+var chFuture: ChannelFuture? = null
+var ktorServer: NettyApplicationEngine? = null
 
 fun main(args: Array<String>) {
+    try {
+        setupSystem()
+        printSplash()
+        generateCert()
+        initVia()
+        bindPorts(args)
+
+        initFuture.complete(Unit)
+        VIAaaSConsole.start()
+        addShutdownHook()
+        serverFinishing.join()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    } finally {
+        stopServer()
+    }
+}
+
+private fun addShutdownHook() {
+    Runtime.getRuntime().addShutdownHook(Thread {
+        serverFinishing.complete(Unit)
+        finishedFuture.join()
+    })
+}
+
+private fun setupSystem() {
     // Stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/Velocity.java
     if (System.getProperty("io.netty.allocator.maxOrder") == null) {
         System.setProperty("io.netty.allocator.maxOrder", "9")
     }
     // Also stolen from Velocity
-    System.setOut(IoBuilder.forLogger("STDOUT").setLevel(Level.INFO).buildPrintStream());
-    System.setErr(IoBuilder.forLogger("STDERR").setLevel(Level.ERROR).buildPrintStream());
+    System.setOut(IoBuilder.forLogger("STDOUT").setLevel(Level.INFO).buildPrintStream())
+    System.setErr(IoBuilder.forLogger("STDERR").setLevel(Level.ERROR).buildPrintStream())
+}
 
+private fun printSplash() {
     println(
         """\\        // // //\\  =>     //||     //||   /=====/ PROXY
               | \\      // // //  \\       // ||    // ||  //
@@ -109,17 +142,21 @@ fun main(args: Array<String>) {
               |   \\  // // //      \\   //   ||  //   ||      //
               |<=  \\// // //        \\ //    || //    || /====/""".trimMargin()
     )
+}
 
+private fun generateCert() {
     File("config/https.jks").apply {
         parentFile.mkdirs()
         if (!exists()) generateCertificate(this)
     }
+}
 
+private fun initVia() {
     Via.init(
         ViaManagerImpl.builder()
             .injector(AspirinInjector)
             .loader(AspirinLoader)
-            .commandHandler(AspirinCommands)
+            .commandHandler(ViaAspirinCommand)
             .platform(AspirinPlatform).build()
     )
     MappingDataLoader.enableMappingsCache()
@@ -127,37 +164,39 @@ fun main(args: Array<String>) {
     ProtocolVersion.register(-2, "AUTO")
     AspirinRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
     AspirinBackwards.init(File("config/viabackwards"))
+}
 
-    val future = ServerBootstrap()
+private fun bindPorts(args: Array<String>) {
+    chFuture = ServerBootstrap()
         .group(parentLoop, childLoop)
-        .channelFactory(channelServerSocketFactory())
+        .channelFactory(channelServerSocketFactory(parentLoop))
         .childHandler(FrontEndInit)
         .childOption(ChannelOption.IP_TOS, 0x18)
         .childOption(ChannelOption.TCP_NODELAY, true)
         .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
 
-    var ktorServer: NettyApplicationEngine? = null
+    viaaasLogger.info("Binded minecraft into " + chFuture!!.sync().channel().localAddress())
+    ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
+}
+
+private fun stopServer() {
     try {
-        viaaasLogger.info("Binded minecraft into " + future.sync().channel().localAddress())
-        ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
-    } catch (e: Exception) {
-        runningServer = false
-        e.printStackTrace()
+        Via.getManager().connectionManager.connections.forEach {
+            it.channel?.pipeline()?.get(MinecraftHandler::class.java)?.disconnect("Stopping")
+        }
+        ktorServer?.stop(1000, 1000)
+        httpClient.close()
+        listOf<Future<*>?>(
+            chFuture?.channel()?.close(),
+            parentLoop.shutdownGracefully(),
+            childLoop.shutdownGracefully()
+        )
+            .forEach { it?.sync() }
+
+        (Via.getManager() as ViaManagerImpl).destroy()
+    } finally {
+        finishedFuture.complete(Unit)
     }
-
-    initFuture.complete(Unit)
-
-    VIAaaSConsole.start()
-    while (runningServer) {
-        Thread.sleep(1000L)
-    }
-
-    ktorServer?.stop(1000, 1000)
-    httpClient.close()
-    listOf<Future<*>>(future.channel().close(), parentLoop.shutdownGracefully(), childLoop.shutdownGracefully())
-        .forEach { it.sync() }
-
-    (Via.getManager() as ViaManagerImpl).destroy()
 }
 
 fun Application.mainWeb() {

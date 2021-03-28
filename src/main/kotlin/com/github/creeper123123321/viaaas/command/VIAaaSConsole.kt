@@ -1,39 +1,30 @@
 package com.github.creeper123123321.viaaas.command
 
-import com.github.creeper123123321.viaaas.runningServer
-import com.github.creeper123123321.viaaas.viaaasLogger
+import com.github.creeper123123321.viaaas.command.sub.StopSubCommand
+import com.github.creeper123123321.viaaas.serverFinishing
 import net.minecrell.terminalconsole.SimpleTerminalConsole
 import org.jline.reader.Candidate
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.slf4j.LoggerFactory
-import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.command.ViaCommandSender
 import java.util.*
 
 object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
-    val commands = hashMapOf<String, (MutableList<String>?, String, Array<String>) -> Unit>()
-    override fun isRunning(): Boolean = runningServer
+    val commands = hashMapOf<String, Command>()
+    override fun isRunning(): Boolean = !serverFinishing.isDone
 
     init {
-        commands["viaversion"] = { suggestion, _, args ->
-            if (suggestion == null) {
-                Via.getManager().commandHandler.onCommand(this, args)
-            } else {
-                suggestion.addAll(Via.getManager().commandHandler.onTabComplete(this, args))
-            }
-        }
-        commands["viaver"] = commands["viaversion"]!!
-        commands["vvcloud"] = commands["viaversion"]!!
-        commands["vvaas"] = commands["viaversion"]!!
-        commands["vvaspirin"] = commands["viaversion"]!!
-        commands["viaaas"] = commands["viaversion"]!!
-        commands["help"] = { suggestion, _, _ ->
-            if (suggestion == null) sendMessage(commands.entries.groupBy { it.value }.entries.joinToString(", ") {
-                it.value.joinToString("/") { it.key }
-            })
-        }
-        commands["?"] = commands["help"]!!
+        commands["viaversion"] = ViaAspirinCommand
+        commands["viaver"] = ViaAspirinCommand
+        commands["vvcloud"] = ViaAspirinCommand
+        commands["vvaas"] = ViaAspirinCommand
+        commands["vvaspirin"] = ViaAspirinCommand
+        commands["viaaas"] = ViaAspirinCommand
+        commands["help"] = HelpCommand
+        commands["?"] = HelpCommand
+        commands["end"] = EndCommand
+        commands["reload"] = ReloadCommand
     }
 
     override fun buildReader(builder: LineReaderBuilder): LineReader {
@@ -47,11 +38,9 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
                     candidates.addAll(commands.keys.filter { it.startsWith(alias, ignoreCase = true) }
                         .map { Candidate(it) })
                 } else {
-                    val cmd = commands[alias.toLowerCase()]
-                    if (cmd != null) {
-                        val suggestions = mutableListOf<String>()
-                        cmd(suggestions, alias, args.toTypedArray())
-                        candidates.addAll(suggestions.map(::Candidate))
+                    val command = commands[alias.toLowerCase()]
+                    if (command != null) {
+                        candidates.addAll(command.suggest(this, alias, args).map(::Candidate))
                     }
                 }
             } catch (e: Exception) {
@@ -60,16 +49,16 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
         })
     }
 
-    override fun runCommand(command: String) {
-        val cmd = command.split(" ")
+    override fun runCommand(commandLine: String) {
+        val cmd = commandLine.split(" ")
         try {
             val alias = cmd[0].toLowerCase()
-            val args = cmd.subList(1, cmd.size).toTypedArray()
-            val runnable = commands[alias]
-            if (runnable == null) {
-                sendMessage("unknown command, try 'help'")
+            val args = cmd.subList(1, cmd.size)
+            val command = commands[alias]
+            if (command == null) {
+                sendMessage("Unknown command, try 'help'")
             } else {
-                runnable(null, alias, args)
+                command.execute(this, alias, args)
             }
         } catch (e: Exception) {
             sendMessage("Error running command: $e")
@@ -77,10 +66,8 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
     }
 
     public override fun shutdown() {
-        viaaasLogger.info("Shutting down...")
-        runningServer = false
+        StopSubCommand.execute(this, emptyArray())
     }
-
 
     override fun sendMessage(p0: String) {
         LoggerFactory.getLogger(this.name).info(p0)

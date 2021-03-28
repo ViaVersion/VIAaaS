@@ -8,11 +8,11 @@ import com.github.creeper123123321.viaaas.packet.UnknownPacket
 import com.github.creeper123123321.viaaas.packet.status.StatusResponse
 import com.github.creeper123123321.viaaas.parseProtocol
 import com.github.creeper123123321.viaaas.writeFlushClose
-import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import io.netty.channel.ChannelHandlerContext
+import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.packets.State
 import java.util.*
 
@@ -51,8 +51,20 @@ object StatusState : MinecraftConnectionState {
         super.disconnect(handler, msg)
 
         val packet = StatusResponse()
-        packet.json = """{"version": {"name": "VIAaaS", "protocol": -1}, "players": {"max": 0, "online": 0,
-            | "sample": []}, "description": {"text": ${Gson().toJson("§c$msg")}}}""".trimMargin()
+        packet.json = JsonObject().also {
+            it.add("version", JsonObject().also {
+                it.addProperty("name", "VIAaaS")
+                it.addProperty("protocol", -1)
+            })
+            it.add("players", JsonObject().also {
+                it.addProperty("max", 0)
+                it.addProperty("online", Via.getManager().connectionManager.connections.size)
+                it.add("sample", JsonArray())
+            })
+            it.add("description", JsonObject().also {
+                it.addProperty("text", "§c$msg")
+            })
+        }.toString()
         writeFlushClose(handler.data.frontChannel, packet)
     }
 }

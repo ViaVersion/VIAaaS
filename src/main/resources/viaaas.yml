@@ -1,5 +1,5 @@
 #######################
-# CHANGING THIS CONFIG FILE AT RUNTIME ISN'T SUPPORTED
+# Some configurations need a restart
 # See https://ktor.io/docs/configurations.html#command-line for https interface options
 #######################
 #
