@@ -8,7 +8,7 @@ import us.myles.ViaVersion.api.command.ViaCommandSender
 import us.myles.ViaVersion.commands.ViaCommandHandler
 
 object ViaAspirinCommand : ViaCommandHandler(), Command {
-    override val info = "ViaVersion commands"
+    override val info = "ViaVersion command"
 
     init {
         registerSubCommand(StopSubCommand)
