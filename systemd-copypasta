@@ -1,0 +1,30 @@
+# modified https://minecraft.fandom.com/wiki/Tutorials/Server_startup_script#Installation
+[Unit]
+Description=Minecraft Server %i
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/minecraft/%i
+User=minecraft
+Group=minecraft
+
+PrivateUsers=true
+ProtectSystem=full
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+ExecStart=/usr/bin/screen -DmS mc-%i /bin/sh start.sh
+ExecReload=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "viaver reload"\\015'
+ExecReload=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "reload"\\015'
+ExecStop=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "viaaas end"\\015'
+ExecStop=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "end"\\015'
+ExecStop=/usr/bin/screen -p 0 -S mc-%i -X eval 'stuff "stop"\\015'
+ExecStop=/bin/sh -c 'sleep 10'
+
+Restart=on-failure
+RestartSec=60s
+
+[Install]
+WantedBy=multi-user.target
