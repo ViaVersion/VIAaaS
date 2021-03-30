@@ -7,8 +7,11 @@ Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Insta
 
 Discord: https://viaversion.com/discord
 
+Version translation:
+![Supported Versions Chart](https://camo.githubusercontent.com/3c4710d9240ba56d5dea6638f3d2d1f736949b98825492f47a7ba5cdfe950ce8/68747470733a2f2f692e696d6775722e636f6d2f307532305932752e706e67)
+
 ## How does it work?
-- ViaVersion, ViaBackwards and ViaRewind translates the connections to backend server.
+- [ViaVersion](https://viaversion.com), [ViaBackwards](https://viaversion.com/backwards) and [ViaRewind](https://viaversion.com/rewind) translates the connections to backend server.
 - VIAaaS auth page stores account credentials in the player's browser local storage. Check for XSS vulnerabilities on your domain.
 - Due to technical/security reasons, it requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that
  as suspicious and reset/block your account password if the IP address seems suspect.
