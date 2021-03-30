@@ -110,6 +110,7 @@ class WebDashboardServer {
     suspend fun onException(ws: WebSocketServerSession, exception: Exception) {
         val client = clients[ws]!!
         webLogger.info("WS Error: ${client.id} $exception")
+        webLogger.debug("Ws exception: ", exception)
         client.state.onException(client, exception)
     }
 }
