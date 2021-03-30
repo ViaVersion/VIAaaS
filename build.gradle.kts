@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.4.31"
+    kotlin("jvm") version "1.4.32"
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("com.github.ben-manes.versions") version "0.38.0"
