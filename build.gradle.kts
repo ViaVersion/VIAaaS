@@ -2,12 +2,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
-    id("com.github.johnrengelman.shadow") version "6.1.0"
-    id("com.github.ben-manes.versions") version "0.38.0"
-    id("com.palantir.git-version") version "0.12.3"
     application
     kotlin("jvm") version "1.4.31"
     id("maven-publish")
+    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.ben-manes.versions") version "0.38.0"
+    id("com.palantir.git-version") version "0.12.3"
 }
 
 application {
@@ -48,12 +48,12 @@ dependencies {
     implementation("us.myles:viaversion:3.3.0-21w11a") { isTransitive = false }
     implementation("nl.matsv:viabackwards:3.3.0-21w11a") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
-    implementation("io.netty:netty-all:4.1.59.Final")
+    implementation("io.netty:netty-all:4.1.61.Final")
     implementation("org.yaml:snakeyaml:1.28")
-    implementation("com.google.guava:guava:30.1-jre")
+    implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
 
-    val log4jVer = "2.14.0"
+    val log4jVer = "2.14.1"
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVer")
@@ -62,7 +62,7 @@ dependencies {
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.19.0")
     implementation("org.apache.commons:commons-compress:1.20")
-    implementation("org.tukaani:xz:1.8")
+    implementation("org.tukaani:xz:1.9")
 
     val ktorVersion = "1.5.2"
     implementation(kotlin("stdlib-jdk8"))
@@ -77,7 +77,7 @@ dependencies {
     implementation("io.ktor:ktor-server-host-common:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    implementation("io.ipinfo:ipinfo-api:1.0")
+    implementation("io.ipinfo:ipinfo-api:1.1")
 }
 
 val run: JavaExec by tasks
