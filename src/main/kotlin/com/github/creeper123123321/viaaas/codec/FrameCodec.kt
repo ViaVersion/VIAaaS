@@ -5,10 +5,15 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ByteToMessageCodec
 import us.myles.ViaVersion.api.type.Type
+import us.myles.ViaVersion.exception.CancelDecoderException
 
 class FrameCodec : ByteToMessageCodec<ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
-        if (!ctx.channel().isActive) return
+        if (!ctx.channel().isActive) {
+            input.clear()
+            // Netty throws an exception when there's no output
+            throw CancelDecoderException.CACHED
+        }
         // Ignore, should prevent DoS https://github.com/SpigotMC/BungeeCord/pull/2908
 
         val index = input.readerIndex()
