@@ -96,7 +96,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
                 if (type.toInt() == 70) {
                     val id = data
                     val metadata = data shr 16
-                    data = id or metadata shl 12
+                    data = id.or(metadata shl 12)
                 }
                 if (type.toInt() == 50 || type.toInt() == 70 || type.toInt() == 74) y -= 16
                 packetWrapper.set(Type.INT, 0, x)

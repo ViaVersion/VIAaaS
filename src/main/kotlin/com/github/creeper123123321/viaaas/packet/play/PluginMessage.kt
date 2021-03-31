@@ -41,7 +41,7 @@ class PluginMessage : Packet {
 
     fun writeExtendedForgeShort(buf: ByteBuf, toWrite: Int) {
         var low = toWrite and 0x7FFF
-        val high = toWrite and 0x7F8000 shr 15
+        val high = toWrite.and(0x7F8000).shr(15)
         if (high != 0) {
             low = low or 0x8000
         }

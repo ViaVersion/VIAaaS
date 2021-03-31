@@ -6,7 +6,6 @@ import us.myles.ViaVersion.api.minecraft.BlockChangeRecord1_8
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.api.type.types.CustomByteType
 import java.io.IOException
-import java.util.*
 import java.util.stream.IntStream
 import java.util.zip.DataFormatException
 import java.util.zip.Inflater
@@ -23,14 +22,14 @@ object ChunkPacketTransformer {
         val compressedSize = packetWrapper.read(Type.INT)
         val customByteType = CustomByteType(compressedSize)
         val data = packetWrapper.read(customByteType)
-        var k = 0
-        var l = 0
+        var countOfPrimary = 0
+        var countOfAdditional = 0
         for (j in 0..15) {
-            k += primaryBitMask shr j and 1
-            l += addBitMask shr j and 1
+            countOfPrimary += primaryBitMask.shr(j).and(1)
+            countOfAdditional += addBitMask.shr(j).and(1)
         }
-        var uncompressedSize = 12288 * k
-        uncompressedSize += 2048 * l
+        var uncompressedSize = 12288 * countOfPrimary
+        uncompressedSize += 2048 * countOfAdditional
         if (groundUp) {
             uncompressedSize += 256
         }
@@ -39,29 +38,23 @@ object ChunkPacketTransformer {
         inflater.setInput(data, 0, compressedSize)
         try {
             inflater.inflate(uncompressedData)
-        } catch (ex: DataFormatException) {
-            throw IOException("Bad compressed data format")
         } finally {
             inflater.end()
         }
         val chunk = Chunk1_8to1_7_6_10(uncompressedData, primaryBitMask, addBitMask, true, groundUp)
-        var field = PacketWrapper::class.java.getDeclaredField("packetValues")
-        field.isAccessible = true
-        (field[packetWrapper] as MutableList<*>).clear()
-        field = PacketWrapper::class.java.getDeclaredField("readableObjects")
-        field.isAccessible = true
-        (field[packetWrapper] as LinkedList<*>).clear()
-        field = PacketWrapper::class.java.getDeclaredField("inputBuffer")
+
+        packetWrapper.clearPacket()
+        val field = PacketWrapper::class.java.getDeclaredField("inputBuffer")
         field.isAccessible = true
         val buffer = field[packetWrapper] as ByteBuf
+
         buffer.clear()
         buffer.writeInt(chunkX)
         buffer.writeInt(chunkZ)
         buffer.writeBoolean(groundUp)
         buffer.writeShort(primaryBitMask)
-        val finaldata = chunk.get1_8Data()
-        Type.VAR_INT.writePrimitive(buffer, finaldata.size)
-        buffer.writeBytes(finaldata)
+        val finalData = chunk.get1_8Data()
+        Type.BYTE_ARRAY_PRIMITIVE.write(buffer, finalData)
     }
 
     @Throws(Exception::class)

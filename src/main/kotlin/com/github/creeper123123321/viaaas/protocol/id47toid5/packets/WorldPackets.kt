@@ -40,7 +40,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
             handler { packetWrapper ->
                 val blockId: Int = packetWrapper.read(Type.VAR_INT)
                 val meta = packetWrapper.read(Type.UNSIGNED_BYTE).toInt()
-                packetWrapper.write(Type.VAR_INT, blockId shl 4 or (meta and 15))
+                packetWrapper.write(Type.VAR_INT, blockId.shl(4).or(meta and 15))
             } //Block Data
         }
     })
@@ -168,7 +168,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
                 packetWrapper.write(Type.BYTE, mapData!!.scale)
                 packetWrapper.write(Type.VAR_INT, mapData!!.mapIcons.size)
                 for (mapIcon in mapData!!.mapIcons) {
-                    packetWrapper.write(Type.BYTE, (mapIcon.direction.toInt() shl 4 or mapIcon.type.toInt() and 0xF).toByte())
+                    packetWrapper.write(Type.BYTE, (mapIcon.direction.toInt().shl(4).or(mapIcon.type.toInt() and 0xF)).toByte())
                     packetWrapper.write(Type.BYTE, mapIcon.x)
                     packetWrapper.write(Type.BYTE, mapIcon.z)
                 }

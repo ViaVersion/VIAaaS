@@ -46,8 +46,7 @@ fun resolveSrv(address: String, port: Int): Pair<String, Int> {
                 val record = (attr.get(0) as String).split(" ")
                 return record[3] to record[2].toInt()
             }
-        } catch (ignored: NameNotFoundException) {
-        } catch (ignored: ServiceUnavailableException) { // DuckDNS workaround
+        } catch (ignored: Exception) { // DuckDNS workaround
         }
     }
     return address to port

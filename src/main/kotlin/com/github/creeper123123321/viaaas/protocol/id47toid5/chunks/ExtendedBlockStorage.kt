@@ -2,7 +2,7 @@ package com.github.creeper123123321.viaaas.protocol.id47toid5.chunks
 
 import us.myles.ViaVersion.api.minecraft.chunks.NibbleArray
 
-class ExtendedBlockStorage(val yLocation: Int, paramBoolean: Boolean) {
+class ExtendedBlockStorage(val yLocation: Int, hasSkyLight: Boolean) {
     var blockLSBArray: ByteArray = ByteArray(4096)
     var blockMSBArray: NibbleArray? = null
     var metadataArray: NibbleArray
@@ -52,7 +52,7 @@ class ExtendedBlockStorage(val yLocation: Int, paramBoolean: Boolean) {
     init {
         metadataArray = NibbleArray(blockLSBArray.size)
         blocklightArray = NibbleArray(blockLSBArray.size)
-        if (paramBoolean) {
+        if (hasSkyLight) {
             skylightArray = NibbleArray(blockLSBArray.size)
         }
     }
