@@ -1,7 +1,7 @@
 package com.github.creeper123123321.viaaas.packet.play
 
 import com.github.creeper123123321.viaaas.packet.Packet
-import com.github.creeper123123321.viaaas.readableToByteArray
+import com.github.creeper123123321.viaaas.readRemainingBytes
 import io.netty.buffer.ByteBuf
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.api.type.Type
@@ -15,7 +15,7 @@ class PluginMessage : Packet {
         data = if (protocolVersion <= ProtocolVersion.v1_7_6.version) {
             ByteArray(readExtendedForgeShort(byteBuf)).also { byteBuf.readBytes(it) }
         } else {
-            readableToByteArray(byteBuf)
+            readRemainingBytes(byteBuf)
         }
     }
 

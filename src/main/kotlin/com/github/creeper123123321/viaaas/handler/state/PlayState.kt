@@ -9,7 +9,7 @@ import com.github.creeper123123321.viaaas.packet.UnknownPacket
 import com.github.creeper123123321.viaaas.packet.play.Kick
 import com.github.creeper123123321.viaaas.packet.play.PluginMessage
 import com.github.creeper123123321.viaaas.parseProtocol
-import com.github.creeper123123321.viaaas.readableToByteArray
+import com.github.creeper123123321.viaaas.readRemainingBytes
 import com.github.creeper123123321.viaaas.writeFlushClose
 import com.google.gson.JsonPrimitive
 import io.netty.buffer.ByteBufAllocator
@@ -47,7 +47,7 @@ object PlayState : MinecraftConnectionState {
                     val buf = ByteBufAllocator.DEFAULT.buffer()
                     try {
                         Type.STRING.write(buf, brand)
-                        pluginMessage.data = readableToByteArray(buf)
+                        pluginMessage.data = readRemainingBytes(buf)
                     } finally {
                         buf.release()
                     }

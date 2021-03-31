@@ -1,7 +1,7 @@
 package com.github.creeper123123321.viaaas.packet.login
 
 import com.github.creeper123123321.viaaas.packet.Packet
-import com.github.creeper123123321.viaaas.readableToByteArray
+import com.github.creeper123123321.viaaas.readRemainingBytes
 import io.netty.buffer.ByteBuf
 import us.myles.ViaVersion.api.type.Type
 import kotlin.properties.Delegates
@@ -13,7 +13,7 @@ class PluginRequest : Packet {
     override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         id = Type.VAR_INT.readPrimitive(byteBuf)
         channel = Type.STRING.read(byteBuf)
-        data = readableToByteArray(byteBuf)
+        data = readRemainingBytes(byteBuf)
     }
 
     override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {

@@ -60,7 +60,7 @@ object ChunkPacketTransformer {
         buffer.writeBoolean(groundUp)
         buffer.writeShort(primaryBitMask)
         val finaldata = chunk.get1_8Data()
-        Type.VAR_INT.write(buffer, finaldata.size)
+        Type.VAR_INT.writePrimitive(buffer, finaldata.size)
         buffer.writeBytes(finaldata)
     }
 
@@ -117,7 +117,7 @@ object ChunkPacketTransformer {
             i++
         }
         packetWrapper.write(Type.BOOLEAN, skyLightSent)
-        packetWrapper.write(Type.VAR_INT, columnCount as Int)
+        packetWrapper.write(Type.VAR_INT, columnCount)
         i = 0
         while (i < columnCount) {
             packetWrapper.write(Type.INT, chunkX[i])
