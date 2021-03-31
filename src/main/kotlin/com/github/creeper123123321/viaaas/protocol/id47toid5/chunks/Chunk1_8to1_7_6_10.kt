@@ -1,7 +1,9 @@
 package com.github.creeper123123321.viaaas.protocol.id47toid5.chunks
 
+import com.github.creeper123123321.viaaas.readByteArray
 import com.github.creeper123123321.viaaas.readRemainingBytes
 import io.netty.buffer.ByteBufAllocator
+import io.netty.buffer.Unpooled
 
 class Chunk1_8to1_7_6_10(
     data: ByteArray?,
@@ -10,7 +12,7 @@ class Chunk1_8to1_7_6_10(
     private val skyLight: Boolean,
     private val groundUp: Boolean
 ) {
-    var storageArrays = arrayOfNulls<ExtendedBlockStorage>(16)
+    var storageSections = arrayOfNulls<ExtendedBlockStorage>(16)
     var blockBiomeArray = ByteArray(256)
 
     fun filterChunk(storageArray: ExtendedBlockStorage?, i: Int) =
@@ -21,7 +23,7 @@ class Chunk1_8to1_7_6_10(
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
             var finalSize = 0
-            val filteredChunks = storageArrays.filterIndexed { i, value -> filterChunk(value, i) }.filterNotNull()
+            val filteredChunks = storageSections.filterIndexed { i, value -> filterChunk(value, i) }.filterNotNull()
             filteredChunks.forEach {
                 val blockIds = it.blockLSBArray
                 val nibblearray = it.metadataArray
@@ -56,58 +58,48 @@ class Chunk1_8to1_7_6_10(
     }
 
     init {
-        var dataSize = 0
-        for (i in storageArrays.indices) {
+        val input = Unpooled.wrappedBuffer(data)
+        for (i in storageSections.indices) {
             if (primaryBitMask and 1 shl i != 0) {
-                if (storageArrays[i] == null) storageArrays[i] = ExtendedBlockStorage(i shl 4, skyLight)
-                val blockIds = storageArrays[i]!!.blockLSBArray
-                System.arraycopy(data, dataSize, blockIds, 0, blockIds.size)
-                dataSize += blockIds.size
-            } else if (storageArrays[i] != null && groundUp) {
-                storageArrays[i] = null
+                val storageSection = storageSections.getOrElse(i) {
+                    ExtendedBlockStorage(i shl 4, skyLight).also { storageSections[i] = it }
+                }!!
+                storageSection.blockLSBArray = input.readByteArray(4096)
+            } else if (storageSections[i] != null && groundUp) {
+                storageSections[i] = null
             }
         }
-        for (i in storageArrays.indices) {
-            if (primaryBitMask and 1 shl i != 0 && storageArrays[i] != null) {
-                val nibblearray = storageArrays[i]!!.metadataArray
-                System.arraycopy(data, dataSize, nibblearray.handle, 0, nibblearray.handle.size)
-                dataSize += nibblearray.handle.size
+        for (i in storageSections.indices) {
+            if (primaryBitMask and 1 shl i != 0 && storageSections[i] != null) {
+                storageSections[i]!!.metadataArray.handle = input.readByteArray(4096 / 2)
             }
         }
-        for (i in storageArrays.indices) {
-            if (primaryBitMask and 1 shl i != 0 && storageArrays[i] != null) {
-                val nibblearray = storageArrays[i]!!.blocklightArray
-                System.arraycopy(data, dataSize, nibblearray.handle, 0, nibblearray.handle.size)
-                dataSize += nibblearray.handle.size
+        for (i in storageSections.indices) {
+            if (primaryBitMask and 1 shl i != 0 && storageSections[i] != null) {
+                 storageSections[i]!!.blocklightArray.handle = input.readByteArray(4096 / 2)
             }
         }
         if (skyLight) {
-            for (i in storageArrays.indices) {
-                if (primaryBitMask and 1 shl i != 0 && storageArrays[i] != null) {
-                    val nibblearray = storageArrays[i]!!.skylightArray
-                    System.arraycopy(data, dataSize, nibblearray!!.handle, 0, nibblearray.handle.size)
-                    dataSize += nibblearray.handle.size
+            for (i in storageSections.indices) {
+                if (primaryBitMask and 1 shl i != 0 && storageSections[i] != null) {
+                    storageSections[i]!!.skylightArray!!.handle = input.readByteArray(4096 / 2)
                 }
             }
         }
-        for (i in storageArrays.indices) {
+        for (i in storageSections.indices) {
             if (addBitMask and 1 shl i != 0) {
-                if (storageArrays[i] == null) {
-                    dataSize += 2048
+                if (storageSections[i] == null) {
+                    input.skipBytes(2048)
                 } else {
-                    var nibblearray = storageArrays[i]!!.blockMSBArray
-                    if (nibblearray == null) {
-                        nibblearray = storageArrays[i]!!.createBlockMSBArray()
-                    }
-                    System.arraycopy(data, dataSize, nibblearray!!.handle, 0, nibblearray.handle.size)
-                    dataSize += nibblearray.handle.size
+                    var msbArray = storageSections[i]!!.blockMSBArray ?: storageSections[i]!!.createBlockMSBArray()
+                    msbArray!!.handle = input.readByteArray(4096 / 2)
                 }
-            } else if (groundUp && storageArrays[i] != null && storageArrays[i]!!.blockMSBArray != null) {
-                storageArrays[i]!!.clearMSBArray()
+            } else if (groundUp && storageSections[i] != null && storageSections[i]!!.blockMSBArray != null) {
+                storageSections[i]!!.clearMSBArray()
             }
         }
         if (groundUp) {
-            System.arraycopy(data, dataSize, blockBiomeArray, 0, blockBiomeArray.size)
+            blockBiomeArray = input.readByteArray(256)
         }
     }
 }

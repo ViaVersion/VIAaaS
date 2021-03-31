@@ -154,6 +154,7 @@ fun writeFlushClose(ch: Channel, obj: Any) {
 }
 
 fun readRemainingBytes(byteBuf: ByteBuf) = Type.REMAINING_BYTES.read(byteBuf)
+fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) }
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {
     return httpClient.get(

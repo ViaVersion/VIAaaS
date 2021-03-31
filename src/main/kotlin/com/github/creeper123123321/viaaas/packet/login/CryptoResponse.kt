@@ -1,6 +1,7 @@
 package com.github.creeper123123321.viaaas.packet.login
 
 import com.github.creeper123123321.viaaas.packet.Packet
+import com.github.creeper123123321.viaaas.readByteArray
 import io.netty.buffer.ByteBuf
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.api.type.Type
@@ -14,8 +15,8 @@ class CryptoResponse : Packet {
             encryptedKey = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
             encryptedToken = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
         } else {
-            encryptedKey = ByteArray(byteBuf.readUnsignedShort()).also { byteBuf.readBytes(it) }
-            encryptedToken = ByteArray(byteBuf.readUnsignedShort()).also { byteBuf.readBytes(it) }
+            encryptedKey = byteBuf.readByteArray(byteBuf.readUnsignedShort())
+            encryptedToken = byteBuf.readByteArray(byteBuf.readUnsignedShort())
         }
     }
 
