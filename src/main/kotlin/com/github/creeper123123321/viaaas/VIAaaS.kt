@@ -6,6 +6,7 @@ import com.github.creeper123123321.viaaas.config.VIAaaSConfig
 import com.github.creeper123123321.viaaas.handler.FrontEndInit
 import com.github.creeper123123321.viaaas.handler.MinecraftHandler
 import com.github.creeper123123321.viaaas.platform.*
+import com.github.creeper123123321.viaaas.protocol.registerAspirinProtocols
 import com.github.creeper123123321.viaaas.web.ViaWebApp
 import com.github.creeper123123321.viaaas.web.WebDashboardServer
 import com.google.gson.JsonParser
@@ -164,6 +165,7 @@ private fun initVia() {
     ProtocolVersion.register(-2, "AUTO")
     AspirinRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
     AspirinBackwards.init(File("config/viabackwards"))
+    registerAspirinProtocols()
 }
 
 private fun bindPorts(args: Array<String>) {
