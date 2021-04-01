@@ -50,7 +50,8 @@ Usage for offline mode:
 - Connect to ```mc.example.com.viaaas.localhost```
 
 Usage for online mode:
-- You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections, or use ```_of``` (offline mode in frontend, unencrypted and with no username verification).
+- You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections, or use ```_of```
+ (offline mode in frontend, unencrypted and with no username verification. May be useful if you have a client which is incompatible with online mode).
 - Go to [VIAaaS auth webpage](https://localhost:25543/)
 - Configure CORS proxy, see above in "CORS Proxy" section
 - Listen to the username A you'll use to connect to the proxy.
