@@ -55,6 +55,7 @@ Usage for online mode:
 - Go to [VIAaaS auth webpage](https://localhost:25543/)
 - Configure CORS proxy, see above in "CORS Proxy" section
 - Listen to the username A you'll use to connect to the proxy.
+- Keep the page open
 - Add the account B to VIAaaS page which you'll use in ```_u(account B)``` parameter below.
 - Connect to ```mc.example.com._u(account B).viaaas.localhost``` (```_u``` parameter can be removed if you are using the same username)
 - Approve the login in auth webpage
