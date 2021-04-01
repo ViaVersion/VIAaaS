@@ -112,7 +112,7 @@ class LoginState : MinecraftConnectionState {
                     ).whenCompleteAsync({ _, throwable ->
                         if (throwable != null) {
                             frontHandler.data.frontChannel.pipeline()
-                                .fireExceptionCaught(RuntimeException("Online mode error", throwable))
+                                .fireExceptionCaught(RuntimeException("Online mode error: $throwable", throwable))
                             return@whenCompleteAsync
                         }
 
@@ -127,7 +127,7 @@ class LoginState : MinecraftConnectionState {
                     }, backChan.eventLoop())
                 } catch (e: Exception) {
                     frontHandler.data.frontChannel.pipeline()
-                        .fireExceptionCaught(RuntimeException("Online mode error", e))
+                        .fireExceptionCaught(RuntimeException("Online mode error: $e", e))
                 }
             }
         }
