@@ -7,7 +7,6 @@ import com.github.creeper123123321.viaaas.protocol.id47toid5.data.Particle1_8to1
 import com.github.creeper123123321.viaaas.protocol.id47toid5.storage.MapStorage
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import us.myles.ViaVersion.api.minecraft.Position
-import us.myles.ViaVersion.api.minecraft.item.Item
 import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.remapper.TypeRemapper
 import us.myles.ViaVersion.api.type.Type
@@ -129,7 +128,8 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
             map(xyzShortPos, TypeRemapper(Type.POSITION)) //Position
             handler { packetWrapper ->
                 for (i in 0..3) {
-                    packetWrapper.write(Type.STRING,
+                    packetWrapper.write(
+                        Type.STRING,
                         Protocol1_9To1_8.fixJson(packetWrapper.read(Type.STRING)).toString()
                     )
                 }
@@ -151,16 +151,21 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
         override fun registerMap() {
             map(Type.VAR_INT)
             handler { packetWrapper ->
-                val id: Int = packetWrapper.get(Type.VAR_INT, 0)
-                val length: Int = packetWrapper.read(Type.SHORT).toInt()
-                val data: ByteArray = packetWrapper.read(CustomByteType(length))
+                val id = packetWrapper.get(Type.VAR_INT, 0)
+                val length = packetWrapper.read(Type.SHORT).toInt()
+                val data = packetWrapper.read(CustomByteType(length))
                 val mapStorage = packetWrapper.user().get(MapStorage::class.java)!!
                 var mapData = mapStorage.getMapData(id)
                 if (mapData == null) mapStorage.putMapData(id, MapStorage.MapData().also { mapData = it })
                 if (data[0] == 1.toByte()) {
                     val count = (data.size - 1) / 3
                     mapData!!.mapIcons = Array(count) { i ->
-                        MapStorage.MapIcon((data[i * 3 + 1].toInt() shr 4).toByte(), (data[i * 3 + 1] and 0xF), data[i * 3 + 2], data[i * 3 + 3])
+                        MapStorage.MapIcon(
+                            (data[i * 3 + 1].toInt() shr 4).toByte(),
+                            (data[i * 3 + 1] and 0xF),
+                            data[i * 3 + 2],
+                            data[i * 3 + 3]
+                        )
                     }
                 } else if (data[0] == 2.toByte()) {
                     mapData!!.scale = data[1]
@@ -168,7 +173,10 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
                 packetWrapper.write(Type.BYTE, mapData!!.scale)
                 packetWrapper.write(Type.VAR_INT, mapData!!.mapIcons.size)
                 for (mapIcon in mapData!!.mapIcons) {
-                    packetWrapper.write(Type.BYTE, (mapIcon.direction.toInt().shl(4).or(mapIcon.type.toInt() and 0xF)).toByte())
+                    packetWrapper.write(
+                        Type.BYTE,
+                        (mapIcon.direction.toInt().shl(4).or(mapIcon.type.toInt() and 0xF)).toByte()
+                    )
                     packetWrapper.write(Type.BYTE, mapIcon.x)
                     packetWrapper.write(Type.BYTE, mapIcon.z)
                 }
@@ -221,10 +229,16 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
                 packetWrapper.write(Type.INT, x)
                 packetWrapper.write(Type.UNSIGNED_BYTE, y)
                 packetWrapper.write(Type.INT, z)
-                val direction: Byte = packetWrapper.passthrough(Type.BYTE) //Direction
-                val item: Item = packetWrapper.read(Type.ITEM)
+                val direction = packetWrapper.passthrough(Type.BYTE) //Direction
+                val item = packetWrapper.read(Type.ITEM)
                 packetWrapper.write(Types1_7_6_10.COMPRESSED_NBT_ITEM, item)
-                if (isPlayerInsideBlock(x.toLong(), y.toLong(), z.toLong(), direction) && !isPlaceable(item.identifier)) packetWrapper.cancel()
+                if (isPlayerInsideBlock(
+                        x.toLong(),
+                        y.toLong(),
+                        z.toLong(),
+                        direction
+                    ) && !isPlaceable(item.identifier)
+                ) packetWrapper.cancel()
                 for (i in 0..2) {
                     if (packetWrapper.isReadable(Type.BYTE, 0)) {
                         packetWrapper.passthrough(Type.BYTE)
@@ -243,8 +257,10 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
             map(TypeRemapper(Type.POSITION), xyzShortPosWriter)
             handler { packetWrapper ->
                 for (i in 0..3)
-                    packetWrapper.write(Type.STRING, LegacyComponentSerializer.legacySection()
-                        .serialize(GsonComponentSerializer.gson().deserialize(packetWrapper.read(Type.STRING))))
+                    packetWrapper.write(
+                        Type.STRING, LegacyComponentSerializer.legacySection()
+                            .serialize(GsonComponentSerializer.gson().deserialize(packetWrapper.read(Type.STRING)))
+                    )
             }
         }
     })

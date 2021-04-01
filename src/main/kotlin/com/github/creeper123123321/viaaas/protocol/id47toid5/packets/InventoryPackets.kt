@@ -7,8 +7,8 @@ import us.myles.ViaVersion.api.minecraft.item.Item
 import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
-import us.myles.ViaVersion.protocols.protocol1_9to1_8.Protocol1_9To1_8
 import us.myles.viaversion.libs.kyori.adventure.text.Component
+import us.myles.viaversion.libs.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import us.myles.viaversion.libs.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 
 fun Protocol1_8To1_7_6.registerInventoryPackets() {
@@ -17,20 +17,19 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     this.registerOutgoing(State.PLAY, 0x2D, 0x2D, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val windowId: Short = packetWrapper.read(Type.UNSIGNED_BYTE)
+                val windowId = packetWrapper.read(Type.UNSIGNED_BYTE)
                 packetWrapper.write(Type.UNSIGNED_BYTE, windowId)
-                val windowType: Short = packetWrapper.read(Type.UNSIGNED_BYTE)
+                val windowType = packetWrapper.read(Type.UNSIGNED_BYTE)
                 packetWrapper.user().get(Windows::class.java)!!.types[windowId] = windowType
                 packetWrapper.write(Type.STRING, getInventoryString(windowType.toInt())) //Inventory Type
-                var title: String = packetWrapper.read(Type.STRING) //Title
-                val slots: Short = packetWrapper.read(Type.UNSIGNED_BYTE)
+                val title = packetWrapper.read(Type.STRING) //Title
+                val slots = packetWrapper.read(Type.UNSIGNED_BYTE)
                 val useProvidedWindowTitle: Boolean = packetWrapper.read(Type.BOOLEAN) //Use provided window title
-                title = if (useProvidedWindowTitle) {
-                    Protocol1_9To1_8.fixJson(title).toString()
+                packetWrapper.write(Type.STRING, GsonComponentSerializer.gson().serialize(if (useProvidedWindowTitle) {
+                    LegacyComponentSerializer.legacySection().deserialize(title)
                 } else {
-                    LegacyComponentSerializer.legacySection().serialize(Component.translatable(title)) // todo
-                }
-                packetWrapper.write(Type.STRING, title) //Window title
+                    Component.translatable(title) // todo
+                })) //Window title
                 packetWrapper.write(Type.UNSIGNED_BYTE, slots)
                 if (packetWrapper.get(Type.UNSIGNED_BYTE, 0) == 11.toShort()) packetWrapper.passthrough(Type.INT) //Entity Id
             }

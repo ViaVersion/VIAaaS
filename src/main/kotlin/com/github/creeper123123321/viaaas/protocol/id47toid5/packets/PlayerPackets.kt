@@ -57,7 +57,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     //Chat Message
     this.registerOutgoing(State.PLAY, 0x02, 0x02, object : PacketRemapper() {
         override fun registerMap() {
-            map(Type.STRING) //Chat Message
+            map(Type.COMPONENT) //Chat Message
             create { packetWrapper ->
                 packetWrapper.write(Type.BYTE, 0.toByte()) //Position (chat box)
             }
