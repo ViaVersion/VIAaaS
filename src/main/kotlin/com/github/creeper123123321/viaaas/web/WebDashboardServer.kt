@@ -5,11 +5,11 @@ import com.github.creeper123123321.viaaas.parseUndashedId
 import com.github.creeper123123321.viaaas.webLogger
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
-import com.google.common.collect.ArrayListMultimap
+import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
 import com.google.gson.JsonObject
+import io.ipinfo.api.IPInfo
 import io.ktor.client.request.*
-import io.ktor.features.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import io.ipinfo.api.IPInfo
 
 class WebDashboardServer {
     // I don't think i'll need more than 1k/day
@@ -38,7 +37,12 @@ class WebDashboardServer {
     }
 
     // Minecraft account -> WebClient
-    val listeners = Multimaps.synchronizedListMultimap(ArrayListMultimap.create<UUID, WebClient>())
+    val listeners = Multimaps.synchronizedSetMultimap(
+        MultimapBuilder.SetMultimapBuilder
+            .hashKeys()
+            .hashSetValues()
+            .build<UUID, WebClient>()
+    )
     val usernameIdCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<String, UUID>(CacheLoader.from { name ->
@@ -66,8 +70,11 @@ class WebDashboardServer {
                 if (address is InetSocketAddress) {
                     ipInfo.lookupIP(address.address.hostAddress.substringBefore("%"))
                 } else null
-            } catch (ignored: Exception) { null }
-            val msg = "Client: $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})\nBackend: $backAddress"
+            } catch (ignored: Exception) {
+                null
+            }
+            val msg =
+                "Client: $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})\nBackend: $backAddress"
             listeners[id]?.forEach {
                 it.ws.send(
                     JsonObject().also {

@@ -111,7 +111,8 @@ class LoginState : MinecraftConnectionState {
                         handler.data.backHandler!!.endRemoteAddress
                     ).whenCompleteAsync({ _, throwable ->
                         if (throwable != null) {
-                            frontHandler.data.backHandler!!.disconnect("Online mode error: $throwable")
+                            frontHandler.data.frontChannel.pipeline()
+                                .fireExceptionCaught(RuntimeException("Online mode error", throwable))
                             return@whenCompleteAsync
                         }
 
@@ -125,7 +126,8 @@ class LoginState : MinecraftConnectionState {
                         backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(backAesDe, backAesEn))
                     }, backChan.eventLoop())
                 } catch (e: Exception) {
-                    frontHandler.disconnect("Online mode error: $e")
+                    frontHandler.data.frontChannel.pipeline()
+                        .fireExceptionCaught(RuntimeException("Online mode error", e))
                 }
             }
         }
