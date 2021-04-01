@@ -1,13 +1,11 @@
 package com.github.creeper123123321.viaaas.web
 
 import com.github.creeper123123321.viaaas.config.VIAaaSConfig
-import com.github.creeper123123321.viaaas.viaWebServer
 import com.google.common.collect.Sets
 import com.google.common.util.concurrent.RateLimiter
 import io.ktor.features.*
 import io.ktor.websocket.*
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 data class WebClient(
@@ -19,15 +17,15 @@ data class WebClient(
         val atInt = AtomicInteger()
         fun next() = atInt.getAndAdd(1)
     }
+
     val id = "${ws.call.request.local.remoteHost}(${ws.call.request.origin.remoteHost})-${IdGen.next()}"
     val listenedIds: MutableSet<UUID> = Sets.newConcurrentHashSet()
     val rateLimiter = RateLimiter.create(VIAaaSConfig.rateLimitWs)
 
     fun listenId(uuid: UUID): Boolean {
         if (listenedIds.size >= VIAaaSConfig.listeningWsLimit) return false // This is getting insane
-        server.listeners.put(uuid, this)
         listenedIds.add(uuid)
-        return true
+        return server.listeners.put(uuid, this)
     }
 
     fun unlistenId(uuid: UUID) {
