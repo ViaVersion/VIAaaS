@@ -27,7 +27,7 @@ class Tablist(user: UserConnection?) : StoredObject(user) {
     class TabListEntry(var name: String, var uuid: UUID) {
         var displayName: String? = null
         var ping = 0
-        var properties: List<Property> = ArrayList()
+        var properties = mutableListOf<Property>()
     }
 
     class Property(var name: String?, var value: String?, var signature: String?)

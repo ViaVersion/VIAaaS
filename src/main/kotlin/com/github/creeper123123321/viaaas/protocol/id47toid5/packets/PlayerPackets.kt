@@ -1,5 +1,6 @@
 package com.github.creeper123123321.viaaas.protocol.id47toid5.packets
 
+import com.github.creeper123123321.viaaas.generateOfflinePlayerUuid
 import com.github.creeper123123321.viaaas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.github.creeper123123321.viaaas.protocol.id47toid5.metadata.MetadataRewriter
 import com.github.creeper123123321.viaaas.protocol.id47toid5.storage.EntityTracker
@@ -110,11 +111,11 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     this.registerOutgoing(State.PLAY, 0x0C, 0x0C, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val entityId: Int = packetWrapper.passthrough(Type.VAR_INT) //Entity Id
+                val entityId = packetWrapper.passthrough(Type.VAR_INT) //Entity Id
                 val uuid = UUID.fromString(packetWrapper.read(Type.STRING)) //UUID
                 packetWrapper.write(Type.UUID, uuid)
-                val name: String = ChatColorUtil.stripColor(packetWrapper.read(Type.STRING)) //Name
-                val dataCount: Int = packetWrapper.read(Type.VAR_INT) //DataCunt
+                val name = ChatColorUtil.stripColor(packetWrapper.read(Type.STRING)) //Name
+                val dataCount = packetWrapper.read(Type.VAR_INT) //DataCunt
                 val properties = ArrayList<Tablist.Property>()
                 for (i in 0 until dataCount) {
                     val key: String = packetWrapper.read(Type.STRING) //Name
@@ -122,15 +123,15 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     val signature: String = packetWrapper.read(Type.STRING) //Signature
                     properties.add(Tablist.Property(key, value, signature))
                 }
-                val x: Int = packetWrapper.passthrough(Type.INT) //x
-                val y: Int = packetWrapper.passthrough(Type.INT) //y
-                val z: Int = packetWrapper.passthrough(Type.INT) //z
-                val yaw: Byte = packetWrapper.passthrough(Type.BYTE) //yaw
-                val pitch: Byte = packetWrapper.passthrough(Type.BYTE) //pitch
-                val item: Short = packetWrapper.passthrough(Type.SHORT) //Item in hand
+                val x = packetWrapper.passthrough(Type.INT) //x
+                val y = packetWrapper.passthrough(Type.INT) //y
+                val z = packetWrapper.passthrough(Type.INT) //z
+                val yaw = packetWrapper.passthrough(Type.BYTE) //yaw
+                val pitch = packetWrapper.passthrough(Type.BYTE) //pitch
+                val item = packetWrapper.passthrough(Type.SHORT) //Item in hand
                 val metadata = packetWrapper.read(Types1_7_6_10.METADATA_LIST) //Metadata
                 MetadataRewriter.transform(Entity1_10Types.EntityType.PLAYER, metadata)
-                packetWrapper.write<List<Metadata>>(Types1_8.METADATA_LIST, metadata)
+                packetWrapper.write(Types1_8.METADATA_LIST, metadata)
                 val tablist = packetWrapper.user().get(Tablist::class.java)!!
                 var entryByName = tablist.getTabListEntry(name)
                 if (entryByName == null && name.length > 14) entryByName = tablist.getTabListEntry(name.substring(0, 14))
@@ -215,11 +216,11 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     this.registerOutgoing(State.PLAY, 0x38, 0x38, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val name: String = packetWrapper.read(Type.STRING)
+                val name = packetWrapper.read(Type.STRING)
                 val displayName: String? = null
-                val online: Boolean = packetWrapper.read(Type.BOOLEAN)
-                val ping: Short = packetWrapper.read(Type.SHORT)
-                val tablist: Tablist = packetWrapper.user().get(Tablist::class.java)!!
+                val online = packetWrapper.read(Type.BOOLEAN)
+                val ping = packetWrapper.read(Type.SHORT)
+                val tablist = packetWrapper.user().get(Tablist::class.java)!!
                 var entry = tablist.getTabListEntry(name)
                 if (!online && entry != null) {
                     packetWrapper.write(Type.VAR_INT, 4)
@@ -227,7 +228,13 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     packetWrapper.write(Type.UUID, entry.uuid)
                     tablist.remove(entry)
                 } else if (online && entry == null) {
-                    entry = Tablist.TabListEntry(name, UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray(Charsets.UTF_8)))
+                    val uuid = if (name == packetWrapper.user().protocolInfo?.username) {
+                        packetWrapper.user().protocolInfo!!.uuid!!
+                    } else {
+                        generateOfflinePlayerUuid(name)
+
+                    }
+                    entry = Tablist.TabListEntry(name, uuid)
                     entry.displayName = displayName
                     tablist.add(entry)
                     packetWrapper.write(Type.VAR_INT, 0) // Add
