@@ -14,10 +14,9 @@
                 <OnStartupTriggeringPolicy/>
             </Policies>
         </RollingRandomAccessFile>
-        <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%d{yyyy-MM-dd}-%i.log.xz">
+        <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.xz">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %msg%n"/>
             <Policies>
-                <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="5 MB"/>
                 <OnStartupTriggeringPolicy/>
             </Policies>
