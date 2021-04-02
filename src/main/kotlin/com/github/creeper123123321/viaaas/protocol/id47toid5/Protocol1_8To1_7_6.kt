@@ -61,7 +61,7 @@ object Protocol1_8To1_7_6 : SimpleProtocol() {
         userConnection.put(MapStorage(userConnection))
     }
 
-    fun isPlayerInsideBlock(x: Long, y: Long, z: Long, direction: Byte): Boolean {
+    fun isPlayerInsideBlock(x: Long, y: Long, z: Long, direction: Short): Boolean {
         //switch (direction) {
         //    case 0: {
         //        y--;

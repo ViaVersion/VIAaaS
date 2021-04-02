@@ -220,18 +220,16 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     //Player Block Placement
     this.registerIncoming(State.PLAY, 0x08, 0x08, object : PacketRemapper() {
         override fun registerMap() {
+            map(TypeRemapper(Type.POSITION), xyzUBytePosWriter)
+            map(Type.UNSIGNED_BYTE)
+            map(Type.ITEM, Types1_7_6_10.COMPRESSED_NBT_ITEM)
             handler { packetWrapper ->
-                val pos: Position = packetWrapper.read(Type.POSITION) //Position
-                val x: Int = pos.x
-                val y: Short = pos.y.toShort()
-                val z: Int = pos.z
+                val x: Int = packetWrapper.get(Type.INT, 0)
+                val y: Short = packetWrapper.get(Type.UNSIGNED_BYTE, 0)
+                val z: Int = packetWrapper.get(Type.INT, 1)
                 // https://github.com/ViaVersion/ViaVersion/pull/1379
-                packetWrapper.write(Type.INT, x)
-                packetWrapper.write(Type.UNSIGNED_BYTE, y)
-                packetWrapper.write(Type.INT, z)
-                val direction = packetWrapper.passthrough(Type.BYTE) //Direction
-                val item = packetWrapper.read(Type.ITEM)
-                packetWrapper.write(Types1_7_6_10.COMPRESSED_NBT_ITEM, item)
+                val direction = packetWrapper.get(Type.UNSIGNED_BYTE, 0) //Direction
+                val item = packetWrapper.get(Types1_7_6_10.COMPRESSED_NBT_ITEM, 0)
                 if (isPlayerInsideBlock(
                         x.toLong(),
                         y.toLong(),

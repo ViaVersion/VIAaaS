@@ -31,14 +31,14 @@ val xyzUBytePos = ValueReader { packetWrapper: PacketWrapper ->
     Position(x, y, z)
 }
 val xyzUBytePosWriter: ValueWriter<Position> = ValueWriter<Position> { packetWrapper: PacketWrapper, pos: Position ->
-    packetWrapper.write(Type.INT, pos.x.toInt())
+    packetWrapper.write(Type.INT, pos.x)
     packetWrapper.write(Type.UNSIGNED_BYTE, pos.y.toShort())
-    packetWrapper.write(Type.INT, pos.z.toInt())
+    packetWrapper.write(Type.INT, pos.z)
 }
 val xyzShortPosWriter: ValueWriter<Position> = ValueWriter<Position> { packetWrapper: PacketWrapper, pos: Position ->
-    packetWrapper.write(Type.INT, pos.x.toInt())
+    packetWrapper.write(Type.INT, pos.x)
     packetWrapper.write(Type.SHORT, pos.y.toShort())
-    packetWrapper.write(Type.INT, pos.z.toInt())
+    packetWrapper.write(Type.INT, pos.z)
 }
 val xyzShortPos: ValueReader<Position> = ValueReader<Position> { packetWrapper: PacketWrapper ->
     val x = packetWrapper.read(Type.INT)
