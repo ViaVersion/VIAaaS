@@ -25,6 +25,7 @@ private fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketA
         .handler(BackEndInit(handler.data))
         .channelFactory(channelSocketFactory(loop.parent()))
         .group(loop)
+        .option(ChannelOption.WRITE_BUFFER_WATER_MARK, bufferWaterMark)
         .option(ChannelOption.IP_TOS, 0x18)
         .option(ChannelOption.TCP_NODELAY, true)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // We need to show the error before the client timeout

@@ -24,7 +24,7 @@
         </RollingRandomAccessFile>
     </Appenders>
     <Loggers>
-        <Root level="all">
+        <Root level="debug">
             <AppenderRef level="info" ref="TerminalConsole"/>
             <AppenderRef level="info" ref="File"/>
             <AppenderRef level="debug" ref="DebugFile"/>

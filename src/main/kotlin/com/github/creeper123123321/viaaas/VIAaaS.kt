@@ -19,10 +19,7 @@ import io.ktor.network.tls.certificates.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.ChannelFactory
-import io.netty.channel.ChannelFuture
-import io.netty.channel.ChannelOption
-import io.netty.channel.EventLoopGroup
+import io.netty.channel.*
 import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.epoll.EpollServerSocketChannel
@@ -63,6 +60,7 @@ val httpClient = HttpClient {
     }
 }
 val initFuture = CompletableFuture<Unit>()
+val bufferWaterMark = WriteBufferWaterMark(512 * 1024, 2048 * 1024)
 
 // Minecraft doesn't have forward secrecy
 val mcCryptoKey = KeyPairGenerator.getInstance("RSA").let {
@@ -173,6 +171,7 @@ private fun bindPorts(args: Array<String>) {
         .group(parentLoop, childLoop)
         .channelFactory(channelServerSocketFactory(parentLoop))
         .childHandler(FrontEndInit)
+        .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, bufferWaterMark)
         .childOption(ChannelOption.IP_TOS, 0x18)
         .childOption(ChannelOption.TCP_NODELAY, true)
         .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
