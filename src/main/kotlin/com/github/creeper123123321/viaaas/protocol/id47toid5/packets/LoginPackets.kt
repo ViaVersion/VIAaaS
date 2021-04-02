@@ -18,8 +18,8 @@ fun Protocol1_8To1_7_6.registerLoginPackets() {
     //Encryption Response
     this.registerIncoming(State.LOGIN, 0x01, 0x01, object : PacketRemapper() {
         override fun registerMap() {
-            map(Type.SHORT_BYTE_ARRAY, Type.BYTE_ARRAY_PRIMITIVE)
-            map(Type.SHORT_BYTE_ARRAY, Type.BYTE_ARRAY_PRIMITIVE)
+            map(Type.BYTE_ARRAY_PRIMITIVE, Type.SHORT_BYTE_ARRAY)
+            map(Type.BYTE_ARRAY_PRIMITIVE, Type.SHORT_BYTE_ARRAY)
         }
     })
 }
