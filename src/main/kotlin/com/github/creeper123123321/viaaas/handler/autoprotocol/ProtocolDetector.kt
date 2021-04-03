@@ -19,6 +19,7 @@ import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
+import io.netty.resolver.NoopAddressResolverGroup
 import io.netty.util.concurrent.Future
 import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import us.myles.ViaVersion.packets.State
@@ -35,6 +36,7 @@ object ProtocolDetector {
             try {
                 val ch: ChannelFuture = Bootstrap()
                     .group(childLoop)
+                    .resolver(NoopAddressResolverGroup.INSTANCE)
                     .channelFactory(channelSocketFactory(childLoop))
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.IP_TOS, 0x18)

@@ -64,7 +64,7 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.20")
     implementation("org.tukaani:xz:1.9")
 
-    val ktorVersion = "1.5.2"
+    val ktorVersion = "1.5.3"
     implementation(kotlin("stdlib-jdk8"))
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

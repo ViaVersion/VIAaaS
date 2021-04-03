@@ -11,6 +11,7 @@ import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
+import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ private fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketA
         .option(ChannelOption.IP_TOS, 0x18)
         .option(ChannelOption.TCP_NODELAY, true)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // We need to show the error before the client timeout
+        .resolver(NoopAddressResolverGroup.INSTANCE)
         .connect(socketAddr)
         .addListener(ChannelFutureListener {
             if (it.isSuccess) {
@@ -50,8 +52,7 @@ private fun createBackChannel(handler: MinecraftHandler, socketAddr: InetSocketA
 
 private fun tryBackAddress(
     handler: MinecraftHandler,
-    iterator: Iterator<InetAddress>,
-    port: Int,
+    iterator: Iterator<InetSocketAddress>,
     state: State,
     success: () -> Unit,
 ) {
@@ -60,13 +61,13 @@ private fun tryBackAddress(
             // We're in the event loop
             handler.disconnect("Couldn't connect: $e")
         } else if (handler.data.frontChannel.isActive) {
-            tryBackAddress(handler, iterator, port, state, success)
+            tryBackAddress(handler, iterator, state, success)
         }
     }
     try {
-        val socketAddr = InetSocketAddress(iterator.next(), port)
+        val socketAddr = iterator.next()
 
-        if (checkLocalAddress(socketAddr.address)
+        if ((socketAddr.address != null && checkLocalAddress(socketAddr.address))
             || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
             || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)
         ) {
@@ -93,14 +94,21 @@ fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: St
         try {
             val srvResolved = resolveSrv(address, port)
 
-            val iterator = InetAddress.getAllByName(srvResolved.first)
-                .groupBy { it is Inet4Address }
-                .toSortedMap() // I'm sorry, IPv4, but my true love is IPv6... We can still be friends though...
-                .map { it.value.random() }
-                .iterator()
+            val removedEndDot = srvResolved.first.replace(Regex("\\.$"), "")
+
+            val iterator =
+                if (!removedEndDot.endsWith(".onion")) {
+                    InetAddress.getAllByName(srvResolved.first)
+                        .groupBy { it is Inet4Address }
+                        .toSortedMap() // I'm sorry, IPv4, but my true love is IPv6... We can still be friends though...
+                        .map { InetSocketAddress(it.value.random(), srvResolved.second) }
+                        .iterator()
+                } else {
+                    listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.second)).iterator()
+                }
 
             if (!iterator.hasNext()) throw IllegalArgumentException("Hostname has no IP address")
-            tryBackAddress(handler, iterator, srvResolved.second, state, success)
+            tryBackAddress(handler, iterator, state, success)
         } catch (e: Exception) {
             handler.data.frontChannel.eventLoop().submit {
                 handler.disconnect("Couldn't connect: $e")

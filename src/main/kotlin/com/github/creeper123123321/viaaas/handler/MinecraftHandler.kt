@@ -9,6 +9,7 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.proxy.Socks5ProxyHandler
 import us.myles.ViaVersion.exception.CancelCodecException
 import java.net.SocketAddress
+import java.nio.channels.ClosedChannelException
 
 class MinecraftHandler(
     val data: ConnectionData,
@@ -44,6 +45,7 @@ class MinecraftHandler(
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         if (cause is CancelCodecException) return
+        if (cause is ClosedChannelException) return
         mcLogger.debug("Exception: ", cause)
         disconnect("Exception: $cause")
     }

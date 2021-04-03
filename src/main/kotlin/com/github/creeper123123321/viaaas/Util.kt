@@ -25,8 +25,6 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import javax.naming.NameNotFoundException
-import javax.naming.ServiceUnavailableException
 import javax.naming.directory.InitialDirContext
 
 val badLength = DecoderException("Invalid length!")
@@ -41,7 +39,7 @@ fun resolveSrv(address: String, port: Int): Pair<String, Int> {
         try {
             // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java
             val attr = InitialDirContext()
-                    .getAttributes("dns:///_minecraft._tcp.$address", arrayOf("SRV"))["SRV"]
+                .getAttributes("dns:///_minecraft._tcp.$address", arrayOf("SRV"))["SRV"]
             if (attr != null && attr.size() > 0) {
                 val record = (attr.get(0) as String).split(" ")
                 return record[3] to record[2].toInt()
@@ -75,8 +73,8 @@ fun mcCfb8(key: ByteArray, mode: Int): Cipher {
 fun parseUndashedId(string: String): UUID {
     Preconditions.checkArgument(string.length == 32, "Length is incorrect")
     return UUID(
-            string.substring(0, 16).toULong(16).toLong(),
-            string.substring(16).toULong(16).toLong()
+        string.substring(0, 16).toULong(16).toLong(),
+        string.substring(16).toULong(16).toLong()
     )
 }
 
@@ -95,7 +93,8 @@ fun twosComplementHexdigest(digest: ByteArray): String {
 
 // https://github.com/VelocityPowered/Velocity/blob/e3f17eeb245b8d570f16c1f2aff5e7eafb698d5e/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
 fun generateOfflinePlayerUuid(username: String) = UUID.nameUUIDFromBytes(
-        "OfflinePlayer:$username".toByteArray(Charsets.UTF_8))
+    "OfflinePlayer:$username".toByteArray(Charsets.UTF_8)
+)
 
 fun checkLocalAddress(inetAddress: InetAddress): Boolean {
     return VIAaaSConfig.blockLocalAddress && (inetAddress.isAnyLocalAddress
@@ -107,16 +106,15 @@ fun checkLocalAddress(inetAddress: InetAddress): Boolean {
             || inetAddress.isMCOrgLocal
             || inetAddress.isMCSiteLocal
             || NetworkInterface.networkInterfaces().flatMap { it.inetAddresses() }
-            .anyMatch {
-                // This public address acts like a localhost, let's block it
-                it == inetAddress
-            })
+        .anyMatch {
+            // This public address acts like a localhost, let's block it
+            it == inetAddress
+        })
 }
 
 fun matchesAddress(addr: InetSocketAddress, list: List<String>): Boolean {
-    return (matchAddress(addr.hostString, list)
-            || (addr.address != null && (matchAddress(addr.address.hostAddress, list)
-            || matchAddress(addr.address.hostName, list))))
+    return (matchAddress(addr.hostString, list) || (addr.address != null
+            && (matchAddress(addr.address.hostAddress, list) || matchAddress(addr.address.hostName, list))))
 }
 
 private fun matchAddress(addr: String, list: List<String>): Boolean {
@@ -157,9 +155,9 @@ fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) 
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {
     return httpClient.get(
-            "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
-                    UrlEscapers.urlFormParameterEscaper().escape(username) +
-                    "&serverId=$hash"
+        "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
+                UrlEscapers.urlFormParameterEscaper().escape(username) +
+                "&serverId=$hash"
     ) ?: throw IllegalArgumentException("Couldn't authenticate with session servers")
 }
 
