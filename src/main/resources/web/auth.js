@@ -32,13 +32,6 @@ var listening = document.getElementById("listening");
 var actions = document.getElementById("actions");
 var accounts = document.getElementById("accounts-list");
 var listenVisible = false;
-var pageBlur = false;
-document.addEventListener("focus", () => {
-    pageBlur = false;
-});
-document.addEventListener("blur", () => {
-    pageBlur = true;
-});
 
 // Util
 isMojang = it => !!it.clientToken;
@@ -319,7 +312,7 @@ function handleSWMsg(event) {
     callback(data.action);
 }
 function authNotification(msg, yes, no) {
-    if (!navigator.serviceWorker || (!pageBlur && !document.hidden) || Notification.permission != "granted") {
+    if (!navigator.serviceWorker || Notification.permission != "granted") {
         if (confirm(msg)) yes(); else no();
         return;
     }
