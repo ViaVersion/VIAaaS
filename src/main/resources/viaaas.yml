@@ -36,7 +36,7 @@ use-strong-random: false
 require-host-name: true
 # Host names of this instance, that will be used in the virtual host as a suffix.
 # Use commas for separating multiple hostnames.
-host-name: viaaas.localhost,via.localhost,lhost.duckdns.org
+host-name: viaaas.localhost,via.localhost,via-127-0-0-1.nip.io
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
 # Default port to be used when connecting to the backend server.
