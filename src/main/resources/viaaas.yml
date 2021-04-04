@@ -32,7 +32,7 @@ use-strong-random: false
 ######
 # Requires virtual host to contain the value from "host-name" as a suffix.
 # A false value will allow virtual hosts with no suffix, connecting to the virtual host sent by client.
-# A false value could be used for transparent proxying.
+# A false value could be used for transparent proxying or for MiTM.
 require-host-name: true
 # Host names of this instance, that will be used in the virtual host as a suffix.
 # Use commas for separating multiple hostnames.

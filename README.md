@@ -80,9 +80,6 @@ Address parts:
 - Mojang may lock your account when API is called from a suspect IP address
 
 ## FAQ
-VIAaaS is stuck when connecting with online mode:
-- Your system may have low entropy, see https://wiki.archlinux.org/index.php/Rng-tools
-
 My Microsoft account <18 years old is not able to log in, it's giving XSTS error:
 - Add your account to a family (see https://wiki.vg/Microsoft_Authentication_Scheme#Authenticate_with_XSTS)
 
@@ -92,7 +89,11 @@ Why a online webpage for online mode?:
 
 How to use IPv6?:
 - When listening to 0.0.0.0, it should listen on IPv6 too.
-- To use IPv6 in backend address, you need to use a instance with IPv6 connectivity. The hostname parser currently doesn't support direct IPv6, but you can use a DNS name.
+- To use IPv6 in backend address, you need to use a instance with IPv6 connectivity. The hostname parser currently doesn't support
+ direct IPv6, but you can use a DNS name with https://sslip.io/
+
+I'm getting a DNS error/"Unknown host" while connecting to (...).localhost
+- Try configuring via-127-0-0-1.nip.io as hostname suffix
 
 How to use with Geyser?
 - Currently you need to set the parameters (at least the hostname) in Geyser's `address` field:
