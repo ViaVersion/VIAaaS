@@ -1,0 +1,25 @@
+package com.viaversion.aas.command.sub
+
+import com.viaversion.aas.handler.MinecraftHandler
+import com.viaversion.aas.parseProtocol
+import us.myles.ViaVersion.api.Via
+import us.myles.ViaVersion.api.command.ViaCommandSender
+import us.myles.ViaVersion.api.command.ViaSubCommand
+
+object ConnectionsSubCommand : ViaSubCommand() {
+    override fun name(): String = "connections"
+    override fun description(): String = "Lists VIAaaS connections"
+    override fun execute(p0: ViaCommandSender, p1: Array<out String>): Boolean {
+        p0.sendMessage("List of player connections: ")
+        Via.getManager().connectionManager.connections.forEach {
+            val handler = it.channel?.pipeline()?.get(MinecraftHandler::class.java)
+            val backAddr = handler?.endRemoteAddress
+            val pVer = it.protocolInfo?.protocolVersion?.parseProtocol()
+            val backName = it.protocolInfo?.username
+            val backVer = it.protocolInfo?.serverProtocolVersion?.parseProtocol()
+            val pAddr = handler?.data?.frontHandler?.endRemoteAddress
+            p0.sendMessage("$pAddr $pVer -> $backVer ($backName) $backAddr")
+        }
+        return true
+    }
+}

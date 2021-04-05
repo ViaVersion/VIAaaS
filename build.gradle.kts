@@ -11,7 +11,7 @@ plugins {
 }
 
 application {
-    mainClassName = "com.github.creeper123123321.viaaas.VIAaaSKt"
+    mainClassName = "com.viaversion.aas.VIAaaSKt"
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
