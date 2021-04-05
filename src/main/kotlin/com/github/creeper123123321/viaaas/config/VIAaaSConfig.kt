@@ -16,7 +16,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val isNativeTransportMc: Boolean get() = this.getBoolean("native-transport-mc", true)
     val port: Int get() = this.getInt("port", 25565)
     val bindAddress: String get() = this.getString("bind-address", "localhost")!!
-    val hostName: List<String> get() = this.getString("host-name", "viaaas.localhost")!!.split(",")
+    val hostName: List<String> get() = this.getString("host-name", "viaaas.localhost")!!.split(",").map { it.trim() }
     val mcRsaSize: Int get() = this.getInt("mc-rsa-size", 4096)
     val useStrongRandom: Boolean get() = this.getBoolean("use-strong-random", true)
     val blockLocalAddress: Boolean get() = this.getBoolean("block-local-address", true)
