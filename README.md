@@ -32,6 +32,8 @@ java -jar VIAaaS-all.jar
 ## CORS Proxy
 - For less chance of Mojang seeing the login as suspect, you (the player) should set up a CORS proxy on your machine.
 - Note the ending slash in cors-anywhere address
+- You can use my public instance at https://crp123-cors.herokuapp.com/ ([source](https://github.com/creeper123123321/cors-anywhere/)) too,
+but proxies have a bit more chance of being seen as suspect.
 
 Setting up [cors-anywhere](https://www.npmjs.com/package/cors-anywhere) on local machine:
 ```sh
@@ -41,9 +43,6 @@ npm install
 node server.js
 ```
 - It will be available at ```http://localhost:8080/```
-
-My cors-anywhere instance:
-- If you trust me, you can use https://crp123-cors.herokuapp.com/ ([source](https://github.com/creeper123123321/cors-anywhere/))
 
 ## Usage for players
 Usage for offline mode:
