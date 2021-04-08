@@ -1,5 +1,6 @@
 package com.viaversion.aas.protocol.id47toid5.packets
 
+import com.google.common.base.Charsets
 import com.viaversion.aas.generateOfflinePlayerUuid
 import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.metadata.MetadataRewriter
@@ -8,7 +9,7 @@ import com.viaversion.aas.protocol.id47toid5.storage.Scoreboard
 import com.viaversion.aas.protocol.id47toid5.storage.Tablist
 import com.viaversion.aas.protocol.xyzToPosition
 import com.viaversion.aas.protocol.xyzUBytePos
-import com.google.common.base.Charsets
+import com.viaversion.aas.readRemainingBytes
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.CustomStringType
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import de.gerrygames.viarewind.utils.ChatUtil
@@ -17,7 +18,6 @@ import us.myles.ViaVersion.api.PacketWrapper
 import us.myles.ViaVersion.api.Via
 import us.myles.ViaVersion.api.entities.Entity1_10Types
 import us.myles.ViaVersion.api.minecraft.item.Item
-import us.myles.ViaVersion.api.minecraft.metadata.Metadata
 import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.remapper.TypeRemapper
 import us.myles.ViaVersion.api.type.Type
@@ -25,7 +25,6 @@ import us.myles.ViaVersion.api.type.types.CustomByteType
 import us.myles.ViaVersion.api.type.types.version.Types1_8
 import us.myles.ViaVersion.packets.State
 import us.myles.ViaVersion.util.ChatColorUtil
-import us.myles.viaversion.libs.opennbt.tag.builtin.CompoundTag
 import us.myles.viaversion.libs.opennbt.tag.builtin.ListTag
 import us.myles.viaversion.libs.opennbt.tag.builtin.StringTag
 import java.nio.charset.StandardCharsets
@@ -86,7 +85,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         override fun registerMap() {
             map(Type.DOUBLE) //x
             handler { packetWrapper ->
-                val y: Double = packetWrapper.read(Type.DOUBLE)
+                val y = packetWrapper.read(Type.DOUBLE)
                 packetWrapper.write(Type.DOUBLE, y - 1.62) //y - fixed value
             }
             map(Type.DOUBLE) //z
@@ -134,7 +133,8 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 packetWrapper.write(Types1_8.METADATA_LIST, metadata)
                 val tablist = packetWrapper.user().get(Tablist::class.java)!!
                 var entryByName = tablist.getTabListEntry(name)
-                if (entryByName == null && name.length > 14) entryByName = tablist.getTabListEntry(name.substring(0, 14))
+                if (entryByName == null && name.length > 14) entryByName =
+                    tablist.getTabListEntry(name.substring(0, 14))
                 val entryByUUID = tablist.getTabListEntry(uuid)
                 if (entryByName == null || entryByUUID == null) {
                     if (entryByName != null || entryByUUID != null) {
@@ -148,7 +148,8 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     val packetPlayerListItem = PacketWrapper(0x38, null, packetWrapper.user())
                     val newentry = Tablist.TabListEntry(name, uuid)
                     if (entryByName != null || entryByUUID != null) {
-                        newentry.displayName = if (entryByUUID != null) entryByUUID.displayName else entryByName!!.displayName
+                        newentry.displayName =
+                            if (entryByUUID != null) entryByUUID.displayName else entryByName!!.displayName
                     }
                     newentry.properties = properties
                     tablist.add(newentry)
@@ -180,7 +181,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     delayedPacket.write(Type.BYTE, yaw)
                     delayedPacket.write(Type.BYTE, pitch)
                     delayedPacket.write(Type.SHORT, item)
-                    delayedPacket.write<List<Metadata>>(Types1_8.METADATA_LIST, metadata)
+                    delayedPacket.write(Types1_8.METADATA_LIST, metadata)
                     Via.getPlatform().runSync({
                         try {
                             delayedPacket.send(Protocol1_8To1_7_6::class.java)
@@ -209,7 +210,6 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
             map(Type.SHORT, Type.VAR_INT) //Total Experience
         }
     })
-
 
 
     //Player List Item
@@ -280,10 +280,10 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     //Scoreboard Objective
     this.registerOutgoing(State.PLAY, 0x3B, 0x3B, object : PacketRemapper() {
         override fun registerMap() {
+            map(Type.STRING) // name
             handler { packetWrapper ->
-                val name: String = packetWrapper.passthrough(Type.STRING)
-                val value: String = packetWrapper.read(Type.STRING)
-                val mode: Byte = packetWrapper.read(Type.BYTE)
+                val value = packetWrapper.read(Type.STRING)
+                val mode = packetWrapper.read(Type.BYTE)
                 packetWrapper.write(Type.BYTE, mode)
                 if (mode.toInt() == 0 || mode.toInt() == 2) {
                     packetWrapper.write(Type.STRING, value)
@@ -297,14 +297,14 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     this.registerOutgoing(State.PLAY, 0x3C, 0x3C, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val name: String = packetWrapper.passthrough(Type.STRING)
-                val mode: Byte = packetWrapper.passthrough(Type.BYTE)
+                val name = packetWrapper.passthrough(Type.STRING)
+                val mode = packetWrapper.passthrough(Type.BYTE)
                 if (mode.toInt() != 1) {
-                    val objective: String = packetWrapper.passthrough(Type.STRING)
+                    val objective = packetWrapper.passthrough(Type.STRING)
                     packetWrapper.user().get(Scoreboard::class.java)!!.put(name, objective)
                     packetWrapper.write(Type.VAR_INT, packetWrapper.read(Type.INT))
                 } else {
-                    val objective: String = packetWrapper.user().get(Scoreboard::class.java)!!.get(name)
+                    val objective = packetWrapper.user().get(Scoreboard::class.java)!!.get(name)
                     packetWrapper.write(Type.STRING, objective)
                 }
             }
@@ -329,8 +329,8 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 if (mode.toInt() == 0 || mode.toInt() == 3 || mode.toInt() == 4) {
                     val count = packetWrapper.read(Type.SHORT).toInt()
                     val type = CustomStringType(count)
-                    val entries: Array<String> = packetWrapper.read(type)
-                    packetWrapper.write<Array<String>>(Type.STRING_ARRAY, entries)
+                    val entries = packetWrapper.read(type)
+                    packetWrapper.write(Type.STRING_ARRAY, entries)
                 }
             }
         }
@@ -396,14 +396,18 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         override fun registerMap() {
             map(Type.STRING)
             handler { packetWrapper ->
-                val channel: String = packetWrapper.get(Type.STRING, 0)
+                val channel = packetWrapper.get(Type.STRING, 0)
                 if (channel.equals("MC|ItemName", ignoreCase = true)) {
                     val name: ByteArray = packetWrapper.read(Type.STRING).toByteArray(Charsets.UTF_8)
                     packetWrapper.write(Type.REMAINING_BYTES, name)
-                } else if (channel.equals("MC|BEdit", ignoreCase = true) || channel.equals("MC|BSign", ignoreCase = true)) {
+                } else if (channel.equals("MC|BEdit", ignoreCase = true) || channel.equals(
+                        "MC|BSign",
+                        ignoreCase = true
+                    )
+                ) {
                     packetWrapper.read(Type.SHORT) //length
                     val book: Item = packetWrapper.read(Types1_7_6_10.COMPRESSED_NBT_ITEM)
-                    val tag: CompoundTag? = book.tag
+                    val tag = book.tag
                     if (tag != null && tag.contains("pages")) {
                         val pages = tag.get<ListTag>("pages")
                         if (pages != null) {
@@ -421,9 +425,9 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 packetWrapper.id = -1
                 val newPacketBuf = Unpooled.buffer()
                 packetWrapper.writeToBuffer(newPacketBuf)
-                val newWrapper = PacketWrapper(0x17, newPacketBuf, packetWrapper.user())
+                val newWrapper = PacketWrapper(0x17, null, packetWrapper.user())
                 newWrapper.passthrough(Type.STRING)
-                newWrapper.write(Type.SHORT, newPacketBuf.readableBytes().toShort())
+                newWrapper.write(Type.SHORT_BYTE_ARRAY, readRemainingBytes(newPacketBuf))
                 newWrapper.sendToServer(Protocol1_8To1_7_6::class.java, true, true)
             }
         }
@@ -477,7 +481,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
             map(Type.BOOLEAN)
             create { packetWrapper -> packetWrapper.write(Type.BYTE, 0.toByte()) }
             handler { packetWrapper ->
-                val flags: Short = packetWrapper.read(Type.UNSIGNED_BYTE)
+                val flags = packetWrapper.read(Type.UNSIGNED_BYTE)
                 packetWrapper.write(Type.BOOLEAN, flags and 1 == 1.toShort())
             }
         }
@@ -487,7 +491,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     this.registerIncoming(State.PLAY, 0x14, 0x14, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val text: String = packetWrapper.read(Type.STRING)
+                val text = packetWrapper.read(Type.STRING)
                 packetWrapper.clearInputBuffer()
                 packetWrapper.write(Type.STRING, text)
             }

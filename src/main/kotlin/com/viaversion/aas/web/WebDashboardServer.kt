@@ -1,29 +1,30 @@
 package com.viaversion.aas.web
 
-import com.viaversion.aas.httpClient
-import com.viaversion.aas.parseUndashedId
-import com.viaversion.aas.webLogger
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
 import com.google.gson.JsonObject
+import com.viaversion.aas.httpClient
+import com.viaversion.aas.parseUndashedId
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.aas.webLogger
 import io.ipinfo.api.IPInfo
 import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
-import us.myles.ViaVersion.api.Via
 import java.net.InetSocketAddress
 import java.net.SocketAddress
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 class WebDashboardServer {
     // I don't think i'll need more than 1k/day
@@ -87,9 +88,10 @@ class WebDashboardServer {
                 )
                 it.ws.flush()
             }
-            Via.getPlatform().runSync({
+            GlobalScope.run {
+                delay(Duration.ofSeconds(20))
                 future.completeExceptionally(StacklessException("No response from browser"))
-            }, 20 * 20)
+            }
         }
         return future
     }

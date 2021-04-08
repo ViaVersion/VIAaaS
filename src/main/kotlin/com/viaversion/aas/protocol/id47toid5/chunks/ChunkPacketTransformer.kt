@@ -60,18 +60,18 @@ object ChunkPacketTransformer {
     @Throws(Exception::class)
     fun transformChunkBulk(packetWrapper: PacketWrapper) {
         val columnCount = packetWrapper.read(Type.SHORT).toInt() //short1
-        val size = packetWrapper.read(Type.INT) //size
+        val compressedSize = packetWrapper.read(Type.INT) //size
         val skyLightSent = packetWrapper.read(Type.BOOLEAN) //h
         val chunkX = IntArray(columnCount) //a
         val chunkZ = IntArray(columnCount) //b
         val primaryBitMask = IntArray(columnCount) //c
         val addBitMask = IntArray(columnCount) //d
-        val inflatedBuffers = arrayOfNulls<ByteArray>(columnCount.toInt()) //inflatedBuffers
-        var customByteType = CustomByteType(size)
+        val inflatedBuffers = arrayOfNulls<ByteArray>(columnCount) //inflatedBuffers
+        var customByteType = CustomByteType(compressedSize)
         val buildBuffer = packetWrapper.read(customByteType) //buildBuffer
         var data = ByteArray(196864 * columnCount) //abyte
         val inflater = Inflater()
-        inflater.setInput(buildBuffer, 0, size)
+        inflater.setInput(buildBuffer, 0, compressedSize)
         try {
             inflater.inflate(data)
         } catch (ex: DataFormatException) {
@@ -79,51 +79,42 @@ object ChunkPacketTransformer {
         } finally {
             inflater.end()
         }
-        var i = 0
-        for (j in 0 until columnCount) {
-            chunkX[j] = packetWrapper.read(Type.INT)
-            chunkZ[j] = packetWrapper.read(Type.INT)
-            primaryBitMask[j] = packetWrapper.read(Type.SHORT).toInt()
-            addBitMask[j] = packetWrapper.read(Type.SHORT).toInt()
-            var k = 0
-            var l = 0
-            var i1: Int
-            i1 = 0
-            while (i1 < 16) {
-                k += primaryBitMask[j] shr i1 and 1
-                l += addBitMask[j] shr i1 and 1
-                ++i1
+        var cursor = 0
+        for (column in 0 until columnCount) {
+            chunkX[column] = packetWrapper.read(Type.INT)
+            chunkZ[column] = packetWrapper.read(Type.INT)
+            primaryBitMask[column] = packetWrapper.read(Type.SHORT).toInt()
+            addBitMask[column] = packetWrapper.read(Type.SHORT).toInt()
+            var primaryCount = 0
+            var secondaryCount = 0
+            (0 until 16).forEach {
+                primaryCount += primaryBitMask[column] shr it and 1
+                secondaryCount += addBitMask[column] shr it and 1
             }
-            i1 = 8192 * k + 256
-            i1 += 2048 * l
+            var copySize = 8192 * primaryCount + 256
+            copySize += 2048 * secondaryCount
             if (skyLightSent) {
-                i1 += 2048 * k
+                copySize += 2048 * primaryCount
             }
-            inflatedBuffers[j] = ByteArray(i1)
-            System.arraycopy(data, i, inflatedBuffers[j], 0, i1)
-            i += i1
+            inflatedBuffers[column] = ByteArray(copySize)
+            System.arraycopy(data, cursor, inflatedBuffers[column]!!, 0, copySize)
+            cursor += copySize
         }
-        val chunks = arrayOfNulls<Chunk1_8to1_7_6_10>(columnCount.toInt())
-        i = 0
-        while (i < columnCount) {
-            chunks[i] = Chunk1_8to1_7_6_10(inflatedBuffers[i], primaryBitMask[i], addBitMask[i], skyLightSent, true)
-            i++
+        val chunks = arrayOfNulls<Chunk1_8to1_7_6_10>(columnCount)
+        (0 until columnCount).forEach {
+            chunks[it] = Chunk1_8to1_7_6_10(inflatedBuffers[it]!!, primaryBitMask[it], addBitMask[it], skyLightSent, true)
         }
         packetWrapper.write(Type.BOOLEAN, skyLightSent)
         packetWrapper.write(Type.VAR_INT, columnCount)
-        i = 0
-        while (i < columnCount) {
-            packetWrapper.write(Type.INT, chunkX[i])
-            packetWrapper.write(Type.INT, chunkZ[i])
-            packetWrapper.write(Type.UNSIGNED_SHORT, primaryBitMask[i])
-            ++i
+        (0 until columnCount).forEach {
+            packetWrapper.write(Type.INT, chunkX[it])
+            packetWrapper.write(Type.INT, chunkZ[it])
+            packetWrapper.write(Type.UNSIGNED_SHORT, primaryBitMask[it])
         }
-        i = 0
-        while (i < columnCount) {
-            data = chunks[i]!!.get1_8Data()
+        (0 until columnCount).forEach {
+            data = chunks[it]!!.get1_8Data()
             customByteType = CustomByteType(data.size)
             packetWrapper.write(customByteType, data)
-            ++i
         }
     }
 

@@ -13,4 +13,5 @@ class StacklessException : RuntimeException {
     )
 
     override fun fillInStackTrace(): Throwable = this
+    override fun toString(): String = "StacklessException: $message"
 }

@@ -31,7 +31,7 @@ class EntityTracker(user: UserConnection) : StoredObject(user) {
         if (!metadataBuffer.containsKey(entityId)) return
         val wrapper = PacketWrapper(0x1C, null, this.user)
         wrapper.write(Type.VAR_INT, entityId)
-        wrapper.write<List<Metadata>>(Types1_8.METADATA_LIST, metadataBuffer[entityId])
+        wrapper.write(Types1_8.METADATA_LIST, metadataBuffer[entityId])
         MetadataRewriter.transform(clientEntityTypes[entityId], metadataBuffer[entityId]!!)
         if (metadataBuffer[entityId]!!.isNotEmpty()) {
             try {

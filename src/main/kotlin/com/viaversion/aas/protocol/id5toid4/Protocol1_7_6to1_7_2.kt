@@ -7,7 +7,6 @@ import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.type.Type
 import us.myles.ViaVersion.packets.State
 
-
 // Based on https://github.com/Gerrygames/ClientViaVersion
 object Protocol1_7_6to1_7_2 : SimpleProtocol() {
     override fun registerPackets() {

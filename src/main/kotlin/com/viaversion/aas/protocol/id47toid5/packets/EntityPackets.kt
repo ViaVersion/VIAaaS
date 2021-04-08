@@ -28,8 +28,8 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     this.registerOutgoing(State.PLAY, 0x0B, 0x0B, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val entityId: Int = packetWrapper.read(Type.VAR_INT) //Entity Id
-                val animation: Short = packetWrapper.read(Type.UNSIGNED_BYTE) //Animation
+                val entityId = packetWrapper.read(Type.VAR_INT) //Entity Id
+                val animation = packetWrapper.read(Type.UNSIGNED_BYTE) //Animation
                 packetWrapper.clearInputBuffer()
                 if (animation.toInt() == 104 || animation.toInt() == 105) {
                     packetWrapper.id = 0x1C //Entity Metadata
@@ -67,12 +67,12 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             map(Type.BYTE)
             map(Type.INT)
             handler { packetWrapper ->
-                val type: Byte = packetWrapper.get(Type.BYTE, 0)
-                var x: Int = packetWrapper.get(Type.INT, 0)
-                var y: Int = packetWrapper.get(Type.INT, 1)
-                var z: Int = packetWrapper.get(Type.INT, 2)
-                var yaw: Byte = packetWrapper.get(Type.BYTE, 2)
-                var data: Int = packetWrapper.get(Type.INT, 3)
+                val type = packetWrapper.get(Type.BYTE, 0)
+                var x = packetWrapper.get(Type.INT, 0)
+                var y = packetWrapper.get(Type.INT, 1)
+                var z = packetWrapper.get(Type.INT, 2)
+                var yaw = packetWrapper.get(Type.BYTE, 2)
+                var data = packetWrapper.get(Type.INT, 3)
                 if (type.toInt() == 71) {
                     when (data) {
                         0 -> {
@@ -392,7 +392,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             map(Type.FLOAT) //Sideways
             map(Type.FLOAT) //Forwards
             handler { packetWrapper ->
-                val flags: Short = packetWrapper.read(Type.UNSIGNED_BYTE)
+                val flags = packetWrapper.read(Type.UNSIGNED_BYTE)
                 packetWrapper.write(Type.BOOLEAN, flags and 1 == 1.toShort()) //Jump
                 packetWrapper.write(Type.BOOLEAN, flags and 2 == 2.toShort()) //Unmount
             }

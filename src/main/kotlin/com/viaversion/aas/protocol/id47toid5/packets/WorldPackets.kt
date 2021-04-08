@@ -6,11 +6,9 @@ import com.viaversion.aas.protocol.id47toid5.chunks.ChunkPacketTransformer
 import com.viaversion.aas.protocol.id47toid5.data.Particle1_8to1_7
 import com.viaversion.aas.protocol.id47toid5.storage.MapStorage
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
-import us.myles.ViaVersion.api.minecraft.Position
 import us.myles.ViaVersion.api.remapper.PacketRemapper
 import us.myles.ViaVersion.api.remapper.TypeRemapper
 import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.api.type.types.CustomByteType
 import us.myles.ViaVersion.packets.State
 import us.myles.ViaVersion.protocols.protocol1_9to1_8.Protocol1_9To1_8
 import us.myles.viaversion.libs.kyori.adventure.text.serializer.gson.GsonComponentSerializer
@@ -37,7 +35,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
         override fun registerMap() {
             map(xyzUBytePos, TypeRemapper(Type.POSITION)) //Position
             handler { packetWrapper ->
-                val blockId: Int = packetWrapper.read(Type.VAR_INT)
+                val blockId = packetWrapper.read(Type.VAR_INT)
                 val meta = packetWrapper.read(Type.UNSIGNED_BYTE).toInt()
                 packetWrapper.write(Type.VAR_INT, blockId.shl(4).or(meta and 15))
             } //Block Data
@@ -89,7 +87,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     this.registerOutgoing(State.PLAY, 0x2A, 0x2A, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val parts: Array<String> = packetWrapper.read(Type.STRING).split("_").toTypedArray()
+                val parts = packetWrapper.read(Type.STRING).split("_").toTypedArray()
                 var particle = Particle1_8to1_7.find(parts[0])
                 if (particle == null) particle = Particle1_8to1_7.CRIT
                 packetWrapper.write(Type.INT, particle.ordinal)
@@ -152,8 +150,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
             map(Type.VAR_INT)
             handler { packetWrapper ->
                 val id = packetWrapper.get(Type.VAR_INT, 0)
-                val length = packetWrapper.read(Type.SHORT).toInt()
-                val data = packetWrapper.read(CustomByteType(length))
+                val data = packetWrapper.read(Type.SHORT_BYTE_ARRAY)
                 val mapStorage = packetWrapper.user().get(MapStorage::class.java)!!
                 var mapData = mapStorage.getMapData(id)
                 if (mapData == null) mapStorage.putMapData(id, MapStorage.MapData().also { mapData = it })
@@ -224,9 +221,9 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
             map(Type.UNSIGNED_BYTE)
             map(Type.ITEM, Types1_7_6_10.COMPRESSED_NBT_ITEM)
             handler { packetWrapper ->
-                val x: Int = packetWrapper.get(Type.INT, 0)
-                val y: Short = packetWrapper.get(Type.UNSIGNED_BYTE, 0)
-                val z: Int = packetWrapper.get(Type.INT, 1)
+                val x = packetWrapper.get(Type.INT, 0)
+                val y = packetWrapper.get(Type.UNSIGNED_BYTE, 0)
+                val z = packetWrapper.get(Type.INT, 1)
                 // https://github.com/ViaVersion/ViaVersion/pull/1379
                 val direction = packetWrapper.get(Type.UNSIGNED_BYTE, 0) //Direction
                 val item = packetWrapper.get(Types1_7_6_10.COMPRESSED_NBT_ITEM, 0)
@@ -241,7 +238,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
                     if (packetWrapper.isReadable(Type.BYTE, 0)) {
                         packetWrapper.passthrough(Type.BYTE)
                     } else {
-                        val cursor: Short = packetWrapper.read(Type.UNSIGNED_BYTE)
+                        val cursor = packetWrapper.read(Type.UNSIGNED_BYTE)
                         packetWrapper.write(Type.BYTE, cursor.toByte())
                     }
                 }

@@ -1,24 +1,22 @@
 package com.viaversion.aas.handler.state
 
+import com.google.gson.Gson
 import com.viaversion.aas.*
 import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
-import com.viaversion.aas.packet.*
+import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.packet.login.*
-import com.google.gson.Gson
 import com.viaversion.aas.util.StacklessException
-import io.ktor.client.request.*
+import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import us.myles.ViaVersion.packets.State
-import java.util.*
 import java.util.concurrent.CompletableFuture
 import javax.crypto.Cipher
-import io.netty.channel.Channel
 
 class LoginState : MinecraftConnectionState {
     val callbackPlayerId = CompletableFuture<String>()
@@ -179,7 +177,7 @@ class LoginState : MinecraftConnectionState {
 
         callbackPlayerId.whenComplete { id, e ->
             if (e != null) {
-                disconnect(handler, "Profile error: $e")
+                handler.data.frontChannel.pipeline().fireExceptionCaught(StacklessException("Profile error: $e", e))
             } else {
                 mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
                 if (frontOnline != null) {

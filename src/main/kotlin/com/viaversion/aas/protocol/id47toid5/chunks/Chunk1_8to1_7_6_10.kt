@@ -6,9 +6,9 @@ import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 
 class Chunk1_8to1_7_6_10(
-    data: ByteArray?,
+    data: ByteArray,
     private val primaryBitMask: Int,
-    addBitMask: Int,
+    additionalBitMask: Int,
     private val skyLight: Boolean,
     private val groundUp: Boolean
 ) {
@@ -22,7 +22,6 @@ class Chunk1_8to1_7_6_10(
     fun get1_8Data(): ByteArray {
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
-            var finalSize = 0
             val filteredChunks = storageSections.filterIndexed { i, value -> filterChunk(value, i) }.filterNotNull()
             filteredChunks.forEach {
                 val blockIds = it.blockLSBArray
@@ -57,12 +56,14 @@ class Chunk1_8to1_7_6_10(
         }
     }
 
+    fun filterBitmask(bitmask: Int, i: Int) = (bitmask and (1 shl i)) != 0
+
     init {
         val input = Unpooled.wrappedBuffer(data)
         for (i in storageSections.indices) {
-            if ((primaryBitMask and (1 shl i)) != 0) {
+            if (filterBitmask(primaryBitMask, i)) {
                 var storageSection = storageSections[i]
-                if (storageSection == null){
+                if (storageSection == null) {
                     storageSection = ExtendedBlockStorage(i shl 4, skyLight)
                     storageSections[i] = storageSection
                 }
@@ -72,29 +73,29 @@ class Chunk1_8to1_7_6_10(
             }
         }
         for (i in storageSections.indices) {
-            if (primaryBitMask.and(1 shl i) != 0 && storageSections[i] != null) {
+            if (filterBitmask(primaryBitMask, i) && storageSections[i] != null) {
                 storageSections[i]!!.metadataArray.handle = input.readByteArray(4096 / 2)
             }
         }
         for (i in storageSections.indices) {
-            if (primaryBitMask.and(1 shl i) != 0 && storageSections[i] != null) {
-                 storageSections[i]!!.blocklightArray.handle = input.readByteArray(4096 / 2)
+            if (filterBitmask(primaryBitMask, i) && storageSections[i] != null) {
+                storageSections[i]!!.blocklightArray.handle = input.readByteArray(4096 / 2)
             }
         }
         if (skyLight) {
             for (i in storageSections.indices) {
-                if (primaryBitMask.and(1 shl i) != 0 && storageSections[i] != null) {
+                if (filterBitmask(primaryBitMask, i) && storageSections[i] != null) {
                     storageSections[i]!!.skylightArray!!.handle = input.readByteArray(4096 / 2)
                 }
             }
         }
         for (i in storageSections.indices) {
-            if (addBitMask.and(1 shl i) != 0) {
+            if (filterBitmask(additionalBitMask, i)) {
                 if (storageSections[i] == null) {
                     input.skipBytes(2048)
                 } else {
                     val msbArray = storageSections[i]!!.blockMSBArray ?: storageSections[i]!!.createBlockMSBArray()
-                    msbArray!!.handle = input.readByteArray(4096 / 2)
+                    msbArray.handle = input.readByteArray(4096 / 2)
                 }
             } else if (groundUp && storageSections[i] != null && storageSections[i]!!.blockMSBArray != null) {
                 storageSections[i]!!.clearMSBArray()

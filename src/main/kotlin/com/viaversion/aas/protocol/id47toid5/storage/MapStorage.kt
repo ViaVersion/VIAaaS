@@ -16,7 +16,7 @@ class MapStorage(user: UserConnection) : StoredObject(user) {
 
     class MapData {
         var scale: Byte = 0
-        var mapIcons = arrayOf<MapIcon>()
+        var mapIcons = emptyArray<MapIcon>()
     }
     class MapIcon(var direction: Byte, var type: Byte, var x: Byte, var z: Byte)
 }

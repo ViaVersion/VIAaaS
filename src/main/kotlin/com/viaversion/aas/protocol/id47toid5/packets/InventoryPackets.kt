@@ -16,22 +16,25 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     //Open Window
     this.registerOutgoing(State.PLAY, 0x2D, 0x2D, object : PacketRemapper() {
         override fun registerMap() {
+            map(Type.UNSIGNED_BYTE)
             handler { packetWrapper ->
-                val windowId = packetWrapper.read(Type.UNSIGNED_BYTE)
-                packetWrapper.write(Type.UNSIGNED_BYTE, windowId)
+                val windowId = packetWrapper.get(Type.UNSIGNED_BYTE, 0)
                 val windowType = packetWrapper.read(Type.UNSIGNED_BYTE)
                 packetWrapper.user().get(Windows::class.java)!!.types[windowId] = windowType
                 packetWrapper.write(Type.STRING, getInventoryString(windowType.toInt())) //Inventory Type
                 val title = packetWrapper.read(Type.STRING) //Title
                 val slots = packetWrapper.read(Type.UNSIGNED_BYTE)
-                val useProvidedWindowTitle: Boolean = packetWrapper.read(Type.BOOLEAN) //Use provided window title
-                packetWrapper.write(Type.STRING, GsonComponentSerializer.gson().serialize(if (useProvidedWindowTitle) {
-                    LegacyComponentSerializer.legacySection().deserialize(title)
-                } else {
-                    Component.translatable(title) // todo
-                })) //Window title
+                val useProvidedWindowTitle = packetWrapper.read(Type.BOOLEAN) //Use provided window title
+                val convertedTitle = GsonComponentSerializer.gson().serialize(
+                    if (useProvidedWindowTitle) {
+                        LegacyComponentSerializer.legacySection().deserialize(title)
+                    } else {
+                        Component.translatable(title) // todo
+                    }
+                )
+                packetWrapper.write(Type.STRING, convertedTitle) //Window title
                 packetWrapper.write(Type.UNSIGNED_BYTE, slots)
-                if (packetWrapper.get(Type.UNSIGNED_BYTE, 0) == 11.toShort()) packetWrapper.passthrough(Type.INT) //Entity Id
+                if (windowType == 11.toShort()) packetWrapper.passthrough(Type.INT) //Entity Id
             }
         }
     })
@@ -40,8 +43,8 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     this.registerOutgoing(State.PLAY, 0x2F, 0x2F, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val windowId: Short = packetWrapper.read(Type.BYTE).toShort() //Window Id
-                val windowType: Short = packetWrapper.user().get(Windows::class.java)!!.get(windowId).toShort()
+                val windowId = packetWrapper.read(Type.BYTE).toShort() //Window Id
+                val windowType = packetWrapper.user().get(Windows::class.java)!!.get(windowId).toShort()
                 packetWrapper.write(Type.BYTE, windowId.toByte())
                 var slot = packetWrapper.read(Type.SHORT).toInt()
                 if (windowType.toInt() == 4 && slot >= 1) slot += 1
@@ -54,9 +57,10 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     //Window Items
     this.registerOutgoing(State.PLAY, 0x30, 0x30, object : PacketRemapper() {
         override fun registerMap() {
+            map(Type.UNSIGNED_BYTE) //Window Id
             handler { packetWrapper ->
-                val windowId: Short = packetWrapper.passthrough(Type.UNSIGNED_BYTE) //Window Id
-                val windowType: Short = packetWrapper.user().get(Windows::class.java)!![windowId]
+                val windowId = packetWrapper.get(Type.UNSIGNED_BYTE, 0)
+                val windowType = packetWrapper.user().get(Windows::class.java)!![windowId]
                 var items = packetWrapper.read(Types1_7_6_10.COMPRESSED_NBT_ITEM_ARRAY)
                 if (windowType.toInt() == 4) {
                     val old = items
@@ -75,10 +79,10 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     this.registerIncoming(State.PLAY, 0x0E, 0x0E, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
-                val windowId: Short = packetWrapper.read(Type.UNSIGNED_BYTE) //Window Id
+                val windowId = packetWrapper.read(Type.UNSIGNED_BYTE) //Window Id
                 packetWrapper.write(Type.BYTE, windowId.toByte())
-                val windowType: Short = packetWrapper.user().get(Windows::class.java)!![windowId]
-                var slot: Int = packetWrapper.read(Type.SHORT).toInt()
+                val windowType = packetWrapper.user().get(Windows::class.java)!![windowId]
+                var slot = packetWrapper.read(Type.SHORT).toInt()
                 if (windowType.toInt() == 4) {
                     if (slot == 1) {
                         packetWrapper.cancel()

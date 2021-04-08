@@ -44,9 +44,9 @@ class ExtendedBlockStorage(val yLocation: Int, hasSkyLight: Boolean) {
         metadataArray = paramNibbleArray
     }
 
-    fun createBlockMSBArray(): NibbleArray? {
+    fun createBlockMSBArray(): NibbleArray {
         blockMSBArray = NibbleArray(blockLSBArray.size)
-        return blockMSBArray
+        return blockMSBArray!!
     }
 
     init {
