@@ -425,9 +425,9 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 packetWrapper.id = -1
                 val newPacketBuf = Unpooled.buffer()
                 packetWrapper.writeToBuffer(newPacketBuf)
-                val newWrapper = PacketWrapper(0x17, null, packetWrapper.user())
+                val newWrapper = PacketWrapper(0x17, newPacketBuf, packetWrapper.user())
                 newWrapper.passthrough(Type.STRING)
-                newWrapper.write(Type.SHORT_BYTE_ARRAY, readRemainingBytes(newPacketBuf))
+                newWrapper.write(Type.SHORT, newPacketBuf.readableBytes().toShort())
                 newWrapper.sendToServer(Protocol1_8To1_7_6::class.java, true, true)
             }
         }
