@@ -13,11 +13,8 @@ import io.ipinfo.api.IPInfo
 import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.time.delay
-import kotlinx.coroutines.withContext
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.time.Duration
@@ -88,7 +85,7 @@ class WebDashboardServer {
                 )
                 it.ws.flush()
             }
-            GlobalScope.run {
+            GlobalScope.launch {
                 delay(Duration.ofSeconds(20))
                 future.completeExceptionally(StacklessException("No response from browser"))
             }
