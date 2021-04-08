@@ -89,7 +89,7 @@ class WebDashboardServer {
             }
             Via.getPlatform().runSync({
                 future.completeExceptionally(StacklessException("No response from browser"))
-            }, 15 * 20)
+            }, 20 * 20)
         }
         return future
     }
