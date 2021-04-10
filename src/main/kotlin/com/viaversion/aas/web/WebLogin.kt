@@ -30,7 +30,7 @@ class WebLogin : WebState {
 
                 val token = webClient.server.generateToken(uuid)
                 webClient.ws.send(JsonObject().also {
-                    it.addProperty("login_result", true)
+                    it.addProperty("action", "login_result")
                     it.addProperty("success", true)
                     it.addProperty("username", username)
                     it.addProperty("uuid", uuid.toString())
