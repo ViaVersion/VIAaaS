@@ -1,10 +1,11 @@
 package com.viaversion.aas
 
-import com.viaversion.aas.config.VIAaaSConfig
 import com.google.common.base.Preconditions
+import com.google.common.net.HostAndPort
 import com.google.common.net.UrlEscapers
 import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
+import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
 import io.ktor.client.request.*
 import io.netty.buffer.ByteBuf
@@ -35,20 +36,20 @@ val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
 
 val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()
 
-fun resolveSrv(address: String, port: Int): Pair<String, Int> {
-    if (port == 25565) {
+fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
+    if (hostAndPort.port == 25565) {
         try {
             // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java
             val attr = InitialDirContext()
-                .getAttributes("dns:///_minecraft._tcp.$address", arrayOf("SRV"))["SRV"]
+                .getAttributes("dns:///_minecraft._tcp.${hostAndPort.host}", arrayOf("SRV"))["SRV"]
             if (attr != null && attr.size() > 0) {
                 val record = (attr.get(0) as String).split(" ")
-                return record[3] to record[2].toInt()
+                return HostAndPort.fromParts(record[3], record[2].toInt())
             }
         } catch (ignored: Exception) { // DuckDNS workaround
         }
     }
-    return address to port
+    return hostAndPort
 }
 
 fun decryptRsa(privateKey: PrivateKey, data: ByteArray) = Cipher.getInstance("RSA").let {

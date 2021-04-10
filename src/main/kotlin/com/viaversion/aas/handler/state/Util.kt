@@ -1,5 +1,6 @@
 package com.viaversion.aas.handler.state
 
+import com.google.common.net.HostAndPort
 import com.viaversion.aas.*
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.BackEndInit
@@ -93,19 +94,19 @@ fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: St
     handler.data.frontChannel.setAutoRead(false)
     GlobalScope.launch(Dispatchers.IO) {
         try {
-            val srvResolved = resolveSrv(address, port)
+            val srvResolved = resolveSrv(HostAndPort.fromParts(address, port))
 
-            val removedEndDot = srvResolved.first.replace(Regex("\\.$"), "")
+            val removedEndDot = srvResolved.host.replace(Regex("\\.$"), "")
 
             val iterator =
                 if (!removedEndDot.endsWith(".onion")) {
-                    InetAddress.getAllByName(srvResolved.first)
+                    InetAddress.getAllByName(srvResolved.host)
                         .groupBy { it is Inet4Address }
                         .toSortedMap() // I'm sorry, IPv4, but my true love is IPv6... We can still be friends though...
-                        .map { InetSocketAddress(it.value.random(), srvResolved.second) }
+                        .map { InetSocketAddress(it.value.random(), srvResolved.port) }
                         .iterator()
                 } else {
-                    listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.second)).iterator()
+                    listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.port)).iterator()
                 }
 
             if (!iterator.hasNext()) throw StacklessException("Hostname has no IP address")

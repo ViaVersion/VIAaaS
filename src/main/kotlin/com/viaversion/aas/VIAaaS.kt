@@ -1,5 +1,7 @@
 package com.viaversion.aas
 
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.viaversion.aas.command.VIAaaSConsole
 import com.viaversion.aas.command.ViaAspirinCommand
 import com.viaversion.aas.config.VIAaaSConfig
@@ -9,7 +11,6 @@ import com.viaversion.aas.platform.*
 import com.viaversion.aas.protocol.registerAspirinProtocols
 import com.viaversion.aas.web.ViaWebApp
 import com.viaversion.aas.web.WebDashboardServer
-import com.google.gson.JsonParser
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
 import io.ktor.client.*
@@ -43,12 +44,14 @@ import us.myles.ViaVersion.api.protocol.ProtocolVersion
 import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator
+import java.security.SecureRandom
+import java.util.*
 import java.util.concurrent.CompletableFuture
 
 val viaaasVer = JsonParser.parseString(
     AspirinPlatform::class.java.classLoader.getResourceAsStream("viaaas_info.json")!!.reader(Charsets.UTF_8).readText()
 ).asJsonObject.get("version").asString
-val viaWebServer = WebDashboardServer()
+var viaWebServer = WebDashboardServer()
 var serverFinishing = CompletableFuture<Unit>()
 var finishedFuture = CompletableFuture<Unit>()
 val httpClient = HttpClient {

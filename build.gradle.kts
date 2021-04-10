@@ -78,6 +78,7 @@ dependencies {
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     implementation("io.ipinfo:ipinfo-api:1.1")
+    implementation("com.auth0:java-jwt:3.15.0")
 }
 
 val run: JavaExec by tasks

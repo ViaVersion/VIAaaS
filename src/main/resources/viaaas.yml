@@ -13,7 +13,7 @@ bind-address: localhost
 # Use Netty native transport for Minecraft connections when available.
 native-transport-mc: true
 # Address of SOCKS5 proxy used for connecting to backend servers. Empty to disable.
-backend-socks5-proxy-address: ""
+backend-socks5-proxy-address: ''
 # Port of SOCKS5 proxy used for connecting to backend servers.
 backend-socks5-proxy-port: 9050
 #
@@ -36,7 +36,7 @@ use-strong-random: false
 require-host-name: true
 # Host names of this instance, that will be used in the virtual host as a suffix.
 # Use commas for separating multiple hostnames.
-host-name: viaaas.localhost,via.localhost,via-127-0-0-1.nip.io
+host-name: [ viaaas.localhost, via.localhost, via-127-0-0-1.nip.io ]
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
 # Default port to be used when connecting to the backend server.
@@ -49,9 +49,9 @@ default-backend-port: 25565
 # Blocks backend connection to local addresses (localhost, 0.0.0.0, ::1, 127.(...), 10.(...), etc).
 block-local-address: true
 # If some server is in this list, it will be blocked. This has priority over allowed-back-addresses.
-blocked-back-addresses: ["*.hypixel.net"]
+blocked-back-addresses: [ "*.hypixel.net" ]
 # Only allows the backend address if it matches an address in this list.
-allowed-back-addresses: ["*"]
+allowed-back-addresses: [ "*" ]
 #
 ######
 # Info
@@ -70,3 +70,9 @@ rate-limit-ws: 1.5
 rate-limit-connection-mc: 10.0
 # Limits how many usernames a websocket connection can listen to.
 listening-ws-limit: 10
+#
+#####
+# SECRETS - DO NOT SHARE
+#####
+# Key used to generate Minecraft tokens for listening logins
+jwt-secret: ''
