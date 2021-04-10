@@ -127,7 +127,7 @@ class WebDashboardServer {
 
     suspend fun onMessage(ws: WebSocketServerSession, msg: String) {
         val client = clients[ws]!!
-        while (client.rateLimiter.tryAcquire()) {
+        while (!client.rateLimiter.tryAcquire()) {
             delay(10)
         }
         client.state.onMessage(client, msg)
