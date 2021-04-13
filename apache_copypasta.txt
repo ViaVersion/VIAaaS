@@ -1,6 +1,11 @@
+# command to installing apache + certbot
 sudo apt install apache2 python3-certbot-apache
+# generate the let's encrypt certificate with certbot
+
+# enable some needed modules
 sudo a2enmod rewrite ssl proxy_http proxy_connect proxy_wstunnel
 
+# this is a example configuration for using in VirtualHost of Apache config
 # https://stackoverflow.com/questions/19294816/is-it-possible-to-ignore-an-apache-proxyd-certificate
 # https://stackoverflow.com/questions/27526281/websockets-and-apache-proxy-how-to-configure-mod-proxy-wstunnel
 SSLProxyEngine on
