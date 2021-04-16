@@ -45,10 +45,10 @@ repositories {
 }
 
 dependencies {
-    implementation("us.myles:viaversion:3.3.0-21w14a") { isTransitive = false }
-    implementation("nl.matsv:viabackwards:3.3.0-21w14a") { isTransitive = false }
+    implementation("us.myles:viaversion:3.3.0-21w15a") { isTransitive = false }
+    implementation("nl.matsv:viabackwards:3.3.0-21w15a") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
-    implementation("io.netty:netty-all:4.1.61.Final")
+    implementation("io.netty:netty-all:4.1.63.Final")
     implementation("org.yaml:snakeyaml:1.28")
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
