@@ -72,6 +72,7 @@ fun mcCfb8(key: ByteArray, mode: Int): Cipher {
 }
 
 // https://github.com/VelocityPowered/Velocity/blob/6467335f74a7d1617512a55cc9acef5e109b51ac/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
+@OptIn(ExperimentalUnsignedTypes::class)
 fun parseUndashedId(string: String): UUID {
     Preconditions.checkArgument(string.length == 32, "Length is incorrect")
     return UUID(

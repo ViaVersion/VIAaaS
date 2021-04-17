@@ -42,7 +42,7 @@ class HandshakeState : MinecraftConnectionState {
             throw StacklessException("Rate-limited")
         }
         val virtualPort = packet.port
-        val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "") // todo
+        val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "").ifEmpty { null } // todo
         val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
 
         val parsed = VIAaaSConfig.hostName.map {

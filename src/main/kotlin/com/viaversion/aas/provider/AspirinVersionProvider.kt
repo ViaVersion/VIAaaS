@@ -8,6 +8,6 @@ object AspirinVersionProvider : BaseVersionProvider() {
     override fun getClosestServerProtocol(connection: UserConnection): Int {
         val ver = connection.channel!!.pipeline().get(MinecraftHandler::class.java).data.viaBackServerVer
         if (ver != null) return ver
-        return super.getServerProtocol(connection)
+        return super.getClosestServerProtocol(connection)
     }
 }
