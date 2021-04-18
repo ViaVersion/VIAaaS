@@ -25,16 +25,13 @@ class ProtocolDetectorHandler(val connectionData: ConnectionData) : ChannelDuple
         if (address is InetSocketAddress) {
             val timeoutRun = ctx.executor().schedule({
                 mcLogger.warn("Timeout protocol A.D. $address")
-                hold = false
-                drainQueue(ctx)
                 ctx.pipeline().remove(this)
             }, 10, TimeUnit.SECONDS)
-            ProtocolDetector.detectVersion(address)
-                .whenComplete { protocol, _ ->
+            ProtocolDetector.detectVersion(address).whenComplete { protocol, _ ->
                     if (protocol != null && protocol.version != -1) {
                         connectionData.viaBackServerVer = protocol.version
                     } else {
-                        connectionData.viaBackServerVer = 47 // fallback
+                        connectionData.viaBackServerVer = -1 // fallback
                     }
 
                     ctx.pipeline().remove(this)

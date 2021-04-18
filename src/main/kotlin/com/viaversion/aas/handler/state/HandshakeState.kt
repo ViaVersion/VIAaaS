@@ -8,6 +8,7 @@ import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.packet.handshake.Handshake
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
+import com.google.common.net.HostAndPort
 import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.util.StacklessException
 import io.netty.channel.ChannelHandlerContext
@@ -64,7 +65,7 @@ class HandshakeState : MinecraftConnectionState {
         (handler.data.state as? LoginState)?.also {
             it.frontOnline = frontOnline
             it.backName = parsed.username
-            it.backAddress = packet.address to packet.port
+            it.backAddress = HostAndPort.fromParts(packet.address, packet.port)
         }
 
         val playerAddr = handler.data.frontHandler.endRemoteAddress

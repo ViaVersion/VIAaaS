@@ -10,6 +10,7 @@ import com.viaversion.aas.webLogger
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
+import kotlinx.coroutines.future.await
 import java.net.URLEncoder
 import java.util.*
 
@@ -24,7 +25,6 @@ class WebLogin : WebState {
 
         when (obj.getAsJsonPrimitive("action").asString) {
             "offline_login" -> {
-                // todo add some spam check
                 val username = obj.get("username").asString.trim()
                 val uuid = generateOfflinePlayerUuid(username)
 
@@ -51,7 +51,8 @@ class WebLogin : WebState {
                 if (check.getAsJsonPrimitive("valid").asBoolean) {
                     val mcIdUser = check.get("username").asString
                     val uuid = check.get("uuid")?.asString?.let { parseUndashedId(it.replace("-", "")) }
-                        ?: webClient.server.usernameIdCache.get(mcIdUser)
+                        ?: webClient.server.usernameIdCache.get(mcIdUser).await()
+                        ?: throw StacklessException("Failed to get UUID from minecraft.id")
 
                     val token = webClient.server.generateToken(uuid)
                     webClient.ws.send(JsonObject().also {
@@ -90,7 +91,13 @@ class WebLogin : WebState {
             }
             "unlisten_login_requests" -> {
                 val uuid = UUID.fromString(obj.getAsJsonPrimitive("uuid").asString)
-                webClient.unlistenId(uuid)
+                webLogger.info("Unlisten: ${webClient.id}: $uuid")
+                val response = JsonObject().also {
+                    it.addProperty("action", "unlisten_login_requests_result")
+                    it.addProperty("uuid", uuid.toString())
+                    it.addProperty("success", webClient.unlistenId(uuid))
+                }
+                webClient.ws.send(response.toString())
             }
             "session_hash_response" -> {
                 val hash = obj.get("session_hash").asString

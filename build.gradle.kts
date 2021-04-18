@@ -11,7 +11,8 @@ plugins {
 }
 
 application {
-    mainClassName = "com.viaversion.aas.VIAaaSKt"
+    mainClass.set("com.viaversion.aas.VIAaaSKt")
+    mainClassName = mainClass.get()
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 

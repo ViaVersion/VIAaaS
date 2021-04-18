@@ -66,7 +66,7 @@ Example address: ```server.example.com._p25565._v1_12_2._of._uBACKUSERNAME.viaaa
 Address parts:
 - ```server.example.com```: backend server address
 - ```_p```: backend port
-- ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name with underline instead of dots). ```AUTO``` is default and 1.8 is fallback if it fails.
+- ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name with underline instead of dots). ```AUTO``` is default and ``-1`` is fallback if it fails.
 - ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be based on backend online mode.
 - ```_u```: username to use in backend connection
 - ```viaaas.example.com```: hostname suffix (defined in config)

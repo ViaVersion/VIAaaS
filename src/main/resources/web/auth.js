@@ -8,8 +8,12 @@ let urlParams = new URLSearchParams();
 window.location.hash.substr(1).split("?").map(it => new URLSearchParams(it).forEach((a, b) => urlParams.append(b, a)));
 var mcIdUsername = urlParams.get("username");
 var mcauth_code = urlParams.get("mcauth_code");
-if (urlParams.get("mcauth_success") == "false") {
+var mcauth_success = urlParams.get("mcauth_success");
+if (mcauth_success == "false") {
     addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg"));
+}
+if (mcauth_code != null) {
+    history.replaceState(null, null, "#");
 }
 
 // WS url
@@ -271,9 +275,25 @@ function addAction(text, onClick) {
     actions.appendChild(p);
 }
 function addListeningList(user) {
-    let msg = document.createElement("p");
-    msg.innerText = "Listening to login: " + user;
-    listening.appendChild(msg);
+    let p = document.createElement("p");
+    let head = document.createElement("img");
+    let n = document.createElement("span");
+    let remove = document.createElement("a");
+    n.innerText = " " + user + " ";
+    remove.innerText = "Unlisten";
+    remove.href = "javascript:";
+    remove.onclick = () => {
+        // todo remove the token
+        listening.removeChild(p);
+        unlisten(user);
+    };
+    head.className = "account_head";
+    head.alt = user + "'s head";
+    head.src = "https://crafthead.net/helm/" + user;
+    p.append(head);
+    p.append(n);
+    p.append(remove);
+    listening.appendChild(p);
 }
 function addToast(title, msg) {
     let toast = document.createElement("div");
@@ -344,6 +364,9 @@ new BroadcastChannel("viaaas-notification").addEventListener("message", handleSW
 // Websocket
 function listen(token) {
     socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
+}
+function unlisten(id) {
+    socket.send(JSON.stringify({"action": "unlisten_login_requests", "uuid": id}));
 }
 function confirmJoin(hash) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));

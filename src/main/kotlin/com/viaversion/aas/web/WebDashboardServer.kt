@@ -18,6 +18,7 @@ import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.time.delay
 import java.net.InetSocketAddress
 import java.net.SocketAddress
@@ -45,7 +46,7 @@ class WebDashboardServer {
     }
 
     fun checkToken(token: String): UUID? {
-        try {
+        return try {
             val verified = JWT.require(jwtAlgorithm)
                 .withSubject("mc_account")
                 .withClaim("can_listen", true)
@@ -53,9 +54,9 @@ class WebDashboardServer {
                 .build()
                 .verify(token)
 
-            return UUID.fromString(verified.getClaim("mc_uuid").asString())
+            UUID.fromString(verified.getClaim("mc_uuid").asString())
         } catch (e: JWTVerificationException) {
-            return null
+            null
         }
     }
 
@@ -68,13 +69,11 @@ class WebDashboardServer {
     )
     val usernameIdCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
-        .build<String, UUID>(CacheLoader.from { name ->
-            runBlocking {
-                withContext(Dispatchers.IO) {
-                    httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
-                        ?.get("id")?.asString?.let { parseUndashedId(it) }
-                }
-            }
+        .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
+            GlobalScope.async(Dispatchers.IO) {
+                httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
+                    ?.get("id")?.asString?.let { parseUndashedId(it) }
+            }.asCompletableFuture()
         })
 
     val sessionHashCallbacks = CacheBuilder.newBuilder()

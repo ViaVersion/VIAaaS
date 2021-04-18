@@ -1,5 +1,6 @@
 package com.viaversion.aas.handler.state
 
+import com.google.common.net.HostAndPort
 import com.google.gson.Gson
 import com.viaversion.aas.*
 import com.viaversion.aas.codec.CompressionCodec
@@ -13,18 +14,20 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import us.myles.ViaVersion.packets.State
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import javax.crypto.Cipher
 
 class LoginState : MinecraftConnectionState {
-    val callbackPlayerId = CompletableFuture<String>()
+    val callbackPlayerId = CompletableFuture<UUID>()
     lateinit var frontToken: ByteArray
     lateinit var frontServerId: String
     var frontOnline: Boolean? = null
     lateinit var frontName: String
-    lateinit var backAddress: Pair<String, Int>
+    lateinit var backAddress: HostAndPort
     var backName: String? = null
     var started = false
     override val state: State
@@ -64,7 +67,6 @@ class LoginState : MinecraftConnectionState {
 
         if (threshold != -1) {
             pipe.addAfter("frame", "compress", CompressionCodec(threshold))
-            // todo viarewind backend compression
         } else if (pipe.get("compress") != null) {
             pipe.remove("compress")
         }
@@ -91,43 +93,34 @@ class LoginState : MinecraftConnectionState {
         if (frontOnline == null) {
             authenticateOnlineFront(handler.data.frontChannel)
         }
+        val frontHandler = handler.data.frontHandler
+        val backChan = handler.data.backChannel!!
 
-        callbackPlayerId.whenComplete { playerId, e ->
-            if (e != null) return@whenComplete
-            val frontHandler = handler.data.frontHandler
-            val backChan = handler.data.backChannel!!
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val playerId = callbackPlayerId.await()
 
-            GlobalScope.launch(Dispatchers.IO) {
-                try {
-                    val backKey = generate128Bits()
-                    val backHash = generateServerHash(backServerId, backKey, backPublicKey)
+                val backKey = generate128Bits()
+                val backHash = generateServerHash(backServerId, backKey, backPublicKey)
 
-                    viaWebServer.requestSessionJoin(
-                        parseUndashedId(playerId),
-                        backName!!,
-                        backHash,
-                        frontHandler.endRemoteAddress,
-                        handler.data.backHandler!!.endRemoteAddress
-                    ).whenCompleteAsync({ _, throwable ->
-                        if (throwable != null) {
-                            frontHandler.data.frontChannel.pipeline()
-                                .fireExceptionCaught(throwable)
-                            return@whenCompleteAsync
-                        }
+                viaWebServer.requestSessionJoin(
+                    playerId,
+                    backName!!,
+                    backHash,
+                    frontHandler.endRemoteAddress,
+                    handler.data.backHandler!!.endRemoteAddress
+                ).await()
 
-                        val cryptoResponse = CryptoResponse()
-                        cryptoResponse.encryptedKey = encryptRsa(backPublicKey, backKey)
-                        cryptoResponse.encryptedToken = encryptRsa(backPublicKey, backToken)
-                        forward(frontHandler, cryptoResponse, true)
+                val cryptoResponse = CryptoResponse()
+                cryptoResponse.encryptedKey = encryptRsa(backPublicKey, backKey)
+                cryptoResponse.encryptedToken = encryptRsa(backPublicKey, backToken)
+                val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
+                val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
 
-                        val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
-                        val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
-                        backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(backAesDe, backAesEn))
-                    }, backChan.eventLoop())
-                } catch (e: Exception) {
-                    frontHandler.data.frontChannel.pipeline()
-                        .fireExceptionCaught(e)
-                }
+                forward(frontHandler, cryptoResponse, true)
+                backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(backAesDe, backAesEn))
+            } catch (e: Exception) {
+                frontHandler.data.frontChannel.pipeline().fireExceptionCaught(e)
             }
         }
     }
@@ -152,7 +145,7 @@ class LoginState : MinecraftConnectionState {
                 val profile = hasJoined(frontName, frontHash)
                 val id = profile.get("id")!!.asString
 
-                callbackPlayerId.complete(id)
+                callbackPlayerId.complete(parseUndashedId(id))
             } catch (e: Exception) {
                 callbackPlayerId.completeExceptionally(e)
             }
@@ -169,7 +162,7 @@ class LoginState : MinecraftConnectionState {
         backName = backName ?: frontName
 
         val connect = {
-            connectBack(handler, backAddress.first, backAddress.second, State.LOGIN) {
+            connectBack(handler, backAddress.host, backAddress.port, State.LOGIN) {
                 loginStart.username = backName!!
                 send(handler.data.backChannel!!, loginStart, true)
             }
@@ -187,7 +180,7 @@ class LoginState : MinecraftConnectionState {
         }
 
         when (frontOnline) {
-            false -> callbackPlayerId.complete(generateOfflinePlayerUuid(frontName).toString().replace("-", ""))
+            false -> callbackPlayerId.complete(generateOfflinePlayerUuid(frontName))
             true -> authenticateOnlineFront(handler.data.frontChannel) // forced
             null -> connect() // Connect then authenticate
         }
