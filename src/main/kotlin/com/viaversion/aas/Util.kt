@@ -37,6 +37,7 @@ val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
 val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()
 
 fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
+    if (hostAndPort.host.endsWith(".onion", ignoreCase = true)) return hostAndPort
     if (hostAndPort.port == 25565) {
         try {
             // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java

@@ -98,16 +98,16 @@ fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: St
 
             val removedEndDot = srvResolved.host.replace(Regex("\\.$"), "")
 
-            val iterator =
-                if (!removedEndDot.endsWith(".onion")) {
-                    InetAddress.getAllByName(srvResolved.host)
-                        .groupBy { it is Inet4Address }
-                        .toSortedMap() // I'm sorry, IPv4, but my true love is IPv6... We can still be friends though...
-                        .map { InetSocketAddress(it.value.random(), srvResolved.port) }
+            val iterator = when {
+                removedEndDot.endsWith(".onion", ignoreCase = true) ->
+                    listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.port))
                         .iterator()
-                } else {
-                    listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.port)).iterator()
-                }
+                else -> InetAddress.getAllByName(srvResolved.host)
+                    .groupBy { it is Inet4Address }
+                    .toSortedMap() // I'm sorry, IPv4, but my true love is IPv6... We can still be friends though...
+                    .map { InetSocketAddress(it.value.random(), srvResolved.port) }
+                    .iterator()
+            }
 
             if (!iterator.hasNext()) throw StacklessException("Hostname has no IP address")
             tryBackAddress(handler, iterator, state, success)

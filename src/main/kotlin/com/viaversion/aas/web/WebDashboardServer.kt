@@ -88,12 +88,15 @@ class WebDashboardServer {
         if (!listeners.containsKey(id)) {
             future.completeExceptionally(StacklessException("No browser listening"))
         } else {
-            val info = try {
-                if (address is InetSocketAddress) {
-                    ipInfo.lookupIP(address.address.hostAddress.substringBefore("%"))
-                } else null
-            } catch (ignored: Exception) {
-                null
+            val info = withContext(Dispatchers.IO) {
+                (address as? InetSocketAddress).let {
+                    try {
+                        it?.address?.hostName // resolve it
+                        ipInfo.lookupIP(it?.address?.hostAddress?.substringBefore("%"))
+                    } catch (ignored: Exception) {
+                        null
+                    }
+                }
             }
             val msg =
                 "Client: $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})\nBackend: $backAddress"

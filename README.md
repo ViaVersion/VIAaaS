@@ -108,3 +108,4 @@ How to connect to 1.7.10 and lower servers with a newer client?
 
 Can I use it to connect to .onion Minecraft hidden servers?
 - You can use .onion addresses if the instance is proxying the backend connections to TOR.
+  Note that VIAaaS may log your requests.
