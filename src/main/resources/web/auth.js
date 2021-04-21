@@ -219,7 +219,7 @@ function addMcAccountToList(id, name, msUser = null) {
     };
     head.className = "account_head";
     head.alt = name + "'s head";
-    head.src = "https://crafthead.net/helm/" + id;
+    head.src = (id.length == 36 || id.length == 32) ? "https://crafatar.com/avatars/" + id + "?overlay" : "https://crafthead.net/helm/" + id;
     p.append(head);
     p.append(n);
     p.append(remove);
@@ -289,7 +289,7 @@ function addListeningList(user) {
     };
     head.className = "account_head";
     head.alt = user + "'s head";
-    head.src = "https://crafthead.net/helm/" + user;
+    head.src = "https://crafatar.com/avatars/" + user + "?overlay";
     p.append(head);
     p.append(n);
     p.append(remove);
