@@ -261,6 +261,7 @@ function renderActions() {
         addAction("Listen to offline login in VIAaaS instance", () => {
             let user = prompt("Offline username (case-sensitive):", "");
             if (!user) return;
+            // todo: do { a = JSON.stringify({username: user, date: Date.now(), rand: Math.random()}) } while (!sha512(a).startsWith("00000")); console.log(a);
             socket.send(JSON.stringify({action: "offline_login", username: user}));
         });
     }
