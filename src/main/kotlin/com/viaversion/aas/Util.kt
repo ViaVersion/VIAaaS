@@ -173,3 +173,9 @@ fun generateServerId() = ByteArray(13).let {
 }
 
 fun Int.parseProtocol() = ProtocolVersion.getProtocol(this)
+
+fun sha512Hex(data: ByteArray): String {
+    return MessageDigest.getInstance("SHA-512").digest(data)
+        .asUByteArray()
+        .joinToString("") { it.toString(16).padStart(2, '0') }
+}

@@ -1,9 +1,9 @@
 package com.viaversion.aas.web
 
 import com.viaversion.aas.viaWebServer
-import com.viaversion.aas.webLogger
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
 import io.ktor.routing.*
@@ -17,6 +17,11 @@ class ViaWebApp {
     fun Application.main() {
         install(DefaultHeaders)
         install(ConditionalHeaders)
+        install(CachingHeaders) {
+            options {
+                CachingOptions(CacheControl.MaxAge(600, visibility = CacheControl.Visibility.Public))
+            }
+        }
         install(CallLogging) {
             level = Level.INFO
             this.format {

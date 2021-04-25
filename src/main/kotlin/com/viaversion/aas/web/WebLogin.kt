@@ -2,17 +2,16 @@ package com.viaversion.aas.web
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.viaversion.aas.generateOfflinePlayerUuid
-import com.viaversion.aas.httpClient
-import com.viaversion.aas.parseUndashedId
+import com.viaversion.aas.*
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.aas.webLogger
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import kotlinx.coroutines.future.await
 import java.net.URLEncoder
+import java.time.Duration
 import java.util.*
+import kotlin.math.absoluteValue
 
 class WebLogin : WebState {
     override suspend fun start(webClient: WebClient) {
@@ -25,6 +24,11 @@ class WebLogin : WebState {
 
         when (obj.getAsJsonPrimitive("action").asString) {
             "offline_login" -> {
+                if (!sha512Hex(msg.toByteArray(Charsets.UTF_8)).startsWith("00000")) throw StacklessException("PoW failed")
+                if ((obj.getAsJsonPrimitive("date").asLong - System.currentTimeMillis()).absoluteValue
+                    > Duration.ofMinutes(2).toMillis()) {
+                    throw StacklessException("Invalid PoW date")
+                }
                 val username = obj.get("username").asString.trim()
                 val uuid = generateOfflinePlayerUuid(username)
 
@@ -85,7 +89,7 @@ class WebLogin : WebState {
                     webLogger.info("Listen: ${webClient.id}: $user")
                 } else {
                     response.addProperty("success", false)
-                    webLogger.info("Token fail: ${webClient.id}")
+                    webLogger.info("Listen fail: ${webClient.id}")
                 }
                 webClient.ws.send(response.toString())
             }
