@@ -1,6 +1,6 @@
 package com.viaversion.aas.config
 
-import us.myles.ViaVersion.AbstractViaConfig
+import com.viaversion.viaversion.configuration.AbstractViaConfig
 import java.io.File
 import java.net.URL
 

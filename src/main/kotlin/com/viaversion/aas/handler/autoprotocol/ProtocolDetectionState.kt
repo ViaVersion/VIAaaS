@@ -9,8 +9,8 @@ import com.viaversion.aas.parseProtocol
 import com.google.gson.JsonParser
 import com.viaversion.aas.util.StacklessException
 import io.netty.channel.ChannelHandlerContext
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.protocol.packet.State
 import java.nio.channels.ClosedChannelException
 import java.util.concurrent.CompletableFuture
 

@@ -21,8 +21,8 @@ import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.resolver.NoopAddressResolverGroup
 import io.netty.util.concurrent.Future
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.protocol.packet.State
 import java.net.InetSocketAddress
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException

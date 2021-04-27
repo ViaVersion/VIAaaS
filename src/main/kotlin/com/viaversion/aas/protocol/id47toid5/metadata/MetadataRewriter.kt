@@ -1,10 +1,10 @@
 package com.viaversion.aas.protocol.id47toid5.metadata
 
 import de.gerrygames.viarewind.protocol.protocol1_8to1_7_6_10.metadata.MetaIndex1_8to1_7_6_10
-import us.myles.ViaVersion.api.Via
-import us.myles.ViaVersion.api.entities.Entity1_10Types
-import us.myles.ViaVersion.api.minecraft.metadata.Metadata
-import us.myles.ViaVersion.api.minecraft.metadata.types.MetaType1_8
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
+import com.viaversion.viaversion.api.minecraft.metadata.Metadata
+import com.viaversion.viaversion.api.minecraft.metadata.types.MetaType1_8
 import java.util.*
 
 object MetadataRewriter {

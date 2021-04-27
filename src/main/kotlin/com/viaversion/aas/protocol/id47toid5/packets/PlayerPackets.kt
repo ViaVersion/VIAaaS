@@ -14,19 +14,19 @@ import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.CustomString
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import de.gerrygames.viarewind.utils.ChatUtil
 import io.netty.buffer.Unpooled
-import us.myles.ViaVersion.api.PacketWrapper
-import us.myles.ViaVersion.api.Via
-import us.myles.ViaVersion.api.entities.Entity1_10Types
-import us.myles.ViaVersion.api.minecraft.item.Item
-import us.myles.ViaVersion.api.remapper.PacketRemapper
-import us.myles.ViaVersion.api.remapper.TypeRemapper
-import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.api.type.types.CustomByteType
-import us.myles.ViaVersion.api.type.types.version.Types1_8
-import us.myles.ViaVersion.packets.State
-import us.myles.ViaVersion.util.ChatColorUtil
-import us.myles.viaversion.libs.opennbt.tag.builtin.ListTag
-import us.myles.viaversion.libs.opennbt.tag.builtin.StringTag
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
+import com.viaversion.viaversion.api.minecraft.item.Item
+import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
+import com.viaversion.viaversion.api.protocol.remapper.TypeRemapper
+import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.types.CustomByteType
+import com.viaversion.viaversion.api.type.types.version.Types1_8
+import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.util.ChatColorUtil
+import com.viaversion.viaversion.libs.opennbt.tag.builtin.ListTag
+import com.viaversion.viaversion.libs.opennbt.tag.builtin.StringTag
 import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.experimental.and
@@ -138,14 +138,14 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 val entryByUUID = tablist.getTabListEntry(uuid)
                 if (entryByName == null || entryByUUID == null) {
                     if (entryByName != null || entryByUUID != null) {
-                        val remove = PacketWrapper(0x38, null, packetWrapper.user())
+                        val remove = PacketWrapper.create(0x38, null, packetWrapper.user())
                         remove.write(Type.VAR_INT, 4)
                         remove.write(Type.VAR_INT, 1)
                         remove.write(Type.UUID, entryByName?.uuid ?: entryByUUID!!.uuid)
                         tablist.remove(entryByName ?: entryByUUID!!)
                         remove.send(Protocol1_8To1_7_6::class.java)
                     }
-                    val packetPlayerListItem = PacketWrapper(0x38, null, packetWrapper.user())
+                    val packetPlayerListItem = PacketWrapper.create(0x38, null, packetWrapper.user())
                     val newentry = Tablist.TabListEntry(name, uuid)
                     if (entryByName != null || entryByUUID != null) {
                         newentry.displayName =
@@ -172,7 +172,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     }
                     packetPlayerListItem.send(Protocol1_8To1_7_6::class.java)
                     packetWrapper.cancel()
-                    val delayedPacket = PacketWrapper(0x0C, null, packetWrapper.user())
+                    val delayedPacket = PacketWrapper.create(0x0C, null, packetWrapper.user())
                     delayedPacket.write(Type.VAR_INT, entityId)
                     delayedPacket.write(Type.UUID, uuid)
                     delayedPacket.write(Type.INT, x)
@@ -425,7 +425,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 packetWrapper.id = -1
                 val newPacketBuf = Unpooled.buffer()
                 packetWrapper.writeToBuffer(newPacketBuf)
-                val newWrapper = PacketWrapper(0x17, newPacketBuf, packetWrapper.user())
+                val newWrapper = PacketWrapper.create(0x17, newPacketBuf, packetWrapper.user())
                 newWrapper.passthrough(Type.STRING)
                 newWrapper.write(Type.SHORT, newPacketBuf.readableBytes().toShort())
                 newWrapper.sendToServer(Protocol1_8To1_7_6::class.java, true, true)

@@ -2,7 +2,7 @@ package com.viaversion.aas.packet.login
 
 import com.viaversion.aas.packet.Packet
 import io.netty.buffer.ByteBuf
-import us.myles.ViaVersion.api.type.Type
+import com.viaversion.viaversion.api.type.Type
 import kotlin.properties.Delegates
 
 class SetCompression : Packet {

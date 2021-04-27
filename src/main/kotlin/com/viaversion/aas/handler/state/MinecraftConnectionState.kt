@@ -4,7 +4,7 @@ import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
 import io.netty.channel.ChannelHandlerContext
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.protocol.packet.State
 
 interface MinecraftConnectionState {
     val state: State

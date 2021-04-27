@@ -1,6 +1,6 @@
 package com.viaversion.aas.command
 
-import us.myles.ViaVersion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.command.ViaCommandSender
 
 object ListCommand : Command {
     override val info = "Alias of 'viaaas connections'"

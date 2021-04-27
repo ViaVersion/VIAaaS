@@ -37,10 +37,10 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.Future
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
-import us.myles.ViaVersion.ViaManagerImpl
-import us.myles.ViaVersion.api.Via
-import us.myles.ViaVersion.api.data.MappingDataLoader
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
+import com.viaversion.viaversion.ViaManagerImpl
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.data.MappingDataLoader
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator

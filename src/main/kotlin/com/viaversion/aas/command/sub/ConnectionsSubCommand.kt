@@ -2,9 +2,9 @@ package com.viaversion.aas.command.sub
 
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.parseProtocol
-import us.myles.ViaVersion.api.Via
-import us.myles.ViaVersion.api.command.ViaCommandSender
-import us.myles.ViaVersion.api.command.ViaSubCommand
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.command.ViaSubCommand
 
 object ConnectionsSubCommand : ViaSubCommand() {
     override fun name(): String = "connections"

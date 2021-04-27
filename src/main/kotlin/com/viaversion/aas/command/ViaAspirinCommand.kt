@@ -4,8 +4,8 @@ import com.viaversion.aas.command.sub.AspirinReloadSubCommand
 import com.viaversion.aas.command.sub.ConnectionsSubCommand
 import com.viaversion.aas.command.sub.StopSubCommand
 import com.viaversion.aas.command.sub.VIAaaSSubCommand
-import us.myles.ViaVersion.api.command.ViaCommandSender
-import us.myles.ViaVersion.commands.ViaCommandHandler
+import com.viaversion.viaversion.api.command.ViaCommandSender
+import com.viaversion.viaversion.commands.ViaCommandHandler
 
 object ViaAspirinCommand : ViaCommandHandler(), Command {
     override val info = "ViaVersion command"

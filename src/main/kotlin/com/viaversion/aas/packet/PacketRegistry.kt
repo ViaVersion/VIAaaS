@@ -11,9 +11,9 @@ import com.viaversion.aas.packet.status.StatusResponse
 import com.google.common.collect.Range
 import com.viaversion.aas.util.StacklessException
 import io.netty.buffer.ByteBuf
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.protocol.packet.State
 import java.util.function.Supplier
 
 object PacketRegistry {

@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.MessageToMessageCodec
-import us.myles.ViaVersion.api.type.Type
+import com.viaversion.viaversion.api.type.Type
 import java.util.zip.Deflater
 import java.util.zip.Inflater
 

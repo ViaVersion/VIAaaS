@@ -3,8 +3,8 @@ package com.viaversion.aas.packet.login
 import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.parseUndashedId
 import io.netty.buffer.ByteBuf
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import us.myles.ViaVersion.api.type.Type
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.type.Type
 import java.util.*
 
 class LoginSuccess : Packet {

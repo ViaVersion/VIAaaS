@@ -1,6 +1,6 @@
 package com.viaversion.aas.command
 
-import us.myles.ViaVersion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.command.ViaCommandSender
 
 object ReloadCommand : Command {
     override val info = "Alias for 'viaversion aasreload'"

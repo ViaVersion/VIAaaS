@@ -29,7 +29,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.3.0-SNAPSHOT+" + try {
+version = "0.4.0-SNAPSHOT+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -38,7 +38,7 @@ version = "0.3.0-SNAPSHOT+" + try {
 extra.set("archivesBaseName", "VIAaaS")
 
 repositories {
-    //mavenLocal()
+    mavenLocal()
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://repo.viaversion.com/")
@@ -47,9 +47,9 @@ repositories {
 }
 
 dependencies {
-    implementation("us.myles:viaversion:4.0.0-21w16a") { isTransitive = false }
-    implementation("nl.matsv:viabackwards:4.0.0-21w16a") { isTransitive = false }
-    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.0.0-21w16a") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:4.0.0-21w16a") { isTransitive = false }
+    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:repackage-SNAPSHOT") { isTransitive = false }
     implementation("io.netty:netty-all:4.1.63.Final")
     implementation("org.yaml:snakeyaml:1.28")
     implementation("com.google.guava:guava:30.1.1-jre")
