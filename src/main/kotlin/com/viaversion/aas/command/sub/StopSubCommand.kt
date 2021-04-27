@@ -1,8 +1,8 @@
 package com.viaversion.aas.command.sub
 
 import com.viaversion.aas.serverFinishing
-import us.myles.ViaVersion.api.command.ViaCommandSender
-import us.myles.ViaVersion.api.command.ViaSubCommand
+import com.viaversion.viaversion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.command.ViaSubCommand
 
 object StopSubCommand : ViaSubCommand() {
     override fun name() = "stop"

@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageCodec
-import us.myles.ViaVersion.exception.CancelEncoderException
+import com.viaversion.viaversion.exception.CancelEncoderException
 
 class MinecraftCodec : MessageToMessageCodec<ByteBuf, Packet>() {
     override fun encode(ctx: ChannelHandlerContext, msg: Packet, out: MutableList<Any>) {

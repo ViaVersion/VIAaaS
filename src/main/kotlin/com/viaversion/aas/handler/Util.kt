@@ -5,7 +5,7 @@ import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.send
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.proxy.Socks5ProxyHandler
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import java.net.InetSocketAddress
 
 fun forward(handler: MinecraftHandler, packet: Packet, flush: Boolean = false) {

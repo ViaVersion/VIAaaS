@@ -7,7 +7,7 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.proxy.Socks5ProxyHandler
-import us.myles.ViaVersion.exception.CancelCodecException
+import com.viaversion.viaversion.exception.CancelCodecException
 import java.net.SocketAddress
 import java.nio.channels.ClosedChannelException
 

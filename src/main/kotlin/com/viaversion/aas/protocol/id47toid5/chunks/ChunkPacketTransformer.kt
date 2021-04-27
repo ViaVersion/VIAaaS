@@ -1,10 +1,10 @@
 package com.viaversion.aas.protocol.id47toid5.chunks
 
 import io.netty.buffer.ByteBuf
-import us.myles.ViaVersion.api.PacketWrapper
-import us.myles.ViaVersion.api.minecraft.BlockChangeRecord1_8
-import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.api.type.types.CustomByteType
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
+import com.viaversion.viaversion.api.minecraft.BlockChangeRecord1_8
+import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.types.CustomByteType
 import java.io.IOException
 import java.util.stream.IntStream
 import java.util.zip.DataFormatException

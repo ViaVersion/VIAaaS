@@ -1,6 +1,6 @@
 package com.viaversion.aas.config
 
-import us.myles.ViaVersion.util.Config
+import com.viaversion.viaversion.util.Config
 import java.io.File
 import java.security.SecureRandom
 import java.util.*

@@ -6,12 +6,12 @@ import com.viaversion.aas.protocol.id47toid5.storage.EntityTracker
 import com.viaversion.aas.protocol.id47toid5.type.CustomIntType
 import com.viaversion.aas.protocol.xyzToPosition
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
-import us.myles.ViaVersion.api.entities.Entity1_10Types
-import us.myles.ViaVersion.api.remapper.PacketRemapper
-import us.myles.ViaVersion.api.remapper.TypeRemapper
-import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.api.type.types.version.Types1_8
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
+import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
+import com.viaversion.viaversion.api.protocol.remapper.TypeRemapper
+import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.types.version.Types1_8
+import com.viaversion.viaversion.api.protocol.packet.State
 import kotlin.experimental.and
 
 fun Protocol1_8To1_7_6.registerEntityPackets() {

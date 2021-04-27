@@ -1,11 +1,11 @@
 package com.viaversion.aas.protocol
 
-import us.myles.ViaVersion.api.PacketWrapper
-import us.myles.ViaVersion.api.minecraft.Position
-import us.myles.ViaVersion.api.remapper.ValueReader
-import us.myles.ViaVersion.api.remapper.ValueTransformer
-import us.myles.ViaVersion.api.remapper.ValueWriter
-import us.myles.ViaVersion.api.type.Type
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
+import com.viaversion.viaversion.api.minecraft.Position
+import com.viaversion.viaversion.api.protocol.remapper.ValueReader
+import com.viaversion.viaversion.api.protocol.remapper.ValueTransformer
+import com.viaversion.viaversion.api.protocol.remapper.ValueWriter
+import com.viaversion.viaversion.api.type.Type
 
 val INSERT_DASHES: ValueTransformer<String, String> = object : ValueTransformer<String, String>(Type.STRING) {
     override fun transform(packetWrapper: PacketWrapper, s: String?): String {

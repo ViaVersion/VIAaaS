@@ -1,6 +1,6 @@
 package com.viaversion.aas.command
 
-import us.myles.ViaVersion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.command.ViaCommandSender
 
 object HelpCommand : Command {
     override val info = "Lists the available commands"

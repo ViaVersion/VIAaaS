@@ -1,7 +1,7 @@
 package com.viaversion.aas.protocol.id47toid5.storage
 
-import us.myles.ViaVersion.api.data.StoredObject
-import us.myles.ViaVersion.api.data.UserConnection
+import com.viaversion.viaversion.api.connection.StoredObject
+import com.viaversion.viaversion.api.connection.UserConnection
 import java.util.*
 
 class MapStorage(user: UserConnection) : StoredObject(user) {

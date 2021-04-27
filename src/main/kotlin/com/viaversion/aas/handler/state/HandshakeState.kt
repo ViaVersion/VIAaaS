@@ -12,7 +12,7 @@ import com.google.common.net.HostAndPort
 import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.util.StacklessException
 import io.netty.channel.ChannelHandlerContext
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.protocol.packet.State
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit

@@ -1,11 +1,11 @@
 package com.viaversion.aas.platform
 
 import com.viaversion.aas.provider.AspirinVersionProvider
-import us.myles.ViaVersion.api.Via
-import us.myles.ViaVersion.api.platform.ViaPlatformLoader
-import us.myles.ViaVersion.bungee.providers.BungeeMovementTransmitter
-import us.myles.ViaVersion.protocols.base.VersionProvider
-import us.myles.ViaVersion.protocols.protocol1_9to1_8.providers.MovementTransmitterProvider
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.platform.ViaPlatformLoader
+import com.viaversion.viaversion.api.protocol.version.VersionProvider
+import com.viaversion.viaversion.bungee.providers.BungeeMovementTransmitter
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.MovementTransmitterProvider
 
 object AspirinLoader : ViaPlatformLoader {
     override fun unload() {

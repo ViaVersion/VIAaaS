@@ -1,8 +1,8 @@
 package com.viaversion.aas.command.sub
 
 import com.viaversion.aas.viaaasVer
-import us.myles.ViaVersion.api.command.ViaCommandSender
-import us.myles.ViaVersion.api.command.ViaSubCommand
+import com.viaversion.viaversion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.command.ViaSubCommand
 
 object VIAaaSSubCommand : ViaSubCommand() {
     override fun name(): String = "viaaas"

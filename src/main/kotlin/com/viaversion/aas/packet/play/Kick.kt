@@ -2,7 +2,7 @@ package com.viaversion.aas.packet.play
 
 import com.viaversion.aas.packet.Packet
 import io.netty.buffer.ByteBuf
-import us.myles.ViaVersion.api.type.Type
+import com.viaversion.viaversion.api.type.Type
 
 class Kick : Packet {
     lateinit var msg: String

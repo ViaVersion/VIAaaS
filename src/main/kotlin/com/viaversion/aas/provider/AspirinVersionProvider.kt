@@ -1,8 +1,8 @@
 package com.viaversion.aas.provider
 
 import com.viaversion.aas.handler.MinecraftHandler
-import us.myles.ViaVersion.api.data.UserConnection
-import us.myles.ViaVersion.protocols.base.BaseVersionProvider
+import com.viaversion.viaversion.api.connection.UserConnection
+import com.viaversion.viaversion.protocols.base.BaseVersionProvider
 
 object AspirinVersionProvider : BaseVersionProvider() {
     override fun getClosestServerProtocol(connection: UserConnection): Int {

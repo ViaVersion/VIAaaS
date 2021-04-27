@@ -13,8 +13,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.viaversion.aas.util.StacklessException
 import io.netty.channel.ChannelHandlerContext
-import us.myles.ViaVersion.api.Via
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.protocol.packet.State
 import java.util.*
 
 object StatusState : MinecraftConnectionState {

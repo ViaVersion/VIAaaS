@@ -16,8 +16,8 @@ import com.viaversion.aas.util.StacklessException
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
-import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.protocol.packet.State
 
 object PlayState : MinecraftConnectionState {
     override val state: State

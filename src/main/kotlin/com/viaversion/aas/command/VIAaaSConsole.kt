@@ -7,7 +7,7 @@ import org.jline.reader.Candidate
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.slf4j.LoggerFactory
-import us.myles.ViaVersion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.command.ViaCommandSender
 import java.util.*
 
 object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {

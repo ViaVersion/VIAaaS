@@ -17,7 +17,7 @@ import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import us.myles.ViaVersion.packets.State
+import com.viaversion.viaversion.api.protocol.packet.State
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.InetSocketAddress

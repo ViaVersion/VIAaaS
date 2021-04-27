@@ -13,8 +13,8 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelFutureListener
 import io.netty.handler.codec.DecoderException
 import org.slf4j.LoggerFactory
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import us.myles.ViaVersion.api.type.Type
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.type.Type
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.InetSocketAddress

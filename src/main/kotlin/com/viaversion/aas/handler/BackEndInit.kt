@@ -6,14 +6,14 @@ import com.viaversion.aas.handler.autoprotocol.ProtocolDetectorHandler
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.ReadTimeoutHandler
-import us.myles.ViaVersion.api.data.UserConnection
-import us.myles.ViaVersion.api.protocol.ProtocolPipeline
+import com.viaversion.viaversion.connection.UserConnectionImpl
+import com.viaversion.viaversion.protocol.ProtocolPipelineImpl
 import java.util.concurrent.TimeUnit
 
 class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
-        val user = UserConnection(ch, true)
-        ProtocolPipeline(user)
+        val user = UserConnectionImpl(ch, true)
+        ProtocolPipelineImpl(user)
         ch.pipeline().also { addSocks5(it) }
             // "crypto"
             .addLast("frame", FrameCodec())

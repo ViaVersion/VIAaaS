@@ -1,6 +1,6 @@
 package com.viaversion.aas.protocol.id47toid5.chunks
 
-import us.myles.ViaVersion.api.minecraft.chunks.NibbleArray
+import com.viaversion.viaversion.api.minecraft.chunks.NibbleArray
 
 class ExtendedBlockStorage(val yLocation: Int, hasSkyLight: Boolean) {
     var blockLSBArray: ByteArray = ByteArray(4096)

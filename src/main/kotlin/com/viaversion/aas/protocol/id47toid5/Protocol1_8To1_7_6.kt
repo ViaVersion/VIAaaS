@@ -2,12 +2,12 @@ package com.viaversion.aas.protocol.id47toid5
 
 import com.viaversion.aas.protocol.id47toid5.packets.*
 import com.viaversion.aas.protocol.id47toid5.storage.*
-import us.myles.ViaVersion.api.data.UserConnection
-import us.myles.ViaVersion.api.protocol.SimpleProtocol
+import com.viaversion.viaversion.api.connection.UserConnection
+import com.viaversion.viaversion.api.protocol.AbstractSimpleProtocol
 import java.util.*
 
 // Based on https://github.com/Gerrygames/ClientViaVersion
-object Protocol1_8To1_7_6 : SimpleProtocol() {
+object Protocol1_8To1_7_6 : AbstractSimpleProtocol() {
     private val placeable = ArrayList<Int>()
 
     init {

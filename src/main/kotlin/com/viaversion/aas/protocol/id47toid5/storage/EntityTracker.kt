@@ -2,13 +2,13 @@ package com.viaversion.aas.protocol.id47toid5.storage
 
 import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.metadata.MetadataRewriter
-import us.myles.ViaVersion.api.PacketWrapper
-import us.myles.ViaVersion.api.data.StoredObject
-import us.myles.ViaVersion.api.data.UserConnection
-import us.myles.ViaVersion.api.entities.Entity1_10Types
-import us.myles.ViaVersion.api.minecraft.metadata.Metadata
-import us.myles.ViaVersion.api.type.Type
-import us.myles.ViaVersion.api.type.types.version.Types1_8
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
+import com.viaversion.viaversion.api.connection.StoredObject
+import com.viaversion.viaversion.api.connection.UserConnection
+import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
+import com.viaversion.viaversion.api.minecraft.metadata.Metadata
+import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.types.version.Types1_8
 import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
 
@@ -29,7 +29,7 @@ class EntityTracker(user: UserConnection) : StoredObject(user) {
 
     fun sendMetadataBuffer(entityId: Int) {
         if (!metadataBuffer.containsKey(entityId)) return
-        val wrapper = PacketWrapper(0x1C, null, this.user)
+        val wrapper = PacketWrapper.create(0x1C, null, this.user)
         wrapper.write(Type.VAR_INT, entityId)
         wrapper.write(Types1_8.METADATA_LIST, metadataBuffer[entityId])
         MetadataRewriter.transform(clientEntityTypes[entityId], metadataBuffer[entityId]!!)

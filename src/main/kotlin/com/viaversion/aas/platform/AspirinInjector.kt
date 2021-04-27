@@ -1,10 +1,10 @@
 package com.viaversion.aas.platform
 
-import us.myles.ViaVersion.api.platform.ViaInjector
-import us.myles.ViaVersion.api.protocol.ProtocolVersion
-import us.myles.viaversion.libs.fastutil.ints.IntLinkedOpenHashSet
-import us.myles.viaversion.libs.fastutil.ints.IntSortedSet
-import us.myles.viaversion.libs.gson.JsonObject
+import com.viaversion.viaversion.api.platform.ViaInjector
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.libs.fastutil.ints.IntLinkedOpenHashSet
+import com.viaversion.viaversion.libs.fastutil.ints.IntSortedSet
+import com.viaversion.viaversion.libs.gson.JsonObject
 
 object AspirinInjector : ViaInjector {
     override fun getEncoderName(): String = "via-codec"

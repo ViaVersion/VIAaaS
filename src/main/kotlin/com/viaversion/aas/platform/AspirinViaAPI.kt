@@ -1,10 +1,10 @@
 package com.viaversion.aas.platform
 
+import com.viaversion.viaversion.ViaAPIBase
 import io.netty.buffer.ByteBuf
-import us.myles.ViaVersion.api.ViaAPIBase
-import us.myles.ViaVersion.api.boss.BossBar
-import us.myles.ViaVersion.api.boss.BossColor
-import us.myles.ViaVersion.api.boss.BossStyle
+import com.viaversion.viaversion.api.boss.BossBar
+import com.viaversion.viaversion.api.boss.BossColor
+import com.viaversion.viaversion.api.boss.BossStyle
 import java.util.*
 
 object AspirinViaAPI : ViaAPIBase<UUID>() {
