@@ -16,7 +16,7 @@ import kotlin.experimental.and
 
 fun Protocol1_8To1_7_6.registerEntityPackets() {
     //Entity Equipment
-    this.registerOutgoing(State.PLAY, 0x04, 0x04, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x04, 0x04, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.SHORT) //Slot
@@ -25,7 +25,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Animation
-    this.registerOutgoing(State.PLAY, 0x0B, 0x0B, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x0B, 0x0B, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val entityId = packetWrapper.read(Type.VAR_INT) //Entity Id
@@ -47,7 +47,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Collect Item
-    this.registerOutgoing(State.PLAY, 0x0D, 0x0D, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x0D, 0x0D, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Collected Entity ID
             map(Type.INT, Type.VAR_INT) //Collector Entity ID
@@ -56,7 +56,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
 
 
     //Spawn Object
-    this.registerOutgoing(State.PLAY, 0x0E, 0x0E, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x0E, 0x0E, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT)
             map(Type.BYTE)
@@ -117,7 +117,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Spawn Mob
-    this.registerOutgoing(State.PLAY, 0x0F, 0x0F, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x0F, 0x0F, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT)
             map(Type.UNSIGNED_BYTE)
@@ -152,7 +152,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Spawn Painting
-    this.registerOutgoing(State.PLAY, 0x10, 0x10, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x10, 0x10, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT) //Entity Id
             map(Type.STRING) //Title
@@ -168,7 +168,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Spawn Experience Orb
-    this.registerOutgoing(State.PLAY, 0x11, 0x11, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x11, 0x11, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT)
             map(Type.INT)
@@ -185,7 +185,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Velocity
-    this.registerOutgoing(State.PLAY, 0x12, 0x12, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x12, 0x12, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.SHORT) //velX
@@ -195,7 +195,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Destroy Entities
-    this.registerOutgoing(State.PLAY, 0x13, 0x13, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x13, 0x13, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val amount = packetWrapper.read(Type.BYTE).toInt()
@@ -211,14 +211,14 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity
-    this.registerOutgoing(State.PLAY, 0x14, 0x14, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x14, 0x14, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
         }
     })
 
     //Entity Relative Move
-    this.registerOutgoing(State.PLAY, 0x15, 0x15, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x15, 0x15, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //x
@@ -231,7 +231,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Look
-    this.registerOutgoing(State.PLAY, 0x16, 0x16, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x16, 0x16, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //yaw
@@ -243,7 +243,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Look and Relative Move
-    this.registerOutgoing(State.PLAY, 0x17, 0x17, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x17, 0x17, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //x
@@ -258,7 +258,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Teleport
-    this.registerOutgoing(State.PLAY, 0x18, 0x18, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x18, 0x18, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.INT) //x
@@ -273,7 +273,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Head Look
-    this.registerOutgoing(State.PLAY, 0x19, 0x19, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x19, 0x19, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //Head yaw
@@ -281,7 +281,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity MetadataType
-    this.registerOutgoing(State.PLAY, 0x1C, 0x1C, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x1C, 0x1C, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Types1_7_6_10.METADATA_LIST, Types1_8.METADATA_LIST) //MetadataType
@@ -301,7 +301,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Effect
-    this.registerOutgoing(State.PLAY, 0x1D, 0x1D, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x1D, 0x1D, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //Effect Id
@@ -312,7 +312,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Remove Entity Effect
-    this.registerOutgoing(State.PLAY, 0x1E, 0x1E, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x1E, 0x1E, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //Effect Id
@@ -320,7 +320,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Properties
-    this.registerOutgoing(State.PLAY, 0x20, 0x20, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x20, 0x20, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             handler { packetWrapper ->
@@ -343,7 +343,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
 
 
     //Spawn Global Entity
-    this.registerOutgoing(State.PLAY, 0x2C, 0x2C, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x2C, 0x2C, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT)
             map(Type.BYTE)
@@ -360,7 +360,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Use Entity
-    this.registerIncoming(State.PLAY, 0x02, 0x02, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x02, 0x02, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT, Type.INT)
             handler { packetWrapper ->
@@ -378,7 +378,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Entity Action
-    this.registerIncoming(State.PLAY, 0x0B, 0x0B, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x0B, 0x0B, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT, Type.INT) //Entity Id
             handler { packetWrapper -> packetWrapper.write(Type.BYTE, (packetWrapper.read(Type.VAR_INT) + 1).toByte()) } //Action Id
@@ -387,7 +387,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     })
 
     //Steer Vehicle
-    this.registerIncoming(State.PLAY, 0x0C, 0x0C, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x0C, 0x0C, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.FLOAT) //Sideways
             map(Type.FLOAT) //Forwards

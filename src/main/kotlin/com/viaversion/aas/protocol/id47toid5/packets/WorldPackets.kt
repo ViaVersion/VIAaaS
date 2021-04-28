@@ -17,21 +17,21 @@ import kotlin.experimental.and
 
 fun Protocol1_8To1_7_6.registerWorldPackets() {
     //Chunk Data
-    this.registerOutgoing(State.PLAY, 0x21, 0x21, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x21, 0x21, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper -> ChunkPacketTransformer.transformChunk(packetWrapper) }
         }
     })
 
     //Multi Block Change
-    this.registerOutgoing(State.PLAY, 0x22, 0x22, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x22, 0x22, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper -> ChunkPacketTransformer.transformMultiBlockChange(packetWrapper) }
         }
     })
 
     //Block Change
-    this.registerOutgoing(State.PLAY, 0x23, 0x23, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x23, 0x23, object : PacketRemapper() {
         override fun registerMap() {
             map(xyzUBytePos, TypeRemapper(Type.POSITION)) //Position
             handler { packetWrapper ->
@@ -43,7 +43,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Block Action
-    this.registerOutgoing(State.PLAY, 0x24, 0x24, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x24, 0x24, object : PacketRemapper() {
         override fun registerMap() {
             map(xyzShortPos, TypeRemapper(Type.POSITION)) //Position
             map(Type.UNSIGNED_BYTE)
@@ -53,7 +53,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Block Break Animation
-    this.registerOutgoing(State.PLAY, 0x25, 0x25, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x25, 0x25, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT) //Entity Id
             map(xyzToPosition, TypeRemapper(Type.POSITION)) //Position
@@ -62,14 +62,14 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Map Chunk Bulk
-    this.registerOutgoing(State.PLAY, 0x26, 0x26, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x26, 0x26, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper -> ChunkPacketTransformer.transformChunkBulk(packetWrapper) }
         }
     })
 
     //Effect
-    this.registerOutgoing(State.PLAY, 0x28, 0x28, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x28, 0x28, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT) // id
             map(xyzUBytePos, TypeRemapper(Type.POSITION))
@@ -84,7 +84,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Particle
-    this.registerOutgoing(State.PLAY, 0x2A, 0x2A, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x2A, 0x2A, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val parts = packetWrapper.read(Type.STRING).split("_").toTypedArray()
@@ -121,7 +121,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Update Sign
-    this.registerOutgoing(State.PLAY, 0x33, 0x33, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x33, 0x33, object : PacketRemapper() {
         override fun registerMap() {
             map(xyzShortPos, TypeRemapper(Type.POSITION)) //Position
             handler { packetWrapper ->
@@ -136,7 +136,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Update Block Entity
-    this.registerOutgoing(State.PLAY, 0x35, 0x35, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x35, 0x35, object : PacketRemapper() {
         override fun registerMap() {
             map(xyzShortPos, TypeRemapper(Type.POSITION)) //Position
             map(Type.UNSIGNED_BYTE) //Action
@@ -145,7 +145,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Map
-    this.registerOutgoing(State.PLAY, 0x34, 0x34, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x34, 0x34, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT)
             handler { packetWrapper ->
@@ -198,7 +198,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Open Sign Editor
-    this.registerOutgoing(State.PLAY, 0x36, 0x36, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x36, 0x36, object : PacketRemapper() {
         override fun registerMap() {
             map(xyzToPosition, TypeRemapper(Type.POSITION)) //Position
         }
@@ -206,7 +206,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
 
 
     //Player Digging
-    this.registerIncoming(State.PLAY, 0x07, 0x07, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x07, 0x07, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.UNSIGNED_BYTE, Type.BYTE) //Status
             map(TypeRemapper(Type.POSITION), xyzUBytePosWriter)
@@ -215,7 +215,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Player Block Placement
-    this.registerIncoming(State.PLAY, 0x08, 0x08, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x08, 0x08, object : PacketRemapper() {
         override fun registerMap() {
             map(TypeRemapper(Type.POSITION), xyzUBytePosWriter)
             map(Type.UNSIGNED_BYTE)
@@ -247,7 +247,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
     })
 
     //Update Sign
-    this.registerIncoming(State.PLAY, 0x12, 0x12, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x12, 0x12, object : PacketRemapper() {
         override fun registerMap() {
             map(TypeRemapper(Type.POSITION), xyzShortPosWriter)
             handler { packetWrapper ->

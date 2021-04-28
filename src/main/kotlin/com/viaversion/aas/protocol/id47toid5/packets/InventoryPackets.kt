@@ -14,7 +14,7 @@ import com.viaversion.viaversion.libs.kyori.adventure.text.serializer.legacy.Leg
 fun Protocol1_8To1_7_6.registerInventoryPackets() {
 
     //Open Window
-    this.registerOutgoing(State.PLAY, 0x2D, 0x2D, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x2D, 0x2D, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.UNSIGNED_BYTE)
             handler { packetWrapper ->
@@ -40,7 +40,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     })
 
     //Set Slot
-    this.registerOutgoing(State.PLAY, 0x2F, 0x2F, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x2F, 0x2F, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val windowId = packetWrapper.read(Type.BYTE).toShort() //Window Id
@@ -55,7 +55,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     })
 
     //Window Items
-    this.registerOutgoing(State.PLAY, 0x30, 0x30, object : PacketRemapper() {
+    this.registerClientbound(State.PLAY, 0x30, 0x30, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.UNSIGNED_BYTE) //Window Id
             handler { packetWrapper ->
@@ -76,7 +76,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
 
 
     //Click Window
-    this.registerIncoming(State.PLAY, 0x0E, 0x0E, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x0E, 0x0E, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val windowId = packetWrapper.read(Type.UNSIGNED_BYTE) //Window Id
@@ -100,7 +100,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     })
 
     //Creative Inventory Action
-    this.registerIncoming(State.PLAY, 0x10, 0x10, object : PacketRemapper() {
+    this.registerServerbound(State.PLAY, 0x10, 0x10, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.SHORT) //Slot
             map(Type.ITEM, Types1_7_6_10.COMPRESSED_NBT_ITEM) //Item

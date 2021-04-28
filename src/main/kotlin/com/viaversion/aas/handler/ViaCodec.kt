@@ -10,14 +10,14 @@ import com.viaversion.viaversion.exception.CancelEncoderException
 class ViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         if (!ctx.channel().isActive) return
-        if (!info.checkIncomingPacket()) throw CancelDecoderException.generate(null)
+        if (!info.checkClientboundPacket()) throw CancelDecoderException.generate(null)
         if (!info.shouldTransformPacket()) {
             out.add(bytebuf.retain())
             return
         }
         val transformedBuf: ByteBuf = ctx.alloc().buffer().writeBytes(bytebuf)
         try {
-            info.transformIncoming(transformedBuf, CancelDecoderException::generate)
+            info.transformClientbound(transformedBuf, CancelDecoderException::generate)
             out.add(transformedBuf.retain())
         } finally {
             transformedBuf.release()
@@ -26,14 +26,14 @@ class ViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBu
 
     override fun encode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {
         if (!ctx.channel().isActive) throw CancelEncoderException.CACHED
-        if (!info.checkOutgoingPacket()) throw CancelEncoderException.generate(null)
+        if (!info.checkServerboundPacket()) throw CancelEncoderException.generate(null)
         if (!info.shouldTransformPacket()) {
             out.add(bytebuf.retain())
             return
         }
         val transformedBuf: ByteBuf = ctx.alloc().buffer().writeBytes(bytebuf)
         try {
-            info.transformOutgoing(transformedBuf, CancelEncoderException::generate)
+            info.transformServerbound(transformedBuf, CancelEncoderException::generate)
             out.add(transformedBuf.retain())
         } finally {
             transformedBuf.release()

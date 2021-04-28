@@ -11,14 +11,14 @@ import com.viaversion.viaversion.api.protocol.packet.State
 object Protocol1_7_6to1_7_2 : AbstractSimpleProtocol() {
     override fun registerPackets() {
         //Login Success
-        this.registerOutgoing(State.LOGIN, 0x02, 0x02, object : PacketRemapper() {
+        this.registerClientbound(State.LOGIN, 0x02, 0x02, object : PacketRemapper() {
             override fun registerMap() {
                 map(Type.STRING, INSERT_DASHES)
             }
         })
 
         //Spawn Player
-        this.registerOutgoing(State.PLAY, 0x0C, 0x0C, object : PacketRemapper() {
+        this.registerClientbound(State.PLAY, 0x0C, 0x0C, object : PacketRemapper() {
             override fun registerMap() {
                 map(Type.VAR_INT)
                 map(Type.STRING, INSERT_DASHES)
