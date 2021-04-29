@@ -29,9 +29,10 @@ java -jar VIAaaS-all.jar
 - Default WS URL: ```wss://localhost:25543/ws```
 
 ### How to create a public server
-- You need a domain wildcarding to VIAaaS instance, like ``*.example.com -> 192.168.123.123``. You can use DuckDNS DDNS service.
+- You need a domain wildcarding to VIAaaS instance, like ``*.example.com -> 192.168.123.123``. You can use [DuckDNS](https://duckdns.org/) DDNS service.
+- Configure the hostname in the config
 - Open the Minecraft port (25565)
-- The HTTPS page needs a certificate, you can use Apache Web Server (with Let's Encrypt certificate) as a proxy. See apache_copypasta.txt file.
+- The HTTPS page needs a certificate, you can use [Apache](https://httpd.apache.org/) (with a [Let's Encrypt](https://letsencrypt.org/) certificate) as a proxy. See apache_copypasta.txt file.
 
 ## CORS Proxy
 - For less chance of Mojang seeing the login as suspect, you (the player) should set up a CORS proxy on your machine.
