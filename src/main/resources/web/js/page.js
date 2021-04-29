@@ -140,7 +140,7 @@ function addListeningList(user) {
     };
     head.className = "account_head";
     head.alt = user + "'s head";
-    head.src = "https://crafatar.com/avatars/" + user + "?overlay";
+    head.src = "https://crafthead.net/helm/" + user;
     p.append(head);
     p.append(n);
     p.append(remove);
