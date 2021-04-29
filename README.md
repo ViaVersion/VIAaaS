@@ -25,7 +25,8 @@ How to start VIAaaS server:
 java -jar VIAaaS-all.jar
 ```
 - Requires Java 11
-- Default Minecraft: ```viaaas.localhost``` with port 25565
+- Default Minecraft: ```via.localhost``` with port 25565
+- Default HTTPS: ```https://localhost:25543/```
 - Default WS URL: ```wss://localhost:25543/ws```
 
 ### How to create a public server
@@ -51,35 +52,35 @@ node server.js
 
 ## Usage for players
 Usage for offline mode:
-- Connect to ```mc.example.net.viaaas.localhost```
+- Connect to ```mc.example.net.via.localhost```
 
 Usage for online mode:
 - You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections, or use ```_of```
  (offline mode in frontend. May be useful if you have a client which is incompatible with online mode).
-- Go to [VIAaaS auth webpage](https://localhost:25543/)
+- Go to VIAaaS auth webpage (default is https://localhost:25543/)
 - Configure CORS proxy, see above in "CORS Proxy" section
 - Listen to the username A you'll use to connect to the proxy.
-- Add the account B to VIAaaS page which you'll use in ```_u(account B)``` parameter below.
+- Add the account B to VIAaaS page which you'll use in ```_u``` parameter below.
 - Keep the page open
-- Connect to ```mc.example.com._u(account B).viaaas.localhost``` (```_u``` can be removed if you are using the same username)
+- Connect to ```mc.example.com._u(B).via.localhost``` (```_u``` can be removed if you are using the same username)
 - Approve the login in the webpage
 - If you use the same online mode account, your client may show Bad Login. You can use a mod like
   [Auth Me](https://www.curseforge.com/minecraft/mc-mods/auth-me) or [ReAuth](https://www.curseforge.com/minecraft/mc-mods/reauth).
 
 ### Address options
 Example address:
-- ```server.example.net._p25565._v1_12_2._of._uBACKUSERNAME.viaaas.example.com```
-- ```server.example.net.v_1_8.viaaas.example.com```
+- ```server.example.net._p25565._v1_12_2._of._uBACKUSERNAME.via.example.com```
+- ```server.example.net.v_1_8.via.example.com```
 - It's inspired by [Tor2web](https://www.tor2web.org/) proxies.
 
 Address parts:
+- You can use ``(option)_(value)`` too, like ``p_25565``.
 - ```server.example.net```: backend server address
 - ```_p```: backend port
 - ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name with underline instead of dots). ```AUTO``` is default and ``-1`` is fallback if it fails.
 - ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be based on backend online mode.
 - ```_u```: username to use in backend connection
-- ```viaaas.example.com```: hostname suffix (defined in config)
-- You can use ``(option)_(value)`` too, like ``.p_25565.``.
+- ```via.example.com```: instance address (defined in config)
 
 ## WARNING
 - VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK
@@ -96,6 +97,9 @@ Why a online webpage for online mode?:
 - It's easier to maintain in that way, because providing login via chat requires encoding and decoding more packets which change through versions.
 - It allows your account password and token to be kept with you.
 
+How to use Microsoft Account?:
+- If you are using a public VIAaaS instance, use this page https://viaversion.github.io/VIAaaS/ and configure the WebSocket address.
+
 ### Connection
 How to use IPv6?:
 - When listening to 0.0.0.0, it should listen on IPv6 too.
@@ -110,9 +114,9 @@ How to use with Geyser?
   ```yml
   remote:
     # The IP address of the remote (Java Edition) server
-    address: 2b2t.org._v1_12_2.viaaas.localhost
+    address: 2b2t.org._v1_12_2.via.localhost
   ```
-- If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance, like ```mc.example.com.viaaas.example.net``` as a Java Edition server.
+- If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance, like ```mc.example.com.via.example.net``` as a Java Edition server.
 
 Can I use it to connect to .onion Minecraft hidden servers?
 - You can use .onion addresses if the instance is proxying the backend connections to TOR.
