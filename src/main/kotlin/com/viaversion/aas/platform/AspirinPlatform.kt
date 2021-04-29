@@ -44,10 +44,6 @@ object AspirinPlatform : ViaPlatform<UUID> {
     override fun runRepeatingSync(p0: Runnable, p1: Long): AspirinTask =
         AspirinTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
 
-    override fun cancelTask(p0: PlatformTask<*>?) {
-        (p0 as AspirinTask).obj.cancel(false)
-    }
-
     override fun getDump(): JsonObject = JsonObject()
     override fun kickPlayer(p0: UUID, p1: String): Boolean = false
     override fun getApi(): ViaAPI<UUID> = AspirinViaAPI
