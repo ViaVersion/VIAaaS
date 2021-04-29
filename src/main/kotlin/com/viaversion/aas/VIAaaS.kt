@@ -188,6 +188,10 @@ private fun stopServer() {
         Via.getManager().connectionManager.connections.forEach {
             it.channel?.pipeline()?.get(MinecraftHandler::class.java)?.disconnect("Stopping")
         }
+
+        (Via.getManager() as ViaManagerImpl).destroy()
+    } finally {
+        finishedFuture.complete(Unit)
         ktorServer?.stop(1000, 1000)
         httpClient.close()
         listOf<Future<*>?>(
@@ -196,10 +200,6 @@ private fun stopServer() {
             childLoop.shutdownGracefully()
         )
             .forEach { it?.sync() }
-
-        (Via.getManager() as ViaManagerImpl).destroy()
-    } finally {
-        finishedFuture.complete(Unit)
     }
 }
 
