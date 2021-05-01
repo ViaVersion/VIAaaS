@@ -64,7 +64,6 @@ dependencies {
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.19.0")
     implementation("org.apache.commons:commons-compress:1.20")
-    implementation("org.tukaani:xz:1.9")
 
     val ktorVersion = "1.5.3"
     implementation(kotlin("stdlib-jdk8"))
