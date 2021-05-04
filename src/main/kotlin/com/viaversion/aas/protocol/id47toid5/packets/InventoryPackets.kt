@@ -2,14 +2,14 @@ package com.viaversion.aas.protocol.id47toid5.packets
 
 import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.storage.Windows
-import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import com.viaversion.viaversion.api.minecraft.item.Item
+import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.libs.kyori.adventure.text.Component
 import com.viaversion.viaversion.libs.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import com.viaversion.viaversion.libs.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 
 fun Protocol1_8To1_7_6.registerInventoryPackets() {
 

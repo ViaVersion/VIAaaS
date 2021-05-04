@@ -2,7 +2,6 @@ package com.viaversion.aas.protocol.id47toid5.storage
 
 import com.viaversion.viaversion.api.connection.StoredObject
 import com.viaversion.viaversion.api.connection.UserConnection
-import java.util.*
 
 class MapStorage(user: UserConnection) : StoredObject(user) {
     private val maps: MutableMap<Int, MapData> = HashMap()
@@ -18,5 +17,6 @@ class MapStorage(user: UserConnection) : StoredObject(user) {
         var scale: Byte = 0
         var mapIcons = emptyArray<MapIcon>()
     }
+
     class MapIcon(var direction: Byte, var type: Byte, var x: Byte, var z: Byte)
 }

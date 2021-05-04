@@ -8,6 +8,7 @@ import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.packet.handshake.Handshake
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
@@ -17,7 +18,6 @@ import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import com.viaversion.viaversion.api.protocol.packet.State
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.InetSocketAddress

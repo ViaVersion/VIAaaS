@@ -7,14 +7,14 @@ import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.type.Type
 import io.ktor.client.request.*
 import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFutureListener
 import io.netty.handler.codec.DecoderException
 import org.slf4j.LoggerFactory
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import com.viaversion.viaversion.api.type.Type
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.InetSocketAddress

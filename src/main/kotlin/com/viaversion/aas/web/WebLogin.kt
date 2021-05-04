@@ -26,7 +26,8 @@ class WebLogin : WebState {
             "offline_login" -> {
                 if (!sha512Hex(msg.toByteArray(Charsets.UTF_8)).startsWith("00000")) throw StacklessException("PoW failed")
                 if ((obj.getAsJsonPrimitive("date").asLong - System.currentTimeMillis()).absoluteValue
-                    > Duration.ofMinutes(2).toMillis()) {
+                    > Duration.ofMinutes(2).toMillis()
+                ) {
                     throw StacklessException("Invalid PoW date")
                 }
                 val username = obj.get("username").asString.trim()

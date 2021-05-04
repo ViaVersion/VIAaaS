@@ -3,12 +3,11 @@ package com.viaversion.aas.handler.autoprotocol
 import com.viaversion.aas.handler.ConnectionData
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
+import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
-import io.netty.channel.ChannelDuplexHandler
-import java.lang.Exception
 import java.util.function.Consumer
 
 // https://github.com/ViaVersion/ViaFabric/blob/mc-1.16/src/main/java/com/github/creeper123123321/viafabric/handler/clientside/ProtocolDetectionHandler.java
@@ -28,15 +27,15 @@ class ProtocolDetectorHandler(val connectionData: ConnectionData) : ChannelDuple
                 ctx.pipeline().remove(this)
             }, 10, TimeUnit.SECONDS)
             ProtocolDetector.detectVersion(address).whenComplete { protocol, _ ->
-                    if (protocol != null && protocol.version != -1) {
-                        connectionData.viaBackServerVer = protocol.version
-                    } else {
-                        connectionData.viaBackServerVer = -1 // fallback
-                    }
-
-                    ctx.pipeline().remove(this)
-                    timeoutRun.cancel(false)
+                if (protocol != null && protocol.version != -1) {
+                    connectionData.viaBackServerVer = protocol.version
+                } else {
+                    connectionData.viaBackServerVer = -1 // fallback
                 }
+
+                ctx.pipeline().remove(this)
+                timeoutRun.cancel(false)
+            }
             // Let's cache it before we need it
         }
     }

@@ -1,7 +1,7 @@
 package com.viaversion.aas.protocol.id47toid5.type
 
-import io.netty.buffer.ByteBuf
 import com.viaversion.viaversion.api.type.PartialType
+import io.netty.buffer.ByteBuf
 
 class CustomIntType(amount: Int) : PartialType<IntArray, Int>(amount, IntArray::class.java) {
     override fun read(p0: ByteBuf, p1: Int): IntArray {

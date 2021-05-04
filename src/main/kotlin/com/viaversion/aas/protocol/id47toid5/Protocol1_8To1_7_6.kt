@@ -4,7 +4,6 @@ import com.viaversion.aas.protocol.id47toid5.packets.*
 import com.viaversion.aas.protocol.id47toid5.storage.*
 import com.viaversion.viaversion.api.connection.UserConnection
 import com.viaversion.viaversion.api.protocol.AbstractSimpleProtocol
-import java.util.*
 
 // Based on https://github.com/Gerrygames/ClientViaVersion
 object Protocol1_8To1_7_6 : AbstractSimpleProtocol() {

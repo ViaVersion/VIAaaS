@@ -1,10 +1,10 @@
 package com.viaversion.aas.protocol.id47toid5.chunks
 
-import io.netty.buffer.ByteBuf
-import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.minecraft.BlockChangeRecord1_8
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.CustomByteType
+import io.netty.buffer.ByteBuf
 import java.io.IOException
 import java.util.stream.IntStream
 import java.util.zip.DataFormatException
@@ -102,7 +102,8 @@ object ChunkPacketTransformer {
         }
         val chunks = arrayOfNulls<Chunk1_8to1_7_6_10>(columnCount)
         (0 until columnCount).forEach {
-            chunks[it] = Chunk1_8to1_7_6_10(inflatedBuffers[it]!!, primaryBitMask[it], addBitMask[it], skyLightSent, true)
+            chunks[it] =
+                Chunk1_8to1_7_6_10(inflatedBuffers[it]!!, primaryBitMask[it], addBitMask[it], skyLightSent, true)
         }
         packetWrapper.write(Type.BOOLEAN, skyLightSent)
         packetWrapper.write(Type.VAR_INT, columnCount)
@@ -133,13 +134,13 @@ object ChunkPacketTransformer {
         packetWrapper.write(Type.INT, chunkX)
         packetWrapper.write(Type.INT, chunkZ)
         packetWrapper.write(Type.BLOCK_CHANGE_RECORD_ARRAY, IntStream.range(0, size)
-                .mapToObj {
-                    val encodedPos = (positions[it].toInt())
-                    val x = encodedPos.ushr(12).and(0xF)
-                    val y = encodedPos.and(0xFF)
-                    val z = encodedPos.ushr(8).and(0xF)
-                    BlockChangeRecord1_8(x, y, z, blocks[it].toInt())
-                }
-                .toList().toTypedArray())
+            .mapToObj {
+                val encodedPos = (positions[it].toInt())
+                val x = encodedPos.ushr(12).and(0xF)
+                val y = encodedPos.and(0xFF)
+                val z = encodedPos.ushr(8).and(0xF)
+                BlockChangeRecord1_8(x, y, z, blocks[it].toInt())
+            }
+            .toList().toTypedArray())
     }
 }

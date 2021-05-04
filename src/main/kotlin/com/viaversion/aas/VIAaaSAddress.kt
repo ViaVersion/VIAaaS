@@ -41,20 +41,20 @@ class VIAaaSAddress {
 
     fun parseOption(part: String): Boolean {
         val option = when {
-                part.length < 2 -> null
-                part.startsWith("_") -> part[1]
-                part[1] == '_' -> part[0]
-                else -> null
-            }?.toString()
+            part.length < 2 -> null
+            part.startsWith("_") -> part[1]
+            part[1] == '_' -> part[0]
+            else -> null
+        }?.toString()
         if (option != null) {
             val arg = part.substring(2)
             when (option.toLowerCase(Locale.ROOT)) {
                 "p" -> port = arg.toInt()
                 "o" -> online = when {
-                        arg.startsWith("t", ignoreCase = true) -> true
-                        arg.startsWith("f", ignoreCase = true) -> false
-                        else -> null
-                    }
+                    arg.startsWith("t", ignoreCase = true) -> true
+                    arg.startsWith("f", ignoreCase = true) -> false
+                    else -> null
+                }
                 "v" -> parseProtocol(arg)
                 "u" -> {
                     if (arg.length > 16) throw StacklessException("Invalid username")

@@ -2,9 +2,9 @@ package com.viaversion.aas.packet.login
 
 import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.readByteArray
-import io.netty.buffer.ByteBuf
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
+import io.netty.buffer.ByteBuf
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec

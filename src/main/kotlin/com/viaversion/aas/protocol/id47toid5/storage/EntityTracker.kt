@@ -2,14 +2,13 @@ package com.viaversion.aas.protocol.id47toid5.storage
 
 import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.metadata.MetadataRewriter
-import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.connection.StoredObject
 import com.viaversion.viaversion.api.connection.UserConnection
 import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
 import com.viaversion.viaversion.api.minecraft.metadata.Metadata
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.version.Types1_8
-import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
 
 class EntityTracker(user: UserConnection) : StoredObject(user) {

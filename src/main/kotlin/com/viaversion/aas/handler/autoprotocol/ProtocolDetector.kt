@@ -1,5 +1,7 @@
 package com.viaversion.aas.handler.autoprotocol
 
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
 import com.viaversion.aas.channelSocketFactory
 import com.viaversion.aas.childLoop
 import com.viaversion.aas.codec.FrameCodec
@@ -11,8 +13,8 @@ import com.viaversion.aas.mcLogger
 import com.viaversion.aas.packet.handshake.Handshake
 import com.viaversion.aas.packet.status.StatusRequest
 import com.viaversion.aas.send
-import com.google.common.cache.CacheBuilder
-import com.google.common.cache.CacheLoader
+import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
@@ -21,8 +23,6 @@ import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.resolver.NoopAddressResolverGroup
 import io.netty.util.concurrent.Future
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import com.viaversion.viaversion.api.protocol.packet.State
 import java.net.InetSocketAddress
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException

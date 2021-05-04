@@ -1,5 +1,6 @@
 package com.viaversion.aas.packet
 
+import com.google.common.collect.Range
 import com.viaversion.aas.packet.handshake.Handshake
 import com.viaversion.aas.packet.login.*
 import com.viaversion.aas.packet.play.Kick
@@ -8,91 +9,100 @@ import com.viaversion.aas.packet.status.StatusPing
 import com.viaversion.aas.packet.status.StatusPong
 import com.viaversion.aas.packet.status.StatusRequest
 import com.viaversion.aas.packet.status.StatusResponse
-import com.google.common.collect.Range
 import com.viaversion.aas.util.StacklessException
-import io.netty.buffer.ByteBuf
+import com.viaversion.viaversion.api.protocol.packet.Direction
+import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.ClientboundPackets1_13
+import com.viaversion.viaversion.protocols.protocol1_14to1_13_2.ClientboundPackets1_14
+import com.viaversion.viaversion.protocols.protocol1_15to1_14_4.ClientboundPackets1_15
+import com.viaversion.viaversion.protocols.protocol1_16_2to1_16_1.ClientboundPackets1_16_2
+import com.viaversion.viaversion.protocols.protocol1_16to1_15_2.ClientboundPackets1_16
+import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ClientboundPackets1_17
+import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
+import io.netty.buffer.ByteBuf
 import java.util.function.Supplier
 
 object PacketRegistry {
     val entries = mutableListOf<RegistryEntry>()
 
     init {
-        // Obviosly stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java
-        register(Range.all(), State.HANDSHAKE, 0, true, ::Handshake)
-        register(Range.all(), State.LOGIN, 0, true, ::LoginStart)
-        register(Range.all(), State.LOGIN, 1, true, ::CryptoResponse)
-        register(Range.atLeast(ProtocolVersion.v1_13.version), State.LOGIN, 2, true, ::PluginResponse)
-        register(Range.all(), State.LOGIN, 0, false, ::LoginDisconnect)
-        register(Range.all(), State.LOGIN, 1, false, ::CryptoRequest)
-        register(Range.all(), State.LOGIN, 2, false, ::LoginSuccess)
-        register(Range.all(), State.LOGIN, 3, false, ::SetCompression)
-        register(Range.atLeast(ProtocolVersion.v1_13.version), State.LOGIN, 4, false, ::PluginRequest)
-        register(Range.all(), State.STATUS, 0, true, ::StatusRequest)
-        register(Range.all(), State.STATUS, 1, true, ::StatusPing)
-        register(Range.all(), State.STATUS, 0, false, ::StatusResponse)
-        register(Range.all(), State.STATUS, 1, false, ::StatusPong)
+        // Obviously stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java
+        register(State.HANDSHAKE, Direction.SERVERBOUND, ::Handshake, Range.all(), 0)
+
+        register(State.LOGIN, Direction.SERVERBOUND, ::LoginStart, Range.all(), 0)
+        register(State.LOGIN, Direction.SERVERBOUND, ::CryptoResponse, Range.all(), 1)
+        register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13.version), 2)
+
+        register(State.LOGIN, Direction.CLIENTBOUND, ::LoginDisconnect, Range.all(), 0)
+        register(State.LOGIN, Direction.CLIENTBOUND, ::CryptoRequest, Range.all(), 1)
+        register(State.LOGIN, Direction.CLIENTBOUND, ::LoginSuccess, Range.all(), 2)
+        register(State.LOGIN, Direction.CLIENTBOUND, ::SetCompression, Range.all(), 3)
+        register(State.LOGIN, Direction.CLIENTBOUND, ::PluginRequest, Range.atLeast(ProtocolVersion.v1_13.version), 4)
+
+        register(State.STATUS, Direction.SERVERBOUND, ::StatusRequest, Range.all(), 0)
+        register(State.STATUS, Direction.SERVERBOUND, ::StatusPing, Range.all(), 1)
+        register(State.STATUS, Direction.CLIENTBOUND, ::StatusResponse, Range.all(), 0)
+        register(State.STATUS, Direction.CLIENTBOUND, ::StatusPong, Range.all(), 1)
+
+        // Play
         register(
-            ::Kick, State.PLAY, false, mapOf(
-                Range.closed(ProtocolVersion.v1_7_1.version, ProtocolVersion.v1_8.version) to 0x40,
-                Range.closed(ProtocolVersion.v1_9.version, ProtocolVersion.v1_12_2.version) to 0x1A,
-                Range.closed(ProtocolVersion.v1_13.version, ProtocolVersion.v1_13_2.version) to 0x1B,
-                Range.closed(ProtocolVersion.v1_14.version, ProtocolVersion.v1_14_4.version) to 0x1A,
-                Range.closed(ProtocolVersion.v1_15.version, ProtocolVersion.v1_15_2.version) to 0x1B,
-                Range.closed(ProtocolVersion.v1_16.version, ProtocolVersion.v1_16_1.version) to 0x1A,
-                Range.closed(ProtocolVersion.v1_16_2.version, ProtocolVersion.v1_16_4.version) to 0x19
+            State.PLAY, Direction.CLIENTBOUND, ::Kick, mapOf(
+                ProtocolVersion.v1_7_1..ProtocolVersion.v1_8 to ClientboundPackets1_8.DISCONNECT.id,
+                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.DISCONNECT.id,
+                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.DISCONNECT.id,
+                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.DISCONNECT.id,
+                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.DISCONNECT.id,
+                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.DISCONNECT.id,
+                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.DISCONNECT.id,
+                Range.singleton(ProtocolVersion.v1_17.fullSnapshotVersion) to ClientboundPackets1_17.DISCONNECT.id
             )
         )
+
         register(
-            ::PluginMessage, State.PLAY, true, mapOf(
-                Range.closed(ProtocolVersion.v1_7_1.version, ProtocolVersion.v1_8.version) to 0x17,
-                Range.closed(ProtocolVersion.v1_9.version, ProtocolVersion.v1_11_1.version) to 0x09,
-                Range.singleton(ProtocolVersion.v1_12.version) to 0x0A,
-                Range.closed(ProtocolVersion.v1_12_1.version, ProtocolVersion.v1_12_2.version) to 0x09,
-                Range.closed(ProtocolVersion.v1_13.version, ProtocolVersion.v1_13_2.version) to 0x0A,
-                Range.closed(ProtocolVersion.v1_14.version, ProtocolVersion.v1_16_4.version) to 0x0B
-            )
-        )
-        register(
-            ::PluginMessage, State.PLAY, false,
-            mapOf(
-                Range.closed(ProtocolVersion.v1_7_1.version, ProtocolVersion.v1_8.version) to 0x3F,
-                Range.closed(ProtocolVersion.v1_9.version, ProtocolVersion.v1_12_2.version) to 0x18,
-                Range.closed(ProtocolVersion.v1_13.version, ProtocolVersion.v1_13_2.version) to 0x19,
-                Range.closed(ProtocolVersion.v1_14.version, ProtocolVersion.v1_14_4.version) to 0x18,
-                Range.closed(ProtocolVersion.v1_15.version, ProtocolVersion.v1_15_2.version) to 0x19,
-                Range.closed(ProtocolVersion.v1_16.version, ProtocolVersion.v1_16_1.version) to 0x18,
-                Range.closed(ProtocolVersion.v1_16_2.version, ProtocolVersion.v1_16_4.version) to 0x17
+            State.PLAY, Direction.CLIENTBOUND, ::PluginMessage, mapOf(
+                ProtocolVersion.v1_7_1..ProtocolVersion.v1_8 to ClientboundPackets1_8.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.PLUGIN_MESSAGE.id,
+                Range.singleton(ProtocolVersion.v1_17.fullSnapshotVersion) to ClientboundPackets1_17.PLUGIN_MESSAGE.id
             )
         )
     }
 
+    operator fun ProtocolVersion.rangeTo(o: ProtocolVersion): Range<Int> {
+        return Range.closed(this.originalVersion, o.originalVersion)
+    }
+
     inline fun <reified P : Packet> register(
-        protocol: Range<Int>,
         state: State,
-        id: Int,
-        serverBound: Boolean,
-        constructor: Supplier<P>
-    ) {
-        entries.add(RegistryEntry(protocol, state, id, serverBound, constructor, P::class.java))
-    }
-
-    inline fun <reified P : Packet> register(
+        direction: Direction,
         constructor: Supplier<P>,
-        state: State,
-        serverBound: Boolean,
-        idByProtocol: Map<Range<Int>, Int>
+        idByProtocol: Map<Range<Int>, Int>,
+        klass: Class<P> = P::class.java,
     ) {
-        idByProtocol.forEach { (protocol, id) -> register(protocol, state, id, serverBound, constructor) }
+        entries.add(RegistryEntry(idByProtocol, state, direction, constructor, klass))
+    }
+
+    inline fun <reified P : Packet> register(
+        state: State,
+        direction: Direction,
+        constructor: Supplier<P>,
+        protocol: Range<Int>,
+        id: Int
+    ) {
+        register(constructor = constructor, direction = direction, state = state, idByProtocol = mapOf(protocol to id))
     }
 
     data class RegistryEntry(
-        val versionRange: Range<Int>,
+        val idByVersion: Map<Range<Int>, Int>,
         val state: State,
-        val id: Int,
-        val serverBound: Boolean,
+        val direction: Direction,
         val constructor: Supplier<out Packet>,
         val packetClass: Class<out Packet>
     )
@@ -101,34 +111,35 @@ object PacketRegistry {
         protocolVersion: Int,
         state: State,
         id: Int,
-        serverBound: Boolean
+        direction: Direction
     ): Supplier<out Packet>? {
         return entries.firstOrNull {
-            it.serverBound == serverBound && it.state == state
-                    && it.versionRange.contains(protocolVersion) && it.id == id
+            it.direction == direction
+                    && it.state == state
+                    && it.idByVersion.entries.firstOrNull { it.key.contains(protocolVersion) }?.value == id
         }?.constructor
     }
 
-    fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int, serverBound: Boolean): Int? {
+    fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int, direction: Direction): Int? {
         return entries.firstOrNull {
-            it.versionRange.contains(protocolVersion) && it.packetClass == packetClass && it.serverBound == serverBound
-        }?.id
+            it.packetClass == packetClass && it.direction == direction
+        }?.idByVersion?.entries?.firstOrNull { it.key.contains(protocolVersion) }?.value
     }
 
-    fun decode(byteBuf: ByteBuf, protocolVersion: Int, state: State, serverBound: Boolean): Packet {
+    fun decode(byteBuf: ByteBuf, protocolVersion: Int, state: State, direction: Direction): Packet {
         val packetId = Type.VAR_INT.readPrimitive(byteBuf)
         val packet =
-            getPacketConstructor(protocolVersion, state, packetId, serverBound)?.get() ?: UnknownPacket(packetId)
+            getPacketConstructor(protocolVersion, state, packetId, direction)?.get() ?: UnknownPacket(packetId)
         packet.decode(byteBuf, protocolVersion)
         if (byteBuf.isReadable) throw StacklessException("Remaining bytes!")
         return packet
     }
 
-    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: Int, serverBound: Boolean) {
+    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: Int, direction: Direction) {
         val id = if (packet is UnknownPacket) {
             packet.id
         } else {
-            getPacketId(packet.javaClass, protocolVersion, serverBound)!!
+            getPacketId(packet.javaClass, protocolVersion, direction)!!
         }
         Type.VAR_INT.writePrimitive(byteBuf, id)
         packet.encode(byteBuf, protocolVersion)

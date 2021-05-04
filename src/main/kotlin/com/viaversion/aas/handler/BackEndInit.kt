@@ -3,11 +3,11 @@ package com.viaversion.aas.handler
 import com.viaversion.aas.codec.FrameCodec
 import com.viaversion.aas.codec.MinecraftCodec
 import com.viaversion.aas.handler.autoprotocol.ProtocolDetectorHandler
+import com.viaversion.viaversion.connection.UserConnectionImpl
+import com.viaversion.viaversion.protocol.ProtocolPipelineImpl
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.ReadTimeoutHandler
-import com.viaversion.viaversion.connection.UserConnectionImpl
-import com.viaversion.viaversion.protocol.ProtocolPipelineImpl
 import java.util.concurrent.TimeUnit
 
 class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Channel>() {

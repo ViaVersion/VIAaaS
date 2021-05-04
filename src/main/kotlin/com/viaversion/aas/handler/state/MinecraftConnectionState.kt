@@ -1,10 +1,10 @@
 package com.viaversion.aas.handler.state
 
-import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
-import io.netty.channel.ChannelHandlerContext
+import com.viaversion.aas.packet.Packet
 import com.viaversion.viaversion.api.protocol.packet.State
+import io.netty.channel.ChannelHandlerContext
 
 interface MinecraftConnectionState {
     val state: State

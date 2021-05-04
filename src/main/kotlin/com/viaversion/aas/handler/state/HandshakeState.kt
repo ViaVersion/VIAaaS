@@ -1,18 +1,18 @@
 package com.viaversion.aas.handler.state
 
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import com.google.common.net.HostAndPort
+import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.VIAaaSAddress
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.packet.handshake.Handshake
-import com.google.common.cache.CacheBuilder
-import com.google.common.cache.CacheLoader
-import com.google.common.net.HostAndPort
-import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.util.StacklessException
-import io.netty.channel.ChannelHandlerContext
 import com.viaversion.viaversion.api.protocol.packet.State
+import io.netty.channel.ChannelHandlerContext
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit

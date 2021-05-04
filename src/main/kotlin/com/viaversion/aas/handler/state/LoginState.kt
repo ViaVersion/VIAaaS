@@ -10,13 +10,13 @@ import com.viaversion.aas.handler.forward
 import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.packet.login.*
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
-import com.viaversion.viaversion.api.protocol.packet.State
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import javax.crypto.Cipher

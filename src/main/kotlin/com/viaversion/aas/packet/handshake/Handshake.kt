@@ -1,9 +1,9 @@
 package com.viaversion.aas.packet.handshake
 
 import com.viaversion.aas.packet.Packet
-import io.netty.buffer.ByteBuf
-import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.api.type.Type
+import io.netty.buffer.ByteBuf
 import kotlin.properties.Delegates
 
 class Handshake : Packet {

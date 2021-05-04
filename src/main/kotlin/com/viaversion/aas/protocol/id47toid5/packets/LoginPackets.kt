@@ -1,9 +1,9 @@
 package com.viaversion.aas.protocol.id47toid5.packets
 
 import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
+import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.api.protocol.packet.State
 
 fun Protocol1_8To1_7_6.registerLoginPackets() {
     //Encryption Request

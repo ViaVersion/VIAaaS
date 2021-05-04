@@ -2,140 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>VIAaaS</title>
-    <meta name="application-name" content="VIAaaS">
-    <meta property="og:site_name" content="VIAaaS">
-    <meta name="description" content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy">
-    <meta property="og:title" content="VIAaaS">
-    <meta property="og:description" content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy">
-    <meta property="og:type" content="game">
-    <meta property="og:image" content="https://cdn.discordapp.com/attachments/698483428915675186/821487447664885770/unknown.png">
-    <link rel="icon" href="https://cdn.discordapp.com/attachments/698483428915675186/821487447664885770/unknown.png">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self';
+    <meta content="VIAaaS" name="application-name">
+    <meta content="VIAaaS" property="og:site_name">
+    <meta content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy" name="description">
+    <meta content="VIAaaS" property="og:title">
+    <meta content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy" property="og:description">
+    <meta content="game" property="og:type">
+    <meta content="https://cdn.discordapp.com/attachments/698483428915675186/821487447664885770/unknown.png"
+          property="og:image">
+    <link href="https://cdn.discordapp.com/attachments/698483428915675186/821487447664885770/unknown.png" rel="icon">
+    <meta content="default-src 'self';
  style-src https://cdnjs.cloudflare.com/ 'self';
  img-src data: https://cdn.discordapp.com/ https://crafthead.net/ https://crafatar.com/;
  connect-src 'self' http://localhost:*/ https: wss:;
- script-src 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'self' https://ajax.cloudflare.com/ https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/">
-    <meta name="referrer" content="no-referrer">
-    <meta name="robots" content="noindex">
-    <meta name="theme-color" content="#0468a1">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/js/bootstrap.bundle.min.js" integrity="sha512-q2vREMvON/xrz1KuOj5QKWmdvcHtM4XNbNer+Qbf4TOj+RMDnul0Fg3VmmYprdf3fnL1gZgzKhZszsp62r5Ugg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.js" integrity="sha512-1lagjLfnC1I0iqH9plHYIUq3vDMfjhZsLy9elfK89RBcpcRcx4l+kRJBSnHh2Mh6kLxRHoObD1M5UTUbgFy6nA==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js" integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.min.js" integrity="sha512-/yIGjYJZIXZx10ig0yhbK41OiwcqBUxIj0xQJe+NwkMIdS/u07b6Mwo0nvXB4o7A6WiKnKOf92JwE5Ezo27u9Q==" crossorigin="anonymous"></script>
-    <script src="https://alcdn.msauth.net/browser/2.7.0/js/msal-browser.js" integrity="sha384-5Fqyq1ncNYhL2mXCdWAFXkf2wWtKeA0mXYp++ryAX1lowD0ctAHFdity37L/ULXh" crossorigin="anonymous"></script>
+ script-src 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'self' https://ajax.cloudflare.com/ https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/" http-equiv="Content-Security-Policy">
+    <meta content="no-referrer" name="referrer">
+    <meta content="noindex" name="robots">
+    <meta content="#0468a1" name="theme-color">
+    <link crossorigin="anonymous"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/css/bootstrap.min.css" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+          rel="stylesheet">
+    <script crossorigin="anonymous"
+            integrity="sha512-q2vREMvON/xrz1KuOj5QKWmdvcHtM4XNbNer+Qbf4TOj+RMDnul0Fg3VmmYprdf3fnL1gZgzKhZszsp62r5Ugg=="
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/js/bootstrap.bundle.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-1lagjLfnC1I0iqH9plHYIUq3vDMfjhZsLy9elfK89RBcpcRcx4l+kRJBSnHh2Mh6kLxRHoObD1M5UTUbgFy6nA=="
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
+            src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-/yIGjYJZIXZx10ig0yhbK41OiwcqBUxIj0xQJe+NwkMIdS/u07b6Mwo0nvXB4o7A6WiKnKOf92JwE5Ezo27u9Q=="
+            src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-5Fqyq1ncNYhL2mXCdWAFXkf2wWtKeA0mXYp++ryAX1lowD0ctAHFdity37L/ULXh"
+            src="https://alcdn.msauth.net/browser/2.7.0/js/msal-browser.js"></script>
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="javascript:">VIAaaS</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav nav" role="tablist">
-        <li class="nav-item" role="presentation">
-          <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Status</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="accounts-tab" data-bs-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="settings-tab" data-bs-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            About
-          </a>
-          <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="aboutDropdown">
-            <li><a class="dropdown-item" data-bs-toggle="modal" href="#aboutModal" role="tab">About VIAaaS</a></li>
-          </ul>
-        </li>
-      </ul>
+    <div class="container-fluid">
+        <a class="navbar-brand" href="javascript:">VIAaaS</a>
+        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                data-bs-target="#navbarSupportedContent" data-bs-toggle="collapse" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav nav" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a aria-controls="home" aria-selected="true" class="nav-link active" data-bs-toggle="tab" href="#home"
+                       id="home-tab" role="tab">Status</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a aria-controls="accounts" aria-selected="false" class="nav-link" data-bs-toggle="tab" href="#accounts"
+                       id="accounts-tab" role="tab">Accounts</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a aria-controls="settings" aria-selected="false" class="nav-link" data-bs-toggle="tab" href="#settings"
+                       id="settings-tab" role="tab">Settings</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="aboutDropdown" role="button">
+                        About
+                    </a>
+                    <ul aria-labelledby="aboutDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" data-bs-toggle="modal" href="#aboutModal" role="tab">About
+                            VIAaaS</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 <div class="container tab-content" id="content">
-    <div id="home" class="tab-pane fade show active" aria-labelledby="home-tab">
-	<p>WebSocket connection status: <span id="connection_status" class="text-white bg-dark">?</span></p>
-        <p>CORS Proxy status: <span id="cors_status" class="text-white bg-dark">?</span></p>
-	<hr>
-	<p><span id="actions"></span></p>
-	<p>Listening to logins from: <span id="listening"></span></p>
+    <div aria-labelledby="home-tab" class="tab-pane fade show active" id="home">
+        <p>WebSocket connection status: <span class="text-white bg-dark" id="connection_status">?</span></p>
+        <p>CORS Proxy status: <span class="text-white bg-dark" id="cors_status">?</span></p>
+        <hr>
+        <p><span id="actions"></span></p>
+        <p>Listening to logins from: <span id="listening"></span></p>
     </div>
 
-    <div id="settings" class="tab-pane fade" aria-labelledby="settings-tab">
+    <div aria-labelledby="settings-tab" class="tab-pane fade" id="settings">
         <div class="mb-3">
-          <label for="cors-proxy" class="form-label">CORS Proxy URL Prefix</label>
-          <p>See <a href="https://github.com/ViaVersion/VIAaaS#cors-proxy">README</a>
-            for setting up one. Mojang APIs are called through this proxy, and a remote IP address may look suspicious and block your account.
-            It will receive sensitive data like email, passwords and tokens. HTTPS is required for non-localhost addresses.</p>
-          <input type="url" class="form-control" id="cors-proxy" placeholder="http://localhost:8080/">
+            <label class="form-label" for="cors-proxy">CORS Proxy URL Prefix</label>
+            <p>See <a href="https://github.com/ViaVersion/VIAaaS#cors-proxy">README</a>
+                for setting up one. Mojang APIs are called through this proxy, and a remote IP address may look
+                suspicious and block your account.
+                It will receive sensitive data like email, passwords and tokens. HTTPS is required for non-localhost
+                addresses.</p>
+            <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
         </div>
         <div class="mb-3">
-          <label for="ws-url" class="form-label">WebSocket URL</label>
-          <p>It exchanges sensitive data like minecraft.id tokens, server session hashes and usernames. WSS is required.</p>
-          <input type="url" class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws">
+            <label class="form-label" for="ws-url">WebSocket URL</label>
+            <p>It exchanges sensitive data like minecraft.id tokens, server session hashes and usernames. WSS is
+                required.</p>
+            <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
         </div>
     </div>
 
-    <div id="accounts" class="tab-pane fade" aria-labelledby="accounts-tab">
-	<div>
-          <p>Browser Minecraft accounts:</p>
-          <div id="accounts-list"></div>
-          <hr>
-	</div>
+    <div aria-labelledby="accounts-tab" class="tab-pane fade" id="accounts">
+        <div>
+            <p>Browser Minecraft accounts:</p>
+            <div id="accounts-list"></div>
+            <hr>
+        </div>
         <div id="add-account">
-            <label for="form_add_ms" class="mb-3">Add Microsoft account:</label>
-            <form id="form_add_ms" class="row">
-              <div class="col-auto">
-                <button id="login_submit_ms" type="submit" class="btn btn-primary mb-3">Login with Microsoft</button>
-              </div>
+            <label class="mb-3" for="form_add_ms">Add Microsoft account:</label>
+            <form class="row" id="form_add_ms">
+                <div class="col-auto">
+                    <button class="btn btn-primary mb-3" id="login_submit_ms" type="submit">Login with Microsoft
+                    </button>
+                </div>
             </form>
-            <label for="form_add_mc" class="mb-3">Add Mojang account:</label>
-            <form id="form_add_mc" class="row g-3">
-              <div class="col-auto">
-                <label for="email" class="visually-hidden">Username/Email</label>
-                <input type="text" id="email" name="email" class="form-control" placeholder="mc@example.com">
-              </div>
-              <div class="col-auto">
-                <label for="password" class="visually-hidden">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="password">
-              </div>
-              <div class="col-auto">
-                <button id="login_submit_mc" type="submit" class="btn btn-primary mb-3">Login with Minecraft</button>
-              </div>
+            <label class="mb-3" for="form_add_mc">Add Mojang account:</label>
+            <form class="row g-3" id="form_add_mc">
+                <div class="col-auto">
+                    <label class="visually-hidden" for="email">Username/Email</label>
+                    <input class="form-control" id="email" name="email" placeholder="mc@example.com" type="text">
+                </div>
+                <div class="col-auto">
+                    <label class="visually-hidden" for="password">Password</label>
+                    <input class="form-control" id="password" name="password" placeholder="password" type="password">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary mb-3" id="login_submit_mc" type="submit">Login with Minecraft
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="aboutModalLabel">About</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Copyright © 2020-2021 <a href="https://github.com/creeper123123321">creeper123123321</a></p>
-        <p>Copyright © 2021 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a></p>
-        <p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
-        <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.</p>
-        <p>You should have received a copy of the GNU Affero General Public License along with this program. If not, see
-<a href="https://gnu.org/licenses">http://www.gnu.org/licenses/</a>.</p>
-      </div>
-      <div class="modal-footer">
-        <a role="button" type="button" class="btn btn-secondary" href="https://github.com/ViaVersion/VIAaaS/">Source Code</a>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-      </div>
+<div aria-hidden="true" aria-labelledby="aboutModalLabel" class="modal fade" id="aboutModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aboutModalLabel">About</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <p>Copyright © 2020-2021 <a href="https://github.com/creeper123123321">creeper123123321</a></p>
+                <p>Copyright © 2021 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a>
+                </p>
+                <p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+                    Affero General Public License as published by
+                    the Free Software Foundation, either version 3 of the License, or (at your option) any later
+                    version.</p>
+                <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+                    even the implied warranty of
+                    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+                    more details.</p>
+                <p>You should have received a copy of the GNU Affero General Public License along with this program. If
+                    not, see
+                    <a href="https://gnu.org/licenses">http://www.gnu.org/licenses/</a>.</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-secondary" href="https://github.com/ViaVersion/VIAaaS/" role="button" type="button">Source
+                    Code</a>
+                <button class="btn btn-primary" data-bs-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="toast-container position-absolute top-0 end-0 p-3" id="toasts"></div>

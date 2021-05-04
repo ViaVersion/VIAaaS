@@ -5,14 +5,14 @@ import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.chunks.ChunkPacketTransformer
 import com.viaversion.aas.protocol.id47toid5.data.Particle1_8to1_7
 import com.viaversion.aas.protocol.id47toid5.storage.MapStorage
-import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
+import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.protocol.remapper.TypeRemapper
 import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.api.protocol.packet.State
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.Protocol1_9To1_8
 import com.viaversion.viaversion.libs.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import com.viaversion.viaversion.libs.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.Protocol1_9To1_8
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import kotlin.experimental.and
 
 fun Protocol1_8To1_7_6.registerWorldPackets() {

@@ -1,8 +1,8 @@
 package com.viaversion.aas.web
 
-import com.viaversion.aas.config.VIAaaSConfig
 import com.google.common.collect.Sets
 import com.google.common.util.concurrent.RateLimiter
+import com.viaversion.aas.config.VIAaaSConfig
 import io.ktor.features.*
 import io.ktor.websocket.*
 import java.util.*

@@ -102,9 +102,11 @@ tasks {
 
 tasks.named<ProcessResources>("processResources") {
     filesMatching("viaaas_info.json") {
-        filter<org.apache.tools.ant.filters.ReplaceTokens>("tokens" to mapOf(
+        filter<org.apache.tools.ant.filters.ReplaceTokens>(
+            "tokens" to mapOf(
                 "version" to project.property("version")
-        ))
+            )
+        )
     }
 }
 

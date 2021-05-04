@@ -1,8 +1,8 @@
 package com.viaversion.aas.platform
 
 import com.viaversion.viabackwards.api.ViaBackwardsPlatform
-import org.slf4j.LoggerFactory
 import com.viaversion.viaversion.sponge.util.LoggerWrapper
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.logging.Logger
 

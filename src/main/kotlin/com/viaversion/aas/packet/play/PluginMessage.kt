@@ -3,9 +3,9 @@ package com.viaversion.aas.packet.play
 import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.readByteArray
 import com.viaversion.aas.readRemainingBytes
-import io.netty.buffer.ByteBuf
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
+import io.netty.buffer.ByteBuf
 
 class PluginMessage : Packet {
     lateinit var channel: String

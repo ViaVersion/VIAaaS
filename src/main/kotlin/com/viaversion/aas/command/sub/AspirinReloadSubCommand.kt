@@ -4,7 +4,7 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.viaversion.api.command.ViaCommandSender
 import com.viaversion.viaversion.api.command.ViaSubCommand
 
-object AspirinReloadSubCommand: ViaSubCommand() {
+object AspirinReloadSubCommand : ViaSubCommand() {
     override fun name() = "aasreload"
     override fun description() = "Reloads VIAaaS config"
 

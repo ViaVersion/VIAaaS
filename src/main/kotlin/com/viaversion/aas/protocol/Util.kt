@@ -1,7 +1,7 @@
 package com.viaversion.aas.protocol
 
-import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.minecraft.Position
+import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.protocol.remapper.ValueReader
 import com.viaversion.viaversion.api.protocol.remapper.ValueTransformer
 import com.viaversion.viaversion.api.protocol.remapper.ValueWriter

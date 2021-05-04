@@ -1,5 +1,6 @@
 package com.viaversion.aas.handler.state
 
+import com.google.gson.JsonPrimitive
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
@@ -10,14 +11,13 @@ import com.viaversion.aas.packet.play.Kick
 import com.viaversion.aas.packet.play.PluginMessage
 import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.readRemainingBytes
-import com.viaversion.aas.writeFlushClose
-import com.google.gson.JsonPrimitive
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.aas.writeFlushClose
+import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.api.type.Type
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
-import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.api.protocol.packet.State
 
 object PlayState : MinecraftConnectionState {
     override val state: State
@@ -40,7 +40,8 @@ object PlayState : MinecraftConnectionState {
                 } else {
                     Type.STRING.read(Unpooled.wrappedBuffer(pluginMessage.data))
                 } + " (VIAaaS C: ${handler.data.frontVer!!.parseProtocol()} S: ${
-                        handler.data.viaBackServerVer!!.parseProtocol()})"
+                    handler.data.viaBackServerVer!!.parseProtocol()
+                })"
 
                 if (is1_7(handler)) {
                     pluginMessage.data = brand.toByteArray(Charsets.UTF_8)

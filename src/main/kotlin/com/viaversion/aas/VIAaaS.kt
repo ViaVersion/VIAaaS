@@ -1,6 +1,5 @@
 package com.viaversion.aas
 
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.viaversion.aas.command.VIAaaSConsole
 import com.viaversion.aas.command.ViaAspirinCommand
@@ -11,6 +10,10 @@ import com.viaversion.aas.platform.*
 import com.viaversion.aas.protocol.registerAspirinProtocols
 import com.viaversion.aas.web.ViaWebApp
 import com.viaversion.aas.web.WebDashboardServer
+import com.viaversion.viaversion.ViaManagerImpl
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.data.MappingDataLoader
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
 import io.ktor.client.*
@@ -37,15 +40,9 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.Future
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
-import com.viaversion.viaversion.ViaManagerImpl
-import com.viaversion.viaversion.api.Via
-import com.viaversion.viaversion.api.data.MappingDataLoader
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import java.io.File
 import java.net.InetAddress
 import java.security.KeyPairGenerator
-import java.security.SecureRandom
-import java.util.*
 import java.util.concurrent.CompletableFuture
 
 val viaaasVer = JsonParser.parseString(

@@ -3,9 +3,9 @@ package com.viaversion.aas.protocol.id5toid4
 import com.viaversion.aas.protocol.INSERT_DASHES
 import com.viaversion.viaversion.api.connection.UserConnection
 import com.viaversion.viaversion.api.protocol.AbstractSimpleProtocol
+import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.api.protocol.packet.State
 
 // Based on https://github.com/Gerrygames/ClientViaVersion
 object Protocol1_7_6to1_7_2 : AbstractSimpleProtocol() {

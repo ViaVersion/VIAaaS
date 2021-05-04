@@ -1,11 +1,11 @@
 package com.viaversion.aas.codec
 
 import com.viaversion.aas.badLength
+import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.exception.CancelDecoderException
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ByteToMessageCodec
-import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.exception.CancelDecoderException
 
 class FrameCodec : ByteToMessageCodec<ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {

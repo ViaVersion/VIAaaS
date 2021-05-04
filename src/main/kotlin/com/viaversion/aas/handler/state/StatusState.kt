@@ -1,5 +1,8 @@
 package com.viaversion.aas.handler.state
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
@@ -7,14 +10,11 @@ import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.packet.UnknownPacket
 import com.viaversion.aas.packet.status.StatusResponse
 import com.viaversion.aas.parseProtocol
-import com.viaversion.aas.writeFlushClose
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.viaversion.aas.util.StacklessException
-import io.netty.channel.ChannelHandlerContext
+import com.viaversion.aas.writeFlushClose
 import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.packet.State
+import io.netty.channel.ChannelHandlerContext
 import java.util.*
 
 object StatusState : MinecraftConnectionState {

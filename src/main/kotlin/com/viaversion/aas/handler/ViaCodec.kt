@@ -1,11 +1,11 @@
 package com.viaversion.aas.handler
 
-import io.netty.buffer.ByteBuf
-import io.netty.channel.ChannelHandlerContext
-import io.netty.handler.codec.MessageToMessageCodec
 import com.viaversion.viaversion.api.connection.UserConnection
 import com.viaversion.viaversion.exception.CancelDecoderException
 import com.viaversion.viaversion.exception.CancelEncoderException
+import io.netty.buffer.ByteBuf
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.MessageToMessageCodec
 
 class ViaCodec(val info: UserConnection) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, bytebuf: ByteBuf, out: MutableList<Any>) {

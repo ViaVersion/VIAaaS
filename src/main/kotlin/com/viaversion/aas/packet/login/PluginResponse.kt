@@ -2,8 +2,8 @@ package com.viaversion.aas.packet.login
 
 import com.viaversion.aas.packet.Packet
 import com.viaversion.aas.readRemainingBytes
-import io.netty.buffer.ByteBuf
 import com.viaversion.viaversion.api.type.Type
+import io.netty.buffer.ByteBuf
 import kotlin.properties.Delegates
 
 class PluginResponse : Packet {

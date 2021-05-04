@@ -2,12 +2,12 @@ package com.viaversion.aas.command
 
 import com.viaversion.aas.command.sub.StopSubCommand
 import com.viaversion.aas.serverFinishing
+import com.viaversion.viaversion.api.command.ViaCommandSender
 import net.minecrell.terminalconsole.SimpleTerminalConsole
 import org.jline.reader.Candidate
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.slf4j.LoggerFactory
-import com.viaversion.viaversion.api.command.ViaCommandSender
 import java.util.*
 
 object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {

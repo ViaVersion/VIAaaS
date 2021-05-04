@@ -5,13 +5,13 @@ import com.viaversion.aas.protocol.id47toid5.metadata.MetadataRewriter
 import com.viaversion.aas.protocol.id47toid5.storage.EntityTracker
 import com.viaversion.aas.protocol.id47toid5.type.CustomIntType
 import com.viaversion.aas.protocol.xyzToPosition
-import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
+import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.protocol.remapper.TypeRemapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.version.Types1_8
-import com.viaversion.viaversion.api.protocol.packet.State
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import kotlin.experimental.and
 
 fun Protocol1_8To1_7_6.registerEntityPackets() {
@@ -36,7 +36,10 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
                     packetWrapper.write(Type.VAR_INT, entityId) //Entity Id
                     packetWrapper.write(Type.UNSIGNED_BYTE, 0.toShort()) //Index
                     packetWrapper.write(Type.UNSIGNED_BYTE, 0.toShort()) //Type
-                    packetWrapper.write(Type.BYTE, (if (animation.toInt() == 104) 0x02 else 0x00).toByte()) //Value (sneaking/not sneaking)
+                    packetWrapper.write(
+                        Type.BYTE,
+                        (if (animation.toInt() == 104) 0x02 else 0x00).toByte()
+                    ) //Value (sneaking/not sneaking)
                     packetWrapper.write(Type.UNSIGNED_BYTE, 255.toShort()) //end
                 } else {
                     packetWrapper.write(Type.VAR_INT, entityId) //Entity Id
@@ -381,7 +384,12 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
     this.registerServerbound(State.PLAY, 0x0B, 0x0B, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT, Type.INT) //Entity Id
-            handler { packetWrapper -> packetWrapper.write(Type.BYTE, (packetWrapper.read(Type.VAR_INT) + 1).toByte()) } //Action Id
+            handler { packetWrapper ->
+                packetWrapper.write(
+                    Type.BYTE,
+                    (packetWrapper.read(Type.VAR_INT) + 1).toByte()
+                )
+            } //Action Id
             map(Type.VAR_INT, Type.INT) //Action Paramter
         }
     })
