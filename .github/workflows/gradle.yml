@@ -10,6 +10,11 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 16
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/
+          key: ${{ runner.os }}-via-cache
       - name: Build with Gradle
         run: ./gradlew build
       - uses: actions/upload-artifact@v2
