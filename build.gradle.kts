@@ -47,7 +47,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.viaversion:viaversion:4.0.0-21w17a") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.0.0-21w18a") { isTransitive = false }
     implementation("com.viaversion:viabackwards:4.0.0-21w17a") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
     implementation("io.netty:netty-all:4.1.63.Final")
