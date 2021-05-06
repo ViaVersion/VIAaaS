@@ -39,7 +39,7 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
                     candidates.addAll(commands.keys.filter { it.startsWith(alias, ignoreCase = true) }
                         .map { Candidate(it) })
                 } else {
-                    val command = commands[alias.toLowerCase()]
+                    val command = commands[alias.lowercase()]
                     if (command != null) {
                         candidates.addAll(command.suggest(this, alias, args).map(::Candidate))
                     }
@@ -53,7 +53,7 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
     override fun runCommand(commandLine: String) {
         val cmd = commandLine.split(" ")
         try {
-            val alias = cmd[0].toLowerCase()
+            val alias = cmd[0].lowercase()
             val args = cmd.subList(1, cmd.size)
             val command = commands[alias]
             if (command == null) {

@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.5.0"
     id("maven-publish")
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.38.0"
     id("com.palantir.git-version") version "0.12.3"
 }
@@ -65,7 +65,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.19.0")
     implementation("org.apache.commons:commons-compress:1.20")
 
-    val ktorVersion = "1.5.3"
+    val ktorVersion = "1.5.4"
     implementation(kotlin("stdlib-jdk8"))
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

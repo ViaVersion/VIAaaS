@@ -48,7 +48,7 @@ class VIAaaSAddress {
         }?.toString()
         if (option != null) {
             val arg = part.substring(2)
-            when (option.toLowerCase(Locale.ROOT)) {
+            when (option.lowercase()) {
                 "p" -> port = arg.toInt()
                 "o" -> online = when {
                     arg.startsWith("t", ignoreCase = true) -> true
