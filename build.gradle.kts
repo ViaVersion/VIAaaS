@@ -1,6 +1,6 @@
 import org.gradlewebtools.minify.minifier.js.JSMinifierOptions
-import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Files as JFiles
 
 plugins {
     `java-library`
@@ -109,15 +109,13 @@ class JsMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader())
         val minifier = org.gradlewebtools.minify.minifier.js.JsMinifier(
             minifierOptions = JSMinifierOptions(originalFileNames = true)
         )
-        val file = File.createTempFile("viaaas-minify-", ".js").also {
-            it.parentFile.ensureParentDirsCreated()
-            it.ensureParentDirsCreated()
-            it.createNewFile()
+        val file = JFiles.createTempDirectory("via-").resolve("tmp-minify.js").toFile().also {
             it.writeText(reader.readText())
         }
         minifier.minify(file.parentFile, file.parentFile)
         `in` = file.readText(Charsets.UTF_8).reader()
         file.delete()
+        file.parentFile.delete()
     }
 
     constructor() : this("".reader())
