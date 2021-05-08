@@ -47,26 +47,29 @@ repositories {
 }
 
 dependencies {
+    implementation(kotlin("stdlib-jdk8"))
+    
     implementation("com.viaversion:viaversion:4.0.0-21w18a") { isTransitive = false }
     implementation("com.viaversion:viabackwards:4.0.0-21w17a") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
-    implementation("io.netty:netty-all:4.1.63.Final")
-    implementation("org.yaml:snakeyaml:1.28")
     implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("io.netty:netty-all:4.1.63.Final")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.39.Final")
+    implementation("org.yaml:snakeyaml:1.28")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
 
     val log4jVer = "2.14.1"
+    implementation("net.minecrell:terminalconsoleappender:1.2.0")
+    implementation("org.apache.commons:commons-compress:1.20")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
-    implementation("org.slf4j:slf4j-api:1.7.30")
-    implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.jline:jline-terminal-jansi:3.19.0")
-    implementation("org.apache.commons:commons-compress:1.20")
+    implementation("org.slf4j:slf4j-api:1.7.30")
 
     val ktorVersion = "1.5.4"
-    implementation(kotlin("stdlib-jdk8"))
+    implementation("com.auth0:java-jwt:3.15.0")
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -79,7 +82,6 @@ dependencies {
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     implementation("io.ipinfo:ipinfo-api:1.1")
-    implementation("com.auth0:java-jwt:3.15.0")
 }
 
 val run: JavaExec by tasks
