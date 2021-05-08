@@ -117,8 +117,6 @@ class JsMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader())
         file.delete()
         file.parentFile.delete()
     }
-
-    constructor() : this("".reader())
 }
 
 tasks.named<ProcessResources>("processResources") {
