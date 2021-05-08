@@ -1,3 +1,5 @@
+import org.gradlewebtools.minify.minifier.js.JSMinifierOptions
+import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -8,11 +10,11 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.38.0"
     id("com.palantir.git-version") version "0.12.3"
+    id("org.gradlewebtools.minify") version "1.1.1" apply false
 }
 
 application {
     mainClass.set("com.viaversion.aas.VIAaaSKt")
-    mainClassName = mainClass.get()
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
@@ -48,15 +50,15 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    
+
     implementation("com.viaversion:viaversion:4.0.0-21w18a") { isTransitive = false }
     implementation("com.viaversion:viabackwards:4.0.0-21w17a") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("io.netty:netty-all:4.1.63.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.39.Final")
-    implementation("org.yaml:snakeyaml:1.28")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
+    implementation("org.yaml:snakeyaml:1.28")
 
     val log4jVer = "2.14.1"
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
@@ -102,6 +104,25 @@ tasks {
     }
 }
 
+class JsMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader()) {
+    init {
+        val minifier = org.gradlewebtools.minify.minifier.js.JsMinifier(
+            minifierOptions = JSMinifierOptions(originalFileNames = true)
+        )
+        val file = File.createTempFile("viaaas-minify-", ".js").also {
+            it.parentFile.ensureParentDirsCreated()
+            it.ensureParentDirsCreated()
+            it.createNewFile()
+            it.writeText(reader.readText())
+        }
+        minifier.minify(file.parentFile, file.parentFile)
+        `in` = file.readText(Charsets.UTF_8).reader()
+        file.delete()
+    }
+
+    constructor() : this("".reader())
+}
+
 tasks.named<ProcessResources>("processResources") {
     filesMatching("viaaas_info.json") {
         filter<org.apache.tools.ant.filters.ReplaceTokens>(
@@ -109,6 +130,9 @@ tasks.named<ProcessResources>("processResources") {
                 "version" to project.property("version")
             )
         )
+    }
+    filesMatching("**/*.js") {
+        filter(JsMinifyFilter::class.java)
     }
 }
 

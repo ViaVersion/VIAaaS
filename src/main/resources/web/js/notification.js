@@ -38,6 +38,6 @@ function authNotification(msg, yes, no) {
                 return;
             }
         };
-        setTimeout(() => { delete notificationCallbacks[tag] }, 30_000);
+        setTimeout(() => { delete notificationCallbacks[tag] }, 30 * 1000);
     });
 }
