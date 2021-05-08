@@ -2,6 +2,13 @@ import org.gradlewebtools.minify.minifier.js.JSMinifierOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Files as JFiles
 
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.7.1") }
+}
+
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor
+
 plugins {
     `java-library`
     application
@@ -119,6 +126,12 @@ class JsMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader())
     }
 }
 
+class HtmlMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader()) {
+    init {
+        `in` = HtmlCompressor().compress(reader.readText()).reader()
+    }
+}
+
 tasks.named<ProcessResources>("processResources") {
     filesMatching("viaaas_info.json") {
         filter<org.apache.tools.ant.filters.ReplaceTokens>(
@@ -128,7 +141,10 @@ tasks.named<ProcessResources>("processResources") {
         )
     }
     filesMatching("**/*.js") {
-        filter(JsMinifyFilter::class.java)
+        filter<JsMinifyFilter>()
+    }
+    filesMatching("**/*.html") {
+        filter<HtmlMinifyFilter>()
     }
 }
 
