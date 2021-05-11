@@ -23,7 +23,7 @@ backend-socks5-proxy-port: 9050
 # Sets the RSA key size used by client for encrypting the AES symmetric key when using online mode.
 # Minecraft default is 1024. See https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
 mc-rsa-size: 4096
-# Use SecureRandom.getInstanceStrong(). May block if there's not enough entropy when using online mode.
+# Use SecureRandom.getInstanceStrong(). May block if there's not enough entropy
 # See https://wiki.archlinux.org/index.php/Rng-tools
 use-strong-random: false
 #
@@ -35,8 +35,10 @@ use-strong-random: false
 # A false value could be used for transparent proxying or for MiTM.
 require-host-name: true
 # Host names of this instance, that will be used in the virtual host as a suffix.
-# Use commas for separating multiple hostnames.
-host-name: [ viaaas.localhost, via.localhost, via-127-0-0-1.nip.io ]
+host-name:
+- viaaas.localhost
+- via.localhost
+- via-127-0-0-1.nip.io
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
 # Default port to be used when connecting to the backend server.
@@ -49,14 +51,16 @@ default-backend-port: 25565
 # Blocks backend connection to local addresses (localhost, 0.0.0.0, ::1, 127.(...), 10.(...), etc).
 block-local-address: true
 # If some server is in this list, it will be blocked. This has priority over allowed-back-addresses.
-blocked-back-addresses: [ "*.hypixel.net" ]
+blocked-back-addresses: 
+- "*.hypixel.net"
 # Only allows the backend address if it matches an address in this list.
-allowed-back-addresses: [ "*" ]
+allowed-back-addresses:
+- "*"
 #
 ######
 # Info
 ######
-# Shows VIAaaS info (player and server version) in player list.
+# Shows VIAaaS info (player and server versions) in servers list.
 show-version-ping: true
 # Shows VIAaaS info in server brand (F3).
 show-brand-info: true
@@ -66,7 +70,7 @@ show-brand-info: true
 #####
 # Rates limits websocket messages per second. Message processing will be delayed.
 rate-limit-ws: 1.5
-# Rate limits new front-end connections per second per ip. Will disconnect when hit.
+# Rate limits new front-end connections per second per ip. Will cause a disconnect.
 rate-limit-connection-mc: 10.0
 # Limits how many usernames a websocket connection can listen to.
 listening-ws-limit: 10
@@ -74,5 +78,5 @@ listening-ws-limit: 10
 #####
 # SECRETS - DO NOT SHARE
 #####
-# Key used to generate Minecraft tokens for listening logins
+# Secret key used to generate Minecraft tokens for listening logins
 jwt-secret: ''
