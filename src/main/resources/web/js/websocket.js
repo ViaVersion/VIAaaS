@@ -61,10 +61,10 @@ function handleJoinRequest(parsed) {
             })
             .then(checkFetchSuccess("code"))
             .finally(() => confirmJoin(parsed.session_hash))
-            .catch((e) => addToast("Couldn't contact session server", "error: " + e));
+            .catch((e) => addToast("Couldn't contact session server", "Error: " + e));
         } else {
             confirmJoin(parsed.session_hash);
-            addToast("Couldn't find account", parsed.user);
+            addToast("Couldn't find account", "Couldn't find " + parsed.user + ", check Accounts tab");
         }
     }, () => confirmJoin(parsed.session_hash));
 }
