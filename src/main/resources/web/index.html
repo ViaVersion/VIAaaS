@@ -17,13 +17,21 @@
  style-src https://cdnjs.cloudflare.com/ 'self';
  img-src data: https://cdn.discordapp.com/ https://crafthead.net/ https://crafatar.com/;
  connect-src 'self' http://localhost:*/ https: wss:;
- script-src 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'self' https://ajax.cloudflare.com/ https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/" http-equiv="Content-Security-Policy">
+ script-src 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'self' https://ajax.cloudflare.com/ https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/"
+          http-equiv="Content-Security-Policy">
     <meta content="no-referrer" name="referrer">
     <meta content="noindex" name="robots">
     <meta content="#0468a1" name="theme-color">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/css/bootstrap.min.css" integrity="sha512-N415hCJJdJx+1UBfULt+i+ihvOn42V/kOjOpp1UTh4CZ70Hx5bDlKryWaqEKfY/8EYOu/C2MuyaluJryK1Lb5Q==" crossorigin="anonymous" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/js/bootstrap.bundle.min.js" integrity="sha512-DSdiuNZtfUhehZHXtit9Sa/83i06YSnvT8Js8drwdkVCDMk3JwpIxdhf2oRUByUDB3wguN2iAzoTNfxFAuqGyA==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js" integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A==" crossorigin="anonymous"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/css/bootstrap.min.css"
+          integrity="sha512-N415hCJJdJx+1UBfULt+i+ihvOn42V/kOjOpp1UTh4CZ70Hx5bDlKryWaqEKfY/8EYOu/C2MuyaluJryK1Lb5Q=="
+          crossorigin="anonymous"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/js/bootstrap.bundle.min.js"
+            integrity="sha512-DSdiuNZtfUhehZHXtit9Sa/83i06YSnvT8Js8drwdkVCDMk3JwpIxdhf2oRUByUDB3wguN2iAzoTNfxFAuqGyA=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js"
+            integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A=="
+            crossorigin="anonymous"></script>
     <script crossorigin="anonymous"
             integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
             src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
@@ -39,22 +47,26 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="javascript:">VIAaaS</a>
-        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+                class="navbar-toggler"
                 data-bs-target="#navbarSupportedContent" data-bs-toggle="collapse" type="button">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav nav" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <a aria-controls="home" aria-selected="true" class="nav-link active" data-bs-toggle="tab" href="#home"
+                    <a aria-controls="home" aria-selected="true" class="nav-link active" data-bs-toggle="tab"
+                       href="#home"
                        id="home-tab" role="tab">Status</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a aria-controls="accounts" aria-selected="false" class="nav-link" data-bs-toggle="tab" href="#accounts"
+                    <a aria-controls="accounts" aria-selected="false" class="nav-link" data-bs-toggle="tab"
+                       href="#accounts"
                        id="accounts-tab" role="tab">Accounts</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a aria-controls="settings" aria-selected="false" class="nav-link" data-bs-toggle="tab" href="#settings"
+                    <a aria-controls="settings" aria-selected="false" class="nav-link" data-bs-toggle="tab"
+                       href="#settings"
                        id="settings-tab" role="tab">Settings</a>
                 </li>
                 <li class="nav-item dropdown">

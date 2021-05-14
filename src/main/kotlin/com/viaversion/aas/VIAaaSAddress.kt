@@ -2,7 +2,6 @@ package com.viaversion.aas
 
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import java.util.*
 
 class VIAaaSAddress {
     var serverAddress: String? = null

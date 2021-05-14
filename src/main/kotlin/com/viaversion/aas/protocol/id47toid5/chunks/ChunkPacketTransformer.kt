@@ -4,7 +4,7 @@ import com.viaversion.viaversion.api.minecraft.BlockChangeRecord1_8
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.CustomByteType
-import io.netty.buffer.ByteBuf
+import com.viaversion.viaversion.protocol.packet.PacketWrapperImpl
 import java.io.IOException
 import java.util.stream.IntStream
 import java.util.zip.DataFormatException
@@ -44,9 +44,7 @@ object ChunkPacketTransformer {
         val chunk = Chunk1_8to1_7_6_10(uncompressedData, primaryBitMask, addBitMask, true, groundUp)
 
         packetWrapper.clearPacket()
-        val field = PacketWrapper::class.java.getDeclaredField("inputBuffer")
-        field.isAccessible = true
-        val buffer = field[packetWrapper] as ByteBuf
+        val buffer = (packetWrapper as PacketWrapperImpl).inputBuffer
 
         buffer.clear()
         buffer.writeInt(chunkX)

@@ -1,3 +1,4 @@
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor
 import org.gradlewebtools.minify.minifier.js.JSMinifierOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Files as JFiles
@@ -6,8 +7,6 @@ buildscript {
     repositories { mavenCentral() }
     dependencies { classpath("com.github.hazendaz:htmlcompressor:1.7.1") }
 }
-
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor
 
 plugins {
     `java-library`
@@ -58,8 +57,8 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
-    implementation("com.viaversion:viaversion:4.0.0-21w19a") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:4.0.0-21w19a") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.0.0-21w19a-SNAPSHOT") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:4.0.0-21w19a-SNAPSHOT") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("io.netty:netty-all:4.1.63.Final")
