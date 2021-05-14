@@ -1,6 +1,6 @@
-package com.viaversion.aas.packet.status
+package com.viaversion.aas.codec.packet.status
 
-import com.viaversion.aas.packet.Packet
+import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.viaversion.api.type.Type
 import io.netty.buffer.ByteBuf
 

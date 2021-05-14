@@ -1,4 +1,4 @@
-package com.viaversion.aas.packet
+package com.viaversion.aas.codec.packet
 
 import io.netty.buffer.ByteBuf
 

@@ -1,6 +1,6 @@
-package com.viaversion.aas.packet.status
+package com.viaversion.aas.codec.packet.status
 
-import com.viaversion.aas.packet.Packet
+import com.viaversion.aas.codec.packet.Packet
 import io.netty.buffer.ByteBuf
 import kotlin.properties.Delegates
 

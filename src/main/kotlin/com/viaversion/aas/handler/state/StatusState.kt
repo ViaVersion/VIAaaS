@@ -6,9 +6,9 @@ import com.google.gson.JsonParser
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
-import com.viaversion.aas.packet.Packet
-import com.viaversion.aas.packet.UnknownPacket
-import com.viaversion.aas.packet.status.StatusResponse
+import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.UnknownPacket
+import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.writeFlushClose

@@ -5,7 +5,6 @@ import io.netty.buffer.ByteBuf
 import java.util.*
 
 object AspirinViaAPI : ViaAPIBase<UUID>() {
-
+    override fun getPlayerVersion(p0: UUID): Int = super.getPlayerVersion(p0)
     override fun sendRawPacket(p0: UUID, p1: ByteBuf) = super.sendRawPacket(p0, p1)
-    override fun getPlayerVersion(p0: UUID?): Int = throw UnsupportedOperationException()
 }

@@ -1,14 +1,14 @@
-package com.viaversion.aas.packet
+package com.viaversion.aas.codec.packet
 
 import com.google.common.collect.Range
-import com.viaversion.aas.packet.handshake.Handshake
-import com.viaversion.aas.packet.login.*
-import com.viaversion.aas.packet.play.Kick
-import com.viaversion.aas.packet.play.PluginMessage
-import com.viaversion.aas.packet.status.StatusPing
-import com.viaversion.aas.packet.status.StatusPong
-import com.viaversion.aas.packet.status.StatusRequest
-import com.viaversion.aas.packet.status.StatusResponse
+import com.viaversion.aas.codec.packet.handshake.Handshake
+import com.viaversion.aas.codec.packet.login.*
+import com.viaversion.aas.codec.packet.play.Kick
+import com.viaversion.aas.codec.packet.play.PluginMessage
+import com.viaversion.aas.codec.packet.status.StatusPing
+import com.viaversion.aas.codec.packet.status.StatusPong
+import com.viaversion.aas.codec.packet.status.StatusRequest
+import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.api.protocol.packet.State

@@ -5,10 +5,10 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.handler.is1_7
-import com.viaversion.aas.packet.Packet
-import com.viaversion.aas.packet.UnknownPacket
-import com.viaversion.aas.packet.play.Kick
-import com.viaversion.aas.packet.play.PluginMessage
+import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.UnknownPacket
+import com.viaversion.aas.codec.packet.play.Kick
+import com.viaversion.aas.codec.packet.play.PluginMessage
 import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.readRemainingBytes
 import com.viaversion.aas.util.StacklessException

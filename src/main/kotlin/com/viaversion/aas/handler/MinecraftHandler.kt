@@ -1,7 +1,7 @@
 package com.viaversion.aas.handler
 
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.packet.Packet
+import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.setAutoRead
 import com.viaversion.viaversion.exception.CancelCodecException
 import io.netty.channel.Channel

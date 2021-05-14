@@ -1,6 +1,6 @@
-package com.viaversion.aas.packet.login
+package com.viaversion.aas.codec.packet.login
 
-import com.viaversion.aas.packet.Packet
+import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.parseUndashedId
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type

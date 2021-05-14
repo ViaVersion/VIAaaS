@@ -6,7 +6,7 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.BackEndInit
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
-import com.viaversion.aas.packet.handshake.Handshake
+import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.bootstrap.Bootstrap

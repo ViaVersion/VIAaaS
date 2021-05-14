@@ -5,9 +5,7 @@ import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.CustomByteType
 import com.viaversion.viaversion.protocol.packet.PacketWrapperImpl
-import java.io.IOException
 import java.util.stream.IntStream
-import java.util.zip.DataFormatException
 import java.util.zip.Inflater
 import kotlin.streams.toList
 
@@ -72,8 +70,6 @@ object ChunkPacketTransformer {
         inflater.setInput(buildBuffer, 0, compressedSize)
         try {
             inflater.inflate(data)
-        } catch (ex: DataFormatException) {
-            throw IOException("Bad compressed data format")
         } finally {
             inflater.end()
         }
@@ -138,7 +134,7 @@ object ChunkPacketTransformer {
                 val y = encodedPos.and(0xFF)
                 val z = encodedPos.ushr(8).and(0xF)
                 BlockChangeRecord1_8(x, y, z, blocks[it].toInt())
-            }
-            .toList().toTypedArray())
+            }.toList().toTypedArray()
+        )
     }
 }

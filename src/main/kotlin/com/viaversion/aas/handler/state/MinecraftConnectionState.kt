@@ -2,7 +2,7 @@ package com.viaversion.aas.handler.state
 
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.packet.Packet
+import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
 

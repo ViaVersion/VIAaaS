@@ -7,8 +7,8 @@ import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
-import com.viaversion.aas.packet.Packet
-import com.viaversion.aas.packet.login.*
+import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.login.*
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.Channel

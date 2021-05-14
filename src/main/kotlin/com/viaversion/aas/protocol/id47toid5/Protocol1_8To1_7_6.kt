@@ -7,7 +7,7 @@ import com.viaversion.viaversion.api.protocol.AbstractSimpleProtocol
 
 // Based on https://github.com/Gerrygames/ClientViaVersion
 object Protocol1_8To1_7_6 : AbstractSimpleProtocol() {
-    private val placeable = ArrayList<Int>()
+    private val placeable = hashSetOf<Int>()
 
     init {
         placeable.add(6)

@@ -1,6 +1,6 @@
-package com.viaversion.aas.packet.play
+package com.viaversion.aas.codec.packet.play
 
-import com.viaversion.aas.packet.Packet
+import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.readByteArray
 import com.viaversion.aas.readRemainingBytes
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion

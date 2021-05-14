@@ -1,8 +1,8 @@
 package com.viaversion.aas.codec
 
 import com.viaversion.aas.handler.MinecraftHandler
-import com.viaversion.aas.packet.Packet
-import com.viaversion.aas.packet.PacketRegistry
+import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.PacketRegistry
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.exception.CancelEncoderException

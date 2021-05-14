@@ -8,8 +8,8 @@ import com.viaversion.aas.VIAaaSAddress
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.packet.Packet
-import com.viaversion.aas.packet.handshake.Handshake
+import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext

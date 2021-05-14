@@ -1,7 +1,7 @@
 package com.viaversion.aas.handler
 
 import com.viaversion.aas.config.VIAaaSConfig
-import com.viaversion.aas.packet.Packet
+import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.send
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.netty.channel.ChannelPipeline

@@ -10,8 +10,8 @@ import com.viaversion.aas.handler.ConnectionData
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.addSocks5
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.packet.handshake.Handshake
-import com.viaversion.aas.packet.status.StatusRequest
+import com.viaversion.aas.codec.packet.handshake.Handshake
+import com.viaversion.aas.codec.packet.status.StatusRequest
 import com.viaversion.aas.send
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
