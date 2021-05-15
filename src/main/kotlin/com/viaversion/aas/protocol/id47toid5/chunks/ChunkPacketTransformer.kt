@@ -42,7 +42,7 @@ object ChunkPacketTransformer {
         val chunk = Chunk1_8to1_7_6_10(uncompressedData, primaryBitMask, addBitMask, true, groundUp)
 
         packetWrapper.clearPacket()
-        val buffer = (packetWrapper as PacketWrapperImpl).inputBuffer
+        val buffer = (packetWrapper as PacketWrapperImpl).inputBuffer!!
 
         buffer.clear()
         buffer.writeInt(chunkX)
