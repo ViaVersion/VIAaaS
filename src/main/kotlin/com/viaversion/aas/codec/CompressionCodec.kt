@@ -17,7 +17,7 @@ class CompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf, Byte
     override fun encode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
         val frameLength = input.readableBytes()
         val outBuf = ctx.alloc().buffer()
-        outBuf.skipBytes(5) // reserve varint
+
         try {
             if (frameLength < threshold) {
                 outBuf.writeByte(0)
