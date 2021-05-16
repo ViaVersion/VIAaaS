@@ -84,6 +84,7 @@ class HandshakeState : MinecraftConnectionState {
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {
+        super.disconnect(handler, msg)
         handler.data.frontChannel.close() // Not worth logging
     }
 

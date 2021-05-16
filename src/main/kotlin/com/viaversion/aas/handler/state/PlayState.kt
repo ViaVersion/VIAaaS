@@ -1,27 +1,23 @@
 package com.viaversion.aas.handler.state
 
 import com.google.gson.JsonPrimitive
-import com.viaversion.aas.config.VIAaaSConfig
-import com.viaversion.aas.handler.MinecraftHandler
-import com.viaversion.aas.handler.forward
-import com.viaversion.aas.handler.is1_7
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.UnknownPacket
 import com.viaversion.aas.codec.packet.play.Kick
 import com.viaversion.aas.codec.packet.play.PluginMessage
+import com.viaversion.aas.config.VIAaaSConfig
+import com.viaversion.aas.handler.*
 import com.viaversion.aas.parseProtocol
-import com.viaversion.aas.readRemainingBytes
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.writeFlushClose
 import com.viaversion.viaversion.api.protocol.packet.State
-import com.viaversion.viaversion.api.type.Type
-import io.netty.buffer.ByteBufAllocator
-import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 
 object PlayState : MinecraftConnectionState {
     override val state: State
         get() = State.PLAY
+    override val logDc: Boolean
+        get() = true
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         when {
@@ -35,32 +31,25 @@ object PlayState : MinecraftConnectionState {
         when (pluginMessage.channel) {
             "MC|Brand", "brand", "minecraft:brand" -> {
                 if (!VIAaaSConfig.showBrandInfo) return
-                val brand = if (is1_7(handler)) {
-                    String(pluginMessage.data, Charsets.UTF_8)
-                } else {
-                    Type.STRING.read(Unpooled.wrappedBuffer(pluginMessage.data))
-                } + " (VIAaaS C: ${handler.data.frontVer!!.parseProtocol()} S: ${
-                    handler.data.viaBackServerVer!!.parseProtocol()
-                })"
 
-                if (is1_7(handler)) {
-                    pluginMessage.data = brand.toByteArray(Charsets.UTF_8)
-                } else {
-                    val buf = ByteBufAllocator.DEFAULT.buffer()
-                    try {
-                        Type.STRING.write(buf, brand)
-                        pluginMessage.data = readRemainingBytes(buf)
-                    } finally {
-                        buf.release()
-                    }
-                }
+                val brand = "${
+                    decodeBrand(
+                        pluginMessage.data,
+                        is17(handler)
+                    )
+                }${" (VIAaaS C: ${handler.data.frontVer?.parseProtocol()} S: ${handler.data.viaBackServerVer?.parseProtocol()})"}"
+
+                pluginMessage.data = encodeBrand(brand, is17(handler))
             }
         }
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
-        writeFlushClose(handler.data.frontChannel,
-            Kick().also { it.msg = JsonPrimitive("[VIAaaS] §c$msg").toString() })
+        writeFlushClose(
+            handler.data.frontChannel,
+            Kick().also { it.msg = JsonPrimitive("[VIAaaS] §c$msg").toString() },
+            delay = is17(handler)
+        )
     }
 }

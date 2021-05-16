@@ -2,7 +2,6 @@ package com.viaversion.aas.handler
 
 import com.viaversion.aas.codec.FrameCodec
 import com.viaversion.aas.codec.MinecraftCodec
-import com.viaversion.aas.handler.autoprotocol.ProtocolDetectorHandler
 import com.viaversion.viaversion.connection.UserConnectionImpl
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl
 import io.netty.channel.Channel
@@ -21,11 +20,6 @@ class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
             .addLast("via-codec", ViaCodec(user))
             .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
             .addLast("mc", MinecraftCodec())
-            .also {
-                if (connectionData.viaBackServerVer == null) {
-                    it.addLast("protocol-detector", ProtocolDetectorHandler(connectionData))
-                }
-            }
             .addLast("handler", MinecraftHandler(connectionData, frontEnd = false))
     }
 }

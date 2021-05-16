@@ -17,7 +17,7 @@ class MinecraftHandler(
 ) : SimpleChannelInboundHandler<Packet>() {
     lateinit var endRemoteAddress: SocketAddress
     val other: Channel? get() = if (frontEnd) data.backChannel else data.frontChannel
-    var msgDisconnected = false
+    var loggedDc = false
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         if (ctx.channel().isActive) {

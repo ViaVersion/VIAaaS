@@ -24,6 +24,7 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.SecureRandom
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -150,11 +151,20 @@ fun send(ch: Channel, obj: Any, flush: Boolean = false) {
     }
 }
 
-fun writeFlushClose(ch: Channel, obj: Any) {
-    ch.writeAndFlush(obj).addListener(ChannelFutureListener.CLOSE)
+fun writeFlushClose(ch: Channel, obj: Any, delay: Boolean = false) {
+    // https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/connection/MinecraftConnection.java#L252
+    ch.setAutoRead(false)
+    val action = {
+        ch.writeAndFlush(obj).addListener(ChannelFutureListener.CLOSE)
+    }
+    if (delay) {
+        ch.eventLoop().schedule(action, 250, TimeUnit.MILLISECONDS)
+    } else {
+        action()
+    }
 }
 
-fun readRemainingBytes(byteBuf: ByteBuf) = Type.REMAINING_BYTES.read(byteBuf)
+fun readRemainingBytes(byteBuf: ByteBuf) = Type.REMAINING_BYTES.read(byteBuf)!!
 fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) }
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {
@@ -168,7 +178,7 @@ suspend fun hasJoined(username: String, hash: String): JsonObject {
 fun generate128Bits() = ByteArray(16).also { secureRandom.nextBytes(it) }
 fun generateServerId() = ByteArray(13).let {
     secureRandom.nextBytes(it)
-    Base64.getEncoder().withoutPadding().encodeToString(it)
+    Base64.getEncoder().withoutPadding().encodeToString(it)!!
     // https://developer.mozilla.org/en-US/docs/Glossary/Base64 133% of original
 }
 

@@ -5,10 +5,10 @@ import com.google.gson.Gson
 import com.viaversion.aas.*
 import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
-import com.viaversion.aas.handler.MinecraftHandler
-import com.viaversion.aas.handler.forward
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.login.*
+import com.viaversion.aas.handler.MinecraftHandler
+import com.viaversion.aas.handler.forward
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.Channel
@@ -32,6 +32,8 @@ class LoginState : MinecraftConnectionState {
     var started = false
     override val state: State
         get() = State.LOGIN
+    override val logDc: Boolean
+        get() = true
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         when (packet) {

@@ -12,10 +12,11 @@ interface MinecraftConnectionState {
         handler: MinecraftHandler, ctx: ChannelHandlerContext,
         packet: Packet
     )
+    val logDc: Boolean get() = false
 
     fun disconnect(handler: MinecraftHandler, msg: String) {
-        if (!handler.msgDisconnected) {
-            handler.msgDisconnected = true
+        if (logDc && !handler.loggedDc) {
+            handler.loggedDc = true
             mcLogger.info("DC ${handler.endRemoteAddress}: $msg")
         }
     }

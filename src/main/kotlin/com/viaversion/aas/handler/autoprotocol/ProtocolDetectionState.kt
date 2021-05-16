@@ -1,11 +1,11 @@
 package com.viaversion.aas.handler.autoprotocol
 
 import com.google.gson.JsonParser
+import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.state.MinecraftConnectionState
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.codec.packet.Packet
-import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
@@ -19,9 +19,10 @@ class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : M
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         handler.data.frontChannel.close()
-        if (packet !is StatusResponse) throw StacklessException("unexpected packet")
+        if (packet !is StatusResponse) throw StacklessException("Unexpected packet")
         val ver = JsonParser.parseString(packet.json).asJsonObject
-            .getAsJsonObject("version").get("protocol").asInt.parseProtocol()
+            .getAsJsonObject("version")
+            .get("protocol").asInt.parseProtocol()
         future.complete(ver)
         mcLogger.info("A.D.: ${handler.endRemoteAddress} $ver")
     }

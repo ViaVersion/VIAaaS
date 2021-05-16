@@ -56,6 +56,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
 
     implementation("com.viaversion:viaversion:4.0.0-21w19a-SNAPSHOT") { isTransitive = false }
     implementation("com.viaversion:viabackwards:4.0.0-21w19a-SNAPSHOT") { isTransitive = false }
