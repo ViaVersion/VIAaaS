@@ -38,9 +38,8 @@ class WebDashboardServer {
     fun generateToken(account: UUID): String {
         return JWT.create()
             .withExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(30))))
-            .withSubject("mc_account")
-            .withClaim("can_listen", true)
-            .withClaim("mc_uuid", account.toString())
+            .withSubject(account.toString())
+            .withAudience("viaaas_listen")
             .withIssuer("viaaas")
             .sign(jwtAlgorithm)
     }
@@ -48,13 +47,10 @@ class WebDashboardServer {
     fun checkToken(token: String): UUID? {
         return try {
             val verified = JWT.require(jwtAlgorithm)
-                .withSubject("mc_account")
-                .withClaim("can_listen", true)
-                .withClaimPresence("mc_uuid")
+                .withAnyOfAudience("viaaas_listen")
                 .build()
                 .verify(token)
-
-            UUID.fromString(verified.getClaim("mc_uuid").asString())
+            UUID.fromString(verified.subject)
         } catch (e: JWTVerificationException) {
             null
         }
@@ -89,17 +85,17 @@ class WebDashboardServer {
             future.completeExceptionally(StacklessException("No browser listening"))
         } else {
             val info = withContext(Dispatchers.IO) {
-                (address as? InetSocketAddress).let {
+                (address as? InetSocketAddress)?.let {
                     try {
-                        it?.address?.hostName // resolve it
-                        ipInfo.lookupIP(it?.address?.hostAddress?.substringBefore("%"))
+                        it.address?.hostName // resolve it
+                        ipInfo.lookupIP(it.address?.hostAddress?.substringBefore("%"))
                     } catch (ignored: Exception) {
                         null
                     }
                 }
             }
-            val msg =
-                "Client: $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})\nBackend: $backAddress"
+            val msg = """Requester: $id $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})
+Backend: $backAddress"""
             listeners[id]?.forEach {
                 it.ws.send(
                     JsonObject().also {

@@ -1,7 +1,7 @@
 package com.viaversion.aas.web
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.viaversion.aas.*
 import com.viaversion.aas.util.StacklessException
 import io.ktor.client.request.forms.*
@@ -20,7 +20,7 @@ class WebLogin : WebState {
     }
 
     override suspend fun onMessage(webClient: WebClient, msg: String) {
-        val obj = Gson().fromJson(msg, JsonObject::class.java)
+        val obj = JsonParser.parseString(msg) as JsonObject
 
         when (obj.getAsJsonPrimitive("action").asString) {
             "offline_login" -> {

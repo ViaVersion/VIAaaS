@@ -1,7 +1,7 @@
 package com.viaversion.aas.handler.state
 
 import com.google.common.net.HostAndPort
-import com.google.gson.Gson
+import com.google.gson.JsonPrimitive
 import com.viaversion.aas.*
 import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
@@ -28,6 +28,7 @@ class LoginState : MinecraftConnectionState {
     var frontOnline: Boolean? = null
     lateinit var frontName: String
     lateinit var backAddress: HostAndPort
+    var extraData: String? = null
     var backName: String? = null
     var started = false
     override val state: State
@@ -92,7 +93,7 @@ class LoginState : MinecraftConnectionState {
         val backPublicKey = cryptoRequest.publicKey
         val backToken = cryptoRequest.token
 
-        if (frontOnline == null) {
+        if (!callbackPlayerId.isDone) {
             authenticateOnlineFront(handler.data.frontChannel)
         }
         val frontHandler = handler.data.frontHandler
@@ -105,6 +106,7 @@ class LoginState : MinecraftConnectionState {
                 val backKey = generate128Bits()
                 val backHash = generateServerHash(backServerId, backKey, backPublicKey)
 
+                mcLogger.info("Session req: ${handler.data.frontHandler.endRemoteAddress} ($playerId $frontName) $backName")
                 viaWebServer.requestSessionJoin(
                     playerId,
                     backName!!,
@@ -112,6 +114,7 @@ class LoginState : MinecraftConnectionState {
                     frontHandler.endRemoteAddress,
                     handler.data.backHandler!!.endRemoteAddress
                 ).await()
+                if (!handler.data.frontChannel.isActive) return@launch
 
                 val cryptoResponse = CryptoResponse()
                 cryptoResponse.encryptedKey = encryptRsa(backPublicKey, backKey)
@@ -163,28 +166,23 @@ class LoginState : MinecraftConnectionState {
         frontName = loginStart.username
         backName = backName ?: frontName
 
-        val connect = {
-            connectBack(handler, backAddress.host, backAddress.port, State.LOGIN) {
-                loginStart.username = backName!!
-                send(handler.data.backChannel!!, loginStart, true)
-            }
-        }
-
-        callbackPlayerId.whenComplete { id, e ->
-            if (e != null) {
-                handler.data.frontChannel.pipeline().fireExceptionCaught(StacklessException("Profile error: $e", e))
-            } else {
-                mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
+        GlobalScope.launch {
+            try {
                 if (frontOnline != null) {
-                    connect()
+                    when (frontOnline) {
+                        false -> callbackPlayerId.complete(generateOfflinePlayerUuid(frontName))
+                        true -> authenticateOnlineFront(handler.data.frontChannel) // forced
+                    }
+                    val id = callbackPlayerId.await()
+                    mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
                 }
+                connectBack(handler, backAddress.host, backAddress.port, State.LOGIN, extraData) {
+                    loginStart.username = backName!!
+                    send(handler.data.backChannel!!, loginStart, true)
+                }
+            } catch (e: Exception) {
+                handler.data.frontChannel.pipeline().fireExceptionCaught(StacklessException("Login error: $e", e))
             }
-        }
-
-        when (frontOnline) {
-            false -> callbackPlayerId.complete(generateOfflinePlayerUuid(frontName))
-            true -> authenticateOnlineFront(handler.data.frontChannel) // forced
-            null -> connect() // Connect then authenticate
         }
     }
 
@@ -192,7 +190,7 @@ class LoginState : MinecraftConnectionState {
         super.disconnect(handler, msg)
 
         val packet = LoginDisconnect()
-        packet.msg = Gson().toJson("[VIAaaS] §c$msg")
+        packet.msg = JsonPrimitive("[VIAaaS] §c$msg").toString()
         writeFlushClose(handler.data.frontChannel, packet)
     }
 }

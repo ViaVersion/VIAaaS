@@ -66,6 +66,7 @@ class HandshakeState : MinecraftConnectionState {
             it.frontOnline = frontOnline
             it.backName = parsed.username
             it.backAddress = HostAndPort.fromParts(packet.address, packet.port)
+            it.extraData = extraData
         }
 
         val playerAddr = handler.data.frontHandler.endRemoteAddress

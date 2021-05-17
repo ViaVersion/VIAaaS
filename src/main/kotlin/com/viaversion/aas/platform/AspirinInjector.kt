@@ -11,7 +11,10 @@ object AspirinInjector : ViaInjector {
     override fun getDecoderName() = "via-codec"
     override fun getDump(): JsonObject = JsonObject()
     override fun getServerProtocolVersions(): IntSortedSet = IntLinkedOpenHashSet(
-        sortedSetOf(ProtocolVersion.v1_16_4.version, ProtocolVersion.v1_7_1.version)
+        sortedSetOf(
+            ProtocolVersion.getProtocols().maxOf { it.originalVersion },
+            ProtocolVersion.v1_7_1.version
+        )
     )
 
     override fun getServerProtocolVersion(): Int = ProtocolVersion.v1_7_1.version

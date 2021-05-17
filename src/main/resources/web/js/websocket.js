@@ -53,7 +53,9 @@ function confirmJoin(hash) {
 }
 
 function handleJoinRequest(parsed) {
-    authNotification("Allow auth impersonation from VIAaaS instance?\nUsername: " + parsed.user + "\nSession Hash: " + parsed.session_hash + "\nServer Message: '" + parsed.message + "'", () => {
+    authNotification("Allow auth impersonation from VIAaaS instance?\nAccount: "
+        + parsed.user + "\nServer Message: \n"
+        + parsed.message.split(/[\r\n]+/).map(it => "> " + it).join('\n'), () => {
         let account = findAccountByMcName(parsed.user);
         if (account) {
             getMcUserToken(account).then(data => {

@@ -29,7 +29,8 @@ import java.util.concurrent.CompletableFuture
 private fun createBackChannel(
     handler: MinecraftHandler,
     socketAddr: InetSocketAddress,
-    state: State
+    state: State,
+    extraData: String?
 ): CompletableFuture<Channel> {
     val future = CompletableFuture<Channel>()
     val loop = handler.data.frontChannel.eventLoop()
@@ -71,7 +72,7 @@ private fun createBackChannel(
                     val packet = Handshake()
                     packet.nextState = state
                     packet.protocolId = handler.data.frontVer!!
-                    packet.address = socketAddr.hostString
+                    packet.address = socketAddr.hostString + if (extraData != null) 0.toChar() + extraData else ""
                     packet.port = socketAddr.port
 
                     forward(handler, packet, true)
@@ -90,10 +91,12 @@ private suspend fun tryBackAddresses(
     handler: MinecraftHandler,
     addresses: Iterable<InetSocketAddress>,
     state: State,
+    extraData: String?
 ) {
     var latestException: Exception? = null
     for (socketAddr in addresses) {
         try {
+            if (!handler.data.frontChannel.isActive) return
             if ((socketAddr.address != null && checkLocalAddress(socketAddr.address))
                 || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
                 || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)
@@ -101,7 +104,7 @@ private suspend fun tryBackAddresses(
                 throw StacklessException("Not allowed")
             }
 
-            createBackChannel(handler, socketAddr, state).await()
+            createBackChannel(handler, socketAddr, state, extraData).await()
             return // Finally it worked!
         } catch (e: Exception) {
             latestException = e
@@ -126,7 +129,7 @@ private fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAd
     }
 }
 
-fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: State, success: () -> Unit) {
+fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: State, extraData: String? = null, success: () -> Unit) {
     handler.data.frontChannel.setAutoRead(false)
     GlobalScope.launch(Dispatchers.IO) {
         try {
@@ -134,7 +137,7 @@ fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: St
 
             if (addresses.isEmpty()) throw StacklessException("Hostname has no IP address")
 
-            tryBackAddresses(handler, addresses, state)
+            tryBackAddresses(handler, addresses, state, extraData)
             success()
         } catch (e: Exception) {
             handler.data.frontChannel.eventLoop().submit {
