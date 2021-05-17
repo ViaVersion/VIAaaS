@@ -57,7 +57,7 @@ object StatusState : MinecraftConnectionState {
         packet.json = JsonObject().also {
             it.add("version", JsonObject().also {
                 it.addProperty("name", "VIAaaS")
-                it.addProperty("protocol", -1)
+                it.addProperty("protocol", handler.data.frontVer)
             })
             it.add("players", JsonObject().also {
                 it.addProperty("max", 0)
