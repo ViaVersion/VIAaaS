@@ -62,7 +62,7 @@ dependencies {
     implementation("com.viaversion:viabackwards:4.0.0-21w20a-SNAPSHOT") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
     implementation("com.google.guava:guava:30.1.1-jre")
-    implementation("io.netty:netty-all:4.1.64.Final")
+    implementation("io.netty:netty-all:4.1.65.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.39.Final")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.28")
