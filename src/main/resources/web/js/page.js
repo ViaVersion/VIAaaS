@@ -12,17 +12,14 @@ $(() => {
     }
 
     ohNo();
-    $("#cors-proxy").on("change", () => setCorsProxy($("#cors-proxy").val()));
     $("#cors-proxy").val(getCorsProxy());
-    $("#ws-url").on("change", () => setWsUrl($("#ws-url").val()));
     $("#ws-url").val(getWsUrl());
     $("form").on("submit", e => e.preventDefault());
-    $("#form_add_mc").on("submit", e => {
-        loginMc($("#email").val(), $("#password").val());
-    });
-    $("#form_add_ms").on("submit", e => {
-        loginMs();
-    });
+    $("#form_add_mc").on("submit", e => loginMc($("#email").val(), $("#password").val()));
+    $("#form_add_ms").on("submit", e => loginMs());
+    $("#form_ws_url").on("submit", e => setWsUrl($("#ws-url").val()));
+    $("#form_cors_proxy").on("submit", e => setCorsProxy($("#cors-proxy").val()));
+
 
     refreshAccountList();
     // Heroku sleeps in 30 minutes, let's call it every 10 minutes to keep the same address, so Mojang see it as less suspect

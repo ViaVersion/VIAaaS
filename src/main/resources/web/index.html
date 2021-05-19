@@ -44,8 +44,8 @@
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-2">
+    <div class="container">
         <a class="navbar-brand" href="javascript:">VIAaaS</a>
         <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
                 class="navbar-toggler"
@@ -88,43 +88,58 @@
         <p>WebSocket connection status: <span class="text-white bg-dark" id="connection_status">?</span></p>
         <p>CORS Proxy status: <span class="text-white bg-dark" id="cors_status">?</span></p>
         <hr>
-        <p><span id="actions"></span></p>
         <p>Listening to logins from: <span id="listening"></span></p>
+        <p><span id="actions"></span></p>
     </div>
 
     <div aria-labelledby="settings-tab" class="tab-pane fade" id="settings">
         <div class="mb-3">
-            <label class="form-label" for="cors-proxy">CORS Proxy URL Prefix</label>
+            <label class="form-label" for="form_cors_proxy"><h5>CORS Proxy URL Prefix</h5></label>
             <p>See <a href="https://github.com/ViaVersion/VIAaaS#cors-proxy">README</a>
                 for setting up one. Mojang APIs are called through this proxy, and a remote IP address may look
                 suspicious and block your account.
                 It will receive sensitive data like email, passwords and tokens. HTTPS is required for non-localhost
                 addresses.</p>
-            <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
+            <form class="row g-3" id="form_cors_proxy">
+                <div class="col-auto">
+                    <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                </div>
+            </form>
         </div>
         <div class="mb-3">
-            <label class="form-label" for="ws-url">WebSocket URL</label>
+            <label class="form-label" for="form_ws-url"><h5>WebSocket URL</h5></label>
             <p>It exchanges sensitive data like minecraft.id tokens, server session hashes and usernames. WSS is
                 required.</p>
-            <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
+            <form class="row g-3" id="form_ws_url">
+                <div class="col-auto">
+                    <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <div aria-labelledby="accounts-tab" class="tab-pane fade" id="accounts">
         <div>
-            <p>Browser Minecraft accounts:</p>
+            <h5>Minecraft accounts:</h5>
+            <p>These accounts are stored in the browser.</p>
             <div id="accounts-list"></div>
             <hr>
         </div>
         <div id="add-account">
-            <label class="mb-3" for="form_add_ms">Add Microsoft account:</label>
+            <label class="mb-3" for="form_add_ms"><h5>Add Microsoft account:</h5></label>
             <form class="row" id="form_add_ms">
                 <div class="col-auto">
                     <button class="btn btn-primary mb-3" id="login_submit_ms" type="submit">Login with Microsoft
                     </button>
                 </div>
             </form>
-            <label class="mb-3" for="form_add_mc">Add Mojang account:</label>
+            <label class="mb-3" for="form_add_mc"><h5>Add Mojang account:</h5></label>
             <form class="row g-3" id="form_add_mc">
                 <div class="col-auto">
                     <label class="visually-hidden" for="email">Username/Email</label>
