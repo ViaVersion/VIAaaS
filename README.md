@@ -23,11 +23,12 @@ Supported versions: https://viaversion.com/
 ## Setting up server instance
 
 Download: [GitHub Actions](https://github.com/ViaVersion/VIAaaS/actions) (needs to be logged into GitHub)
-or [JitPack](https://jitpack.io/com/github/viaversion/viaaas/master-SNAPSHOT/viaaas-master-SNAPSHOT-all.jar)
+or [JitPack](https://jitpack.io/com/github/ViaVersion/VIAaaS/master-SNAPSHOT/VIAaaS-master-SNAPSHOT-all.jar)
 
-How to start VIAaaS server:
+How to download and start VIAaaS server:
 
 ```sh
+curl -Lf --output VIAaaS-all.jar "https://jitpack.io/com/github/ViaVersion/VIAaaS/master-SNAPSHOT/VIAaaS-master-SNAPSHOT-all.jar"
 java -jar VIAaaS-all.jar
 ```
 
