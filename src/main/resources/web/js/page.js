@@ -173,5 +173,5 @@ function resetHtml() {
 }
 
 function ohNo() {
-    new Date().getDay() == 3 && console.log("it's snapshot day 🐸 my dudes"); new Date().getDate() == 1 && new Date().getMonth() == 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $10");
+    new Date().getDay() == 3 && console.log("it's snapshot day 🐸 my dudes"); new Date().getDate() == 1 && new Date().getMonth() == 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $99");
 }
