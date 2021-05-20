@@ -6,29 +6,29 @@
     <title>VIAaaS</title>
     <meta content="VIAaaS" name="application-name">
     <meta content="VIAaaS" property="og:site_name">
-    <meta content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy" name="description">
+    <meta content="VIAaaS - ViaVersion as a Service - Standalone ViaVersion Proxy" name="description">
     <meta content="VIAaaS" property="og:title">
-    <meta content="VIAaaS - ViaVersion as a Service - ViaVersion standalone proxy" property="og:description">
+    <meta content="VIAaaS - ViaVersion as a Service - Standalone ViaVersion Proxy" property="og:description">
     <meta content="game" property="og:type">
     <meta content="https://cdn.discordapp.com/attachments/698483428915675186/821487447664885770/unknown.png"
           property="og:image">
     <link href="https://cdn.discordapp.com/attachments/698483428915675186/821487447664885770/unknown.png" rel="icon">
     <meta content="default-src 'self';
- style-src https://cdnjs.cloudflare.com/ 'self';
- img-src data: https://cdn.discordapp.com/ https://crafthead.net/ https://crafatar.com/;
- connect-src 'self' http://localhost:*/ https: wss:;
- script-src 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'self' https://ajax.cloudflare.com/ https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/"
+style-src https://cdnjs.cloudflare.com/ 'self';
+img-src data: https://cdn.discordapp.com/ https://crafthead.net/ https://crafatar.com/;
+connect-src 'self' http://localhost:*/ https: wss:;
+script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/ 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"
           http-equiv="Content-Security-Policy">
     <meta content="no-referrer" name="referrer">
     <meta content="noindex" name="robots">
     <meta content="#0468a1" name="theme-color">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/css/bootstrap.min.css"
-          integrity="sha512-N415hCJJdJx+1UBfULt+i+ihvOn42V/kOjOpp1UTh4CZ70Hx5bDlKryWaqEKfY/8EYOu/C2MuyaluJryK1Lb5Q=="
-          crossorigin="anonymous"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/js/bootstrap.bundle.min.js"
-            integrity="sha512-DSdiuNZtfUhehZHXtit9Sa/83i06YSnvT8Js8drwdkVCDMk3JwpIxdhf2oRUByUDB3wguN2iAzoTNfxFAuqGyA=="
-            crossorigin="anonymous"></script>
+    <!-- https://www.srihash.org/ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css"
+          integrity="sha512-Ez0cGzNzHR1tYAv56860NLspgUGuQw16GiOOp/I2LuTmpSK9xDXlgJz3XN4cnpXWDmkNBKXR/VDMTCnAaEooxA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.bundle.min.js"
+            integrity="sha512-sH8JPhKJUeA9PWk3eOcOl8U+lfZTgtBXD41q6cO/slwxGHCxKcW45K4oPCUhHG7NMB4mbKEddVmPuTXtpbCbFA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js"
             integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A=="
             crossorigin="anonymous"></script>
@@ -38,9 +38,9 @@
     <script crossorigin="anonymous"
             integrity="sha512-/yIGjYJZIXZx10ig0yhbK41OiwcqBUxIj0xQJe+NwkMIdS/u07b6Mwo0nvXB4o7A6WiKnKOf92JwE5Ezo27u9Q=="
             src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.min.js"></script>
-    <script crossorigin="anonymous"
-            integrity="sha384-5Fqyq1ncNYhL2mXCdWAFXkf2wWtKeA0mXYp++ryAX1lowD0ctAHFdity37L/ULXh"
-            src="https://alcdn.msauth.net/browser/2.7.0/js/msal-browser.js"></script>
+    <script src="https://alcdn.msauth.net/browser/2.14.2/js/msal-browser.min.js"
+            integrity="sha384-ggh+EF1aSqm+Y4yvv2n17KpurNcZTeYtUZUvhPziElsstmIEubyEB6AIVpKLuZgr"
+            crossorigin="anonymous"></script>
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
@@ -110,7 +110,7 @@
             </form>
         </div>
         <div class="mb-3">
-            <label class="form-label" for="form_ws-url"><h5>WebSocket URL</h5></label>
+            <label class="form-label" for="form_ws_url"><h5>WebSocket URL</h5></label>
             <p>It exchanges sensitive data like minecraft.id tokens, server session hashes and usernames. WSS is
                 required.</p>
             <form class="row g-3" id="form_ws_url">
@@ -126,20 +126,20 @@
 
     <div aria-labelledby="accounts-tab" class="tab-pane fade" id="accounts">
         <div>
-            <h5>Minecraft accounts:</h5>
+            <h5>Minecraft accounts</h5>
             <p>These accounts are stored in the browser.</p>
             <div id="accounts-list"></div>
             <hr>
         </div>
         <div id="add-account">
-            <label class="mb-3" for="form_add_ms"><h5>Add Microsoft account:</h5></label>
+            <label class="mb-3" for="form_add_ms"><h5>Add Microsoft account</h5></label>
             <form class="row" id="form_add_ms">
                 <div class="col-auto">
                     <button class="btn btn-primary mb-3" id="login_submit_ms" type="submit">Login with Microsoft
                     </button>
                 </div>
             </form>
-            <label class="mb-3" for="form_add_mc"><h5>Add Mojang account:</h5></label>
+            <label class="mb-3" for="form_add_mc"><h5>Add Mojang account</h5></label>
             <form class="row g-3" id="form_add_mc">
                 <div class="col-auto">
                     <label class="visually-hidden" for="email">Username/Email</label>
@@ -150,7 +150,7 @@
                     <input class="form-control" id="password" name="password" placeholder="password" type="password">
                 </div>
                 <div class="col-auto">
-                    <button class="btn btn-primary mb-3" id="login_submit_mc" type="submit">Login with Minecraft
+                    <button class="btn btn-primary mb-3" id="login_submit_mc" type="submit">Login with Mojang
                     </button>
                 </div>
             </form>
@@ -159,27 +159,34 @@
 </div>
 
 <div aria-hidden="true" aria-labelledby="aboutModalLabel" class="modal fade" id="aboutModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="aboutModalLabel">About</h5>
                 <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
             </div>
             <div class="modal-body">
+                <pre>
+\\        // // //\\  =>     //||     //||   /=====/
+ \\      // // //  \\       // ||    // ||  //
+  \\    // // //====\\     //==||   //==||  \====\
+   \\  // // //      \\   //   ||  //   ||      //
+<=  \\// // //        \\ //    || //    || /====/</pre>
+                <p>ViaVersion as a Service - Standalone ViaVersion Proxy</p>
+                <hr>
                 <p>Copyright © 2020-2021 <a href="https://github.com/creeper123123321">creeper123123321</a></p>
                 <p>Copyright © 2021 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a>
                 </p>
                 <p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU
-                    Affero General Public License as published by
-                    the Free Software Foundation, either version 3 of the License, or (at your option) any later
-                    version.</p>
+                    Affero General Public License as published by the Free Software Foundation, either version 3 of the
+                    License,
+                    or (at your option) any later version.</p>
                 <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-                    even the implied warranty of
-                    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
-                    more details.</p>
+                    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+                    General
+                    Public License for more details.</p>
                 <p>You should have received a copy of the GNU Affero General Public License along with this program. If
-                    not, see
-                    <a href="https://gnu.org/licenses">http://www.gnu.org/licenses/</a>.</p>
+                    not, see <a href="https://gnu.org/licenses">https://gnu.org/licenses/</a>.</p>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-secondary" href="https://github.com/ViaVersion/VIAaaS/" role="button" type="button">Source
@@ -191,6 +198,7 @@
 </div>
 
 <div class="toast-container position-absolute top-0 end-0 p-3" id="toasts"></div>
+
 <script src="js/account_manager.js"></script>
 <script src="js/auth_ms.js"></script>
 <script src="js/cors_proxy.js"></script>
