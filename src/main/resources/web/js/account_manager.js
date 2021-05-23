@@ -57,12 +57,7 @@ function logoutMojang(id) {
             headers: {"content-type": "application/json"}
         })
         .then(checkFetchSuccess("not success logout"))
-        .then(data => removeMcAccount(id))
-        .catch(e => {
-            if (confirm("failed to invalidate token! error: " + e + " remove account?")) {
-                removeMcAccount(id);
-            }
-        });
+        .finally(() => removeMcAccount(id));
     });
 }
 
