@@ -4,6 +4,7 @@ var listening = document.getElementById("listening");
 var actions = document.getElementById("actions");
 var accounts = document.getElementById("accounts-list");
 var listenVisible = false;
+var workers = new Array(navigator.hardwareConcurrency).fill(null).map(() => new Worker("js/worker.js"));
 
 // On load
 $(() => {
@@ -20,10 +21,9 @@ $(() => {
     $("#form_ws_url").on("submit", e => setWsUrl($("#ws-url").val()));
     $("#form_cors_proxy").on("submit", e => setCorsProxy($("#cors-proxy").val()));
 
-
+    workers.forEach(it => it.onmessage = onWorkerMsg);
     refreshAccountList();
-    // Heroku sleeps in 30 minutes, let's call it every 10 minutes to keep the same address, so Mojang see it as less suspect
-    setInterval(refreshCorsStatus, 10 * 60 * 1000);
+    setInterval(refreshCorsStatus, 10 * 60 * 1000); // Heroku auto sleeps in 30 min
     refreshCorsStatus();
     resetHtml();
 
@@ -99,18 +99,21 @@ function renderActions() {
         addAction("Listen to offline login in VIAaaS instance", () => {
             let user = prompt("Offline username (case-sensitive):", "");
             if (!user) return;
-            let msg = null;
-            do {
-                msg = JSON.stringify({
-                    action: "offline_login",
-                    username: user,
-                    date: Date.now(),
-                    rand: Math.random()
-                });
-            } while (!sha512(msg).startsWith("00000"));
-            socket.send(msg);
+            workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: Math.random()}));
+            addToast("Offline username", "Please wait a minute...");
         });
     }
+}
+
+function onWorkerMsg(e) {
+    console.log(e);
+    if (e.data.action == "completed_pow") onCompletedPoW(e);
+}
+
+function onCompletedPoW(e) {
+    addToast("Offline username", "Completed proof of work");
+    workers.forEach(it => it.postMessage({action: "cancel", id: e.data.id}));
+    socket.send(e.data.msg);
 }
 
 function addAction(text, onClick) {
