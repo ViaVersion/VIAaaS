@@ -44,7 +44,7 @@ function loginMc(user, pass) {
     .then(data => {
         storeMcAccount(data.accessToken, data.clientToken, data.selectedProfile.name, data.selectedProfile.id);
     }).catch(e => addToast("Failed to login", e));
-    $("#form_add_mc input").reset();
+    $("#form_add_mc input").trigger("reset");
 }
 
 function logoutMojang(id) {
