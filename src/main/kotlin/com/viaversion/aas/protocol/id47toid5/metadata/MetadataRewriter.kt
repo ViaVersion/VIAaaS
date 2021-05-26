@@ -9,20 +9,21 @@ import de.gerrygames.viarewind.protocol.protocol1_8to1_7_6_10.metadata.MetaIndex
 object MetadataRewriter {
     fun transform(type: Entity1_10Types.EntityType?, list: MutableList<Metadata>) {
         for (entry in ArrayList(list)) {
-            val metaIndex = MetaIndex1_8to1_7_6_10.searchIndex(type, entry.id)
+            val metaIndex = MetaIndex1_8to1_7_6_10.searchIndex(type, entry.id())
             try {
                 if (metaIndex == null) throw Exception("Could not find valid metadata")
-                if (metaIndex.newType == MetaType1_8.NonExistent) {
+                if (metaIndex.newType == MetaType1_8.NonExistent || metaIndex.newType == null) {
                     list.remove(entry)
                     return
                 }
                 val value = entry.value
-                if (!value.javaClass.isAssignableFrom(metaIndex.oldType.type.outputClass)) {
+                if (value == null
+                    || !value.javaClass.isAssignableFrom(metaIndex.oldType.type().outputClass)) {
                     list.remove(entry)
                     return
                 }
-                entry.metaType = metaIndex.newType
-                entry.id = metaIndex.newIndex
+                entry.setMetaType(metaIndex.newType)
+                entry.setId(metaIndex.newIndex)
                 when (metaIndex.newType) {
                     MetaType1_8.Int -> entry.value = (value as Number).toInt()
                     MetaType1_8.Byte -> {

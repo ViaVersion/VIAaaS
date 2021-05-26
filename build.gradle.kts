@@ -46,12 +46,12 @@ version = "0.4.0-SNAPSHOT+" + try {
 extra.set("archivesBaseName", "VIAaaS")
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://repo.viaversion.com/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://jitpack.io")
+    mavenLocal()
 }
 
 dependencies {
