@@ -4,7 +4,8 @@ var listening = document.getElementById("listening");
 var actions = document.getElementById("actions");
 var accounts = document.getElementById("accounts-list");
 var listenVisible = false;
-var workers = new Array(navigator.hardwareConcurrency).fill(null).map(() => new Worker("js/worker.js"));
+var workers = [];
+$(() => workers = new Array(navigator.hardwareConcurrency).fill(null).map(() => new Worker("js/worker.js")));
 
 // On load
 $(() => {

@@ -1,0 +1,16 @@
+{
+  "short_name": "VIAaaS",
+  "name": "VIAaaS - ViaVersion as a Service",
+  "icons": [{
+    "src": "https://cdn.discordapp.com/attachments/698483428915675186/821487447664885770/unknown.png",
+    "sizes": "128x128",
+    "type": "image/png"
+  }],
+  "start_url": ".",
+  "background_color": "#3367D6",
+  "display": "standalone",
+  "theme_color": "#0468a1",
+  "shortcuts": [],
+  "description": "VIAaaS - Standalone ViaVersion Proxy",
+  "screenshots": []
+}
