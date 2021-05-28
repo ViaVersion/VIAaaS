@@ -6,3 +6,6 @@ self.addEventListener("notificationclick", event => {
   viac.postMessage({tag: event.notification.tag, action: event.action});
 });
 
+addEventListener("fetch", e => {
+  // chrome please show "add to home screen"
+});
