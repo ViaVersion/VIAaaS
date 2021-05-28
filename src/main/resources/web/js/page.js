@@ -6,6 +6,9 @@ var accounts = document.getElementById("accounts-list");
 var listenVisible = false;
 var workers = [];
 $(() => workers = new Array(navigator.hardwareConcurrency).fill(null).map(() => new Worker("js/worker.js")));
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+});
 
 // On load
 $(() => {
