@@ -58,7 +58,8 @@ function addMcAccountToList(id, name, msUser = null) {
     };
     head.className = "account_head";
     head.alt = name + "'s head";
-    head.src = (id.length == 36 || id.length == 32) ? "https://crafatar.com/avatars/" + id + "?overlay" : "https://crafthead.net/helm/" + id;
+    head.src = "https://crafthead.net/helm/" + id;
+    //(id.length == 36 || id.length == 32) ? "https://crafatar.com/avatars/" + id + "?overlay" : "https://crafthead.net/helm/" + id;
     p.append(head);
     p.append(n);
     p.append(remove);
@@ -103,7 +104,8 @@ function renderActions() {
         addAction("Listen to offline login in VIAaaS instance", () => {
             let user = prompt("Offline username (case-sensitive):", "");
             if (!user) return;
-            workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: Math.random()}));
+            let taskId = Math.random();
+            workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId}));
             addToast("Offline username", "Please wait a minute...");
         });
     }
