@@ -14,12 +14,12 @@ window.addEventListener('beforeinstallprompt', e => {
 $(() => {
     if (navigator.serviceWorker) {
         navigator.serviceWorker.register("sw.js")
-            .then(it => it.installing.postMessage({
+            .then(it => navigator.serviceWorker.ready.then(ready => ready.postMessage({
                 action: "cache",
                 urls: performance.getEntriesByType("resource")
                     .map(it => it.name)
                     .filter(it => it.endsWith(".js") || it.endsWith(".css") || it.endsWith(".png"))
-            })); // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
+            }))); // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
     }
 
     ohNo();
