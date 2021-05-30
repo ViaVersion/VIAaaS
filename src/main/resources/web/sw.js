@@ -23,7 +23,7 @@ self.addEventListener("fetch", evt => {
 
 addEventListener("message", e => {
   if (e.data.action == "cache") {
-    event.waitUntil(cache(e.data.urls));
+    e.waitUntil(cache(e.data.urls));
   }
 });
 
