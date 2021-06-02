@@ -32,7 +32,7 @@ function listenPoW(e) {
     });
 
     if (Date.now() >= endTime) {
-        setTimeout(() => listenPoW(e), 1);
+        setTimeout(() => listenPoW(e), 0);
         return;
     }
   } while (!sha512(msg).startsWith("00000"));
