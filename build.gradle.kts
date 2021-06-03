@@ -58,8 +58,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    implementation("com.viaversion:viaversion:4.0.0-1.17-pre4-SNAPSHOT") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:4.0.0-1.17-pre4-SNAPSHOT") { isTransitive = false }
+    implementation("com.viaversion:viaversion:4.0.0-1.17-pre5-SNAPSHOT") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:4.0.0-1.17-pre5-SNAPSHOT") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:dev-SNAPSHOT") { isTransitive = false }
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("io.netty:netty-all:4.1.65.Final")
