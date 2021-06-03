@@ -1,7 +1,7 @@
 VIAaaS
 ---
 
-VIAaaS - ViaVersion ~~acetylsalicylic acid~~ as a Service - Standalone ViaVersion proxy
+VIAaaS - ViaVersion ~~2-acetoxybenzoic acid~~ as a Service - Standalone ViaVersion proxy
 
 Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Instances
 
