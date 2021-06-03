@@ -10,6 +10,7 @@ import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
+import com.viaversion.aas.setAutoRead
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
@@ -93,6 +94,7 @@ class HandshakeState : MinecraftConnectionState {
         handleVirtualHost(handler, packet)
 
         if (packet.nextState == State.STATUS) { // see LoginState for LOGIN
+            handler.data.frontChannel.setAutoRead(false)
             handler.coroutineScope.launch(Dispatchers.IO) {
                 connectBack(handler, packet.address, packet.port, packet.nextState)
             }

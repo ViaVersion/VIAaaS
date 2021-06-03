@@ -165,6 +165,7 @@ class LoginState : MinecraftConnectionState {
         frontName = loginStart.username
         backName = backName ?: frontName
 
+        handler.data.frontChannel.setAutoRead(false)
         handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 if (frontOnline != null) {

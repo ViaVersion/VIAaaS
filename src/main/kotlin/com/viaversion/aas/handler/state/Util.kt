@@ -134,7 +134,6 @@ suspend fun connectBack(
     state: State,
     extraData: String? = null
 ) {
-    handler.data.frontChannel.setAutoRead(false)
     try {
         val addresses = resolveBackendAddresses(HostAndPort.fromParts(address, port))
 
