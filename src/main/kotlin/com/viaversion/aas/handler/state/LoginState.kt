@@ -14,7 +14,6 @@ import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import java.util.*
@@ -99,7 +98,7 @@ class LoginState : MinecraftConnectionState {
         val frontHandler = handler.data.frontHandler
         val backChan = handler.data.backChannel!!
 
-        GlobalScope.launch(Dispatchers.IO) {
+        handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 val playerId = callbackPlayerId.await()
 
@@ -145,7 +144,7 @@ class LoginState : MinecraftConnectionState {
         }
 
         handler.data.frontChannel.setAutoRead(false)
-        GlobalScope.launch(Dispatchers.IO) {
+        handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 val profile = hasJoined(frontName, frontHash)
                 val id = profile.get("id")!!.asString
@@ -166,7 +165,7 @@ class LoginState : MinecraftConnectionState {
         frontName = loginStart.username
         backName = backName ?: frontName
 
-        GlobalScope.launch {
+        handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 if (frontOnline != null) {
                     when (frontOnline) {
@@ -176,10 +175,9 @@ class LoginState : MinecraftConnectionState {
                     val id = callbackPlayerId.await()
                     mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
                 }
-                connectBack(handler, backAddress.host, backAddress.port, State.LOGIN, extraData) {
-                    loginStart.username = backName!!
-                    send(handler.data.backChannel!!, loginStart, true)
-                }
+                connectBack(handler, backAddress.host, backAddress.port, State.LOGIN, extraData)
+                loginStart.username = backName!!
+                send(handler.data.backChannel!!, loginStart, true)
             } catch (e: Exception) {
                 handler.data.frontChannel.pipeline().fireExceptionCaught(StacklessException("Login error: $e", e))
             }

@@ -14,7 +14,7 @@ plugins {
     kotlin("jvm") version "1.5.10"
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("com.github.ben-manes.versions") version "0.38.0"
+    id("com.github.ben-manes.versions") version "0.39.0"
     id("com.palantir.git-version") version "0.12.3"
     id("org.gradlewebtools.minify") version "1.1.1" apply false
 }

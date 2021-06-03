@@ -5,14 +5,16 @@ import com.google.common.cache.CacheLoader
 import com.google.common.net.HostAndPort
 import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.VIAaaSAddress
+import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.codec.packet.Packet
-import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
@@ -29,21 +31,24 @@ class HandshakeState : MinecraftConnectionState {
     override val state: State
         get() = State.HANDSHAKE
 
-    override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
-        if (packet !is Handshake) throw StacklessException("Invalid packet!")
+    private fun checkRateLimit(handler: MinecraftHandler) {
+        if (!RateLimit.rateLimitByIp.get((handler.endRemoteAddress as InetSocketAddress).address).tryAcquire()) {
+            throw StacklessException("Rate-limited")
+        }
+    }
 
+    private fun handleNextState(handler: MinecraftHandler, packet: Handshake) {
         handler.data.frontVer = packet.protocolId
         when (packet.nextState.ordinal) {
             1 -> handler.data.state = StatusState
             2 -> handler.data.state = LoginState()
             else -> throw StacklessException("Invalid next state")
         }
+    }
 
-        if (!RateLimit.rateLimitByIp.get((handler.endRemoteAddress as InetSocketAddress).address).tryAcquire()) {
-            throw StacklessException("Rate-limited")
-        }
+    private fun handleVirtualHost(handler: MinecraftHandler, packet: Handshake) {
         val virtualPort = packet.port
-        val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "").ifEmpty { null } // todo
+        val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "").ifEmpty { null }
         val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
 
         val parsed = VIAaaSConfig.hostName.map {
@@ -58,10 +63,10 @@ class HandshakeState : MinecraftConnectionState {
         packet.address = parsed.serverAddress!!
         packet.port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
 
-        handler.data.viaBackServerVer = backProto
         var frontOnline = parsed.online
         if (VIAaaSConfig.forceOnlineMode) frontOnline = true
 
+        handler.data.viaBackServerVer = backProto
         (handler.data.state as? LoginState)?.also {
             it.frontOnline = frontOnline
             it.backName = parsed.username
@@ -78,9 +83,19 @@ class HandshakeState : MinecraftConnectionState {
         if (!hadHostname && VIAaaSConfig.requireHostName) {
             throw StacklessException("Missing parts in hostname")
         }
+    }
 
-        if (packet.nextState == State.STATUS) {
-            connectBack(handler, packet.address, packet.port, packet.nextState) {}
+    override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
+        if (packet !is Handshake) throw StacklessException("Invalid packet!")
+
+        handleNextState(handler, packet)
+        checkRateLimit(handler)
+        handleVirtualHost(handler, packet)
+
+        if (packet.nextState == State.STATUS) { // see LoginState for LOGIN
+            handler.coroutineScope.launch(Dispatchers.IO) {
+                connectBack(handler, packet.address, packet.port, packet.nextState)
+            }
         }
     }
 

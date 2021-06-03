@@ -23,7 +23,7 @@ object Protocol1_7_6to1_7_2 : AbstractSimpleProtocol() {
                 map(Type.VAR_INT)
                 map(Type.STRING, INSERT_DASHES)
                 map(Type.STRING)
-                create { packetWrapper -> packetWrapper.write(Type.VAR_INT, 0) }
+                create(Type.VAR_INT, 0)
             }
         })
     }

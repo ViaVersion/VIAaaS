@@ -19,7 +19,6 @@ import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.asCompletableFuture
-import kotlinx.coroutines.time.delay
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.time.Duration
@@ -97,19 +96,25 @@ class WebDashboardServer {
             val msg = """Requester: $id $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})
 Backend: $backAddress"""
             listeners[id]?.forEach {
-                it.ws.send(
-                    JsonObject().also {
-                        it.addProperty("action", "session_hash_request")
-                        it.addProperty("user", name)
-                        it.addProperty("session_hash", hash)
-                        it.addProperty("message", msg)
-                    }.toString()
-                )
-                it.ws.flush()
+                coroutineScope {
+                    launch {
+                        it.ws.send(
+                            JsonObject().also {
+                                it.addProperty("action", "session_hash_request")
+                                it.addProperty("user", name)
+                                it.addProperty("session_hash", hash)
+                                it.addProperty("message", msg)
+                            }.toString()
+                        )
+                        it.ws.flush()
+                    }
+                }
             }
-            GlobalScope.launch {
-                delay(Duration.ofSeconds(20))
-                future.completeExceptionally(StacklessException("No response from browser"))
+            coroutineScope {
+                launch {
+                    delay(20_000)
+                    future.completeExceptionally(StacklessException("No response from browser"))
+                }
             }
         }
         return future

@@ -1,13 +1,16 @@
 package com.viaversion.aas.handler
 
-import com.viaversion.aas.mcLogger
 import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.mcLogger
 import com.viaversion.aas.setAutoRead
 import com.viaversion.viaversion.exception.CancelCodecException
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.proxy.Socks5ProxyHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import java.net.SocketAddress
 import java.nio.channels.ClosedChannelException
 
@@ -18,6 +21,7 @@ class MinecraftHandler(
     lateinit var endRemoteAddress: SocketAddress
     val other: Channel? get() = if (frontEnd) data.backChannel else data.frontChannel
     var loggedDc = false
+    val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         if (ctx.channel().isActive) {
@@ -33,6 +37,7 @@ class MinecraftHandler(
     override fun channelInactive(ctx: ChannelHandlerContext) {
         other?.close()
         data.state.onInactivated(this)
+        coroutineScope.cancel()
     }
 
     override fun channelReadComplete(ctx: ChannelHandlerContext?) {

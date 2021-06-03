@@ -47,9 +47,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
             map(Type.UNSIGNED_BYTE) //Difficulty
             map(Type.UNSIGNED_BYTE) //Max players
             map(Type.STRING) //Level Type
-            create { packetWrapper ->
-                packetWrapper.write(Type.BOOLEAN, false) //Reduced Debug Info
-            }
+            create(Type.BOOLEAN, false) //Reduced Debug Info
         }
     })
 
@@ -57,9 +55,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     this.registerClientbound(State.PLAY, 0x02, 0x02, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.STRING) //Chat Message
-            create { packetWrapper ->
-                packetWrapper.write(Type.BYTE, 0.toByte()) //Position (chat box)
-            }
+            create(Type.BYTE, 0.toByte()) //Position (chat box)
         }
     })
 
@@ -427,7 +423,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 val newWrapper = PacketWrapper.create(0x17, newPacketBuf, packetWrapper.user())
                 newWrapper.passthrough(Type.STRING)
                 newWrapper.write(Type.SHORT, newPacketBuf.readableBytes().toShort())
-                newWrapper.sendToServer(Protocol1_8To1_7_6::class.java, true, true)
+                newWrapper.sendToServer(Protocol1_8To1_7_6::class.java)
             }
         }
     })
@@ -463,10 +459,8 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     //Animation
     this.registerServerbound(State.PLAY, 0x0A, 0x0A, object : PacketRemapper() {
         override fun registerMap() {
-            create { packetWrapper ->
-                packetWrapper.write(Type.INT, 0) //Entity Id, hopefully 0 is ok
-                packetWrapper.write(Type.BYTE, 1.toByte()) //Animation
-            }
+            create(Type.INT, 0) //Entity Id, hopefully 0 is ok
+            create(Type.BYTE, 1.toByte()) //Animation
         }
     })
 
@@ -478,7 +472,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
             map(Type.BYTE)
             map(Type.BYTE)
             map(Type.BOOLEAN)
-            create { packetWrapper -> packetWrapper.write(Type.BYTE, 0.toByte()) }
+            create(Type.BYTE, 0.toByte())
             handler { packetWrapper ->
                 val flags = packetWrapper.read(Type.UNSIGNED_BYTE)
                 packetWrapper.write(Type.BOOLEAN, flags and 1 == 1.toShort())

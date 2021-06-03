@@ -227,9 +227,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             map(Type.BYTE) //x
             map(Type.BYTE) //y
             map(Type.BYTE) //z
-            create { packetWrapper ->
-                packetWrapper.write(Type.BOOLEAN, true) //OnGround
-            }
+            create(Type.BOOLEAN, true) //OnGround
         }
     })
 
@@ -239,9 +237,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //yaw
             map(Type.BYTE) //pitch
-            create { packetWrapper ->
-                packetWrapper.write(Type.BOOLEAN, true) //OnGround
-            }
+            create(Type.BOOLEAN, true) //OnGround
         }
     })
 
@@ -254,9 +250,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             map(Type.BYTE) //z
             map(Type.BYTE) //yaw
             map(Type.BYTE) //pitch
-            create { packetWrapper ->
-                packetWrapper.write(Type.BOOLEAN, true) //OnGround
-            }
+            create(Type.BOOLEAN, true) //OnGround
         }
     })
 
@@ -269,9 +263,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             map(Type.INT) //z
             map(Type.BYTE) //yaw
             map(Type.BYTE) //pitch
-            create { packetWrapper ->
-                packetWrapper.write(Type.BOOLEAN, true) //OnGround
-            }
+            create(Type.BOOLEAN, true) //OnGround
         }
     })
 
@@ -310,7 +302,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             map(Type.BYTE) //Effect Id
             map(Type.BYTE) //Amplifier
             map(Type.SHORT, Type.VAR_INT) //Duration
-            create { packetWrapper -> packetWrapper.write(Type.BOOLEAN, false) } //Hide Particles
+            create(Type.BOOLEAN, false) //Hide Particles
         }
     })
 

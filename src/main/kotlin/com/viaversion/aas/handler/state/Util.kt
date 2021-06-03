@@ -16,8 +16,6 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
 import io.netty.resolver.NoopAddressResolverGroup
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -51,7 +49,7 @@ private fun createBackChannel(
                 mcLogger.info("+ ${handler.endRemoteAddress} -> $socketAddr")
                 handler.data.backChannel = it.channel() as SocketChannel
 
-                GlobalScope.launch {
+                handler.coroutineScope.launch {
                     if (handler.data.viaBackServerVer == null) {
                         try {
                             val detectedProtocol = withTimeoutOrNull(10_000) {
@@ -129,20 +127,21 @@ private fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAd
     }
 }
 
-fun connectBack(handler: MinecraftHandler, address: String, port: Int, state: State, extraData: String? = null, success: () -> Unit) {
+suspend fun connectBack(
+    handler: MinecraftHandler,
+    address: String,
+    port: Int,
+    state: State,
+    extraData: String? = null
+) {
     handler.data.frontChannel.setAutoRead(false)
-    GlobalScope.launch(Dispatchers.IO) {
-        try {
-            val addresses = resolveBackendAddresses(HostAndPort.fromParts(address, port))
+    try {
+        val addresses = resolveBackendAddresses(HostAndPort.fromParts(address, port))
 
-            if (addresses.isEmpty()) throw StacklessException("Hostname has no IP address")
+        if (addresses.isEmpty()) throw StacklessException("Hostname has no IP address")
 
-            tryBackAddresses(handler, addresses, state, extraData)
-            success()
-        } catch (e: Exception) {
-            handler.data.frontChannel.eventLoop().submit {
-                handler.disconnect("Couldn't connect: $e")
-            }
-        }
+        tryBackAddresses(handler, addresses, state, extraData)
+    } catch (e: Exception) {
+        throw StacklessException("Couldn't connect", e)
     }
 }
