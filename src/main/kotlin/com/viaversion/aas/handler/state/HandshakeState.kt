@@ -96,7 +96,11 @@ class HandshakeState : MinecraftConnectionState {
         if (packet.nextState == State.STATUS) { // see LoginState for LOGIN
             handler.data.frontChannel.setAutoRead(false)
             handler.coroutineScope.launch(Dispatchers.IO) {
-                connectBack(handler, packet.address, packet.port, packet.nextState)
+                try {
+                    connectBack(handler, packet.address, packet.port, packet.nextState)
+                } catch (e: Exception) {
+                    handler.data.frontChannel.pipeline().fireExceptionCaught(e)
+                }
             }
         }
     }
