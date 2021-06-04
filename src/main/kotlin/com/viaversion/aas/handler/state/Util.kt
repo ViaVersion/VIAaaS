@@ -109,7 +109,7 @@ private suspend fun tryBackAddresses(
         }
     }
 
-    throw latestException
+    throw latestException ?: StacklessException("No address found")
 }
 
 private fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAddress> {
