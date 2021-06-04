@@ -232,7 +232,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
                         y.toLong(),
                         z.toLong(),
                         direction
-                    ) && !isPlaceable(item.identifier)
+                    ) && !isPlaceable(item.identifier())
                 ) packetWrapper.cancel()
                 for (i in 0..2) {
                     if (packetWrapper.isReadable(Type.BYTE, 0)) {

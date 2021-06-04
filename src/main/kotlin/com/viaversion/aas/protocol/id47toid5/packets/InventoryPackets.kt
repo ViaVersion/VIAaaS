@@ -2,6 +2,7 @@ package com.viaversion.aas.protocol.id47toid5.packets
 
 import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.storage.Windows
+import com.viaversion.viaversion.api.minecraft.item.DataItem
 import com.viaversion.viaversion.api.minecraft.item.Item
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
@@ -67,7 +68,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
                     items = arrayOfNulls(old.size + 1)
                     items[0] = old[0]
                     System.arraycopy(old, 1, items, 2, old.size - 1)
-                    items[1] = Item(351, 3.toByte(), 4.toShort(), null)
+                    items[1] = DataItem(351, 3.toByte(), 4.toShort(), null)
                 }
                 packetWrapper.write(Type.ITEM_ARRAY, items) //Items
             }

@@ -402,7 +402,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 ) {
                     packetWrapper.read(Type.SHORT) //length
                     val book: Item = packetWrapper.read(Types1_7_6_10.COMPRESSED_NBT_ITEM)
-                    val tag = book.tag
+                    val tag = book.tag()
                     if (tag != null && tag.contains("pages")) {
                         val pages = tag.get<ListTag>("pages")
                         if (pages != null) {

@@ -109,7 +109,7 @@ private suspend fun tryBackAddresses(
         }
     }
 
-    throw StacklessException("Latest attempt failed", latestException)
+    throw latestException
 }
 
 private fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAddress> {
@@ -141,6 +141,6 @@ suspend fun connectBack(
 
         tryBackAddresses(handler, addresses, state, extraData)
     } catch (e: Exception) {
-        throw StacklessException("Couldn't connect", e)
+        throw StacklessException("Couldn't connect: " + e, e)
     }
 }
