@@ -98,7 +98,7 @@ class LoginState : MinecraftConnectionState {
         val frontHandler = handler.data.frontHandler
         val backChan = handler.data.backChannel!!
 
-        handler.coroutineScope.launch(Dispatchers.IO) {
+        handler.coroutineScope.launch {
             try {
                 val playerId = callbackPlayerId.await()
 

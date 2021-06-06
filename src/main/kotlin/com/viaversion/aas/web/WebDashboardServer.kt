@@ -14,6 +14,7 @@ import com.viaversion.aas.parseUndashedId
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.webLogger
 import io.ipinfo.api.IPInfo
+import io.ipinfo.api.model.IPResponse
 import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
@@ -65,7 +66,7 @@ class WebDashboardServer {
     val usernameIdCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
-            GlobalScope.async(Dispatchers.IO) {
+            CoroutineScope(Dispatchers.IO).async {
                 httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
                     ?.get("id")?.asString?.let { parseUndashedId(it) }
             }.asCompletableFuture()
@@ -83,34 +84,34 @@ class WebDashboardServer {
         if (!listeners.containsKey(id)) {
             future.completeExceptionally(StacklessException("No browser listening"))
         } else {
-            val info = withContext(Dispatchers.IO) {
-                (address as? InetSocketAddress)?.let {
-                    try {
-                        it.address?.hostName // resolve it
-                        ipInfo.lookupIP(it.address?.hostAddress?.substringBefore("%"))
-                    } catch (ignored: Exception) {
-                        null
+            coroutineScope {
+                launch(Dispatchers.IO) {
+                    var info: IPResponse? = null
+                    (address as? InetSocketAddress)?.let {
+                        try {
+                            val ipLookup = async(Dispatchers.IO) {
+                                ipInfo.lookupIP(it.address?.hostAddress?.substringBefore("%"))
+                            }
+                            val reverseLookup = async(Dispatchers.IO) {
+                                it.address?.hostName
+                            }
+                            info = ipLookup.await()
+                            reverseLookup.await()
+                        } catch (ignored: Exception) {
+                        }
                     }
-                }
-            }
-            val msg = """Requester: $id $address (${info?.org}, ${info?.city}, ${info?.region}, ${info?.countryCode})
-Backend: $backAddress"""
-            listeners[id]?.forEach {
-                coroutineScope {
-                    launch {
-                        it.ws.send(
-                            JsonObject().also {
-                                it.addProperty("action", "session_hash_request")
-                                it.addProperty("user", name)
-                                it.addProperty("session_hash", hash)
-                                it.addProperty("message", msg)
-                            }.toString()
-                        )
+                    val msg = "Requester: $id $address (${info?.org}, ${info?.city}, ${info?.region}, " +
+                            "${info?.countryCode})\nBackend: $backAddress"
+                    listeners[id]?.forEach {
+                        it.ws.send(JsonObject().also {
+                            it.addProperty("action", "session_hash_request")
+                            it.addProperty("user", name)
+                            it.addProperty("session_hash", hash)
+                            it.addProperty("message", msg)
+                        }.toString())
                         it.ws.flush()
                     }
                 }
-            }
-            coroutineScope {
                 launch {
                     delay(20_000)
                     future.completeExceptionally(StacklessException("No response from browser"))

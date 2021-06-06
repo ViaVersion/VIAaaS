@@ -168,11 +168,12 @@ fun readRemainingBytes(byteBuf: ByteBuf) = Type.REMAINING_BYTES.read(byteBuf)!!
 fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) }
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {
-    return httpClient.get(
-        "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
-                UrlEscapers.urlFormParameterEscaper().escape(username) +
-                "&serverId=$hash"
-    ) ?: throw StacklessException("Couldn't authenticate with session servers")
+    return try {
+        httpClient.get("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
+                    UrlEscapers.urlFormParameterEscaper().escape(username) + "&serverId=$hash")
+    } catch (e: Exception) {
+        throw StacklessException("Couldn't authenticate with session servers", e)
+    }
 }
 
 fun generate128Bits() = ByteArray(16).also { secureRandom.nextBytes(it) }
