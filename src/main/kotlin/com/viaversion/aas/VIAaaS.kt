@@ -106,8 +106,10 @@ fun main(args: Array<String>) {
         bindPorts(args)
 
         initFuture.complete(Unit)
-        VIAaaSConsole.start()
         addShutdownHook()
+        
+        VIAaaSConsole.start()
+        
         serverFinishing.join()
     } catch (e: Exception) {
         e.printStackTrace()
