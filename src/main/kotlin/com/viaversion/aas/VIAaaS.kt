@@ -108,7 +108,7 @@ fun main(args: Array<String>) {
         initFuture.complete(Unit)
         addShutdownHook()
         
-        VIAaaSConsole.start()
+        Thread { VIAaaSConsole.start() }.start()
         
         serverFinishing.join()
     } catch (e: Exception) {
