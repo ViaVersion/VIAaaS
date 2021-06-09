@@ -3,6 +3,7 @@ package com.viaversion.aas.codec.packet.handshake
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.types.StringType
 import io.netty.buffer.ByteBuf
 import kotlin.properties.Delegates
 
@@ -14,7 +15,7 @@ class Handshake : Packet {
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         protocolId = Type.VAR_INT.readPrimitive(byteBuf)
-        address = Type.STRING.read(byteBuf)
+        address = StringType(255).read(byteBuf)
         port = byteBuf.readUnsignedShort()
         nextState = State.values()[Type.VAR_INT.readPrimitive(byteBuf)]
     }

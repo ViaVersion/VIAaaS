@@ -26,17 +26,15 @@ class Chunk1_8to1_7_6_10(
             filteredChunks.forEach {
                 val blockIds = it.blockLSBArray
                 val nibblearray = it.metadataArray
-                for (ind in blockIds.indices) {
-                    val id = blockIds[ind].toInt() and 255
-                    val px = ind and 15
-                    val py = ind.shr(8).and(15)
-                    val pz = ind.shr(4).and(15)
-                    val data = nibblearray[px, py, pz].toInt()
+                for (iBlock in blockIds.indices) {
+                    val id = blockIds[iBlock].toInt() and 0xFF
+                    val x = iBlock and 0xF
+                    val y = iBlock.shr(8).and(0xF)
+                    val z = iBlock.shr(4).and(0xF)
+                    val data = nibblearray[x, y, z].toInt()
 
                     //data = SpigotDebreakifier.getCorrectedData(id, data);
-                    val `val` = (id shl 4 or data).toChar()
-                    buf.writeByte(`val`.toInt() and 255)
-                    buf.writeByte(`val`.toInt().shr(8).and(255))
+                    buf.writeShortLE(id.shl(4).or(data))
                 }
             }
             filteredChunks.forEach {

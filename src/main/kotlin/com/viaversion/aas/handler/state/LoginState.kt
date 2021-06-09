@@ -158,7 +158,6 @@ class LoginState : MinecraftConnectionState {
     }
 
     fun handleLoginStart(handler: MinecraftHandler, loginStart: LoginStart) {
-        if (loginStart.username.length > 16) throw badLength
         if (started) throw StacklessException("Login already started")
         started = true
 
