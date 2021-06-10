@@ -161,6 +161,6 @@ Can I use it to connect to .onion Minecraft hidden servers?
 - You can use .onion addresses if the instance is proxying the backend connections to TOR. Note that VIAaaS may log your
   requests.
 
-Can you support more versions?
+Can you support more versions / Is there some alternative?
 
-- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion)
+- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (lenni0451.net:25563)
