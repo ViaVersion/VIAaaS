@@ -100,7 +100,7 @@ class WebDashboardServer {
                                 DefaultDnsQuestion(reverseLookup(it.address), DnsRecordType.PTR)
                             )
                             info = ipLookup.await()
-                            ptr = dnsQuery.suspendAwait().first { it is DnsPtrRecord }?.hostname()
+                            ptr = dnsQuery.suspendAwait().firstNotNullOfOrNull { it as? DnsPtrRecord }?.hostname()
                         } catch (ignored: Exception) {
                         }
                     }
