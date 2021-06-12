@@ -10,10 +10,26 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
 import io.ktor.client.request.*
+import io.ktor.server.netty.*
 import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
+import io.netty.channel.ChannelFactory
 import io.netty.channel.ChannelFutureListener
+import io.netty.channel.EventLoopGroup
+import io.netty.channel.epoll.*
+import io.netty.channel.kqueue.*
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.DatagramChannel
+import io.netty.channel.socket.ServerSocketChannel
+import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket.nio.NioDatagramChannel
+import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.DecoderException
+import io.netty.handler.codec.dns.DefaultDnsQuestion
+import io.netty.handler.codec.dns.DefaultDnsRawRecord
+import io.netty.handler.codec.dns.DefaultDnsRecordDecoder
+import io.netty.handler.codec.dns.DnsRecordType
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.net.InetAddress
@@ -28,7 +44,6 @@ import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import javax.naming.directory.InitialDirContext
 
 val badLength = DecoderException("Invalid length!")
 val mcLogger = LoggerFactory.getLogger("VIAaaS MC")
@@ -37,18 +52,27 @@ val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
 
 val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()
 
-fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
+suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
     if (hostAndPort.host.endsWith(".onion", ignoreCase = true)) return hostAndPort
     if (hostAndPort.port == 25565) {
         try {
-            // https://github.com/GeyserMC/Geyser/blob/99e72f35b308542cf0dbfb5b58816503c3d6a129/connector/src/main/java/org/geysermc/connector/GeyserConnector.java
-            val attr = InitialDirContext()
-                .getAttributes("dns:///_minecraft._tcp.${hostAndPort.host}", arrayOf("SRV"))["SRV"]
-            if (attr != null && attr.size() > 0) {
-                val record = (attr.get(0) as String).split(" ")
-                return HostAndPort.fromParts(record[3], record[2].toInt())
-            }
-        } catch (ignored: Exception) { // DuckDNS workaround
+            // stolen from PacketLib (MIT) https://github.com/Camotoy/PacketLib/blob/312cff5f975be54cf2d92208ae2947dbda8b9f59/src/main/java/com/github/steveice10/packetlib/tcp/TcpClientSession.java
+            dnsResolver
+                .resolveAll(DefaultDnsQuestion("_minecraft._tcp.${hostAndPort.host}", DnsRecordType.SRV))
+                .suspendAwait()
+                .forEach { record ->
+                    if (record is DefaultDnsRawRecord && record.type() == DnsRecordType.SRV) {
+                        val content = record.content()
+
+                        content.skipBytes(4)
+                        val port = content.readUnsignedShort()
+                        val address = DefaultDnsRecordDecoder.decodeName(content)
+
+                        return HostAndPort.fromParts(address, port)
+                    }
+                }
+        } catch (e: Exception) {
+            viaaasLogger.debug("Couldn't resolve SRV", e)
         }
     }
     return hostAndPort
@@ -169,8 +193,10 @@ fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) 
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {
     return try {
-        httpClient.get("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
-                    UrlEscapers.urlFormParameterEscaper().escape(username) + "&serverId=$hash")
+        httpClient.get(
+            "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
+                    UrlEscapers.urlFormParameterEscaper().escape(username) + "&serverId=$hash"
+        )
     } catch (e: Exception) {
         throw StacklessException("Couldn't authenticate with session servers", e)
     }
@@ -189,4 +215,49 @@ fun sha512Hex(data: ByteArray): String {
     return MessageDigest.getInstance("SHA-512").digest(data)
         .asUByteArray()
         .joinToString("") { it.toString(16).padStart(2, '0') }
+}
+
+fun eventLoopGroup(): EventLoopGroup {
+    if (VIAaaSConfig.isNativeTransportMc) {
+        if (Epoll.isAvailable()) return EpollEventLoopGroup()
+        if (KQueue.isAvailable()) return KQueueEventLoopGroup()
+    }
+    return NioEventLoopGroup()
+}
+
+fun channelServerSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<ServerSocketChannel> {
+    return when (eventLoop) {
+        is EpollEventLoopGroup -> ChannelFactory { EpollServerSocketChannel() }
+        is KQueueEventLoopGroup -> ChannelFactory { KQueueServerSocketChannel() }
+        else -> ChannelFactory { NioServerSocketChannel() }
+    }
+}
+
+fun channelSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<SocketChannel> {
+    return when (eventLoop) {
+        is EpollEventLoopGroup -> ChannelFactory { EpollSocketChannel() }
+        is KQueueEventLoopGroup -> ChannelFactory { KQueueSocketChannel() }
+        else -> ChannelFactory { NioSocketChannel() }
+    }
+}
+
+fun channelDatagramFactory(eventLoop: EventLoopGroup): ChannelFactory<DatagramChannel> {
+    return when (eventLoop) {
+        is EpollEventLoopGroup -> ChannelFactory { EpollDatagramChannel() }
+        is KQueueEventLoopGroup -> ChannelFactory { KQueueDatagramChannel() }
+        else -> ChannelFactory { NioDatagramChannel() }
+    }
+}
+
+fun reverseLookup(address: InetAddress): String {
+    val bytes = address.address
+    return if (bytes.size == 4) {
+        // IPv4
+        bytes.reversed()
+            .joinToString(".") { it.toUByte().toString() } + ".in-addr.arpa"
+    } else { // IPv6
+        bytes.flatMap { it.toUByte().toString(16).padStart(2, '0').toCharArray().map { it.toString() } }
+            .asReversed()
+            .joinToString(".") + ".ip6.arpa"
+    }
 }

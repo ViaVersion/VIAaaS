@@ -10,29 +10,25 @@ import com.viaversion.aas.handler.autoprotocol.ProtocolDetector
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
+import io.ktor.server.netty.*
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
-import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
 import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.net.Inet4Address
-import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.util.concurrent.CompletableFuture
 
-private fun createBackChannel(
+private suspend fun createBackChannel(
     handler: MinecraftHandler,
     socketAddr: InetSocketAddress,
     state: State,
     extraData: String?
-): CompletableFuture<Channel> {
-    val future = CompletableFuture<Channel>()
+): Channel {
     val loop = handler.data.frontChannel.eventLoop()
-    Bootstrap()
+    val channel = Bootstrap()
         .handler(BackEndInit(handler.data))
         .channelFactory(channelSocketFactory(loop.parent()))
         .group(loop)
@@ -42,47 +38,40 @@ private fun createBackChannel(
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // We need to show the error before the client timeout
         .resolver(NoopAddressResolverGroup.INSTANCE)
         .connect(socketAddr)
-        .addListener(ChannelFutureListener {
-            try {
-                if (!it.isSuccess) throw it.cause()
+        .also { it.suspendAwait() }
+        .channel()
 
-                mcLogger.info("+ ${handler.endRemoteAddress} -> $socketAddr")
-                handler.data.backChannel = it.channel() as SocketChannel
+    mcLogger.info("+ ${handler.endRemoteAddress} -> $socketAddr")
+    handler.data.backChannel = channel as SocketChannel
 
-                handler.coroutineScope.launch {
-                    if (handler.data.viaBackServerVer == null) {
-                        try {
-                            val detectedProtocol = withTimeoutOrNull(10_000) {
-                                ProtocolDetector.detectVersion(socketAddr).await()
-                            }
-
-                            if (detectedProtocol != null && detectedProtocol.version != -1) {
-                                handler.data.viaBackServerVer = detectedProtocol.version
-                            } else {
-                                handler.data.viaBackServerVer = -1 // fallback
-                            }
-                        } catch (e: Exception) {
-                            mcLogger.warn("Failed to auto-detect version for $socketAddr: $e")
-                            mcLogger.debug("Stacktrace: ", e)
-                        }
-                    }
-
-                    val packet = Handshake()
-                    packet.nextState = state
-                    packet.protocolId = handler.data.frontVer!!
-                    packet.address = socketAddr.hostString + if (extraData != null) 0.toChar() + extraData else ""
-                    packet.port = socketAddr.port
-
-                    forward(handler, packet, true)
-
-                    handler.data.frontChannel.setAutoRead(true)
-                    future.complete(it.channel())
-                }
-            } catch (e: Exception) {
-                future.completeExceptionally(it.cause())
+    if (handler.data.viaBackServerVer == null) {
+        try {
+            val detectedProtocol = withTimeoutOrNull(10_000) {
+                ProtocolDetector.detectVersion(socketAddr).await()
             }
-        })
-    return future
+
+            if (detectedProtocol != null && detectedProtocol.version != -1) {
+                handler.data.viaBackServerVer = detectedProtocol.version
+            } else {
+                handler.data.viaBackServerVer = -1 // fallback
+            }
+        } catch (e: Exception) {
+            mcLogger.warn("Failed to auto-detect version for $socketAddr: $e")
+            mcLogger.debug("Stacktrace: ", e)
+        }
+    }
+
+    val packet = Handshake()
+    packet.nextState = state
+    packet.protocolId = handler.data.frontVer!!
+    packet.address = socketAddr.hostString + if (extraData != null) 0.toChar() + extraData else ""
+    packet.port = socketAddr.port
+
+    forward(handler, packet, true)
+
+    handler.data.frontChannel.setAutoRead(true)
+
+    return channel
 }
 
 private suspend fun tryBackAddresses(
@@ -102,7 +91,7 @@ private suspend fun tryBackAddresses(
                 throw StacklessException("Not allowed")
             }
 
-            createBackChannel(handler, socketAddr, state, extraData).await()
+            createBackChannel(handler, socketAddr, state, extraData)
             return // Finally it worked!
         } catch (e: Exception) {
             latestException = e
@@ -112,7 +101,7 @@ private suspend fun tryBackAddresses(
     throw latestException ?: StacklessException("No address found")
 }
 
-private fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAddress> {
+private suspend fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAddress> {
     val srvResolved = resolveSrv(hostAndPort)
 
     val removedEndDot = srvResolved.host.replace(Regex("\\.$"), "")
@@ -120,7 +109,9 @@ private fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAd
     return when {
         removedEndDot.endsWith(".onion", ignoreCase = true) ->
             listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.port))
-        else -> InetAddress.getAllByName(srvResolved.host)
+        else -> dnsResolver
+            .resolveAll(srvResolved.host)
+            .suspendAwait()
             .groupBy { it is Inet4Address }
             .toSortedMap() // I'm sorry, IPv4, but my true love is IPv6... We can still be friends though...
             .map { InetSocketAddress(it.value.random(), srvResolved.port) }
@@ -137,10 +128,10 @@ suspend fun connectBack(
     try {
         val addresses = resolveBackendAddresses(HostAndPort.fromParts(address, port))
 
-        if (addresses.isEmpty()) throw StacklessException("Hostname has no IP address")
+        if (addresses.isEmpty()) throw StacklessException("Hostname has no IP addresses")
 
         tryBackAddresses(handler, addresses, state, extraData)
     } catch (e: Exception) {
-        throw StacklessException("Couldn't connect: " + e, e)
+        throw StacklessException("Couldn't connect: $e", e)
     }
 }

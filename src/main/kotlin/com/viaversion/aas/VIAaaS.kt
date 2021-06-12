@@ -23,20 +23,10 @@ import io.ktor.network.tls.certificates.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.*
-import io.netty.channel.epoll.Epoll
-import io.netty.channel.epoll.EpollEventLoopGroup
-import io.netty.channel.epoll.EpollServerSocketChannel
-import io.netty.channel.epoll.EpollSocketChannel
-import io.netty.channel.kqueue.KQueue
-import io.netty.channel.kqueue.KQueueEventLoopGroup
-import io.netty.channel.kqueue.KQueueServerSocketChannel
-import io.netty.channel.kqueue.KQueueSocketChannel
-import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.socket.ServerSocketChannel
-import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.channel.socket.nio.NioSocketChannel
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelOption
+import io.netty.channel.WriteBufferWaterMark
+import io.netty.resolver.dns.DnsNameResolverBuilder
 import io.netty.util.concurrent.Future
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
@@ -68,34 +58,13 @@ val mcCryptoKey = KeyPairGenerator.getInstance("RSA").let {
     it.genKeyPair()
 }
 
-fun eventLoopGroup(): EventLoopGroup {
-    if (VIAaaSConfig.isNativeTransportMc) {
-        if (Epoll.isAvailable()) return EpollEventLoopGroup()
-        if (KQueue.isAvailable()) return KQueueEventLoopGroup()
-    }
-    return NioEventLoopGroup()
-}
-
-fun channelServerSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<ServerSocketChannel> {
-    return when (eventLoop) {
-        is EpollEventLoopGroup -> ChannelFactory { EpollServerSocketChannel() }
-        is KQueueEventLoopGroup -> ChannelFactory { KQueueServerSocketChannel() }
-        else -> ChannelFactory { NioServerSocketChannel() }
-    }
-}
-
-fun channelSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<SocketChannel> {
-    return when (eventLoop) {
-        is EpollEventLoopGroup -> ChannelFactory { EpollSocketChannel() }
-        is KQueueEventLoopGroup -> ChannelFactory { KQueueSocketChannel() }
-        else -> ChannelFactory { NioSocketChannel() }
-    }
-}
-
 val parentLoop = eventLoopGroup()
 val childLoop = eventLoopGroup()
 var chFuture: ChannelFuture? = null
 var ktorServer: NettyApplicationEngine? = null
+val dnsResolver = DnsNameResolverBuilder(childLoop.next())
+    .channelFactory(channelDatagramFactory(childLoop))
+    .build()
 
 fun main(args: Array<String>) {
     try {
@@ -107,9 +76,9 @@ fun main(args: Array<String>) {
 
         initFuture.complete(Unit)
         addShutdownHook()
-        
+
         Thread { VIAaaSConsole.start() }.start()
-        
+
         serverFinishing.join()
     } catch (e: Exception) {
         e.printStackTrace()
@@ -162,9 +131,10 @@ private fun initVia() {
     )
     MappingDataLoader.enableMappingsCache()
     (Via.getManager() as ViaManagerImpl).init()
-    ProtocolVersion.register(-2, "AUTO")
     AspirinRewind.init(ViaRewindConfigImpl(File("config/viarewind.yml")))
     AspirinBackwards.init(File("config/viabackwards"))
+
+    ProtocolVersion.register(-2, "AUTO")
     registerAspirinProtocols()
 }
 

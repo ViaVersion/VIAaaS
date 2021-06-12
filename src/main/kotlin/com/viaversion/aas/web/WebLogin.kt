@@ -106,7 +106,7 @@ class WebLogin : WebState {
             }
             "session_hash_response" -> {
                 val hash = obj.get("session_hash").asString
-                webClient.server.sessionHashCallbacks.getIfPresent(hash)?.complete(null)
+                webClient.server.sessionHashCallbacks.getIfPresent(hash)?.complete(Unit)
             }
             else -> throw StacklessException("invalid action!")
         }

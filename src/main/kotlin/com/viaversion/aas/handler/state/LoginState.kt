@@ -113,7 +113,6 @@ class LoginState : MinecraftConnectionState {
                     frontHandler.endRemoteAddress,
                     handler.data.backHandler!!.endRemoteAddress
                 ).await()
-                if (!handler.data.frontChannel.isActive) return@launch
 
                 val cryptoResponse = CryptoResponse()
                 cryptoResponse.encryptedKey = encryptRsa(backPublicKey, backKey)
@@ -179,7 +178,7 @@ class LoginState : MinecraftConnectionState {
                 loginStart.username = backName!!
                 send(handler.data.backChannel!!, loginStart, true)
             } catch (e: Exception) {
-                handler.data.frontChannel.pipeline().fireExceptionCaught(StacklessException("Login error: $e", e))
+                handler.data.frontChannel.pipeline().fireExceptionCaught(e)
             }
         }
     }

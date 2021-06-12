@@ -8,16 +8,18 @@ import com.google.common.cache.CacheLoader
 import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
 import com.google.gson.JsonObject
+import com.viaversion.aas.*
 import com.viaversion.aas.config.VIAaaSConfig
-import com.viaversion.aas.httpClient
-import com.viaversion.aas.parseUndashedId
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.aas.webLogger
 import io.ipinfo.api.IPInfo
 import io.ipinfo.api.model.IPResponse
 import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
+import io.ktor.server.netty.*
 import io.ktor.websocket.*
+import io.netty.handler.codec.dns.DefaultDnsQuestion
+import io.netty.handler.codec.dns.DnsPtrRecord
+import io.netty.handler.codec.dns.DnsRecordType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.asCompletableFuture
 import java.net.InetSocketAddress
@@ -28,6 +30,7 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.coroutineContext
 
 class WebDashboardServer {
     // I don't think i'll need more than 1k/day
@@ -84,23 +87,24 @@ class WebDashboardServer {
         if (!listeners.containsKey(id)) {
             future.completeExceptionally(StacklessException("No browser listening"))
         } else {
-            coroutineScope {
+            CoroutineScope(coroutineContext).apply {
                 launch(Dispatchers.IO) {
                     var info: IPResponse? = null
+                    var ptr: String? = null
                     (address as? InetSocketAddress)?.let {
                         try {
                             val ipLookup = async(Dispatchers.IO) {
-                                ipInfo.lookupIP(it.address?.hostAddress?.substringBefore("%"))
+                                ipInfo.lookupIP(it.address!!.hostAddress!!.substringBefore("%"))
                             }
-                            val reverseLookup = async(Dispatchers.IO) {
-                                it.address?.hostName
-                            }
+                            val dnsQuery = dnsResolver.resolveAll(
+                                DefaultDnsQuestion(reverseLookup(it.address), DnsRecordType.PTR)
+                            )
                             info = ipLookup.await()
-                            reverseLookup.await()
+                            ptr = dnsQuery.suspendAwait().first { it is DnsPtrRecord }?.name()
                         } catch (ignored: Exception) {
                         }
                     }
-                    val msg = "Requester: $id $address (${info?.org}, ${info?.city}, ${info?.region}, " +
+                    val msg = "Requester: $id $address ($ptr) (${info?.org}, ${info?.city}, ${info?.region}, " +
                             "${info?.countryCode})\nBackend: $backAddress"
                     listeners[id]?.forEach {
                         it.ws.send(JsonObject().also {
