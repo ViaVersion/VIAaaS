@@ -30,6 +30,7 @@ import io.netty.handler.codec.dns.DefaultDnsQuestion
 import io.netty.handler.codec.dns.DefaultDnsRawRecord
 import io.netty.handler.codec.dns.DefaultDnsRecordDecoder
 import io.netty.handler.codec.dns.DnsRecordType
+import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.net.InetAddress
@@ -57,10 +58,11 @@ suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
     if (hostAndPort.port == 25565) {
         try {
             // stolen from PacketLib (MIT) https://github.com/Camotoy/PacketLib/blob/312cff5f975be54cf2d92208ae2947dbda8b9f59/src/main/java/com/github/steveice10/packetlib/tcp/TcpClientSession.java
-            dnsResolver
+            val records = dnsResolver
                 .resolveAll(DefaultDnsQuestion("_minecraft._tcp.${hostAndPort.host}", DnsRecordType.SRV))
                 .suspendAwait()
-                .forEach { record ->
+            try {
+                records.forEach { record ->
                     if (record is DefaultDnsRawRecord && record.type() == DnsRecordType.SRV) {
                         val content = record.content()
 
@@ -71,6 +73,9 @@ suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
                         return HostAndPort.fromParts(address, port)
                     }
                 }
+            } finally {
+                records.forEach { ReferenceCountUtil.release(it) }
+            }
         } catch (e: Exception) {
             viaaasLogger.debug("Couldn't resolve SRV", e)
         }

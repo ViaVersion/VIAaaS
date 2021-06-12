@@ -20,6 +20,7 @@ import io.ktor.websocket.*
 import io.netty.handler.codec.dns.DefaultDnsQuestion
 import io.netty.handler.codec.dns.DnsPtrRecord
 import io.netty.handler.codec.dns.DnsRecordType
+import io.netty.util.ReferenceCountUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.asCompletableFuture
 import java.net.InetSocketAddress
@@ -100,7 +101,13 @@ class WebDashboardServer {
                                 DefaultDnsQuestion(reverseLookup(it.address), DnsRecordType.PTR)
                             )
                             info = ipLookup.await()
-                            ptr = dnsQuery.suspendAwait().firstNotNullOfOrNull { it as? DnsPtrRecord }?.hostname()
+                            ptr = dnsQuery.suspendAwait().let {
+                                try {
+                                    it.firstNotNullOfOrNull { it as? DnsPtrRecord }?.hostname()
+                                } finally {
+                                    it.forEach { ReferenceCountUtil.release(it) }
+                                }
+                            }
                         } catch (ignored: Exception) {
                         }
                     }
