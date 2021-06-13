@@ -17,6 +17,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
 import io.ktor.client.*
+import io.ktor.client.engine.java.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.network.tls.certificates.*
@@ -41,9 +42,9 @@ val viaaasVer = JsonParser.parseString(
 var viaWebServer = WebDashboardServer()
 var serverFinishing = CompletableFuture<Unit>()
 var finishedFuture = CompletableFuture<Unit>()
-val httpClient = HttpClient {
+val httpClient = HttpClient(Java) {
     install(UserAgent) {
-        agent = "VIAaaS/$viaaasVer"
+        agent = "VIAaaS/${viaaasVer.substringBefore("+")}"
     }
     install(JsonFeature) {
         serializer = GsonSerializer()
@@ -63,6 +64,7 @@ val childLoop = eventLoopGroup()
 var chFuture: ChannelFuture? = null
 var ktorServer: NettyApplicationEngine? = null
 val dnsResolver = DnsNameResolverBuilder(childLoop.next())
+    .socketChannelFactory(channelSocketFactory(childLoop))
     .channelFactory(channelDatagramFactory(childLoop))
     .build()
 

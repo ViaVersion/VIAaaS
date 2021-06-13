@@ -37,7 +37,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.4.2+" + try {
+version = "0.4.3+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -62,9 +62,10 @@ dependencies {
     implementation("com.viaversion:viabackwards:4.0.1-SNAPSHOT") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:master-SNAPSHOT") { isTransitive = false }
 
-    implementation("com.google.guava:guava:30.1.1-jre")
     implementation("io.netty:netty-all:4.1.65.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.39.Final")
+
+    implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.28")
 
@@ -78,18 +79,16 @@ dependencies {
     implementation("org.slf4j:slf4j-api:1.7.30")
 
     val ktorVersion = "1.6.0"
-    implementation("com.auth0:java-jwt:3.16.0")
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-gson:$ktorVersion")
-    implementation("io.ktor:ktor-server-host-common:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-client-java:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-gson:$ktorVersion")
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+
+    implementation("com.auth0:java-jwt:3.16.0")
     implementation("io.ipinfo:ipinfo-api:1.1")
 }
 

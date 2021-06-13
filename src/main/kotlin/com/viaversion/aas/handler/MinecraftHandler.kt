@@ -52,7 +52,7 @@ class MinecraftHandler(
         if (cause is CancelCodecException) return
         if (cause is ClosedChannelException) return
         mcLogger.debug("Exception: ", cause)
-        disconnect("Exception: $cause")
+        disconnect("$cause")
     }
 
     fun disconnect(s: String) {

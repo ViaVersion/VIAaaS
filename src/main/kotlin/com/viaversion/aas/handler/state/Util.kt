@@ -132,6 +132,6 @@ suspend fun connectBack(
 
         tryBackAddresses(handler, addresses, state, extraData)
     } catch (e: Exception) {
-        throw StacklessException("Couldn't connect: $e", e)
+        throw StacklessException("Connect: $e", e)
     }
 }
