@@ -98,7 +98,7 @@ function renderActions() {
                 renderActions();
             });
         }
-        addAction("Listen to premium login in VIAaaS instance", () => {
+        addAction("Listen to frontend premium login in VIAaaS instance", () => {
             let user = prompt("Premium username (case-sensitive): ", "");
             if (!user) return;
             let callbackUrl = new URL(location);
@@ -107,7 +107,7 @@ function renderActions() {
             location = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
                 + "?callback=" + encodeURIComponent(callbackUrl);
         });
-        addAction("Listen to offline login in VIAaaS instance", () => {
+        addAction("Listen to frontend offline login in VIAaaS instance", () => {
             let user = prompt("Offline username (case-sensitive):", "");
             if (!user) return;
             let taskId = Math.random();
