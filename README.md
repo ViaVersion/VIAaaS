@@ -1,7 +1,9 @@
 VIAaaS
 ---
 
-VIAaaS - ViaVersion ~~2-acetoxybenzoic acid~~ as a Service - Standalone ViaVersion proxy
+VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
+
+<img alt="VIAaaS Logo" height="200" src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png">
 
 Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Instances
 
