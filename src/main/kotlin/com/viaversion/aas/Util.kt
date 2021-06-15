@@ -147,8 +147,7 @@ fun checkLocalAddress(inetAddress: InetAddress): Boolean {
 }
 
 fun matchesAddress(addr: InetSocketAddress, list: List<String>): Boolean {
-    return (matchAddress(addr.hostString, list) || (addr.address != null
-            && (matchAddress(addr.address.hostAddress, list) || matchAddress(addr.address.hostName, list))))
+    return matchAddress(addr.hostString, list) || (addr.address != null && matchAddress(addr.address.hostAddress, list))
 }
 
 private fun matchAddress(addr: String, list: List<String>): Boolean {
