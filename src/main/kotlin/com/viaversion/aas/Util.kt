@@ -76,8 +76,7 @@ suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
             } finally {
                 records.forEach { ReferenceCountUtil.release(it) }
             }
-        } catch (e: Exception) {
-            viaaasLogger.debug("Couldn't resolve SRV", e)
+        } catch (ignored: Exception) {
         }
     }
     return hostAndPort
