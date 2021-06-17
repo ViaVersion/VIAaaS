@@ -38,6 +38,7 @@ require-host-name: true
 host-name:
   - viaaas.localhost
   - via.localhost
+  - via.localho.st
   - via-127-0-0-1.nip.io
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
