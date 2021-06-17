@@ -27,7 +27,7 @@ Supported versions: https://viaversion.com/
 Download: [GitHub Actions](https://github.com/ViaVersion/VIAaaS/actions) (needs to be logged into GitHub)
 or [JitPack](https://jitpack.io/com/github/ViaVersion/VIAaaS/master-SNAPSHOT/VIAaaS-master-SNAPSHOT-all.jar)
 
-How to download and start VIAaaS server:
+### How to download and start VIAaaS server:
 
 ```sh
 curl -Lf --output VIAaaS-all.jar "https://jitpack.io/com/github/ViaVersion/VIAaaS/master-SNAPSHOT/VIAaaS-master-SNAPSHOT-all.jar"
@@ -56,7 +56,7 @@ java -jar VIAaaS-all.jar
   at https://crp123-cors.herokuapp.com/ ([source](https://github.com/creeper123123321/cors-anywhere/)) too, but proxies
   have a bit more chance of being seen as suspect.
 
-Setting up [cors-anywhere](https://www.npmjs.com/package/cors-anywhere) on local machine:
+### Setting up [cors-anywhere](https://www.npmjs.com/package/cors-anywhere) on local machine:
 
 ```sh
 git clone https://github.com/Rob--W/cors-anywhere
@@ -69,11 +69,11 @@ node server.js
 
 ## Usage for players
 
-Usage for offline mode:
+#### Offline mode:
 
 - Connect to ```mc.example.net.via.localhost```
 
-Usage for online mode:
+#### Online mode:
 
 - You can use two accounts (avoids Bad Login error), the same account for front-end and back-end connections, or
   use ```_of```
@@ -91,13 +91,13 @@ Usage for online mode:
 
 ### Address options
 
-Example address:
+#### Example address:
 
 - ```server.example.net._p25565._v1_12_2._of._uBACKUSERNAME.via.example.com```
 - ```server.example.net.v_1_8.via.example.com```
 - It's inspired by [Tor2web](https://www.tor2web.org/) proxies.
 
-Address parts:
+#### Address parts:
 
 - You can use ``(option)_(value)`` too, like ``p_25565``.
 - ```server.example.net```: backend server address
@@ -120,34 +120,34 @@ Address parts:
 
 ### Accounts
 
-My Microsoft account <18 years old is not able to log in, it's giving XSTS error:
+#### My Microsoft account <18 years old is not able to log in, it's giving XSTS error:
 
 - Add your account to a family (see https://wiki.vg/Microsoft_Authentication_Scheme#Authenticate_with_XSTS)
 
-Why a online webpage for online mode?:
+#### Why a online webpage for online mode?:
 
 - It's easier to maintain in that way, because providing login via chat requires encoding and decoding more packets
   which change through versions.
 - It allows your account password and token to be kept with you.
 
-How to use Microsoft Account?:
+#### How to use Microsoft Account?:
 
 - If you are using a public VIAaaS instance, use this page https://viaversion.github.io/VIAaaS/ and configure the
   WebSocket address.
 
 ### Connection
 
-How to use IPv6?:
+#### How to use IPv6?:
 
 - When listening to 0.0.0.0, it should listen on IPv6 too.
 - To use IPv6 in backend address, you need to use a instance with IPv6 connectivity. The hostname parser currently
   doesn't support direct IPv6, but you can use a DNS name with https://sslip.io/
 
-I'm getting a DNS error/"Unknown host" while connecting to (...).localhost
+#### I'm getting a DNS error/"Unknown host" while connecting to (...).localhost
 
-- Try configuring via-127-0-0-1.nip.io as hostname suffix
+- Try configuring via.localho.st as hostname suffix
 
-How to use with Geyser?
+#### How to use with Geyser?
 
 - Currently you need to set the parameters (at least the hostname) in Geyser's `address` field:
   ```yml
@@ -158,11 +158,11 @@ How to use with Geyser?
 - If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance,
   like ```mc.example.com.via.example.net``` as a Java Edition server.
 
-Can I use it to connect to .onion Minecraft hidden servers?
+#### Can I use it to connect to .onion Minecraft hidden servers?
 
 - You can use .onion addresses if the instance is proxying the backend connections to TOR. Note that VIAaaS may log your
   requests.
 
-Can you support more versions / Is there some alternative?
+#### Can you support more versions / Is there some alternative?
 
 - See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (lenni0451.net:25563)
