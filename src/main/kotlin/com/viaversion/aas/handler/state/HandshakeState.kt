@@ -24,16 +24,26 @@ class HandshakeState : MinecraftConnectionState {
     object RateLimit {
         val rateLimitByIp = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(CacheLoader.from<InetAddress, RateLimiter> {
-                RateLimiter.create(VIAaaSConfig.rateLimitConnectionMc)
+            .build(CacheLoader.from<InetAddress, Limits> {
+                Limits(
+                    RateLimiter.create(VIAaaSConfig.rateLimitConnectionMc),
+                    RateLimiter.create(VIAaaSConfig.rateLimitLoginMc)
+                )
             })
+
+        data class Limits(val handshakeLimiter: RateLimiter, val loginLimiter: RateLimiter)
     }
 
     override val state: State
         get() = State.HANDSHAKE
 
-    private fun checkRateLimit(handler: MinecraftHandler) {
-        if (!RateLimit.rateLimitByIp.get((handler.endRemoteAddress as InetSocketAddress).address).tryAcquire()) {
+    private fun checkRateLimit(handler: MinecraftHandler, state: State) {
+        val socketAddress = (handler.endRemoteAddress as InetSocketAddress).address
+        val limit = RateLimit.rateLimitByIp.get(socketAddress)
+
+        if (!limit.handshakeLimiter.tryAcquire()
+            || (state == State.LOGIN && !limit.loginLimiter.tryAcquire())
+        ) {
             throw StacklessException("Rate-limited")
         }
     }
@@ -58,7 +68,7 @@ class HandshakeState : MinecraftConnectionState {
             it.viaSuffix == null
         }.first()
 
-        val backProto = parsed.protocol
+        val backProto = parsed.protocol ?: -2
         val hadHostname = parsed.viaSuffix != null
 
         packet.address = parsed.serverAddress!!
@@ -67,7 +77,7 @@ class HandshakeState : MinecraftConnectionState {
         var frontOnline = parsed.online
         if (VIAaaSConfig.forceOnlineMode) frontOnline = true
 
-        handler.data.viaBackServerVer = backProto
+        handler.data.backServerVer = backProto
         (handler.data.state as? LoginState)?.also {
             it.frontOnline = frontOnline
             it.backName = parsed.username
@@ -90,16 +100,20 @@ class HandshakeState : MinecraftConnectionState {
         if (packet !is Handshake) throw StacklessException("Invalid packet!")
 
         handleNextState(handler, packet)
-        checkRateLimit(handler)
+        checkRateLimit(handler, packet.nextState)
         handleVirtualHost(handler, packet)
 
+        connectStatus(handler, ctx, packet)
+    }
+
+    private fun connectStatus(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Handshake) {
         if (packet.nextState == State.STATUS) { // see LoginState for LOGIN
             handler.data.frontChannel.setAutoRead(false)
             handler.coroutineScope.launch(Dispatchers.IO) {
                 try {
                     connectBack(handler, packet.address, packet.port, packet.nextState)
                 } catch (e: Exception) {
-                    handler.data.frontChannel.pipeline().fireExceptionCaught(e)
+                    ctx.fireExceptionCaught(e)
                 }
             }
         }

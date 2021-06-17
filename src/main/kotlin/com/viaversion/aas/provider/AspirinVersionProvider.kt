@@ -6,7 +6,7 @@ import com.viaversion.viaversion.protocols.base.BaseVersionProvider
 
 object AspirinVersionProvider : BaseVersionProvider() {
     override fun getClosestServerProtocol(connection: UserConnection): Int {
-        val ver = connection.channel!!.pipeline().get(MinecraftHandler::class.java).data.viaBackServerVer
+        val ver = connection.channel!!.pipeline().get(MinecraftHandler::class.java).data.backServerVer
         if (ver != null) return ver
         return super.getClosestServerProtocol(connection)
     }

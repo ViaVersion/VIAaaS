@@ -7,9 +7,11 @@ import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.login.*
+import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
@@ -159,6 +161,10 @@ class LoginState : MinecraftConnectionState {
     fun handleLoginStart(handler: MinecraftHandler, loginStart: LoginStart) {
         if (started) throw StacklessException("Login already started")
         started = true
+
+        VIAaaSConfig.maxPlayers?.let {
+            if (currentPlayers() >= it) throw StacklessException("Instance is full!")
+        }
 
         frontName = loginStart.username
         backName = backName ?: frontName

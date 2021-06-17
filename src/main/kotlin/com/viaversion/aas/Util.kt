@@ -7,6 +7,8 @@ import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
 import io.ktor.client.request.*
@@ -263,4 +265,8 @@ fun reverseLookup(address: InetAddress): String {
             .asReversed()
             .joinToString(".") + ".ip6.arpa"
     }
+}
+
+fun currentPlayers(): Int {
+    return Via.getManager().connectionManager.connections.filter { it.protocolInfo.state == State.PLAY }.count()
 }

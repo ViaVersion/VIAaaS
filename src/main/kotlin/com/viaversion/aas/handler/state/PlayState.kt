@@ -37,7 +37,7 @@ object PlayState : MinecraftConnectionState {
                         pluginMessage.data,
                         is17(handler)
                     )
-                }${" (VIAaaS C: ${handler.data.frontVer?.parseProtocol()} S: ${handler.data.viaBackServerVer?.parseProtocol()})"}"
+                }${" (VIAaaS C: ${handler.data.frontVer?.parseProtocol()} S: ${handler.data.backServerVer?.parseProtocol()})"}"
 
                 pluginMessage.data = encodeBrand(brand, is17(handler))
             }

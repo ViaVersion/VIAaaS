@@ -39,7 +39,6 @@ host-name:
   - viaaas.localhost
   - via.localhost
   - via.localho.st
-  - via-127-0-0-1.nip.io
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
 # Default port to be used when connecting to the backend server.
@@ -71,10 +70,20 @@ show-brand-info: true
 #####
 # Rates limits websocket messages per second. Message processing will be delayed.
 rate-limit-ws: 1.5
-# Rate limits new front-end connections per second per ip. Will cause a disconnect.
+# Rate limits new front-end connections per second per ip. Will disconnect.
 rate-limit-connection-mc: 10.0
+# Rate limits the logins into front-end per second per ip. Will disconnect
+rate-limit-login-mc: 0.2
 # Limits how many usernames a websocket connection can listen to.
 listening-ws-limit: 10
+#
+#####
+# Misc
+#####
+# Favicon URL to use in disconnection messages. Should use "data:image/png;base64," and be a 64x64 PNG
+favicon-url: ''
+# Max players to allow connection. Use -1 to not limit
+max-players: 20
 #
 #####
 # SECRETS - DO NOT SHARE

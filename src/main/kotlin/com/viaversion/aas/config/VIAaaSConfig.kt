@@ -22,7 +22,6 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
             map["host-name"] = map["host-name"].toString().split(',').map { it.trim() }
         }
     }
-
     val isNativeTransportMc: Boolean get() = this.getBoolean("native-transport-mc", true)
     val port: Int get() = this.getInt("port", 25565)
     val bindAddress: String get() = this.getString("bind-address", "localhost")!!
@@ -58,4 +57,8 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
         get() = this.getString("jwt-secret", null).let {
             if (it.isNullOrBlank()) throw IllegalStateException("invalid jwt-secret") else it
         }
+    val rateLimitLoginMc: Double get() = this.getDouble("rate-limit-login-mc", 0.2)
+    val faviconUrl: String?
+        get() = this.getString("favicon-url", "")!!.filter { !it.isWhitespace() }.ifEmpty { null }
+    val maxPlayers: Int? get() = this.getInt("max-players", 20).let { if (it == -1) null else it }
 }

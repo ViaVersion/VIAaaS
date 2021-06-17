@@ -10,6 +10,7 @@ import com.viaversion.aas.handler.autoprotocol.ProtocolDetector
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.server.netty.*
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
@@ -44,22 +45,7 @@ private suspend fun createBackChannel(
     mcLogger.info("+ ${handler.endRemoteAddress} -> $socketAddr")
     handler.data.backChannel = channel as SocketChannel
 
-    if (handler.data.viaBackServerVer == null) {
-        try {
-            val detectedProtocol = withTimeoutOrNull(10_000) {
-                ProtocolDetector.detectVersion(socketAddr).await()
-            }
-
-            if (detectedProtocol != null && detectedProtocol.version != -1) {
-                handler.data.viaBackServerVer = detectedProtocol.version
-            } else {
-                handler.data.viaBackServerVer = -1 // fallback
-            }
-        } catch (e: Exception) {
-            mcLogger.warn("Failed to auto-detect version for $socketAddr: $e")
-            mcLogger.debug("Stacktrace: ", e)
-        }
-    }
+    autoDetectVersion(handler, socketAddr)
 
     val packet = Handshake()
     packet.nextState = state
@@ -72,6 +58,27 @@ private suspend fun createBackChannel(
     handler.data.frontChannel.setAutoRead(true)
 
     return channel
+}
+
+private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: InetSocketAddress) {
+    if (handler.data.backServerVer == -2) { // Auto
+        try {
+            val detectedProtocol = withTimeoutOrNull(10_000) {
+                ProtocolDetector.detectVersion(socketAddr).await()
+            }
+
+            if (detectedProtocol != null
+                && detectedProtocol.version != -1
+                && ProtocolVersion.isRegistered(detectedProtocol.version)) {
+                handler.data.backServerVer = detectedProtocol.version
+            } else {
+                handler.data.backServerVer = -1 // fallback
+            }
+        } catch (e: Exception) {
+            mcLogger.warn("Failed to auto-detect version for $socketAddr: $e")
+            mcLogger.debug("Stacktrace: ", e)
+        }
+    }
 }
 
 private suspend fun tryBackAddresses(

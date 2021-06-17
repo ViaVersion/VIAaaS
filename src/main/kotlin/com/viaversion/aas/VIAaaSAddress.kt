@@ -20,19 +20,21 @@ class VIAaaSAddress {
             return this
         }
 
-        var endOfOptions = false
-        val optionsList = arrayListOf<String>()
-        serverAddress = suffixRemoved.split('.').asReversed().filter {
-            if (endOfOptions || !parseOption(it)) {
-                endOfOptions = true
-                true
-            } else {
-                optionsList.add(it)
-                false
-            }
-        }.asReversed().joinToString(".")
+        var stopOptions = false
+        val optionsParts = arrayListOf<String>()
+        val serverParts = arrayListOf<String>()
 
-        viaOptions = optionsList.asReversed().joinToString(".")
+        for (part in suffixRemoved.split('.').asReversed()) {
+            if (!stopOptions && parseOption(part)) {
+                optionsParts.add(part)
+                continue
+            }
+            stopOptions = true
+            serverParts.add(part)
+        }
+
+        serverAddress = serverParts.asReversed().joinToString(".")
+        viaOptions = optionsParts.asReversed().joinToString(".")
         viaSuffix = viaHostName
 
         return this
@@ -44,37 +46,42 @@ class VIAaaSAddress {
             part.startsWith("_") -> part[1]
             part[1] == '_' -> part[0]
             else -> null
-        }?.toString()
-        if (option != null) {
-            val arg = part.substring(2)
-            when (option.lowercase()) {
-                "p" -> port = arg.toInt()
-                "o" -> online = when {
-                    arg.startsWith("t", ignoreCase = true) -> true
-                    arg.startsWith("f", ignoreCase = true) -> false
-                    else -> null
-                }
-                "v" -> parseProtocol(arg)
-                "u" -> {
-                    if (arg.length > 16) throw StacklessException("Invalid username")
-                    username = arg
-                }
-            }
-            return true
+        }?.toString() ?: return false
+
+        val arg = part.substring(2)
+        when (option.lowercase()) {
+            "p" -> parsePort(arg)
+            "o" -> parseOnlineMode(arg)
+            "v" -> parseProtocol(arg)
+            "u" -> parseUsername(arg)
         }
-        return false
+        return true
     }
 
-    private fun parseProtocol(arg: String) {
+    fun parsePort(arg: String) {
+        port = arg.toInt()
+    }
+
+    fun parseUsername(arg: String) {
+        if (arg.length > 16) throw StacklessException("Invalid username")
+        username = arg
+    }
+
+    fun parseOnlineMode(arg: String) {
+        online = when {
+            arg.startsWith("t", ignoreCase = true) -> true
+            arg.startsWith("f", ignoreCase = true) -> false
+            else -> null
+        }
+    }
+
+    fun parseProtocol(arg: String) {
         try {
             protocol = arg.toInt()
         } catch (e: NumberFormatException) {
             ProtocolVersion.getClosest(arg.replace("_", "."))?.also {
                 protocol = it.version
             }
-        }
-        if (protocol == -2) {
-            protocol = null
         }
     }
 }

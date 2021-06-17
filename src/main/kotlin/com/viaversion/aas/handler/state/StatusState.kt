@@ -7,6 +7,7 @@ import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.UnknownPacket
 import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.config.VIAaaSConfig
+import com.viaversion.aas.currentPlayers
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.parseProtocol
@@ -41,7 +42,7 @@ object StatusState : MinecraftConnectionState {
                 it.addProperty(
                     "name",
                     "§9VIAaaS§r C: §7${handler.data.frontVer?.parseProtocol()}§r S: §7${
-                        handler.data.viaBackServerVer?.parseProtocol()
+                        handler.data.backServerVer?.parseProtocol()
                     }"
                 )
             })
@@ -60,13 +61,16 @@ object StatusState : MinecraftConnectionState {
                 it.addProperty("protocol", handler.data.frontVer)
             })
             it.add("players", JsonObject().also {
-                it.addProperty("max", 0)
-                it.addProperty("online", Via.getManager().connectionManager.connections.size)
+                it.addProperty("max", VIAaaSConfig.maxPlayers ?: -1)
+                it.addProperty("online", currentPlayers())
                 it.add("sample", JsonArray())
             })
             it.add("description", JsonObject().also {
                 it.addProperty("text", "§c$msg")
             })
+            VIAaaSConfig.faviconUrl?.let { favicon ->
+                it.addProperty("favicon", favicon)
+            }
         }.toString()
         writeFlushClose(handler.data.frontChannel, packet)
     }

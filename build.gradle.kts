@@ -67,7 +67,7 @@ dependencies {
 
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-    implementation("org.yaml:snakeyaml:1.28")
+    implementation("org.yaml:snakeyaml:1.29")
 
     val log4jVer = "2.14.1"
     implementation("net.minecrell:terminalconsoleappender:1.2.0")

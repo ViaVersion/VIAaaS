@@ -9,7 +9,7 @@ class ConnectionData(
     var backChannel: Channel? = null,
     var state: MinecraftConnectionState = HandshakeState(),
     var frontVer: Int? = null,
-    var viaBackServerVer: Int? = null,
+    var backServerVer: Int? = null,
 ) {
     val frontHandler get() = frontChannel.pipeline().get(MinecraftHandler::class.java)
     val backHandler get() = backChannel?.pipeline()?.get(MinecraftHandler::class.java)
