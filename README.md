@@ -13,11 +13,11 @@ Supported versions: https://viaversion.com/
 
 ## Demo
 
-Online mode: https://youtube.com/watch?v=9MKKjuoe66k
+Online mode: https://youtu.be/9MKKjuoe66k
 
-Using with GeyserConnect: https://youtube.com/watch?v=_LItAIIFmsI
+Using with GeyserConnect: https://youtu.be/_LItAIIFmsI
 
-Offline mode: https://youtube.com/watch?v=_QQgykRVaUs
+Offline mode tutorial: https://youtu.be/lPdELnrxmp0
 
 ## How does it work?
 
