@@ -11,6 +11,14 @@ Discord: https://viaversion.com/discord
 
 Supported versions: https://viaversion.com/
 
+## Demo
+
+Online mode: https://youtube.com/watch?v=9MKKjuoe66k
+
+Using with GeyserConnect: https://youtube.com/watch?v=_LItAIIFmsI
+
+Offline mode: https://youtube.com/watch?v=_QQgykRVaUs
+
 ## How does it work?
 
 - [ViaVersion](https://viaversion.com), [ViaBackwards](https://viaversion.com/backwards)
