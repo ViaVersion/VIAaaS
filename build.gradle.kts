@@ -16,7 +16,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.39.0"
     id("com.palantir.git-version") version "0.12.3"
-    id("org.gradlewebtools.minify") version "1.1.1" apply false
+    id("org.gradlewebtools.minify") version "1.2.0" apply false
 }
 
 application {
@@ -58,9 +58,12 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    implementation("com.viaversion:viaversion:4.0.1-SNAPSHOT") { isTransitive = false }
-    implementation("com.viaversion:viabackwards:4.0.1-SNAPSHOT") { isTransitive = false }
-    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:master-SNAPSHOT") { isTransitive = false }
+    val vvVer = "4.0.1-1.17.1-pre1-SNAPSHOT"
+    val vbVer = "4.0.1-1.17.1-pre1-SNAPSHOT"
+    val vrVer = "bc0aed1"
+    implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
+    implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
+    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
     implementation("io.netty:netty-all:4.1.65.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.39.Final")
@@ -82,10 +85,9 @@ dependencies {
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-client-gson:$ktorVersion")
     implementation("io.ktor:ktor-client-java:$ktorVersion")
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-gson:$ktorVersion")
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
     implementation("com.auth0:java-jwt:3.16.0")
