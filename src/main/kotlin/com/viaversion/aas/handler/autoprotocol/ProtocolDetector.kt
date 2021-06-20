@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 object ProtocolDetector {
     private val SERVER_VER = CacheBuilder.newBuilder()
-        .expireAfterAccess(100, TimeUnit.SECONDS)
+        .expireAfterAccess(30, TimeUnit.SECONDS)
         .build<InetSocketAddress, CompletableFuture<ProtocolVersion>>(CacheLoader.from { address ->
             val future = CompletableFuture<ProtocolVersion>()
             try {
