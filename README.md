@@ -3,7 +3,7 @@ VIAaaS
 
 VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
 
-<img alt="VIAaaS Logo" height="200" src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png">
+<img alt="VIAaaS Logo (VIA logo with structural formula of aspirin)" height="200" src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png">
 
 Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Instances
 
