@@ -11,7 +11,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.5.10"
+    kotlin("jvm") version "1.5.20"
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.39.0"
@@ -66,7 +66,7 @@ dependencies {
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
     implementation("io.netty:netty-all:4.1.65.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.39.Final")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.40.Final")
 
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
