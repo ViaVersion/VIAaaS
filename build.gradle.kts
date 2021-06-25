@@ -51,6 +51,7 @@ repositories {
     maven("https://repo.viaversion.com/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://jitpack.io")
+    maven("https://nexus.velocitypowered.com/repository/maven-public/")
     mavenLocal()
 }
 
@@ -69,6 +70,7 @@ dependencies {
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.40.Final")
 
     implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("com.velocitypowered:velocity-native:1.1.0-SNAPSHOT")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.29")
 

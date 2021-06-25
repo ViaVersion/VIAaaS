@@ -1,72 +1,84 @@
 package com.viaversion.aas.codec
 
-import com.viaversion.aas.util.StacklessException
+import com.velocitypowered.natives.compression.VelocityCompressor
+import com.velocitypowered.natives.util.MoreByteBufUtils
+import com.velocitypowered.natives.util.Natives
 import com.viaversion.viaversion.api.type.Type
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.MessageToMessageCodec
-import java.util.zip.Deflater
-import java.util.zip.Inflater
 
 class CompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf, ByteBuf>() {
-    // https://github.com/Gerrygames/ClientViaVersion/blob/master/src/main/java/de/gerrygames/the5zig/clientviaversion/netty/CompressionEncoder.java
-    private val inflater: Inflater = Inflater()
-    private val deflater: Deflater = Deflater()
+    // stolen from Krypton (GPL) and modified
+    // https://github.com/astei/krypton/blob/master/src/main/java/me/steinborn/krypton/mod/shared/network/compression/MinecraftCompressEncoder.java
+    private val VANILLA_MAXIMUM_UNCOMPRESSED_SIZE = 2 * 1024 * 1024 // 2MiB
+    private val HARD_MAXIMUM_UNCOMPRESSED_SIZE = 16 * 1024 * 1024 // 16MiB
+    private val UNCOMPRESSED_CAP =
+        if (java.lang.Boolean.getBoolean("velocity.increased-compression-cap")) HARD_MAXIMUM_UNCOMPRESSED_SIZE else VANILLA_MAXIMUM_UNCOMPRESSED_SIZE
+    private lateinit var compressor: VelocityCompressor
 
-    @Throws(Exception::class)
-    override fun encode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
-        val frameLength = input.readableBytes()
-        val outBuf = ctx.alloc().buffer()
+    override fun handlerAdded(ctx: ChannelHandlerContext) {
+        compressor = Natives.compress.get().create(threshold)
+    }
 
+    override fun handlerRemoved(ctx: ChannelHandlerContext) {
+        compressor.close()
+    }
+
+    override fun encode(ctx: ChannelHandlerContext, msg: ByteBuf, out: MutableList<Any>) {
+        if (!ctx.channel().isActive) return
+
+        val outBuf = allocateBuffer(ctx, msg)
         try {
-            if (frameLength < threshold) {
+            val uncompressedSize = msg.readableBytes()
+            if (uncompressedSize < threshold) { // Not compressed
                 outBuf.writeByte(0)
-                outBuf.writeBytes(input)
-                out.add(outBuf.retain())
-                return
-            }
-            Type.VAR_INT.writePrimitive(outBuf, frameLength)
-            deflater.setInput(input.nioBuffer())
-            deflater.finish()
-            while (!deflater.finished()) {
-                outBuf.ensureWritable(8192)
-                val wIndex = outBuf.writerIndex()
-                outBuf.writerIndex(wIndex + deflater.deflate(outBuf.nioBuffer(wIndex, outBuf.writableBytes())))
+                outBuf.writeBytes(msg)
+            } else {
+                Type.VAR_INT.writePrimitive(outBuf, uncompressedSize)
+                val compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, msg)
+                try {
+                    compressor.deflate(compatibleIn, outBuf)
+                } finally {
+                    compatibleIn.release()
+                }
             }
             out.add(outBuf.retain())
         } finally {
             outBuf.release()
-            deflater.reset()
         }
     }
 
-    @Throws(Exception::class)
+    private fun allocateBuffer(ctx: ChannelHandlerContext, msg: ByteBuf): ByteBuf {
+        val initialBufferSize = msg.readableBytes() + 1
+        return MoreByteBufUtils.preferredBuffer(ctx.alloc(), compressor, initialBufferSize)
+    }
+
     override fun decode(ctx: ChannelHandlerContext, input: ByteBuf, out: MutableList<Any>) {
         if (!input.isReadable || !ctx.channel().isActive) return
-        val outLength = Type.VAR_INT.readPrimitive(input)
-        if (outLength == 0) {
+
+        val claimedUncompressedSize = Type.VAR_INT.readPrimitive(input)
+        if (claimedUncompressedSize == 0) { // Uncompressed
             out.add(input.retain())
             return
         }
 
-        if (outLength < threshold) {
-            throw StacklessException("Badly compressed packet - size of $outLength is below server threshold of $threshold")
+        if (claimedUncompressedSize < threshold) {
+            throw DecoderException("Badly compressed packet - size of $claimedUncompressedSize is below server threshold of $threshold")
         }
-        if (outLength > 2097152) {
-            throw StacklessException("Badly compressed packet - size of $outLength is larger than protocol maximum of 2097152")
+        if (claimedUncompressedSize > UNCOMPRESSED_CAP) {
+            throw DecoderException("Badly compressed packet - size of $claimedUncompressedSize is larger than maximum of $UNCOMPRESSED_CAP")
         }
-
-        inflater.setInput(input.nioBuffer())
-        val output = ctx.alloc().buffer(outLength, outLength)
+        val compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, input)
+        val decompressed = MoreByteBufUtils.preferredBuffer(ctx.alloc(), compressor, claimedUncompressedSize)
         try {
-            output.writerIndex(
-                output.writerIndex() + inflater.inflate(output.nioBuffer(output.writerIndex(), output.writableBytes()))
-            )
-            out.add(output.retain())
+            compressor.inflate(compatibleIn, decompressed, claimedUncompressedSize)
+            input.clear()
+            out.add(decompressed.retain())
         } finally {
-            inflater.reset()
-            output.release()
+            decompressed.release()
+            compatibleIn.release()
         }
     }
-
 }

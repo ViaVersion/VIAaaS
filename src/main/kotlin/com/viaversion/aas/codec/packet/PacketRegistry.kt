@@ -57,7 +57,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.DISCONNECT.id,
                 ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.DISCONNECT.id,
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.DISCONNECT.id,
-                Range.singleton(ProtocolVersion.v1_17.originalVersion) to ClientboundPackets1_17.DISCONNECT.id
+                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.DISCONNECT.id
             )
         )
 
@@ -70,7 +70,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.PLUGIN_MESSAGE.id,
-                Range.singleton(ProtocolVersion.v1_17.originalVersion) to ClientboundPackets1_17.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.PLUGIN_MESSAGE.id
             )
         )
     }
@@ -78,6 +78,8 @@ object PacketRegistry {
     operator fun ProtocolVersion.rangeTo(o: ProtocolVersion): Range<Int> {
         return Range.closed(this.originalVersion, o.originalVersion)
     }
+
+    val ProtocolVersion.singleton get() = Range.singleton(this.originalVersion)
 
     inline fun <reified P : Packet> register(
         state: State,

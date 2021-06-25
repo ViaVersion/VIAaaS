@@ -1,6 +1,7 @@
 package com.viaversion.aas
 
 import com.google.gson.JsonParser
+import com.velocitypowered.natives.util.Natives
 import com.viaversion.aas.command.VIAaaSConsole
 import com.viaversion.aas.command.ViaAspirinCommand
 import com.viaversion.aas.config.VIAaaSConfig
@@ -150,6 +151,7 @@ private fun bindPorts(args: Array<String>) {
         .childOption(ChannelOption.TCP_NODELAY, true)
         .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
 
+    viaaasLogger.info("Using compression: ${Natives.compress.loadedVariant}")
     viaaasLogger.info("Binded minecraft into " + chFuture!!.sync().channel().localAddress())
     ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
 }
