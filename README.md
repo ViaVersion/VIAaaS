@@ -111,7 +111,7 @@ node server.js
 - ```server.example.net```: backend server address
 - ```_p```: backend port
 - ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name with underline instead of
-  dots). ```AUTO``` is default and ``-1`` is fallback if it fails.
+  dots). ```AUTO``` is default and 1.8 is fallback if it fails.
 - ```_o```: ```t``` to force online mode in frontend, ```f``` to disable online mode in frontend. If not set, it will be
   based on backend online mode.
 - ```_u```: username to use in backend connection

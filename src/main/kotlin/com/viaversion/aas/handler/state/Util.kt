@@ -72,7 +72,7 @@ private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: Ine
                 && ProtocolVersion.isRegistered(detectedProtocol.version)) {
                 handler.data.backServerVer = detectedProtocol.version
             } else {
-                handler.data.backServerVer = -1 // fallback
+                handler.data.backServerVer = 47 // fallback 1.8
             }
         } catch (e: Exception) {
             mcLogger.warn("Failed to auto-detect version for $socketAddr: $e")
