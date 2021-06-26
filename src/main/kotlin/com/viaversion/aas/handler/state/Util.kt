@@ -68,7 +68,7 @@ private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: Ine
             }
 
             if (detectedProtocol != null
-                && detectedProtocol.version != -1
+                && detectedProtocol.version !in arrayOf(-1, -2)
                 && ProtocolVersion.isRegistered(detectedProtocol.version)) {
                 handler.data.backServerVer = detectedProtocol.version
             } else {
