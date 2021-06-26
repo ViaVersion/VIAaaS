@@ -70,7 +70,7 @@ dependencies {
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.40.Final")
 
     implementation("com.google.guava:guava:30.1.1-jre")
-    implementation("com.velocitypowered:velocity-native:1.1.0-SNAPSHOT")
+    implementation("com.velocitypowered:velocity-native:3.0.0-SNAPSHOT")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.29")
 
