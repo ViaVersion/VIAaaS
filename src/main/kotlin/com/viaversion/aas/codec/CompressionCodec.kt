@@ -19,7 +19,7 @@ class CompressionCodec(val threshold: Int) : MessageToMessageCodec<ByteBuf, Byte
     private lateinit var compressor: VelocityCompressor
 
     override fun handlerAdded(ctx: ChannelHandlerContext) {
-        compressor = Natives.compress.get().create(threshold)
+        compressor = Natives.compress.get().create(6)
     }
 
     override fun handlerRemoved(ctx: ChannelHandlerContext) {
