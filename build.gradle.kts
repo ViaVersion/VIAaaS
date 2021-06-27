@@ -92,7 +92,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:3.16.0")
+    implementation("com.auth0:java-jwt:3.17.0")
     implementation("io.ipinfo:ipinfo-api:1.1")
 }
 
