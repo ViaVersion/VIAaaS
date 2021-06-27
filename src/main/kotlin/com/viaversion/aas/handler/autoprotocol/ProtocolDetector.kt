@@ -2,8 +2,8 @@ package com.viaversion.aas.handler.autoprotocol
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
+import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.channelSocketFactory
-import com.viaversion.aas.childLoop
 import com.viaversion.aas.codec.FrameCodec
 import com.viaversion.aas.codec.MinecraftCodec
 import com.viaversion.aas.codec.packet.handshake.Handshake
@@ -32,9 +32,9 @@ object ProtocolDetector {
             val future = CompletableFuture<ProtocolVersion>()
             try {
                 val ch = Bootstrap()
-                    .group(childLoop)
+                    .group(AspirinServer.childLoop)
                     .resolver(NoopAddressResolverGroup.INSTANCE)
-                    .channelFactory(channelSocketFactory(childLoop))
+                    .channelFactory(channelSocketFactory(AspirinServer.childLoop))
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.IP_TOS, 0x18)
                     .handler(object : ChannelInitializer<Channel>() {

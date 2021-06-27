@@ -75,13 +75,14 @@ dependencies {
     implementation("org.yaml:snakeyaml:1.29")
 
     val log4jVer = "2.14.1"
+    val slf4jVer = "1.7.31"
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVer")
     implementation("org.jline:jline-terminal-jansi:3.20.0")
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:$slf4jVer")
 
     val ktorVersion = "1.6.0"
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")

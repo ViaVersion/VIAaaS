@@ -33,7 +33,7 @@ private suspend fun createBackChannel(
         .handler(BackEndInit(handler.data))
         .channelFactory(channelSocketFactory(loop.parent()))
         .group(loop)
-        .option(ChannelOption.WRITE_BUFFER_WATER_MARK, bufferWaterMark)
+        .option(ChannelOption.WRITE_BUFFER_WATER_MARK, AspirinServer.bufferWaterMark)
         .option(ChannelOption.IP_TOS, 0x18)
         .option(ChannelOption.TCP_NODELAY, true)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // We need to show the error before the client timeout
@@ -116,7 +116,7 @@ private suspend fun resolveBackendAddresses(hostAndPort: HostAndPort): List<Inet
     return when {
         removedEndDot.endsWith(".onion", ignoreCase = true) ->
             listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.port))
-        else -> dnsResolver
+        else -> AspirinServer.dnsResolver
             .resolveAll(srvResolved.host)
             .suspendAwait()
             .groupBy { it is Inet4Address }

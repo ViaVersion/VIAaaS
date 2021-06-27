@@ -48,7 +48,7 @@ class WebLogin : WebState {
                 val username = obj.get("username").asString
                 val code = obj.get("code").asString
 
-                val check = httpClient.submitForm<JsonObject>(
+                val check = AspirinServer.httpClient.submitForm<JsonObject>(
                     "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
                     formParameters = parametersOf("code", code),
                 )

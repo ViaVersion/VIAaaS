@@ -1,6 +1,5 @@
 package com.viaversion.aas.web
 
-import com.viaversion.aas.viaWebServer
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -13,7 +12,7 @@ import org.slf4j.event.Level
 import java.nio.channels.ClosedChannelException
 import java.time.Duration
 
-class ViaWebApp {
+class ViaWebApp(val viaWebServer: WebDashboardServer) {
     fun Application.main() {
         install(DefaultHeaders)
         install(ConditionalHeaders)
@@ -41,6 +40,11 @@ class ViaWebApp {
         install(Compression)
 
         routing {
+            static {
+                defaultResource("index.html", "web")
+                resources("web")
+            }
+
             webSocket("/ws") {
                 try {
                     viaWebServer.connected(this)
@@ -56,11 +60,6 @@ class ViaWebApp {
                 } finally {
                     viaWebServer.disconnected(this)
                 }
-            }
-
-            static {
-                defaultResource("index.html", "web")
-                resources("web")
             }
         }
     }

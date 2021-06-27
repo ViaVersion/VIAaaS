@@ -1,7 +1,7 @@
 package com.viaversion.aas.command
 
+import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.command.sub.StopSubCommand
-import com.viaversion.aas.serverFinishing
 import com.viaversion.viaversion.api.command.ViaCommandSender
 import net.minecrell.terminalconsole.SimpleTerminalConsole
 import org.jline.reader.Candidate
@@ -12,7 +12,7 @@ import java.util.*
 
 object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
     val commands = hashMapOf<String, Command>()
-    override fun isRunning(): Boolean = !serverFinishing.isDone
+    override fun isRunning(): Boolean = !AspirinServer.wasStopSignalFired()
 
     init {
         commands["viaversion"] = ViaAspirinCommand

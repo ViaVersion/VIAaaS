@@ -71,7 +71,8 @@ class WebDashboardServer {
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
             CoroutineScope(Dispatchers.IO).async {
-                httpClient.get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
+                AspirinServer.httpClient
+                    .get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
                     ?.get("id")?.asString?.let { parseUndashedId(it) }
             }.asCompletableFuture()
         })
@@ -97,7 +98,7 @@ class WebDashboardServer {
                             val ipLookup = async(Dispatchers.IO) {
                                 ipInfo.lookupIP(it.address!!.hostAddress!!.substringBefore("%"))
                             }
-                            val dnsQuery = dnsResolver.resolveAll(
+                            val dnsQuery = AspirinServer.dnsResolver.resolveAll(
                                 DefaultDnsQuestion(reverseLookup(it.address), DnsRecordType.PTR)
                             )
                             info = ipLookup.await()

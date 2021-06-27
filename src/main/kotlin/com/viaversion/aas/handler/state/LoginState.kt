@@ -11,7 +11,6 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
@@ -83,7 +82,7 @@ class LoginState : MinecraftConnectionState {
 
         val cryptoRequest = CryptoRequest()
         cryptoRequest.serverId = frontServerId
-        cryptoRequest.publicKey = mcCryptoKey.public
+        cryptoRequest.publicKey = AspirinServer.mcCryptoKey.public
         cryptoRequest.token = frontToken
 
         send(frontChannel, cryptoRequest, true)
@@ -108,7 +107,7 @@ class LoginState : MinecraftConnectionState {
                 val backHash = generateServerHash(backServerId, backKey, backPublicKey)
 
                 mcLogger.info("Session req: ${handler.data.frontHandler.endRemoteAddress} ($playerId $frontName) $backName")
-                viaWebServer.requestSessionJoin(
+                AspirinServer.viaWebServer.requestSessionJoin(
                     playerId,
                     backName!!,
                     backHash,
@@ -132,8 +131,8 @@ class LoginState : MinecraftConnectionState {
 
     fun handleCryptoResponse(handler: MinecraftHandler, cryptoResponse: CryptoResponse) {
         val frontHash = let {
-            val frontKey = decryptRsa(mcCryptoKey.private, cryptoResponse.encryptedKey)
-            val decryptedToken = decryptRsa(mcCryptoKey.private, cryptoResponse.encryptedToken)
+            val frontKey = decryptRsa(AspirinServer.mcCryptoKey.private, cryptoResponse.encryptedKey)
+            val decryptedToken = decryptRsa(AspirinServer.mcCryptoKey.private, cryptoResponse.encryptedToken)
 
             if (!decryptedToken.contentEquals(frontToken)) throw StacklessException("Invalid verification token!")
 
@@ -141,7 +140,7 @@ class LoginState : MinecraftConnectionState {
             val aesDe = mcCfb8(frontKey, Cipher.DECRYPT_MODE)
             handler.data.frontChannel.pipeline().addBefore("frame", "crypto", CryptoCodec(aesDe, aesEn))
 
-            generateServerHash(frontServerId, frontKey, mcCryptoKey.public)
+            generateServerHash(frontServerId, frontKey, AspirinServer.mcCryptoKey.public)
         }
 
         handler.data.frontChannel.setAutoRead(false)

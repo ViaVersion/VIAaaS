@@ -60,7 +60,7 @@ suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
     if (hostAndPort.port == 25565) {
         try {
             // stolen from PacketLib (MIT) https://github.com/Camotoy/PacketLib/blob/312cff5f975be54cf2d92208ae2947dbda8b9f59/src/main/java/com/github/steveice10/packetlib/tcp/TcpClientSession.java
-            val records = dnsResolver
+            val records = AspirinServer.dnsResolver
                 .resolveAll(DefaultDnsQuestion("_minecraft._tcp.${hostAndPort.host}", DnsRecordType.SRV))
                 .suspendAwait()
             try {
@@ -198,7 +198,7 @@ fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) 
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {
     return try {
-        httpClient.get(
+        AspirinServer.httpClient.get(
             "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
                     UrlEscapers.urlFormParameterEscaper().escape(username) + "&serverId=$hash"
         )
