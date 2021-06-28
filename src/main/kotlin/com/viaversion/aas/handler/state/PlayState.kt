@@ -12,6 +12,7 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.writeFlushClose
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
+import io.netty.util.ReferenceCountUtil
 
 object PlayState : MinecraftConnectionState {
     override val state: State
@@ -24,7 +25,7 @@ object PlayState : MinecraftConnectionState {
             packet is UnknownPacket && (packet.id !in 0..127) -> throw StacklessException("Invalid packet id!")
             packet is PluginMessage && !handler.frontEnd -> modifyPluginMessage(handler, packet)
         }
-        forward(handler, packet)
+        forward(handler, ReferenceCountUtil.retain(packet))
     }
 
     private fun modifyPluginMessage(handler: MinecraftHandler, pluginMessage: PluginMessage) {

@@ -13,7 +13,6 @@ import com.viaversion.aas.handler.forward
 import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.writeFlushClose
-import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
 import java.util.*

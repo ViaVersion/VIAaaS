@@ -23,6 +23,8 @@ import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ClientboundPacke
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.ByteBufAllocator
+import io.netty.util.ReferenceCountUtil
 import java.util.function.Supplier
 
 object PacketRegistry {
@@ -130,11 +132,14 @@ object PacketRegistry {
 
     fun decode(byteBuf: ByteBuf, protocolVersion: Int, state: State, direction: Direction): Packet {
         val packetId = Type.VAR_INT.readPrimitive(byteBuf)
-        val packet =
-            getPacketConstructor(protocolVersion, state, packetId, direction)?.get() ?: UnknownPacket(packetId)
-        packet.decode(byteBuf, protocolVersion)
-        if (byteBuf.isReadable) throw StacklessException("Remaining bytes!")
-        return packet
+        val packet = getPacketConstructor(protocolVersion, state, packetId, direction)?.get()
+            ?: UnknownPacket(packetId, ByteBufAllocator.DEFAULT.buffer())
+        try {
+            packet.decode(byteBuf, protocolVersion)
+            return ReferenceCountUtil.retain(packet)
+        } finally {
+            ReferenceCountUtil.release(packet)
+        }
     }
 
     fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: Int, direction: Direction) {
