@@ -26,7 +26,9 @@ object AspirinViaConfig : AbstractViaConfig(File("config/viaversion.yml")) {
         "anti-xray-patch", "bungee-ping-interval",
         "bungee-ping-save", "bungee-servers", "quick-move-action-fix", "nms-player-ticking",
         "item-cache", "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
-        "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox", "block-protocols"
+        "blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox", "block-protocols",
+        "block-disconnect-msg", "reload-disconnect-msg", "max-pps", "max-pps-kick-msg", "tracking-period",
+        "tracking-warning-pps", "tracking-max-warnings", "tracking-max-kick-msg", "use-new-deathmessages"
     )
 
     init {
