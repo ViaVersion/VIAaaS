@@ -124,7 +124,7 @@ class LoginState : MinecraftConnectionState {
                 val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
 
                 forward(frontHandler, cryptoResponse, true)
-                backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(backAesDe, backAesEn))
+                backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(backAesEn, backAesDe))
             } catch (e: Exception) {
                 frontHandler.data.frontChannel.pipeline().fireExceptionCaught(e)
             }
@@ -140,7 +140,7 @@ class LoginState : MinecraftConnectionState {
 
             val aesEn = mcCfb8(frontKey, Cipher.ENCRYPT_MODE)
             val aesDe = mcCfb8(frontKey, Cipher.DECRYPT_MODE)
-            handler.data.frontChannel.pipeline().addBefore("frame", "crypto", CryptoCodec(aesDe, aesEn))
+            handler.data.frontChannel.pipeline().addBefore("frame", "crypto", CryptoCodec(aesEn, aesDe))
 
             generateServerHash(frontServerId, frontKey, AspirinServer.mcCryptoKey.public)
         }
