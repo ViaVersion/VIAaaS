@@ -164,7 +164,7 @@ class LoginState : MinecraftConnectionState {
         started = true
 
         VIAaaSConfig.maxPlayers?.let {
-            if (currentPlayers() >= it) throw StacklessException("Instance is full!")
+            if (AspirinServer.currentPlayers() >= it) throw StacklessException("Instance is full!")
         }
 
         frontName = loginStart.username

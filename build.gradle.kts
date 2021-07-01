@@ -37,7 +37,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.4.4+" + try {
+version = "0.4.5+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -94,7 +94,6 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
     implementation("com.auth0:java-jwt:3.17.0")
-    implementation("io.ipinfo:ipinfo-api:1.1")
 }
 
 val run: JavaExec by tasks

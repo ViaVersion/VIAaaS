@@ -20,7 +20,7 @@ class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : M
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         handler.data.frontChannel.close()
         if (packet !is StatusResponse) throw StacklessException("Unexpected packet")
-        val ver = JsonParser.parseString(packet.json).asJsonObject
+        val ver = JsonParser.parseString(packet.msg).asJsonObject
             .getAsJsonObject("version")
             .get("protocol").asInt.parseProtocol()
         future.complete(ver)

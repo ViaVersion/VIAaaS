@@ -266,7 +266,3 @@ fun reverseLookup(address: InetAddress): String {
             .joinToString(".") + ".ip6.arpa"
     }
 }
-
-fun currentPlayers(): Int {
-    return Via.getManager().connectionManager.connections.filter { it.protocolInfo.state == State.PLAY }.count()
-}

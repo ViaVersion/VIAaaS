@@ -8,11 +8,12 @@ import com.google.common.cache.CacheLoader
 import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
 import com.google.gson.JsonObject
-import com.viaversion.aas.*
+import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.config.VIAaaSConfig
+import com.viaversion.aas.parseUndashedId
+import com.viaversion.aas.reverseLookup
 import com.viaversion.aas.util.StacklessException
-import io.ipinfo.api.IPInfo
-import io.ipinfo.api.model.IPResponse
+import com.viaversion.aas.webLogger
 import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.server.netty.*
@@ -35,7 +36,6 @@ import kotlin.coroutines.coroutineContext
 
 class WebDashboardServer {
     // I don't think i'll need more than 1k/day
-    val ipInfo = IPInfo.builder().setToken("").build()
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val jwtAlgorithm = Algorithm.HMAC256(VIAaaSConfig.jwtSecret)
 
@@ -87,24 +87,25 @@ class WebDashboardServer {
     ): CompletableFuture<Unit> {
         val future = sessionHashCallbacks.get(hash)
         if (!listeners.containsKey(id)) {
-            future.completeExceptionally(StacklessException("No browser listening"))
+            future.completeExceptionally(StacklessException("Username isn't listened. Use web auth."))
         } else {
             CoroutineScope(coroutineContext).apply {
                 launch(Dispatchers.IO) {
-                    var info: IPResponse? = null
+                    var info: JsonObject? = null
                     var ptr: String? = null
-                    (address as? InetSocketAddress)?.let {
+                    if (address is InetSocketAddress) {
                         try {
+                            val cleanedIp = address.hostString.substringBefore("%")
                             val ipLookup = async(Dispatchers.IO) {
-                                ipInfo.lookupIP(it.address!!.hostAddress!!.substringBefore("%"))
+                                AspirinServer.httpClient.get<JsonObject>("https://ipinfo.io/$cleanedIp")
                             }
-                            val dnsQuery = AspirinServer.dnsResolver.resolveAll(
-                                DefaultDnsQuestion(reverseLookup(it.address), DnsRecordType.PTR)
-                            )
+                            val dnsQuery = AspirinServer.dnsResolver
+                                .resolveAll(DefaultDnsQuestion(reverseLookup(address.address), DnsRecordType.PTR))
                             info = ipLookup.await()
                             ptr = dnsQuery.suspendAwait().let {
                                 try {
                                     it.firstNotNullOfOrNull { it as? DnsPtrRecord }?.hostname()
+                                        ?.removeSuffix(".")
                                 } finally {
                                     it.forEach { ReferenceCountUtil.release(it) }
                                 }
@@ -112,8 +113,11 @@ class WebDashboardServer {
                         } catch (ignored: Exception) {
                         }
                     }
-                    val msg = "Requester: $id $address ($ptr) (${info?.org}, ${info?.city}, ${info?.region}, " +
-                            "${info?.countryCode})\nBackend: $backAddress"
+                    val ipString =
+                        "${info?.get("org")?.asString}, ${info?.get("country")?.asString}, ${info?.get("region")?.asString}, ${
+                            info?.get("city")?.asString
+                        }"
+                    val msg = "Requester: $id $address ($ptr) ($ipString)\nBackend: $backAddress"
                     listeners[id]?.forEach {
                         it.ws.send(JsonObject().also {
                             it.addProperty("action", "session_hash_request")

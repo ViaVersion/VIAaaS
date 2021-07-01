@@ -9,6 +9,7 @@ import com.viaversion.aas.platform.AspirinPlatform
 import com.viaversion.aas.web.WebDashboardServer
 import com.viaversion.viaversion.ViaManagerImpl
 import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.protocol.packet.State
 import io.ktor.client.*
 import io.ktor.client.engine.java.*
 import io.ktor.client.features.*
@@ -119,5 +120,9 @@ object AspirinServer {
             stopSignal()
             waitMainFinish()
         })
+    }
+
+    fun currentPlayers(): Int {
+        return Via.getManager().connectionManager.connections.filter { it.protocolInfo.state == State.PLAY }.count()
     }
 }

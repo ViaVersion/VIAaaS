@@ -3,11 +3,11 @@ package com.viaversion.aas.handler.state
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.UnknownPacket
 import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.config.VIAaaSConfig
-import com.viaversion.aas.currentPlayers
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.parseProtocol
@@ -33,7 +33,7 @@ object StatusState : MinecraftConnectionState {
 
     private fun modifyResponse(handler: MinecraftHandler, packet: StatusResponse) {
         if (VIAaaSConfig.showVersionPing) {
-            val parsed = JsonParser.parseString(packet.json).asJsonObject
+            val parsed = JsonParser.parseString(packet.msg).asJsonObject
             val players = parsed.getAsJsonObject("players") ?: JsonObject().also { parsed.add("players", it) }
             val sample = players.getAsJsonArray("sample") ?: JsonArray().also { players.add("sample", it) }
             sample.add(JsonObject().also {
@@ -46,7 +46,7 @@ object StatusState : MinecraftConnectionState {
                 )
             })
 
-            packet.json = parsed.toString()
+            packet.msg = parsed.toString()
         }
     }
 
@@ -54,14 +54,14 @@ object StatusState : MinecraftConnectionState {
         super.disconnect(handler, msg)
 
         val packet = StatusResponse()
-        packet.json = JsonObject().also {
+        packet.msg = JsonObject().also {
             it.add("version", JsonObject().also {
                 it.addProperty("name", "VIAaaS")
                 it.addProperty("protocol", handler.data.frontVer)
             })
             it.add("players", JsonObject().also {
                 it.addProperty("max", VIAaaSConfig.maxPlayers ?: -1)
-                it.addProperty("online", currentPlayers())
+                it.addProperty("online", AspirinServer.currentPlayers())
                 it.add("sample", JsonArray())
             })
             it.add("description", JsonObject().also {
