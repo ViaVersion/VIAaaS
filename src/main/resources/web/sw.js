@@ -15,6 +15,7 @@ self.addEventListener("install", evt => {
 });
 
 self.addEventListener("fetch", evt => {
+  if (event.request.mode != "navigate") return;
   evt.respondWith(
     fromNetwork(evt.request)
       .catch(() => fromCache(evt.request))

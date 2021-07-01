@@ -1,22 +1,22 @@
 // Account storage
 function storeMcAccount(accessToken, clientToken, name, id, msUser = null) {
-    let accounts = JSON.parse(localStorage.getItem("mc_accounts")) || [];
+    let accounts = JSON.parse(localStorage.getItem("viaaas_mc_accounts")) || [];
     let account = {accessToken: accessToken, clientToken: clientToken, name: name, id: id, msUser: msUser};
     accounts.push(account);
-    localStorage.setItem("mc_accounts", JSON.stringify(accounts));
+    localStorage.setItem("viaaas_mc_accounts", JSON.stringify(accounts));
     refreshAccountList();
     return account;
 }
 
 function removeMcAccount(id) {
-    let accounts = JSON.parse(localStorage.getItem("mc_accounts")) || [];
+    let accounts = getMcAccounts();
     accounts = accounts.filter(it => it.id != id);
-    localStorage.setItem("mc_accounts", JSON.stringify(accounts));
+    localStorage.setItem("viaaas_mc_accounts", JSON.stringify(accounts));
     refreshAccountList();
 }
 
 function getMcAccounts() {
-    return JSON.parse(localStorage.getItem("mc_accounts")) || [];
+    return JSON.parse(localStorage.getItem("viaaas_mc_accounts")) || [];
 }
 
 function findAccountByMcName(name) {

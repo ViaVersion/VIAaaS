@@ -9,34 +9,32 @@ function defaultWs() {
 }
 
 function getWsUrl() {
-    let url = localStorage.getItem("ws-url") || defaultWs();
-    localStorage.setItem("ws-url", url);
-    return url;
+    return localStorage.getItem("viaaas_ws_url") || defaultWs();
 }
 function setWsUrl(url) {
-    localStorage.setItem("ws-url", url);
+    localStorage.setItem("viaaas_ws_url", url);
     location.reload();
 }
 
 // Tokens
 function saveToken(token) {
-    let hTokens = JSON.parse(localStorage.getItem("tokens")) || {};
-    let tokens = hTokens[wsUrl] || [];
+    let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
+    let tokens = getTokens();
     tokens.push(token);
     hTokens[wsUrl] = tokens;
-    localStorage.setItem("tokens", JSON.stringify(hTokens));
+    localStorage.setItem("viaaas_tokens", JSON.stringify(hTokens));
 }
 
 function removeToken(token) {
-    let hTokens = JSON.parse(localStorage.getItem("tokens")) || {};
-    let tokens = hTokens[wsUrl] || [];
+    let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
+    let tokens = getTokens();
     tokens = tokens.filter(it => it != token);
     hTokens[wsUrl] = tokens;
-    localStorage.setItem("tokens", JSON.stringify(hTokens));
+    localStorage.setItem("viaaas_tokens", JSON.stringify(hTokens));
 }
 
 function getTokens() {
-    return (JSON.parse(localStorage.getItem("tokens")) || {})[wsUrl] || [];
+    return (JSON.parse(localStorage.getItem("viaaas_tokens")) || {})[wsUrl] || [];
 }
 
 // Websocket
