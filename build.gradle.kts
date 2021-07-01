@@ -60,7 +60,7 @@ dependencies {
     implementation(kotlin("reflect"))
 
     val vvVer = "4.0.1-1.17.1-rc1-SNAPSHOT"
-    val vbVer = "4.0.1-1.17.1-pre2-SNAPSHOT"
+    val vbVer = "4.0.1-1.17.1-rc1-SNAPSHOT"
     val vrVer = "e3f7a96"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
