@@ -84,7 +84,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.20.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "1.6.0"
+    val ktorVersion = "1.6.1"
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

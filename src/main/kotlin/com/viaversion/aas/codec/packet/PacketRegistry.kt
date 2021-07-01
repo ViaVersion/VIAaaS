@@ -9,7 +9,6 @@ import com.viaversion.aas.codec.packet.status.StatusPing
 import com.viaversion.aas.codec.packet.status.StatusPong
 import com.viaversion.aas.codec.packet.status.StatusRequest
 import com.viaversion.aas.codec.packet.status.StatusResponse
-import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
