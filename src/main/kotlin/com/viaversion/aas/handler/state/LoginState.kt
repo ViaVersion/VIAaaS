@@ -19,7 +19,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import javax.crypto.Cipher
 
 class LoginState : MinecraftConnectionState {
     val callbackPlayerId = CompletableFuture<UUID>()
@@ -120,11 +119,9 @@ class LoginState : MinecraftConnectionState {
                 val cryptoResponse = CryptoResponse()
                 cryptoResponse.encryptedKey = encryptRsa(backPublicKey, backKey)
                 cryptoResponse.encryptedToken = encryptRsa(backPublicKey, backToken)
-                val backAesEn = mcCfb8(backKey, Cipher.ENCRYPT_MODE)
-                val backAesDe = mcCfb8(backKey, Cipher.DECRYPT_MODE)
 
                 forward(frontHandler, cryptoResponse, true)
-                backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(backAesEn, backAesDe))
+                backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(aesKey(backKey), aesKey(backKey)))
             } catch (e: Exception) {
                 frontHandler.data.frontChannel.pipeline().fireExceptionCaught(e)
             }
@@ -138,9 +135,8 @@ class LoginState : MinecraftConnectionState {
 
             if (!decryptedToken.contentEquals(frontToken)) throw StacklessException("Invalid verification token!")
 
-            val aesEn = mcCfb8(frontKey, Cipher.ENCRYPT_MODE)
-            val aesDe = mcCfb8(frontKey, Cipher.DECRYPT_MODE)
-            handler.data.frontChannel.pipeline().addBefore("frame", "crypto", CryptoCodec(aesEn, aesDe))
+            handler.data.frontChannel.pipeline()
+                .addBefore("frame", "crypto", CryptoCodec(aesKey(frontKey), aesKey(frontKey)))
 
             generateServerHash(frontServerId, frontKey, AspirinServer.mcCryptoKey.public)
         }

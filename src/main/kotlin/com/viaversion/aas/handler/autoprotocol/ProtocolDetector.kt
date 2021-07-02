@@ -10,7 +10,7 @@ import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.codec.packet.status.StatusRequest
 import com.viaversion.aas.handler.ConnectionData
 import com.viaversion.aas.handler.MinecraftHandler
-import com.viaversion.aas.handler.addSocks5
+import com.viaversion.aas.handler.addProxyHandler
 import com.viaversion.aas.send
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -44,7 +44,7 @@ object ProtocolDetector {
                                 state = ProtocolDetectionState(future),
                                 frontVer = -1
                             )
-                            channel.pipeline().also { addSocks5(it) }
+                            channel.pipeline().also { addProxyHandler(it) }
                                 .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
                                 .addLast("frame", FrameCodec())
                                 .addLast("mc", MinecraftCodec())

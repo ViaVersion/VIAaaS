@@ -7,8 +7,6 @@ import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.viaversion.api.Via
-import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
 import io.ktor.client.request.*
@@ -45,7 +43,6 @@ import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 val badLength = DecoderException("Invalid length!")
@@ -53,7 +50,7 @@ val mcLogger = LoggerFactory.getLogger("VIAaaS MC")
 val webLogger = LoggerFactory.getLogger("VIAaaS Web")
 val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
 
-val secureRandom = if (VIAaaSConfig.useStrongRandom) SecureRandom.getInstanceStrong() else SecureRandom()
+val secureRandom = SecureRandom()
 
 suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
     if (hostAndPort.host.endsWith(".onion", ignoreCase = true)) return hostAndPort
@@ -94,14 +91,7 @@ fun encryptRsa(publicKey: PublicKey, data: ByteArray) = Cipher.getInstance("RSA"
     it.doFinal(data)
 }
 
-fun mcCfb8(key: ByteArray, mode: Int): Cipher {
-    val spec = SecretKeySpec(key, "AES")
-    val iv = IvParameterSpec(key)
-    return Cipher.getInstance("AES/CFB8/NoPadding").let {
-        it.init(mode, spec, iv)
-        it
-    }
-}
+fun aesKey(key: ByteArray) = SecretKeySpec(key, "AES")
 
 // https://github.com/VelocityPowered/Velocity/blob/6467335f74a7d1617512a55cc9acef5e109b51ac/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -223,11 +213,11 @@ fun sha512Hex(data: ByteArray): String {
 }
 
 fun eventLoopGroup(): EventLoopGroup {
-    if (VIAaaSConfig.isNativeTransportMc) {
-        if (Epoll.isAvailable()) return EpollEventLoopGroup()
-        if (KQueue.isAvailable()) return KQueueEventLoopGroup()
+    return when {
+        Epoll.isAvailable() -> EpollEventLoopGroup()
+        KQueue.isAvailable() -> KQueueEventLoopGroup()
+        else -> NioEventLoopGroup()
     }
-    return NioEventLoopGroup()
 }
 
 fun channelServerSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<ServerSocketChannel> {

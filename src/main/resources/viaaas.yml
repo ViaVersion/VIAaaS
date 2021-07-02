@@ -4,43 +4,38 @@
 #######################
 #
 ######
-# Network
+# Minecraft networking
 ######
-# Port used for binding Minecraft port
+# Port used for binding
 port: 25565
 # Address to bind
 bind-address: localhost
-# Use Netty native transport for Minecraft connections when available.
-native-transport-mc: true
-# Address of SOCKS5 proxy used for connecting to backend servers. Empty to disable.
+# Proxy used to connect to backend servers
+# Example: socks5://localhost:9050, socks4://localhost:9050, http://foo:bar@localhost:9080
+backend-proxy: ''
+# Migrated to backend-proxy
 backend-socks5-proxy-address: ''
-# Port of SOCKS5 proxy used for connecting to backend servers.
 backend-socks5-proxy-port: 9050
 #
 ######
 # Crypto
 ######
-# Sets the RSA key size used by client for encrypting the AES symmetric key when using online mode.
+# Sets the RSA key size used for encrypting the AES symmetric key.
 # Minecraft default is 1024. See https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
 mc-rsa-size: 4096
-# Use SecureRandom.getInstanceStrong(). May block if there's not enough entropy
-# See https://wiki.archlinux.org/index.php/Rng-tools
-use-strong-random: false
 #
 ######
 # VIAaaS virtual hosts options
 ######
 # Requires virtual host to contain the value from "host-name" as a suffix.
-# A false value will allow virtual hosts with no suffix, connecting to the virtual host sent by client.
+# A false value will allow virtual hosts with no suffix, connecting to the hostname sent by client.
 # A false value could be used for transparent proxying or for MiTM.
 require-host-name: true
-# Host names of this instance, that will be used in the virtual host as a suffix.
+# Host names of this instance. Will be used as a suffix.
 host-name:
   - viaaas.localhost
   - via.localhost
   - via.localho.st
-# Requires online mode for front-end connections. May be useful for stopping bots.
-force-online-mode: false
 # Default port to be used when connecting to the backend server.
 # Use -1 to reuse the port sent by client, useful for transparent proxying.
 default-backend-port: 25565
@@ -48,9 +43,9 @@ default-backend-port: 25565
 ######
 # Address filtering
 ######
-# Blocks backend connection to local addresses (localhost, 0.0.0.0, ::1, 127.(...), 10.(...), etc).
+# Blocks backend connection to local addresses (localhost, 0.0.0.0, 10.(...), etc).
 block-local-address: true
-# If some server is in this list, it will be blocked. This has priority over allowed-back-addresses.
+# If some server is in this list, it will be blocked.
 blocked-back-addresses:
   - "*.hypixel.net"
 # Only allows the backend address if it matches an address in this list.
@@ -82,6 +77,8 @@ listening-ws-limit: 10
 #####
 # Favicon URL to use in disconnection messages. Should use "data:image/png;base64," and be a 64x64 PNG
 favicon-url: ''
+# Requires online mode for front-end connections. May be useful for stopping bots.
+force-online-mode: false
 # Max players to allow connection. Use -1 to not limit
 max-players: 20
 #

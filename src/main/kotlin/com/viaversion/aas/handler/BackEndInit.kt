@@ -13,7 +13,7 @@ class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Chann
     override fun initChannel(ch: Channel) {
         val user = UserConnectionImpl(ch, true)
         ProtocolPipelineImpl(user)
-        ch.pipeline().also { addSocks5(it) }
+        ch.pipeline().also { addProxyHandler(it) }
             // "crypto"
             .addLast("frame", FrameCodec())
             // compress

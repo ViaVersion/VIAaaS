@@ -103,9 +103,10 @@ object AspirinServer {
             .childOption(ChannelOption.TCP_NODELAY, true)
             .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
 
-        viaaasLogger.info("Using compression: ${Natives.compress.loadedVariant}")
-        viaaasLogger.info("Binded minecraft into " + chFuture!!.sync().channel().localAddress())
         ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
+
+        viaaasLogger.info("Using compression: ${Natives.compress.loadedVariant}, crypto: ${Natives.cipher.loadedVariant}")
+        viaaasLogger.info("Binded minecraft into " + chFuture!!.sync().channel().localAddress())
     }
 
     fun generateCert() {

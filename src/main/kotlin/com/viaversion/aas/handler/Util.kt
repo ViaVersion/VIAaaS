@@ -1,5 +1,6 @@
 package com.viaversion.aas.handler
 
+import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.readRemainingBytes
@@ -9,6 +10,8 @@ import com.viaversion.viaversion.api.type.Type
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelPipeline
+import io.netty.handler.proxy.HttpProxyHandler
+import io.netty.handler.proxy.Socks4ProxyHandler
 import io.netty.handler.proxy.Socks5ProxyHandler
 import java.net.InetSocketAddress
 
@@ -18,10 +21,17 @@ fun forward(handler: MinecraftHandler, packet: Packet, flush: Boolean = false) {
 
 fun is17(handler: MinecraftHandler) = handler.data.frontVer!! <= ProtocolVersion.v1_7_6.version
 
-fun addSocks5(pipe: ChannelPipeline) {
-    val addr = VIAaaSConfig.backendSocks5ProxyAddress
-    if (addr != null) {
-        pipe.addFirst(Socks5ProxyHandler(InetSocketAddress(addr, VIAaaSConfig.backendSocks5ProxyPort)))
+fun addProxyHandler(pipe: ChannelPipeline) {
+    val proxyUri = VIAaaSConfig.backendProxy
+    if (proxyUri != null) {
+        val socket = InetSocketAddress(AspirinServer.dnsResolver.resolve(proxyUri.host).get(), proxyUri.port)
+        val user = proxyUri.userInfo?.substringBefore(':')
+        val pass = proxyUri.userInfo?.substringAfter(':')
+        when (proxyUri.scheme) {
+            "socks5" -> pipe.addFirst(Socks5ProxyHandler(socket, user, pass))
+            "socks4" -> pipe.addFirst(Socks4ProxyHandler(socket, user))
+            "http" -> pipe.addFirst(if (user != null) HttpProxyHandler(socket, user, pass) else HttpProxyHandler(socket))
+        }
     }
 }
 
