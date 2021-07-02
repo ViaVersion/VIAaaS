@@ -7,6 +7,7 @@ import com.viaversion.viaversion.exception.CancelCodecException
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.handler.proxy.ProxyConnectException
 import io.netty.handler.proxy.ProxyHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,8 +35,10 @@ class MinecraftHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        other?.close()
-        data.state.onInactivated(this)
+        if (!failedProxy(ctx)) {
+            other?.close()
+            data.state.onInactivated(this)
+        }
         coroutineScope.cancel()
     }
 
@@ -47,7 +50,13 @@ class MinecraftHandler(
         other?.setAutoRead(ctx.channel().isWritable)
     }
 
+    private fun failedProxy(ctx: ChannelHandlerContext): Boolean {
+        // proxy connect future fails are handled in another part
+        return (ctx.channel().pipeline().get("proxy") as? ProxyHandler)?.connectFuture()?.isSuccess == false
+    }
+
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+        if (cause is ProxyConnectException && failedProxy(ctx)) return
         if (cause is CancelCodecException) return
         if (cause is ClosedChannelException) return
         mcLogger.debug("Exception: ", cause)

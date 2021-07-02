@@ -16,6 +16,7 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
+import io.netty.handler.proxy.ProxyHandler
 import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withTimeoutOrNull
@@ -41,6 +42,7 @@ private suspend fun createBackChannel(
         .connect(socketAddr)
         .also { it.suspendAwait() }
         .channel()
+    (channel.pipeline().get("proxy") as? ProxyHandler)?.connectFuture()?.suspendAwait()
 
     mcLogger.info("+ ${handler.endRemoteAddress} -> $socketAddr")
     handler.data.backChannel = channel as SocketChannel
@@ -69,7 +71,8 @@ private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: Ine
 
             if (detectedProtocol != null
                 && detectedProtocol.version !in arrayOf(-1, -2)
-                && ProtocolVersion.isRegistered(detectedProtocol.version)) {
+                && ProtocolVersion.isRegistered(detectedProtocol.version)
+            ) {
                 handler.data.backServerVer = detectedProtocol.version
             } else {
                 handler.data.backServerVer = 47 // fallback 1.8
