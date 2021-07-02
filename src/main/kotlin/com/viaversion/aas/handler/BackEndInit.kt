@@ -7,13 +7,16 @@ import com.viaversion.viaversion.protocol.ProtocolPipelineImpl
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.ReadTimeoutHandler
+import java.net.InetSocketAddress
+import java.net.URI
 import java.util.concurrent.TimeUnit
 
-class BackEndInit(val connectionData: ConnectionData) : ChannelInitializer<Channel>() {
+class BackEndInit(val connectionData: ConnectionData, val proxyUri: URI?, val proxyAddress: InetSocketAddress?) :
+    ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         val user = UserConnectionImpl(ch, true)
         ProtocolPipelineImpl(user)
-        ch.pipeline().also { addProxyHandler(it) }
+        ch.pipeline().also { addProxyHandler(it, proxyUri, proxyAddress) }
             // "crypto"
             .addLast("frame", FrameCodec())
             // compress

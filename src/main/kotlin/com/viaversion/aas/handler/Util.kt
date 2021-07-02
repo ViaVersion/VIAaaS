@@ -1,8 +1,6 @@
 package com.viaversion.aas.handler
 
-import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.codec.packet.Packet
-import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.readRemainingBytes
 import com.viaversion.aas.send
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -14,6 +12,7 @@ import io.netty.handler.proxy.HttpProxyHandler
 import io.netty.handler.proxy.Socks4ProxyHandler
 import io.netty.handler.proxy.Socks5ProxyHandler
 import java.net.InetSocketAddress
+import java.net.URI
 
 fun forward(handler: MinecraftHandler, packet: Packet, flush: Boolean = false) {
     send(handler.other!!, packet, flush)
@@ -21,10 +20,8 @@ fun forward(handler: MinecraftHandler, packet: Packet, flush: Boolean = false) {
 
 fun is17(handler: MinecraftHandler) = handler.data.frontVer!! <= ProtocolVersion.v1_7_6.version
 
-fun addProxyHandler(pipe: ChannelPipeline) {
-    val proxyUri = VIAaaSConfig.backendProxy
+fun addProxyHandler(pipe: ChannelPipeline, proxyUri: URI?, socket: InetSocketAddress?) {
     if (proxyUri != null) {
-        val socket = InetSocketAddress(AspirinServer.dnsResolver.resolve(proxyUri.host).get(), proxyUri.port)
         val user = proxyUri.userInfo?.substringBefore(':')
         val pass = proxyUri.userInfo?.substringAfter(':')
         val handler = when (proxyUri.scheme) {

@@ -19,19 +19,22 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.handler.proxy.ProxyHandler
 import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.withTimeout
 import java.net.Inet4Address
 import java.net.InetSocketAddress
+import java.net.URI
 
 private suspend fun createBackChannel(
     handler: MinecraftHandler,
     socketAddr: InetSocketAddress,
     state: State,
-    extraData: String?
+    extraData: String?,
+    proxyUri: URI?,
+    proxyAddress: InetSocketAddress?
 ): Channel {
     val loop = handler.data.frontChannel.eventLoop()
     val channel = Bootstrap()
-        .handler(BackEndInit(handler.data))
+        .handler(BackEndInit(handler.data, proxyUri, proxyAddress))
         .channelFactory(channelSocketFactory(loop.parent()))
         .group(loop)
         .option(ChannelOption.WRITE_BUFFER_WATER_MARK, AspirinServer.bufferWaterMark)
@@ -64,22 +67,23 @@ private suspend fun createBackChannel(
 
 private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: InetSocketAddress) {
     if (handler.data.backServerVer == -2) { // Auto
+        var detectedProtocol: ProtocolVersion? = null
         try {
-            val detectedProtocol = withTimeoutOrNull(10_000) {
+            detectedProtocol = withTimeout(10_000) {
                 ProtocolDetector.detectVersion(socketAddr).await()
             }
-
-            if (detectedProtocol != null
-                && detectedProtocol.version !in arrayOf(-1, -2)
-                && ProtocolVersion.isRegistered(detectedProtocol.version)
-            ) {
-                handler.data.backServerVer = detectedProtocol.version
-            } else {
-                handler.data.backServerVer = 47 // fallback 1.8
-            }
         } catch (e: Exception) {
-            mcLogger.warn("Failed to auto-detect version for $socketAddr: $e")
+            mcLogger.warn("Failed to detect version of $socketAddr: $e")
             mcLogger.debug("Stacktrace: ", e)
+        }
+
+        if (detectedProtocol != null
+            && detectedProtocol.version !in arrayOf(-1, -2)
+            && ProtocolVersion.isRegistered(detectedProtocol.version)
+        ) {
+            handler.data.backServerVer = detectedProtocol.version
+        } else {
+            handler.data.backServerVer = 47 // fallback 1.8
         }
     }
 }
@@ -101,7 +105,12 @@ private suspend fun tryBackAddresses(
                 throw StacklessException("Not allowed")
             }
 
-            createBackChannel(handler, socketAddr, state, extraData)
+            val proxyUri = VIAaaSConfig.backendProxy
+            val proxySocket = if (proxyUri == null) null else {
+                InetSocketAddress(AspirinServer.dnsResolver.resolve(proxyUri.host).suspendAwait(), proxyUri.port)
+            }
+
+            createBackChannel(handler, socketAddr, state, extraData, proxyUri, proxySocket)
             return // Finally it worked!
         } catch (e: Exception) {
             latestException = e
