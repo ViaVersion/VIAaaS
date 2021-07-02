@@ -7,7 +7,7 @@ import com.viaversion.viaversion.exception.CancelCodecException
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.netty.handler.proxy.Socks5ProxyHandler
+import io.netty.handler.proxy.ProxyHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -24,13 +24,12 @@ class MinecraftHandler(
     val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
-        if (ctx.channel().isActive) {
-            data.state.handlePacket(this, ctx, packet)
-        }
+        if (!ctx.channel().isActive) return
+        data.state.handlePacket(this, ctx, packet)
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        endRemoteAddress = ctx.channel().pipeline().get(Socks5ProxyHandler::class.java)?.destinationAddress()
+        endRemoteAddress = (ctx.channel().pipeline().get("proxy") as? ProxyHandler)?.destinationAddress()
             ?: ctx.channel().remoteAddress()
     }
 

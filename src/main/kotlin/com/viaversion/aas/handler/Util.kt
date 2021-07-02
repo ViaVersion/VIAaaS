@@ -1,8 +1,8 @@
 package com.viaversion.aas.handler
 
 import com.viaversion.aas.AspirinServer
-import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.readRemainingBytes
 import com.viaversion.aas.send
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -27,11 +27,13 @@ fun addProxyHandler(pipe: ChannelPipeline) {
         val socket = InetSocketAddress(AspirinServer.dnsResolver.resolve(proxyUri.host).get(), proxyUri.port)
         val user = proxyUri.userInfo?.substringBefore(':')
         val pass = proxyUri.userInfo?.substringAfter(':')
-        when (proxyUri.scheme) {
-            "socks5" -> pipe.addFirst(Socks5ProxyHandler(socket, user, pass))
-            "socks4" -> pipe.addFirst(Socks4ProxyHandler(socket, user))
-            "http" -> pipe.addFirst(if (user != null) HttpProxyHandler(socket, user, pass) else HttpProxyHandler(socket))
+        val handler = when (proxyUri.scheme) {
+            "socks5" -> Socks5ProxyHandler(socket, user, pass)
+            "socks4" -> Socks4ProxyHandler(socket, user)
+            "http" -> if (user != null) HttpProxyHandler(socket, user, pass) else HttpProxyHandler(socket)
+            else -> null
         }
+        if (handler != null) pipe.addFirst("proxy", handler)
     }
 }
 
