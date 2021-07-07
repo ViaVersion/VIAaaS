@@ -59,9 +59,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.0.1"
-    val vbVer = "4.0.1"
-    val vrVer = "e3f7a96"
+    val vvVer = "4.0.2-SNAPSHOT"
+    val vbVer = "4.0.2-SNAPSHOT"
+    val vrVer = "9b21447"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
@@ -70,7 +70,7 @@ dependencies {
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.40.Final")
 
     implementation("com.google.guava:guava:30.1.1-jre")
-    implementation("com.velocitypowered:velocity-native:3.0.0-SNAPSHOT")
+    implementation("com.velocitypowered:velocity-native:3.0.0")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.29")
 
@@ -93,7 +93,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:3.17.0")
+    implementation("com.auth0:java-jwt:3.18.1")
 }
 
 val run: JavaExec by tasks
