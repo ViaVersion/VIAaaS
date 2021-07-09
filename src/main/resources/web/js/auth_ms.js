@@ -1,11 +1,15 @@
 // https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-javascript-auth-code
 
-const redirectUrl = location.origin == "https://localhost:25543" ?
-"https://localhost:25543/" : "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
+const azureClientId = "a370fff9-7648-4dbf-b96e-2b4f8d539ac2";
+const whitelistedOrigin = ["https://localhost:25543", "https://via-login.geyserconnect.net", "https://via.re.yt.nom.br", "https://viaaas.noxt.cf"];
+let redirectUrl = "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
+if (whitelistedOrigin.includes(location.origin)) {
+    redirectUrl = location.origin + location.pathname;
+}
 
 const msalConfig = {
     auth: {
-        clientId: "a370fff9-7648-4dbf-b96e-2b4f8d539ac2",
+        clientId: azureClientId,
         authority: "https://login.microsoftonline.com/consumers/",
         redirectUri: redirectUrl,
     },
