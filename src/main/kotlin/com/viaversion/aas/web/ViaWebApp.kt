@@ -30,7 +30,7 @@ class ViaWebApp(val viaWebServer: WebDashboardServer) {
         }
         install(WebSockets) {
             maxFrameSize = Short.MAX_VALUE.toLong()
-            pingPeriod = Duration.ofSeconds(60)
+            pingPeriod = Duration.ofSeconds(20)
             timeout = Duration.ofSeconds(15)
         }
         install(XForwardedHeaderSupport)
