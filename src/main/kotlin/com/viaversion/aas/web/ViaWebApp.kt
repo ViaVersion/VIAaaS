@@ -5,11 +5,15 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
+import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.util.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
 import org.slf4j.event.Level
+import java.io.File
 import java.nio.channels.ClosedChannelException
+import java.nio.file.Path
 import java.time.Duration
 
 class ViaWebApp(val viaWebServer: WebDashboardServer) {
@@ -40,11 +44,25 @@ class ViaWebApp(val viaWebServer: WebDashboardServer) {
         install(Compression)
 
         routing {
-            static {
-                default("config/web/index.html")
-                files("config/web")
-                defaultResource("index.html", "web")
-                resources("web")
+            get("{path...}") {
+                // todo if-modified-since
+                val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")
+                val index = Path.of("index.html")
+
+                var resource = call.resolveResource(relativePath.toString(), "web")
+                if (resource == null) {
+                    resource = call.resolveResource(relativePath.resolve(index).toString(), "web")
+                }
+
+                var file = File("config/web").combineSafe(relativePath)
+                if (file.isDirectory) {
+                    file = file.resolve("index.html")
+                }
+
+                when {
+                    file.isFile -> call.respondFile(file)
+                    resource != null -> call.respond(resource)
+                }
             }
 
             webSocket("/ws") {
