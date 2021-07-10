@@ -41,6 +41,8 @@ class ViaWebApp(val viaWebServer: WebDashboardServer) {
 
         routing {
             static {
+                default("config/web/index.html")
+                files("config/web")
                 defaultResource("index.html", "web")
                 resources("web")
             }
