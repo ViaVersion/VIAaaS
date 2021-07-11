@@ -11,13 +11,13 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.parseProtocol
+import com.viaversion.aas.send
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.aas.writeFlushClose
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
 import java.util.*
 
-object StatusState : MinecraftConnectionState {
+object StatusState : ConnectionState {
     override val state: State
         get() = State.STATUS
     override val logDc: Boolean
@@ -71,6 +71,7 @@ object StatusState : MinecraftConnectionState {
                 it.addProperty("favicon", favicon)
             }
         }.toString()
-        writeFlushClose(handler.data.frontChannel, packet)
+        send(handler.data.frontChannel, packet, flush = true)
+        handler.data.state = StatusKicked()
     }
 }

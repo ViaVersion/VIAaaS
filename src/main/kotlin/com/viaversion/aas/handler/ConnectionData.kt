@@ -1,13 +1,13 @@
 package com.viaversion.aas.handler
 
 import com.viaversion.aas.handler.state.HandshakeState
-import com.viaversion.aas.handler.state.MinecraftConnectionState
+import com.viaversion.aas.handler.state.ConnectionState
 import io.netty.channel.Channel
 
 class ConnectionData(
     val frontChannel: Channel,
     var backChannel: Channel? = null,
-    var state: MinecraftConnectionState = HandshakeState(),
+    var state: ConnectionState = HandshakeState(),
     var frontVer: Int? = null,
     var backServerVer: Int? = null,
 ) {

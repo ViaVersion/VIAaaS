@@ -6,7 +6,7 @@ import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
 
-interface MinecraftConnectionState {
+interface ConnectionState {
     val state: State
     fun handlePacket(
         handler: MinecraftHandler, ctx: ChannelHandlerContext,

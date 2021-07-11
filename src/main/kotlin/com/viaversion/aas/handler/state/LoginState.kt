@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
-class LoginState : MinecraftConnectionState {
+class LoginState : ConnectionState {
     val callbackPlayerId = CompletableFuture<UUID>()
     lateinit var frontToken: ByteArray
     lateinit var frontServerId: String

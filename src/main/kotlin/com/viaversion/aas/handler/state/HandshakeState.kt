@@ -20,7 +20,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
-class HandshakeState : MinecraftConnectionState {
+class HandshakeState : ConnectionState {
     object RateLimit {
         val rateLimitByIp = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)

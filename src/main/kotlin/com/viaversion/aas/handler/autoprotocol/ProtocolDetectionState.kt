@@ -4,7 +4,7 @@ import com.google.gson.JsonParser
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.handler.MinecraftHandler
-import com.viaversion.aas.handler.state.MinecraftConnectionState
+import com.viaversion.aas.handler.state.ConnectionState
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.util.StacklessException
@@ -13,7 +13,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.netty.channel.ChannelHandlerContext
 import java.util.concurrent.CompletableFuture
 
-class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : MinecraftConnectionState {
+class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : ConnectionState {
     override val state: State
         get() = State.STATUS
 
