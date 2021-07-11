@@ -106,23 +106,26 @@ class LoginState : ConnectionState {
     }
 
     fun reauthMessage(handler: MinecraftHandler, backName: String, backHash: String): CompletableFuture<Boolean> {
-        if (handler.data.frontVer!! < ProtocolVersion.v1_13.version) {
+        if (!handler.data.frontEncrypted
+            || handler.data.frontVer!! < ProtocolVersion.v1_13.version
+        ) {
             callbackPluginReauth.complete(false)
-        } else {
-            val buf = ByteBufAllocator.DEFAULT.buffer()
-            try {
-                Type.STRING.write(buf, backName)
-                Type.STRING.write(buf, backHash)
+            return callbackPluginReauth
+        }
 
-                val packet = PluginRequest()
-                packet.id = ThreadLocalRandom.current().nextInt()
-                packet.channel = "viaaas:reauth"
-                packet.data = readRemainingBytes(buf)
-                send(handler.data.frontChannel, packet, true)
-                pendingReauth = packet.id
-            } finally {
-                buf.release()
-            }
+        val buf = ByteBufAllocator.DEFAULT.buffer()
+        try {
+            Type.STRING.write(buf, backName)
+            Type.STRING.write(buf, backHash)
+
+            val packet = PluginRequest()
+            packet.id = ThreadLocalRandom.current().nextInt()
+            packet.channel = "viaaas:reauth"
+            packet.data = readRemainingBytes(buf)
+            send(handler.data.frontChannel, packet, true)
+            pendingReauth = packet.id
+        } finally {
+            buf.release()
         }
         return callbackPluginReauth
     }
