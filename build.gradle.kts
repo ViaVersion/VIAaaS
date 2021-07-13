@@ -11,7 +11,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.5.20"
+    kotlin("jvm") version "1.5.21"
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.39.0"
