@@ -81,6 +81,8 @@ favicon-url: ''
 force-online-mode: false
 # Max players to allow connection. Use -1 to not limit
 max-players: 20
+# Time to cache server protocol detection in seconds
+protocol-detector-cache: 30
 #
 #####
 # SECRETS - DO NOT SHARE

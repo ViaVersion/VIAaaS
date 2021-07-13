@@ -68,4 +68,6 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val maxPlayers: Int? get() = this.getInt("max-players", 20).let { if (it == -1) null else it }
     val backendProxy: URI?
         get() = this.getString("backend-proxy", "").let { if (it.isNullOrEmpty()) null else URI.create(it) }
+    val protocolDetectorCache: Int
+        get() = this.getInt("protocol-detector-cache", 30)
 }
