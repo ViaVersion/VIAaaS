@@ -28,7 +28,7 @@ public class StatusKicked implements ConnectionState {
 	}
 
 	@Override
-	public boolean getLogDc() {
+	public boolean getLogDcInfo() {
 		return false;
 	}
 

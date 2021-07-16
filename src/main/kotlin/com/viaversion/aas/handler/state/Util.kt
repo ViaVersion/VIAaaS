@@ -47,7 +47,7 @@ private suspend fun createBackChannel(
         .channel()
     (channel.pipeline().get("proxy") as? ProxyHandler)?.connectFuture()?.suspendAwait()
 
-    mcLogger.info("+ ${handler.endRemoteAddress} -> $socketAddr")
+    mcLogger.info("+ ${state.name.substring(0, 1)} ${handler.endRemoteAddress} -> $socketAddr")
     handler.data.backChannel = channel as SocketChannel
 
     autoDetectVersion(handler, socketAddr)
@@ -102,7 +102,7 @@ private suspend fun tryBackAddresses(
                 || matchesAddress(socketAddr, VIAaaSConfig.blockedBackAddresses)
                 || !matchesAddress(socketAddr, VIAaaSConfig.allowedBackAddresses)
             ) {
-                throw StacklessException("Not allowed")
+                throw StacklessException("Address not allowed")
             }
 
             val proxyUri = VIAaaSConfig.backendProxy
@@ -144,13 +144,9 @@ suspend fun connectBack(
     state: State,
     extraData: String? = null
 ) {
-    try {
-        val addresses = resolveBackendAddresses(HostAndPort.fromParts(address, port))
+    val addresses = resolveBackendAddresses(HostAndPort.fromParts(address, port))
 
-        if (addresses.isEmpty()) throw StacklessException("Hostname has no IP addresses")
+    if (addresses.isEmpty()) throw StacklessException("Hostname has no IP addresses")
 
-        tryBackAddresses(handler, addresses, state, extraData)
-    } catch (e: Exception) {
-        throw StacklessException("Connect: $e", e)
-    }
+    tryBackAddresses(handler, addresses, state, extraData)
 }

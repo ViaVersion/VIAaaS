@@ -36,7 +36,7 @@ class LoginState : ConnectionState {
     var started = false
     override val state: State
         get() = State.LOGIN
-    override val logDc: Boolean
+    override val logDcInfo: Boolean
         get() = true
     var callbackPluginReauth = CompletableFuture<Boolean>()
     var pendingReauth: Int? = null

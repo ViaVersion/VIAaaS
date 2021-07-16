@@ -17,7 +17,7 @@ import io.netty.util.ReferenceCountUtil
 object PlayState : ConnectionState {
     override val state: State
         get() = State.PLAY
-    override val logDc: Boolean
+    override val logDcInfo: Boolean
         get() = true
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {

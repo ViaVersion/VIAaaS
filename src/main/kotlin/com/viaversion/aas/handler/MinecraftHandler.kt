@@ -36,10 +36,9 @@ class MinecraftHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         if (!failedProxy(ctx)) {
-            other?.close()
             data.state.onInactivated(this)
         }
-        coroutineScope.cancel()
+        ctx.executor().execute(coroutineScope::cancel) // wait a bit... cancelexception spam...
     }
 
     override fun channelReadComplete(ctx: ChannelHandlerContext?) {

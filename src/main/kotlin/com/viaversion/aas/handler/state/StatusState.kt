@@ -20,8 +20,6 @@ import java.util.*
 object StatusState : ConnectionState {
     override val state: State
         get() = State.STATUS
-    override val logDc: Boolean
-        get() = true
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         if (packet is UnknownPacket) throw StacklessException("Invalid packet")

@@ -86,7 +86,7 @@ class HandshakeState : ConnectionState {
         }
 
         val playerAddr = handler.data.frontHandler.endRemoteAddress
-        mcLogger.info(
+        mcLogger.debug(
             "HS: $playerAddr ${handler.data.state.state.toString().substring(0, 1)} " +
                     "$virtualHostNoExtra $virtualPort v${handler.data.frontVer}"
         )
@@ -122,9 +122,5 @@ class HandshakeState : ConnectionState {
     override fun disconnect(handler: MinecraftHandler, msg: String) {
         super.disconnect(handler, msg)
         handler.data.frontChannel.close() // Not worth logging
-    }
-
-    override fun onInactivated(handler: MinecraftHandler) {
-        // Not worth logging
     }
 }
