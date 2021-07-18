@@ -4,13 +4,13 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.net.HostAndPort
 import com.google.common.util.concurrent.RateLimiter
-import com.viaversion.aas.VIAaaSAddress
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.setAutoRead
+import com.viaversion.aas.util.AddressParser
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
@@ -63,7 +63,7 @@ class HandshakeState : ConnectionState {
         val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
 
         val parsed = VIAaaSConfig.hostName.map {
-            VIAaaSAddress().parse(virtualHostNoExtra, it)
+            AddressParser().parse(virtualHostNoExtra, it)
         }.sortedBy {
             it.viaSuffix == null
         }.first()
