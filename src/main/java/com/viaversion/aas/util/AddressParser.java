@@ -21,7 +21,7 @@ public class AddressParser {
 
 	public AddressParser parse(String address, String viaHostName) {
 		address = StringsKt.removeSuffix(address, ".");
-		String suffixRemoved = StringsKt.removeSuffix(address, viaHostName);
+		String suffixRemoved = StringsKt.removeSuffix(address, "." + viaHostName);
 
 		if (suffixRemoved.equals(address)) {
 			serverAddress = address;
