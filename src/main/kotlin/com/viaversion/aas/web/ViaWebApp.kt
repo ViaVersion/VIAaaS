@@ -42,6 +42,7 @@ class ViaWebApp(val viaWebServer: WebDashboardServer) {
         // i think we aren't vulnerable to breach, dynamic things are websockets
         // https://ktor.io/docs/compression.html#security
         install(Compression)
+        install(PartialContent)
 
         routing {
             get("{path...}") {
