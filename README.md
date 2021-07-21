@@ -17,6 +17,8 @@ Online mode: https://youtu.be/9MKKjuoe66k
 
 Using with GeyserConnect: https://youtu.be/_LItAIIFmsI
 
+Using with GeyserConnect on offline mode: https://youtu.be/-hZESD61nSU
+
 Offline mode tutorial: https://youtu.be/lPdELnrxmp0
 
 ## How does it work?
