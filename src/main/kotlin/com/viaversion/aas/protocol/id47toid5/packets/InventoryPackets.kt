@@ -3,19 +3,17 @@ package com.viaversion.aas.protocol.id47toid5.packets
 import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.storage.Windows
 import com.viaversion.viaversion.api.minecraft.item.DataItem
-import com.viaversion.viaversion.api.minecraft.item.Item
-import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.libs.kyori.adventure.text.Component
 import com.viaversion.viaversion.libs.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import com.viaversion.viaversion.libs.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import com.viaversion.viaversion.protocols.protocol1_8.ServerboundPackets1_8
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ClientboundPackets1_7
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 
 fun Protocol1_8To1_7_6.registerInventoryPackets() {
-
-    //Open Window
-    this.registerClientbound(State.PLAY, 0x2D, 0x2D, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.OPEN_WINDOW, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.UNSIGNED_BYTE)
             handler { packetWrapper ->
@@ -40,8 +38,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
         }
     })
 
-    //Set Slot
-    this.registerClientbound(State.PLAY, 0x2F, 0x2F, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.SET_SLOT, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.UNSIGNED_BYTE) // window id
             map(Type.SHORT) // window type
@@ -57,8 +54,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
         }
     })
 
-    //Window Items
-    this.registerClientbound(State.PLAY, 0x30, 0x30, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.WINDOW_ITEMS, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.UNSIGNED_BYTE) //Window Id
             handler { packetWrapper ->
@@ -78,8 +74,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     })
 
 
-    //Click Window
-    this.registerServerbound(State.PLAY, 0x0E, 0x0E, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.CLICK_WINDOW, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val windowId = packetWrapper.read(Type.UNSIGNED_BYTE) //Window Id
@@ -102,8 +97,7 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
         }
     })
 
-    //Creative Inventory Action
-    this.registerServerbound(State.PLAY, 0x10, 0x10, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.CREATIVE_INVENTORY_ACTION, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.SHORT) //Slot
             map(Type.ITEM, Types1_7_6_10.COMPRESSED_NBT_ITEM) //Item

@@ -3,10 +3,15 @@ package com.viaversion.aas.protocol.id47toid5
 import com.viaversion.aas.protocol.id47toid5.packets.*
 import com.viaversion.aas.protocol.id47toid5.storage.*
 import com.viaversion.viaversion.api.connection.UserConnection
-import com.viaversion.viaversion.api.protocol.AbstractSimpleProtocol
+import com.viaversion.viaversion.api.protocol.AbstractProtocol
+import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
+import com.viaversion.viaversion.protocols.protocol1_8.ServerboundPackets1_8
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ClientboundPackets1_7
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ServerboundPackets1_7
 
 // Based on https://github.com/Gerrygames/ClientViaVersion
-object Protocol1_8To1_7_6 : AbstractSimpleProtocol() {
+object Protocol1_8To1_7_6 : AbstractProtocol<ClientboundPackets1_7, ClientboundPackets1_8,
+        ServerboundPackets1_7, ServerboundPackets1_8>() {
     private val placeable = hashSetOf<Int>()
 
     init {
@@ -97,7 +102,6 @@ object Protocol1_8To1_7_6 : AbstractSimpleProtocol() {
 
     fun getInventoryString(b: Int): String {
         return when (b) {
-            0 -> "minecraft:chest"
             1 -> "minecraft:crafting_table"
             2 -> "minecraft:furnace"
             3 -> "minecraft:dispenser"
@@ -109,8 +113,7 @@ object Protocol1_8To1_7_6 : AbstractSimpleProtocol() {
             9 -> "minecraft:hopper"
             10 -> "minecraft:dropper"
             11 -> "EntityHorse"
-            else -> throw IllegalArgumentException("Unknown type $b")
+            else -> "minecraft:chest"
         }
     }
-
 }

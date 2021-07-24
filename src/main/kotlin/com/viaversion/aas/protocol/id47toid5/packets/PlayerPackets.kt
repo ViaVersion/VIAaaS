@@ -21,7 +21,9 @@ import com.viaversion.viaversion.api.type.types.CustomByteType
 import com.viaversion.viaversion.api.type.types.version.Types1_8
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.ListTag
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.StringTag
+import com.viaversion.viaversion.protocols.protocol1_8.ServerboundPackets1_8
 import com.viaversion.viaversion.util.ChatColorUtil
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ClientboundPackets1_7
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.CustomStringType
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
 import de.gerrygames.viarewind.utils.ChatUtil
@@ -31,15 +33,13 @@ import java.util.*
 import kotlin.experimental.and
 
 fun Protocol1_8To1_7_6.registerPlayerPackets() {
-    //Keep Alive
-    this.registerClientbound(State.PLAY, 0x00, 0x00, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.KEEP_ALIVE, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT)
         }
     })
 
-    //Join Game
-    this.registerClientbound(State.PLAY, 0x01, 0x01, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.JOIN_GAME, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT) //Entiy Id
             map(Type.UNSIGNED_BYTE) //Gamemode
@@ -51,23 +51,20 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Chat Message
-    this.registerClientbound(State.PLAY, 0x02, 0x02, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.CHAT_MESSAGE, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.STRING) //Chat Message
             create(Type.BYTE, 0.toByte()) //Position (chat box)
         }
     })
 
-    //Spawn Position
-    this.registerClientbound(State.PLAY, 0x05, 0x05, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.SPAWN_POSITION, object : PacketRemapper() {
         override fun registerMap() {
             map(xyzToPosition, TypeRemapper(Type.POSITION)) //Position
         }
     })
 
-    //Update Health
-    this.registerClientbound(State.PLAY, 0x06, 0x06, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.UPDATE_HEALTH, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.FLOAT) //Health
             map(Type.SHORT, Type.VAR_INT) //Food
@@ -75,8 +72,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Player Position And Look
-    this.registerClientbound(State.PLAY, 0x08, 0x08, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.ENTITY_POSITION_AND_ROTATION, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.DOUBLE) //x
             handler { packetWrapper ->
@@ -93,16 +89,14 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Use Bed
-    this.registerClientbound(State.PLAY, 0x0A, 0x0A, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.USE_BED, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(xyzUBytePos, TypeRemapper(Type.POSITION))
         }
     })
 
-    //Spawn Player
-    this.registerClientbound(State.PLAY, 0x0C, 0x0C, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.SPAWN_PLAYER, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val entityId = packetWrapper.passthrough(Type.VAR_INT) //Entity Id
@@ -197,8 +191,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Set Experience
-    this.registerClientbound(State.PLAY, 0x1F, 0x1F, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.SET_EXPERIENCE, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.FLOAT) //Experience bar
             map(Type.SHORT, Type.VAR_INT) //Level
@@ -207,8 +200,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     })
 
 
-    //Player List Item
-    this.registerClientbound(State.PLAY, 0x38, 0x38, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.PLAYER_INFO, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val name = packetWrapper.read(Type.STRING)
@@ -272,8 +264,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Scoreboard Objective
-    this.registerClientbound(State.PLAY, 0x3B, 0x3B, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.SCOREBOARD_OBJECTIVE, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.STRING) // name
             handler { packetWrapper ->
@@ -288,8 +279,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Update Score
-    this.registerClientbound(State.PLAY, 0x3C, 0x3C, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.UPDATE_SCORE, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val name = packetWrapper.passthrough(Type.STRING)
@@ -306,8 +296,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Scoreboard Teams
-    this.registerClientbound(State.PLAY, 0x3E, 0x3E, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.TEAMS, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.STRING)
             handler { packetWrapper ->
@@ -331,8 +320,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Custom Payload
-    this.registerClientbound(State.PLAY, 0x3F, 0x3F, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.PLUGIN_MESSAGE, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.STRING)
             handler { packetWrapper ->
@@ -379,15 +367,13 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Keep Alive
-    this.registerServerbound(State.PLAY, 0x00, 0x00, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.KEEP_ALIVE, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.VAR_INT, Type.INT)
         }
     })
 
-    //Custom Payload
-    this.registerServerbound(State.PLAY, 0x17, 0x17, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.PLUGIN_MESSAGE, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.STRING)
             handler { packetWrapper ->
@@ -428,8 +414,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Player Position
-    this.registerServerbound(State.PLAY, 0x04, 0x04, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.PLAYER_POSITION, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.DOUBLE) //X
             handler { packetWrapper ->
@@ -441,8 +426,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Player Position And Look
-    this.registerServerbound(State.PLAY, 0x06, 0x06, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.PLAYER_POSITION_AND_ROTATION, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.DOUBLE) //X
             handler { packetWrapper ->
@@ -456,17 +440,14 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Animation
-    this.registerServerbound(State.PLAY, 0x0A, 0x0A, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.ANIMATION, object : PacketRemapper() {
         override fun registerMap() {
             create(Type.INT, 0) //Entity Id, hopefully 0 is ok
             create(Type.BYTE, 1.toByte()) //Animation
         }
     })
 
-
-    //Client Settings
-    this.registerServerbound(State.PLAY, 0x15, 0x15, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.CLIENT_SETTINGS, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.STRING)
             map(Type.BYTE)
@@ -480,8 +461,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    //Tab-Complete
-    this.registerServerbound(State.PLAY, 0x14, 0x14, object : PacketRemapper() {
+    this.registerServerbound(ServerboundPackets1_8.TAB_COMPLETE, object : PacketRemapper() {
         override fun registerMap() {
             handler { packetWrapper ->
                 val text = packetWrapper.read(Type.STRING)
