@@ -61,7 +61,7 @@ dependencies {
 
     val vvVer = "4.0.2-SNAPSHOT"
     val vbVer = "4.0.2-SNAPSHOT"
-    val vrVer = "9484048dff"
+    val vrVer = "6fc2ec0822"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
