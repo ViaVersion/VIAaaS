@@ -472,4 +472,5 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
     })
 
     this.cancelServerbound(ServerboundPackets1_8.SPECTATE)
+    this.cancelServerbound(ServerboundPackets1_8.RESOURCE_PACK_STATUS)
 }

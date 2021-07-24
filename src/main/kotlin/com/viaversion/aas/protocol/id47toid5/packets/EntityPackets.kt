@@ -221,7 +221,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
         }
     })
 
-    this.registerClientbound(ClientboundPackets1_7.ENTITY_HEAD_LOOK, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.ENTITY_ROTATION, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //yaw
@@ -254,7 +254,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
         }
     })
 
-    this.registerClientbound(ClientboundPackets1_7.ENTITY_ROTATION, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.ENTITY_HEAD_LOOK, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.INT, Type.VAR_INT) //Entity Id
             map(Type.BYTE) //Head yaw
