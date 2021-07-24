@@ -11,7 +11,10 @@ import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ServerboundPackets
 
 // Based on https://github.com/Gerrygames/ClientViaVersion
 object Protocol1_8To1_7_6 : AbstractProtocol<ClientboundPackets1_7, ClientboundPackets1_8,
-        ServerboundPackets1_7, ServerboundPackets1_8>() {
+        ServerboundPackets1_7, ServerboundPackets1_8>(
+    ClientboundPackets1_7::class.java, ClientboundPackets1_8::class.java,
+    ServerboundPackets1_7::class.java, ServerboundPackets1_8::class.java
+) {
     private val placeable = hashSetOf<Int>()
 
     init {
