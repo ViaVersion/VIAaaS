@@ -43,13 +43,15 @@ fun Protocol1_8To1_7_6.registerInventoryPackets() {
     //Set Slot
     this.registerClientbound(State.PLAY, 0x2F, 0x2F, object : PacketRemapper() {
         override fun registerMap() {
+            map(Type.UNSIGNED_BYTE) // window id
+            map(Type.SHORT) // window type
             handler { packetWrapper ->
-                val windowId = packetWrapper.read(Type.BYTE).toShort() //Window Id
-                val windowType = packetWrapper.user().get(Windows::class.java)!!.get(windowId).toShort()
-                packetWrapper.write(Type.BYTE, windowId.toByte())
-                var slot = packetWrapper.read(Type.SHORT).toInt()
-                if (windowType.toInt() == 4 && slot >= 1) slot += 1
-                packetWrapper.write(Type.SHORT, slot.toShort()) //Slot
+                val windowId = packetWrapper.get(Type.UNSIGNED_BYTE, 0) //Window Id
+                val windowType = packetWrapper.user().get(Windows::class.java)!!.get(windowId)
+                val slot = packetWrapper.get(Type.SHORT, 0).toInt()
+                if (windowType.toInt() == 4 && slot >= 1) {
+                    packetWrapper.set(Type.SHORT, 0, (slot + 1).toShort())
+                }
             }
             map(Types1_7_6_10.COMPRESSED_NBT_ITEM, Type.ITEM) //Item
         }
