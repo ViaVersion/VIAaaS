@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.config.VIAaaSConfig
+import com.viaversion.aas.fireExceptionCaughtIfOpen
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.setAutoRead
@@ -113,7 +114,7 @@ class HandshakeState : ConnectionState {
                 try {
                     connectBack(handler, packet.address, packet.port, packet.nextState)
                 } catch (e: Exception) {
-                    ctx.fireExceptionCaught(e)
+                    ctx.channel().fireExceptionCaughtIfOpen(e)
                 }
             }
         }

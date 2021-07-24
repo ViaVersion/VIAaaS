@@ -256,3 +256,7 @@ fun reverseLookup(address: InetAddress): String {
             .joinToString(".") + ".ip6.arpa"
     }
 }
+
+fun Channel.fireExceptionCaughtIfOpen(e: Exception) {
+    if (isOpen()) pipeline().fireExceptionCaught(e)
+}

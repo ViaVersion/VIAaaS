@@ -167,7 +167,7 @@ class LoginState : ConnectionState {
                 forward(frontHandler, cryptoResponse, true)
                 backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(aesKey(backKey), aesKey(backKey)))
             } catch (e: Exception) {
-                frontHandler.data.frontChannel.pipeline().fireExceptionCaught(e)
+                frontHandler.data.frontChannel.fireExceptionCaughtIfOpen(e)
             }
         }
     }
@@ -224,7 +224,7 @@ class LoginState : ConnectionState {
                 loginStart.username = backName!!
                 send(handler.data.backChannel!!, loginStart, true)
             } catch (e: Exception) {
-                handler.data.frontChannel.pipeline().fireExceptionCaught(e)
+                handler.data.frontChannel.fireExceptionCaughtIfOpen(e)
             }
         }
     }
