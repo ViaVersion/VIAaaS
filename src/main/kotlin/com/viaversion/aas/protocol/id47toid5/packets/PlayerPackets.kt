@@ -72,7 +72,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
         }
     })
 
-    this.registerClientbound(ClientboundPackets1_7.ENTITY_POSITION_AND_ROTATION, object : PacketRemapper() {
+    this.registerClientbound(ClientboundPackets1_7.PLAYER_POSITION, object : PacketRemapper() {
         override fun registerMap() {
             map(Type.DOUBLE) //x
             handler { packetWrapper ->
@@ -470,4 +470,6 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
             }
         }
     })
+
+    this.cancelServerbound(ServerboundPackets1_8.SPECTATE)
 }
