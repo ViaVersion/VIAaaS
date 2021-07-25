@@ -16,7 +16,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.39.0"
     id("com.palantir.git-version") version "0.12.3"
-    id("org.gradlewebtools.minify") version "1.2.0" apply false
+    id("org.gradlewebtools.minify") version "1.2.1" apply false
 }
 
 application {
@@ -66,8 +66,9 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.65.Final")
+    implementation("io.netty:netty-all:4.1.66.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.40.Final")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.8.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("com.velocitypowered:velocity-native:3.0.0")
@@ -75,7 +76,7 @@ dependencies {
     implementation("org.yaml:snakeyaml:1.29")
 
     val log4jVer = "2.14.1"
-    val slf4jVer = "1.7.31"
+    val slf4jVer = "1.7.32"
     implementation("net.minecrell:terminalconsoleappender:1.2.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
@@ -107,7 +108,6 @@ tasks {
     }
     build {
         dependsOn(shadowJar)
-        dependsOn(named("dependencyUpdates"))
     }
     jar {
         manifest.attributes("Multi-Release" to "true")

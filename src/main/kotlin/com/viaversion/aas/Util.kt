@@ -30,6 +30,7 @@ import io.netty.handler.codec.dns.DefaultDnsQuestion
 import io.netty.handler.codec.dns.DefaultDnsRawRecord
 import io.netty.handler.codec.dns.DefaultDnsRecordDecoder
 import io.netty.handler.codec.dns.DnsRecordType
+import io.netty.incubator.channel.uring.*
 import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
@@ -214,6 +215,7 @@ fun sha512Hex(data: ByteArray): String {
 
 fun eventLoopGroup(): EventLoopGroup {
     return when {
+        //IOUring.isAvailable() -> IOUringEventLoopGroup() // experimental
         Epoll.isAvailable() -> EpollEventLoopGroup()
         KQueue.isAvailable() -> KQueueEventLoopGroup()
         else -> NioEventLoopGroup()
@@ -222,6 +224,7 @@ fun eventLoopGroup(): EventLoopGroup {
 
 fun channelServerSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<ServerSocketChannel> {
     return when (eventLoop) {
+        is IOUringEventLoopGroup -> ChannelFactory { IOUringServerSocketChannel() }
         is EpollEventLoopGroup -> ChannelFactory { EpollServerSocketChannel() }
         is KQueueEventLoopGroup -> ChannelFactory { KQueueServerSocketChannel() }
         else -> ChannelFactory { NioServerSocketChannel() }
@@ -230,6 +233,7 @@ fun channelServerSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<Server
 
 fun channelSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<SocketChannel> {
     return when (eventLoop) {
+        is IOUringEventLoopGroup -> ChannelFactory { IOUringSocketChannel() }
         is EpollEventLoopGroup -> ChannelFactory { EpollSocketChannel() }
         is KQueueEventLoopGroup -> ChannelFactory { KQueueSocketChannel() }
         else -> ChannelFactory { NioSocketChannel() }
@@ -238,6 +242,7 @@ fun channelSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<SocketChanne
 
 fun channelDatagramFactory(eventLoop: EventLoopGroup): ChannelFactory<DatagramChannel> {
     return when (eventLoop) {
+        is IOUringEventLoopGroup -> ChannelFactory { IOUringDatagramChannel() }
         is EpollEventLoopGroup -> ChannelFactory { EpollDatagramChannel() }
         is KQueueEventLoopGroup -> ChannelFactory { KQueueDatagramChannel() }
         else -> ChannelFactory { NioDatagramChannel() }
