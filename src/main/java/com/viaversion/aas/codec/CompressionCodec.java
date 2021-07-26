@@ -14,9 +14,7 @@ import java.util.List;
 public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 	// stolen from Krypton (GPL) and modified
 	// https://github.com/astei/krypton/blob/master/src/main/java/me/steinborn/krypton/mod/shared/network/compression/MinecraftCompressEncoder.java
-	private static final int VANILLA_MAXIMUM_UNCOMPRESSED_SIZE = 8 * 1024 * 1024; // 8MiB
-	private static final int HARD_MAXIMUM_UNCOMPRESSED_SIZE = 16 * 1024 * 1024; // 16MiB
-	private static final int UNCOMPRESSED_CAP = java.lang.Boolean.getBoolean("velocity.increased-compression-cap") ? HARD_MAXIMUM_UNCOMPRESSED_SIZE : VANILLA_MAXIMUM_UNCOMPRESSED_SIZE;
+	private static final int UNCOMPRESSED_CAP = 8 * 1024 * 1024; // 8MiB
 	private final int threshold;
 	private VelocityCompressor compressor;
 

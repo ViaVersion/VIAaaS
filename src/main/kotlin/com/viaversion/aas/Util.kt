@@ -215,7 +215,8 @@ fun sha512Hex(data: ByteArray): String {
 
 fun eventLoopGroup(): EventLoopGroup {
     return when {
-        //IOUring.isAvailable() -> IOUringEventLoopGroup() // experimental
+        System.getProperty("com.viaversion.aas.io_uring").toBoolean()
+                && IOUring.isAvailable() -> IOUringEventLoopGroup() // experimental
         Epoll.isAvailable() -> EpollEventLoopGroup()
         KQueue.isAvailable() -> KQueueEventLoopGroup()
         else -> NioEventLoopGroup()
