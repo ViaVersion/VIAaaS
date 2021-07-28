@@ -34,7 +34,6 @@ frame-ancestors 'self'"
             integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
             src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
     <script src="https://alcdn.msauth.net/browser/2.15.0/js/msal-browser.min.js" integrity="sha384-/weuqUPkC0P9JxnstihEV1GHdWrheU9Qo3MbdTuxxKJM8l/cSTE5zGP5VBIM4TZN" crossorigin="anonymous"></script>
-    <link href="style.css" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-2">
@@ -87,66 +86,44 @@ frame-ancestors 'self'"
 
     <div aria-labelledby="settings-tab" class="tab-pane fade" id="settings">
         <div class="mb-3">
-            <label class="form-label" for="form_cors_proxy"><h5>CORS Proxy URL Prefix</h5></label>
-            <p>See <a href="https://github.com/ViaVersion/VIAaaS#cors-proxy">README</a>
-                for setting up one. Mojang APIs are called through this proxy, and a remote IP address may look
-                suspicious and block your account.
-                It will receive sensitive data like email, passwords and tokens. HTTPS is required for non-localhost
-                addresses.</p>
-            <form class="row g-3" id="form_cors_proxy">
-                <div class="col-auto">
-                    <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary" type="submit">Save</button>
-                </div>
+            <p>See <a href="https://github.com/ViaVersion/VIAaaS/">README</a> for more details.</p>
+            <form class="input-group" id="form_cors_proxy">
+              <label class="input-group-text" for="cors-proxy">CORS Proxy URL Prefix</label>
+              <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
+              <button class="btn btn-primary" type="submit">Save</button>
             </form>
         </div>
         <div class="mb-3">
-            <label class="form-label" for="form_ws_url"><h5>WebSocket URL</h5></label>
-            <p>It exchanges sensitive data like minecraft.id tokens, server session hashes and usernames. WSS is
-                required.</p>
-            <form class="row g-3" id="form_ws_url">
-                <div class="col-auto">
-                    <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary" type="submit">Save</button>
-                </div>
+            <form class="input-group" id="form_ws_url">
+              <label class="input-group-text" for="ws-url">WebSocket URL</label>
+              <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
+              <button class="btn btn-primary" type="submit">Save</button>
             </form>
         </div>
     </div>
 
     <div aria-labelledby="accounts-tab" class="tab-pane fade" id="accounts">
-        <div>
-            <h5>Minecraft accounts</h5>
-            <p>These accounts are stored in the browser.</p>
-            <div id="accounts-list"></div>
-            <hr>
+        <div class="mb-3">
+            <p class="form-label">Accounts stored in the browser</p>
+            <ul class="list-group" id="accounts-list"></ul>
         </div>
         <div id="add-account">
-            <label class="mb-3" for="form_add_ms"><h5>Add Microsoft account</h5></label>
-            <form class="row" id="form_add_ms">
+            <div class="mb-3">
+              <label class="form-label" for="form_add_ms">Add Microsoft account</label>
+              <form class="row" id="form_add_ms">
                 <div class="col-auto">
-                    <button class="btn btn-primary mb-3" id="login_submit_ms" type="submit">Login with Microsoft
-                    </button>
+                    <button class="btn btn-primary" id="login_submit_ms" type="submit">Login with Microsoft</button>
                 </div>
-            </form>
-            <label class="mb-3" for="form_add_mc"><h5>Add Mojang account</h5></label>
-            <form class="row g-3" id="form_add_mc">
-                <div class="col-auto">
-                    <label class="visually-hidden" for="email">Username/Email</label>
-                    <input class="form-control" id="email" name="email" placeholder="mc@example.com" type="text">
-                </div>
-                <div class="col-auto">
-                    <label class="visually-hidden" for="password">Password</label>
-                    <input class="form-control" id="password" name="password" placeholder="password" type="password">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary mb-3" id="login_submit_mc" type="submit">Login with Mojang
-                    </button>
-                </div>
-            </form>
+              </form>
+            </div>
+            <div class="mb-2">
+              <label class="form-label" for="form_add_mc">Add Mojang account</label>
+              <form class="input-group" id="form_add_mc">
+                <input aria-label="Email/Username" class="form-control" id="email" name="email" placeholder="mc@example.com" type="text">
+                <input aria-label="Password" class="form-control" id="password" name="password" placeholder="password" type="password">
+                <button class="btn btn-primary" id="login_submit_mc" type="submit">Login with Mojang</button>
+              </form>
+            </div>
         </div>
     </div>
 </div>
@@ -159,27 +136,28 @@ frame-ancestors 'self'"
                 <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
             </div>
             <div class="modal-body">
-                <pre>
-\\        // // //\\  =>     //||     //||   /=====/
- \\      // // //  \\       // ||    // ||  //
-  \\    // // //====\\     //==||   //==||  \====\
-   \\  // // //      \\   //   ||  //   ||      //
-<=  \\// // //        \\ //    || //    || /====/</pre>
-                <p>ViaVersion as a Service - Standalone ViaVersion Proxy</p>
-                <hr>
-                <p>Copyright © 2020-2021 <a href="https://github.com/creeper123123321">creeper123123321</a></p>
-                <p>Copyright © 2021 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a>
-                </p>
-                <p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+                <!-- Design somewhat stolen/inspired from Gnome -->
+                <img src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png" class="mx-auto d-block" alt="VIAaaS logo" width=150">
+                <div class="text-center mb-3">
+                  <h5>ViaVersion as a Service</h5>
+                  <h6>Standalone ViaVersion Proxy</h6>
+                </div>
+                <div class="text-center mb-3">
+                  <p class="mb-1">Copyright © 2020-2021 <a href="https://github.com/creeper123123321">creeper123123321</a></p>
+                  <p class="mb-1">Copyright © 2021 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a></p>
+                </div>
+                <div>
+                  <p>VIAaaS is free software: you can redistribute it and/or modify it under the terms of the GNU
                     Affero General Public License as published by the Free Software Foundation, either version 3 of the
                     License,
                     or (at your option) any later version.</p>
-                <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+                  <p>VIAaaS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
                     even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
                     General
                     Public License for more details.</p>
-                <p>You should have received a copy of the GNU Affero General Public License along with this program. If
+                  <p>You should have received a copy of the GNU Affero General Public License along with this program. If
                     not, see <a href="https://gnu.org/licenses">https://gnu.org/licenses/</a>.</p>
+                </div>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-secondary" href="https://github.com/ViaVersion/VIAaaS/" role="button" type="button">Source

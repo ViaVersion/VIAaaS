@@ -48,10 +48,16 @@ function refreshCorsStatus() {
 }
 
 function addMcAccountToList(id, name, msUser = null) {
-    let p = document.createElement("p");
+    let p = document.createElement("li");
+    p.className = "input-group d-flex";
+    let shead = document.createElement("span");
+    shead.className = "input-group-text";
     let head = document.createElement("img");
+    shead.append(head);
     let n = document.createElement("span");
+    n.className = "form-control";
     let remove = document.createElement("a");
+    remove.className = "btn btn-danger";
     n.innerText = " " + name + " " + (msUser == null ? "" : "(" + msUser + ") ");
     remove.innerText = "Logout";
     remove.href = "javascript:";
@@ -62,11 +68,11 @@ function addMcAccountToList(id, name, msUser = null) {
             logoutMs(msUser);
         }
     };
-    head.className = "account_head";
+    head.width = "24";
     head.alt = name + "'s head";
     head.src = "https://crafthead.net/helm/" + id;
     //(id.length == 36 || id.length == 32) ? "https://crafatar.com/avatars/" + id + "?overlay" : "https://crafthead.net/helm/" + id;
-    p.append(head);
+    p.append(shead);
     p.append(n);
     p.append(remove);
     accounts.appendChild(p);
@@ -151,7 +157,7 @@ function addListeningList(user) {
         listening.removeChild(p);
         unlisten(user);
     };
-    head.className = "account_head";
+    head.width = "24";
     head.alt = user + "'s head";
     head.src = "https://crafthead.net/helm/" + user;
     p.append(head);
@@ -188,5 +194,7 @@ function resetHtml() {
 }
 
 function ohNo() {
-    new Date().getDay() == 3 && console.log("it's snapshot day 🐸 my dudes"); new Date().getDate() == 1 && new Date().getMonth() == 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $99");
+    try {
+      new Date().getDay() == 3 && console.log("it's snapshot day 🐸 my dudes"); new Date().getDate() == 1 && new Date().getMonth() == 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $99");
+    } catch (e) { console.log(e); }
 }

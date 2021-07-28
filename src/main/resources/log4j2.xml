@@ -17,7 +17,7 @@
         <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %msg%n"/>
             <Policies>
-                <SizeBasedTriggeringPolicy size="5 MB"/>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
                 <OnStartupTriggeringPolicy/>
             </Policies>
             <DefaultRolloverStrategy max="2"/>
