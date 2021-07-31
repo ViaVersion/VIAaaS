@@ -37,7 +37,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.4.9+" + try {
+version = "0.4.10+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -138,9 +138,7 @@ class HtmlMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader(
 tasks.named<ProcessResources>("processResources") {
     filesMatching("viaaas_info.json") {
         filter<org.apache.tools.ant.filters.ReplaceTokens>(
-            "tokens" to mapOf(
-                "version" to project.property("version")
-            )
+            "tokens" to mapOf("version" to project.version)
         )
     }
     filesMatching("**/*.js") {

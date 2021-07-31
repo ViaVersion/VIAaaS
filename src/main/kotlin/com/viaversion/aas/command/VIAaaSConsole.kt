@@ -26,6 +26,8 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
         commands["end"] = EndCommand
         commands["reload"] = ReloadCommand
         commands["list"] = ListCommand
+        commands["ver"] = VersionCommand.INSTANCE
+        commands["version"] = VersionCommand.INSTANCE
     }
 
     override fun buildReader(builder: LineReaderBuilder): LineReader {

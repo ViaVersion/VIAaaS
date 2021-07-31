@@ -11,6 +11,9 @@ import com.viaversion.viaversion.api.data.MappingDataLoader
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
 import java.io.File
@@ -20,11 +23,12 @@ fun main(args: Array<String>) {
     try {
         setupSystem()
         printSplash()
+        CoroutineScope(Dispatchers.IO).launch { viaaasLogger.info(AspirinServer.updaterCheckMessage()) }
         AspirinServer.generateCert()
         initVia()
         AspirinServer.listenPorts(args)
 
-        AspirinServer.mainStartSigal()
+        AspirinServer.mainStartSignal()
         AspirinServer.addShutdownHook()
 
         Thread { VIAaaSConsole.start() }.start()
@@ -60,7 +64,6 @@ private fun printSplash() {
               |<=  \\// // //        \\ //    || //    || /====/""".trimMargin()
     )
 }
-
 
 private fun initVia() {
     Via.init(

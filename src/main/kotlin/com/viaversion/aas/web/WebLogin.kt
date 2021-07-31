@@ -25,8 +25,8 @@ class WebLogin : WebState {
         when (obj.getAsJsonPrimitive("action").asString) {
             "offline_login" -> {
                 if (!sha512Hex(msg.toByteArray(Charsets.UTF_8)).startsWith("00000")) throw StacklessException("PoW failed")
-                if ((obj.getAsJsonPrimitive("date").asLong - System.currentTimeMillis()).absoluteValue
-                    > Duration.ofMinutes(2).toMillis()
+                if ((obj.getAsJsonPrimitive("date").asLong - System.currentTimeMillis())
+                        .absoluteValue > Duration.ofSeconds(20).toMillis()
                 ) {
                     throw StacklessException("Invalid PoW date")
                 }

@@ -1,5 +1,6 @@
 package com.viaversion.aas
 
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.velocitypowered.natives.util.Natives
 import com.viaversion.aas.config.VIAaaSConfig
@@ -10,10 +11,12 @@ import com.viaversion.aas.web.WebDashboardServer
 import com.viaversion.viaversion.ViaManagerImpl
 import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.update.Version
 import io.ktor.client.*
 import io.ktor.client.engine.java.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import io.ktor.client.request.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -36,6 +39,7 @@ object AspirinServer {
             .reader(Charsets.UTF_8)
             .readText()
     ).asJsonObject.get("version").asString
+    val cleanedVer get() = version.substringBefore("+")
     var viaWebServer = WebDashboardServer()
     private var serverFinishing = CompletableFuture<Unit>()
     private var finishedFuture = CompletableFuture<Unit>()
@@ -56,7 +60,7 @@ object AspirinServer {
         .build()
     val httpClient = HttpClient(Java) {
         install(UserAgent) {
-            agent = "VIAaaS/${version.substringBefore("+")}"
+            agent = "VIAaaS/$cleanedVer"
         }
         install(JsonFeature) {
             serializer = GsonSerializer()
@@ -91,7 +95,7 @@ object AspirinServer {
 
     fun stopSignal() = serverFinishing.complete(Unit)
     fun mainFinishSignal() = finishedFuture.complete(Unit)
-    fun mainStartSigal() = initFuture.complete(Unit)
+    fun mainStartSignal() = initFuture.complete(Unit)
 
     fun listenPorts(args: Array<String>) {
         chFuture = ServerBootstrap()
@@ -125,5 +129,21 @@ object AspirinServer {
 
     fun currentPlayers(): Int {
         return Via.getManager().connectionManager.connections.filter { it.protocolInfo.state == State.PLAY }.count()
+    }
+
+    suspend fun updaterCheckMessage(): String {
+        return try {
+            val latestData =
+                httpClient.get<JsonObject>("https://api.github.com/repos/viaversion/viaaas/releases/latest")
+            val latest = Version(latestData.get("tag_name")!!.asString.removePrefix("v"))
+            val current = Version(cleanedVer)
+            when {
+                latest > current -> "This build is outdated."
+                latest < current -> "This build is newer than released."
+                else -> "VIAaaS seems up to date."
+            }
+        } catch (e: Exception) {
+            "Failed to fetch latest release info. $e"
+        }
     }
 }

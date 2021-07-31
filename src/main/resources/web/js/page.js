@@ -195,6 +195,13 @@ function resetHtml() {
 
 function ohNo() {
     try {
+      icanhazepoch().then(sec => {
+        if (Math.abs(Date.now() / 1000 - sec) > 15) {
+          addToast("Time isn't synchronized", "Please synchronize your computer time to NTP servers");
+        } else {
+          console.log("time seems synchronized");
+        }
+      })
       new Date().getDay() == 3 && console.log("it's snapshot day 🐸 my dudes"); new Date().getDate() == 1 && new Date().getMonth() == 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $99");
     } catch (e) { console.log(e); }
 }
