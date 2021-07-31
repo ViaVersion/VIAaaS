@@ -138,7 +138,7 @@ object AspirinServer {
             val latest = Version(latestData.get("tag_name")!!.asString.removePrefix("v"))
             val current = Version(cleanedVer)
             when {
-                latest > current -> "This build is outdated."
+                latest > current -> "This build is outdated. Latest is $latest"
                 latest < current -> "This build is newer than released."
                 else -> "VIAaaS seems up to date."
             }
