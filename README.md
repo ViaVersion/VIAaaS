@@ -83,6 +83,8 @@ node server.js
 
 #### Online mode:
 
+Web login:
+
 - You can use the same username for front-end and back-end connection. It's also possible to use an 
   offline mode connection on front-end (use ``_of``).
 - Go to VIAaaS auth webpage (default is https://localhost:25543/)
@@ -91,6 +93,12 @@ node server.js
 - Keep the page open
 - Connect with your account A to ```mc.example.com._u(account B).via.localhost``` (```_u``` can be removed if username is the same)
 - Approve the login in the webpage
+
+Fabric client:
+
+- Install [ParacetamolAuth](https://github.com/creeper123123321/ParacetamolAuth) in your Fabric client.
+- Join the server: ```mc.example.net.via.localhost```
+- Approve the login
 
 ### Address options
 
