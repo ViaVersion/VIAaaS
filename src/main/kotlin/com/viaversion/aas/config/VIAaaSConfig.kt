@@ -2,13 +2,36 @@ package com.viaversion.aas.config
 
 import com.viaversion.aas.secureRandom
 import com.viaversion.viaversion.util.Config
+import net.coobird.thumbnailator.Thumbnails
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URI
+import java.net.URL
 import java.util.*
 
 object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     init {
         reloadConfig()
+    }
+
+    override fun reloadConfig() {
+        super.reloadConfig()
+        reloadIcon()
+    }
+
+    fun reloadIcon() {
+        val rawUrl = this.getString("favicon-url", "")!!
+        faviconUrl = when {
+            rawUrl.isEmpty() -> null
+            rawUrl.startsWith("data:image/png;base64,") -> rawUrl.filter { !it.isWhitespace() }
+            else -> "data:image/png;base64," + Base64.getEncoder().encodeToString(
+                ByteArrayOutputStream().also {
+                    Thumbnails.of(URL(rawUrl))
+                        .size(64, 64)
+                        .outputFormat("png").toOutputStream(it)
+                }.toByteArray()
+            )
+        }
     }
 
     override fun getUnsupportedOptions() = emptyList<String>()
@@ -63,8 +86,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
             if (it.isNullOrBlank()) throw IllegalStateException("invalid jwt-secret") else it
         }
     val rateLimitLoginMc: Double get() = this.getDouble("rate-limit-login-mc", 0.2)
-    val faviconUrl: String?
-        get() = this.getString("favicon-url", "")!!.filter { !it.isWhitespace() }.ifEmpty { null }
+    var faviconUrl: String? = null
     val maxPlayers: Int? get() = this.getInt("max-players", 20).let { if (it == -1) null else it }
     val backendProxy: URI?
         get() = this.getString("backend-proxy", "").let { if (it.isNullOrEmpty()) null else URI.create(it) }

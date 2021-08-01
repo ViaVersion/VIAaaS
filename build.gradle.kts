@@ -72,6 +72,7 @@ dependencies {
 
     implementation("com.google.guava:guava:30.1.1-jre")
     implementation("com.velocitypowered:velocity-native:3.0.0")
+    implementation("net.coobird:thumbnailator:0.4.14")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.29")
 
