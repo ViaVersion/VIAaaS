@@ -30,6 +30,7 @@ $(() => {
     $("#form_add_ms").on("submit", e => loginMs());
     $("#form_ws_url").on("submit", e => setWsUrl($("#ws-url").val()));
     $("#form_cors_proxy").on("submit", e => setCorsProxy($("#cors-proxy").val()));
+    $(".css_async").attr("disabled", null);
 
     workers.forEach(it => it.onmessage = onWorkerMsg);
     refreshAccountList();

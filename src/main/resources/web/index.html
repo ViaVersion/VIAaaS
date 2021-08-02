@@ -18,22 +18,14 @@
 style-src https://cdnjs.cloudflare.com/ 'self';
 img-src data: https://cdn.discordapp.com/ https://crafthead.net/ https://crafatar.com/;
 connect-src 'self' http://localhost:*/ https: wss:;
-script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/ 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=';
-frame-ancestors 'self'"
+script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/ 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"
           http-equiv="Content-Security-Policy">
     <meta content="no-referrer" name="referrer">
     <meta content="noindex" name="robots">
     <meta content="#0468a1" name="theme-color">
     <!-- https://www.srihash.org/ -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" integrity="sha512-usVBAd66/NpVNfBge19gws2j6JZinnca12rAe2l+d+QkLU9fiG02O1X8Q6hepIpr/EYKZvKx/I9WsnujJuOmBA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.bundle.min.js" integrity="sha512-72WD92hLs7T5FAXn3vkNZflWG6pglUDDpm87TeQmfSg8KnrymL2G30R7as4FmTwhgu9H7eSzDCX3mjitSecKnw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js"
-            integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A=="
-            crossorigin="anonymous"></script>
-    <script crossorigin="anonymous"
-            integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
-            src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-    <script src="https://alcdn.msauth.net/browser/2.15.0/js/msal-browser.min.js" integrity="sha384-/weuqUPkC0P9JxnstihEV1GHdWrheU9Qo3MbdTuxxKJM8l/cSTE5zGP5VBIM4TZN" crossorigin="anonymous"></script>
+    <link class="css_async" disabled rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" integrity="sha512-usVBAd66/NpVNfBge19gws2j6JZinnca12rAe2l+d+QkLU9fiG02O1X8Q6hepIpr/EYKZvKx/I9WsnujJuOmBA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.bundle.min.js" integrity="sha512-72WD92hLs7T5FAXn3vkNZflWG6pglUDDpm87TeQmfSg8KnrymL2G30R7as4FmTwhgu9H7eSzDCX3mjitSecKnw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-2">
@@ -63,9 +55,7 @@ frame-ancestors 'self'"
                 </li>
                 <li class="nav-item dropdown">
                     <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
-                       id="aboutDropdown" role="button">
-                        About
-                    </a>
+                       id="aboutDropdown" role="button">About</a>
                     <ul aria-labelledby="aboutDropdown" class="dropdown-menu dropdown-menu-dark">
                         <li><a class="dropdown-item" data-bs-toggle="modal" href="#aboutModal" role="tab">About
                             VIAaaS</a></li>
@@ -169,6 +159,15 @@ frame-ancestors 'self'"
 </div>
 
 <div class="toast-container position-absolute top-0 end-0 p-3" id="toasts"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js"
+    integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A=="
+    crossorigin="anonymous"></script>
+<script crossorigin="anonymous"
+    integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
+    src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.15.0/js/msal-browser.min.js" integrity="sha384-/weuqUPkC0P9JxnstihEV1GHdWrheU9Qo3MbdTuxxKJM8l/cSTE5zGP5VBIM4TZN"
+    crossorigin="anonymous"></script>
 
 <script src="js/account_manager.js"></script>
 <script src="js/auth_ms.js"></script>
