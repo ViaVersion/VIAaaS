@@ -3,6 +3,8 @@ package com.viaversion.aas.config
 import com.viaversion.aas.secureRandom
 import com.viaversion.viaversion.util.Config
 import net.coobird.thumbnailator.Thumbnails
+import net.coobird.thumbnailator.filters.Canvas
+import net.coobird.thumbnailator.geometry.Positions
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URI
@@ -28,6 +30,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
                 ByteArrayOutputStream().also {
                     Thumbnails.of(URL(rawUrl))
                         .size(64, 64)
+                        .addFilter(Canvas(64, 64, Positions.CENTER, false))
                         .outputFormat("png").toOutputStream(it)
                 }.toByteArray()
             )
