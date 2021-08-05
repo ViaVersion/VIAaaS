@@ -9,6 +9,7 @@ import com.viaversion.viaversion.api.minecraft.metadata.Metadata
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.version.Types1_8
+import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ClientboundPackets1_7
 import java.util.concurrent.ConcurrentHashMap
 
 class EntityTracker(user: UserConnection) : StoredObject(user) {
@@ -28,7 +29,7 @@ class EntityTracker(user: UserConnection) : StoredObject(user) {
 
     fun sendMetadataBuffer(entityId: Int) {
         if (!metadataBuffer.containsKey(entityId)) return
-        val wrapper = PacketWrapper.create(0x1C, null, this.user)
+        val wrapper = PacketWrapper.create(ClientboundPackets1_7.ENTITY_METADATA, null, this.user)
         wrapper.write(Type.VAR_INT, entityId)
         wrapper.write(Types1_8.METADATA_LIST, metadataBuffer[entityId])
         MetadataRewriter.transform(clientEntityTypes[entityId], metadataBuffer[entityId]!!)

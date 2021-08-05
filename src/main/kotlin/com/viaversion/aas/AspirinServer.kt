@@ -38,7 +38,7 @@ object AspirinServer {
             .getResourceAsStream("viaaas_info.json")!!
             .reader(Charsets.UTF_8)
             .readText()
-    ).asJsonObject.get("version").asString
+    ).asJsonObject["version"].asString
     val cleanedVer get() = version.substringBefore("+")
     var viaWebServer = WebDashboardServer()
     private var serverFinishing = CompletableFuture<Unit>()
@@ -135,7 +135,7 @@ object AspirinServer {
         return try {
             val latestData =
                 httpClient.get<JsonObject>("https://api.github.com/repos/viaversion/viaaas/releases/latest")
-            val latest = Version(latestData.get("tag_name")!!.asString.removePrefix("v"))
+            val latest = Version(latestData["tag_name"]!!.asString.removePrefix("v"))
             val current = Version(cleanedVer)
             when {
                 latest > current -> "This build is outdated. Latest is $latest"

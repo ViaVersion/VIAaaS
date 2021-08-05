@@ -73,9 +73,9 @@ class LoginState : ConnectionState {
     private fun handleCompression(handler: MinecraftHandler, setCompression: SetCompression) {
         val pipe = handler.data.frontChannel.pipeline()
         val threshold = setCompression.threshold
-        val backPipe = pipe.get(MinecraftHandler::class.java).other!!.pipeline()
+        val backPipe = pipe[MinecraftHandler::class.java].other!!.pipeline()
 
-        if (backPipe.get("compress") != null) {
+        if (backPipe["compress"] != null) {
             backPipe.remove("compress")
         }
         if (threshold != -1) {
@@ -84,7 +84,7 @@ class LoginState : ConnectionState {
 
         forward(handler, setCompression)
 
-        if (pipe.get("compress") != null) {
+        if (pipe["compress"] != null) {
             pipe.remove("compress")
         }
         if (threshold != -1) {
@@ -189,7 +189,7 @@ class LoginState : ConnectionState {
         handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 val profile = hasJoined(frontName, frontHash)
-                val id = profile.get("id")!!.asString
+                val id = profile["id"]!!.asString
 
                 callbackPlayerId.complete(parseUndashedId(id))
             } catch (e: Exception) {

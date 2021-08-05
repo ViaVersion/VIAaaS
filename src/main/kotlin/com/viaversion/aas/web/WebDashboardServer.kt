@@ -85,7 +85,7 @@ class WebDashboardServer {
         id: UUID, name: String, hash: String,
         address: SocketAddress, backAddress: SocketAddress
     ): CompletableFuture<Unit> {
-        val future = sessionHashCallbacks.get(hash)
+        val future = sessionHashCallbacks[hash]
         if (!listeners.containsKey(id)) {
             future.completeExceptionally(StacklessException("UUID isn't listened. Use web auth."))
         } else {

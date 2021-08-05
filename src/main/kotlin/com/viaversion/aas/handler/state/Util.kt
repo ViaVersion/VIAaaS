@@ -45,7 +45,7 @@ private suspend fun createBackChannel(
         .connect(socketAddr)
         .also { it.suspendAwait() }
         .channel()
-    (channel.pipeline().get("proxy") as? ProxyHandler)?.connectFuture()?.suspendAwait()
+    (channel.pipeline()["proxy"] as? ProxyHandler)?.connectFuture()?.suspendAwait()
 
     mcLogger.info("+ ${state.name.substring(0, 1)} ${handler.endRemoteAddress} -> $socketAddr")
     handler.data.backChannel = channel as SocketChannel

@@ -9,11 +9,9 @@ import com.viaversion.aas.protocol.id47toid5.storage.Scoreboard
 import com.viaversion.aas.protocol.id47toid5.storage.Tablist
 import com.viaversion.aas.protocol.xyzToPosition
 import com.viaversion.aas.protocol.xyzUBytePos
-import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
 import com.viaversion.viaversion.api.minecraft.item.Item
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
-import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.protocol.remapper.TypeRemapper
 import com.viaversion.viaversion.api.type.Type
@@ -21,6 +19,7 @@ import com.viaversion.viaversion.api.type.types.CustomByteType
 import com.viaversion.viaversion.api.type.types.version.Types1_8
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.ListTag
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.StringTag
+import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_8.ServerboundPackets1_8
 import com.viaversion.viaversion.util.ChatColorUtil
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ClientboundPackets1_7
@@ -127,14 +126,15 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 val entryByUUID = tablist.getTabListEntry(uuid)
                 if (entryByName == null || entryByUUID == null) {
                     if (entryByName != null || entryByUUID != null) {
-                        val remove = PacketWrapper.create(0x38, null, packetWrapper.user())
+                        val remove = PacketWrapper.create(ClientboundPackets1_8.PLAYER_INFO, null, packetWrapper.user())
                         remove.write(Type.VAR_INT, 4)
                         remove.write(Type.VAR_INT, 1)
                         remove.write(Type.UUID, entryByName?.uuid ?: entryByUUID!!.uuid)
                         tablist.remove(entryByName ?: entryByUUID!!)
                         remove.send(Protocol1_8To1_7_6::class.java)
                     }
-                    val packetPlayerListItem = PacketWrapper.create(0x38, null, packetWrapper.user())
+                    val packetPlayerListItem =
+                        PacketWrapper.create(ClientboundPackets1_8.PLAYER_INFO, null, packetWrapper.user())
                     val newentry = Tablist.TabListEntry(name, uuid)
                     if (entryByName != null || entryByUUID != null) {
                         newentry.displayName =
@@ -160,8 +160,10 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                         packetPlayerListItem.write(Type.STRING, newentry.displayName)
                     }
                     packetPlayerListItem.send(Protocol1_8To1_7_6::class.java)
+
                     packetWrapper.cancel()
-                    val delayedPacket = PacketWrapper.create(0x0C, null, packetWrapper.user())
+                    val delayedPacket =
+                        PacketWrapper.create(ClientboundPackets1_8.SPAWN_PLAYER, null, packetWrapper.user())
                     delayedPacket.write(Type.VAR_INT, entityId)
                     delayedPacket.write(Type.UUID, uuid)
                     delayedPacket.write(Type.INT, x)
@@ -171,13 +173,8 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     delayedPacket.write(Type.BYTE, pitch)
                     delayedPacket.write(Type.SHORT, item)
                     delayedPacket.write(Types1_8.METADATA_LIST, metadata)
-                    Via.getPlatform().runSync({
-                        try {
-                            delayedPacket.send(Protocol1_8To1_7_6::class.java)
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                        }
-                    }, 1L)
+
+                    delayedPacket.send(Protocol1_8To1_7_6::class.java)
                 } else {
                     entryByUUID.properties = properties
                 }
@@ -403,10 +400,11 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     packetWrapper.write(Type.ITEM, book)
                 }
                 packetWrapper.cancel()
-                packetWrapper.id = -1
+                packetWrapper.packetType = null
                 val newPacketBuf = Unpooled.buffer()
                 packetWrapper.writeToBuffer(newPacketBuf)
-                val newWrapper = PacketWrapper.create(0x17, newPacketBuf, packetWrapper.user())
+                val newWrapper =
+                    PacketWrapper.create(ServerboundPackets1_8.PLUGIN_MESSAGE, newPacketBuf, packetWrapper.user())
                 newWrapper.passthrough(Type.STRING)
                 newWrapper.write(Type.SHORT, newPacketBuf.readableBytes().toShort())
                 newWrapper.sendToServer(Protocol1_8To1_7_6::class.java)

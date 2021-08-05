@@ -21,8 +21,7 @@ class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : C
         handler.data.frontChannel.close()
         if (packet !is StatusResponse) throw StacklessException("Unexpected packet")
         val ver = JsonParser.parseString(packet.msg).asJsonObject
-            .getAsJsonObject("version")
-            .get("protocol").asInt.parseProtocol()
+            .getAsJsonObject("version")["protocol"].asInt.parseProtocol()
         future.complete(ver)
         mcLogger.info("A.D.: ${handler.endRemoteAddress} $ver")
     }

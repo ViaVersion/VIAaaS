@@ -10,6 +10,7 @@ import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.protocol.remapper.TypeRemapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.version.Types1_8
+import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_8.ServerboundPackets1_8
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ClientboundPackets1_7
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_10
@@ -31,7 +32,7 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
                 val animation = packetWrapper.read(Type.UNSIGNED_BYTE) //Animation
                 packetWrapper.clearInputBuffer()
                 if (animation.toInt() == 104 || animation.toInt() == 105) {
-                    packetWrapper.id = 0x1C //Entity Metadata
+                    packetWrapper.packetType = ClientboundPackets1_8.ENTITY_METADATA
                     packetWrapper.write(Type.VAR_INT, entityId) //Entity Id
                     packetWrapper.write(Type.UNSIGNED_BYTE, 0.toShort()) //Index
                     packetWrapper.write(Type.UNSIGNED_BYTE, 0.toShort()) //Type

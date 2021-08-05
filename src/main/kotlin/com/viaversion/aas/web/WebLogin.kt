@@ -30,7 +30,7 @@ class WebLogin : WebState {
                 ) {
                     throw StacklessException("Invalid PoW date")
                 }
-                val username = obj.get("username").asString.trim()
+                val username = obj["username"].asString.trim()
                 val uuid = generateOfflinePlayerUuid(username)
 
                 val token = webClient.server.generateToken(uuid)
@@ -45,8 +45,8 @@ class WebLogin : WebState {
                 webLogger.info("Token gen: ${webClient.id}: offline $username $uuid")
             }
             "minecraft_id_login" -> {
-                val username = obj.get("username").asString
-                val code = obj.get("code").asString
+                val username = obj["username"].asString
+                val code = obj["code"].asString
 
                 val check = AspirinServer.httpClient.submitForm<JsonObject>(
                     "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
@@ -54,9 +54,9 @@ class WebLogin : WebState {
                 )
 
                 if (check.getAsJsonPrimitive("valid").asBoolean) {
-                    val mcIdUser = check.get("username").asString
-                    val uuid = check.get("uuid")?.asString?.let { parseUndashedId(it.replace("-", "")) }
-                        ?: webClient.server.usernameIdCache.get(mcIdUser).await()
+                    val mcIdUser = check["username"].asString
+                    val uuid = check["uuid"]?.asString?.let { parseUndashedId(it.replace("-", "")) }
+                        ?: webClient.server.usernameIdCache[mcIdUser].await()
                         ?: throw StacklessException("Failed to get UUID from minecraft.id")
 
                     val token = webClient.server.generateToken(uuid)
@@ -105,7 +105,7 @@ class WebLogin : WebState {
                 webClient.ws.send(response.toString())
             }
             "session_hash_response" -> {
-                val hash = obj.get("session_hash").asString
+                val hash = obj["session_hash"].asString
                 webClient.server.sessionHashCallbacks.getIfPresent(hash)?.complete(Unit)
             }
             else -> throw StacklessException("invalid action!")

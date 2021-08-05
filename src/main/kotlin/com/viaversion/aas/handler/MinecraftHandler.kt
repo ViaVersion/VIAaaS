@@ -30,7 +30,7 @@ class MinecraftHandler(
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        endRemoteAddress = (ctx.channel().pipeline().get("proxy") as? ProxyHandler)?.destinationAddress()
+        endRemoteAddress = (ctx.pipeline()["proxy"] as? ProxyHandler)?.destinationAddress()
             ?: ctx.channel().remoteAddress()
     }
 
@@ -46,12 +46,15 @@ class MinecraftHandler(
     }
 
     override fun channelWritabilityChanged(ctx: ChannelHandlerContext) {
+        if (!ctx.channel().isWritable) {
+            ctx.executor().execute(ctx.channel()::flush) // Flush to write more
+        }
         other?.setAutoRead(ctx.channel().isWritable)
     }
 
     private fun failedProxy(ctx: ChannelHandlerContext): Boolean {
         // proxy connect future fails are handled in another part
-        return (ctx.channel().pipeline().get("proxy") as? ProxyHandler)?.connectFuture()?.isSuccess == false
+        return (ctx.pipeline()["proxy"] as? ProxyHandler)?.connectFuture()?.isSuccess == false
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

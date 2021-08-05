@@ -37,7 +37,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.4.10+" + try {
+version = "0.4.11+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -86,7 +86,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.20.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "1.6.1"
+    val ktorVersion = "1.6.2"
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

@@ -12,7 +12,7 @@ class ConnectionData(
     var frontVer: Int? = null,
     var backServerVer: Int? = null,
 ) {
-    val frontHandler get() = frontChannel.pipeline().get(MinecraftHandler::class.java)
+    val frontHandler get() = frontChannel.pipeline()[MinecraftHandler::class.java]
     val backHandler get() = backChannel?.pipeline()?.get(MinecraftHandler::class.java)
-    val frontEncrypted get() = frontChannel.pipeline().get(CryptoCodec::class.java) != null
+    val frontEncrypted get() = frontChannel.pipeline()[CryptoCodec::class.java] != null
 }
