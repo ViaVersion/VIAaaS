@@ -1,4 +1,4 @@
-importScripts("https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.min.js");
+importScripts("https://cdnjs.cloudflare.com/ajax/libs/js-sha512/0.8.0/sha512.min.js");
 
 var pending = [];
 
@@ -40,8 +40,8 @@ function listenPoW(e) {
   postMessage({id: e.data.id, action: "completed_pow", msg: msg});
 }
 
-function sha512(s) {
+/* function sha512(s) {
     const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
     shaObj.update(s);
     return shaObj.getHash("HEX");
-}
+} */
