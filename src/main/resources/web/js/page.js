@@ -145,7 +145,7 @@ function addAction(text, onClick) {
     actions.appendChild(p);
 }
 
-function addListeningList(user) {
+function addListeningList(user, token) {
     let p = document.createElement("p");
     let head = document.createElement("img");
     let n = document.createElement("span");
@@ -154,7 +154,7 @@ function addListeningList(user) {
     remove.innerText = "Unlisten";
     remove.href = "javascript:";
     remove.onclick = () => {
-        // todo remove the token
+        removeToken(token);
         listening.removeChild(p);
         unlisten(user);
     };

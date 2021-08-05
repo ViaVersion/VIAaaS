@@ -83,7 +83,7 @@ function onSocketMsg(event) {
         }
     } else if (parsed.action == "listen_login_requests_result") {
         if (parsed.success) {
-            addListeningList(parsed.user);
+            addListeningList(parsed.user, parsed.token);
         } else {
             removeToken(parsed.token);
         }
