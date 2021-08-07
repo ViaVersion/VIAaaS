@@ -1,30 +1,23 @@
-import {authNotification} from "./notification.js";
-import {checkFetchSuccess} from "./util.js";
-import {findAccountByMcName} from "./account_manager.js";
-import {addListeningList, addToast, renderActions, resetHtml, setListenVisible, setWsStatus} from "./page.js";
-
-let wsUrl = getWsUrl();
-let socket = null;
+var wsUrl = getWsUrl();
+var socket = null;
 
 // WS url
 function defaultWs() {
     let url = new URL("ws", new URL(location));
     url.protocol = "wss";
-    return window.location.host.endsWith("github.io") || !window.location.protocol.startsWith("http")
-        ? "wss://localhost:25543/ws" : url.toString();
+    return window.location.host == "viaversion.github.io" || !window.location.host ? "wss://localhost:25543/ws" : url.toString();
 }
 
-export function getWsUrl() {
+function getWsUrl() {
     return localStorage.getItem("viaaas_ws_url") || defaultWs();
 }
-
-export function setWsUrl(url) {
+function setWsUrl(url) {
     localStorage.setItem("viaaas_ws_url", url);
     location.reload();
 }
 
 // Tokens
-export function saveToken(token) {
+function saveToken(token) {
     let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
     let tokens = getTokens();
     tokens.push(token);
@@ -32,28 +25,28 @@ export function saveToken(token) {
     localStorage.setItem("viaaas_tokens", JSON.stringify(hTokens));
 }
 
-export function removeToken(token) {
+function removeToken(token) {
     let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
     let tokens = getTokens();
-    tokens = tokens.filter(it => it !== token);
+    tokens = tokens.filter(it => it != token);
     hTokens[wsUrl] = tokens;
     localStorage.setItem("viaaas_tokens", JSON.stringify(hTokens));
 }
 
-export function getTokens() {
+function getTokens() {
     return (JSON.parse(localStorage.getItem("viaaas_tokens")) || {})[wsUrl] || [];
 }
 
 // Websocket
-export function listen(token) {
+function listen(token) {
     socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
 }
 
-export function unlisten(id) {
+function unlisten(id) {
     socket.send(JSON.stringify({"action": "unlisten_login_requests", "uuid": id}));
 }
 
-export function confirmJoin(hash) {
+function confirmJoin(hash) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 
@@ -63,10 +56,12 @@ function handleJoinRequest(parsed) {
         + parsed.message.split(/[\r\n]+/).map(it => "> " + it).join('\n'), () => {
         let account = findAccountByMcName(parsed.user);
         if (account) {
-            account.joinGame(parsed.session_hash)
-                .then(checkFetchSuccess("code"))
-                .finally(() => confirmJoin(parsed.session_hash))
-                .catch((e) => addToast("Couldn't contact session server", "Error: " + e));
+            getMcUserToken(account).then(data => {
+                return joinGame(data.accessToken, data.id, parsed.session_hash);
+            })
+            .then(checkFetchSuccess("code"))
+            .finally(() => confirmJoin(parsed.session_hash))
+            .catch((e) => addToast("Couldn't contact session server", "Error: " + e));
         } else {
             confirmJoin(parsed.session_hash);
             addToast("Couldn't find account", "Couldn't find " + parsed.user + ", check Accounts tab");
@@ -76,63 +71,55 @@ function handleJoinRequest(parsed) {
 
 function onSocketMsg(event) {
     let parsed = JSON.parse(event.data);
-    if (parsed.action === "ad_minecraft_id_login") {
-        setListenVisible(true);
+    if (parsed.action == "ad_minecraft_id_login") {
+        listenVisible = true;
         renderActions();
-    } else if (parsed.action === "login_result") {
+    } else if (parsed.action == "login_result") {
         if (!parsed.success) {
             addToast("Couldn't verify Minecraft account", "VIAaaS returned failed response");
         } else {
             listen(parsed.token);
             saveToken(parsed.token);
         }
-    } else if (parsed.action === "listen_login_requests_result") {
+    } else if (parsed.action == "listen_login_requests_result") {
         if (parsed.success) {
             addListeningList(parsed.user, parsed.token);
         } else {
             removeToken(parsed.token);
         }
-    } else if (parsed.action === "session_hash_request") {
+    } else if (parsed.action == "session_hash_request") {
         handleJoinRequest(parsed);
     }
 }
 
-export function listenStoredTokens() {
+function listenStoredTokens() {
     getTokens().forEach(listen);
 }
 
 function onConnect() {
-    setWsStatus("connected");
+    connectionStatus.innerText = "connected";
     resetHtml();
     listenStoredTokens();
 }
 
 function onWsError(e) {
     console.log(e);
-    setWsStatus("socket error");
+    connectionStatus.innerText = "socket error";
     resetHtml();
 }
 
 function onDisconnect(evt) {
-    setWsStatus("disconnected with close code " + evt.code + " and reason: " + evt.reason);
+    connectionStatus.innerText = "disconnected with close code " + evt.code + " and reason: " + evt.reason;
     resetHtml();
     setTimeout(connect, 5000);
 }
 
-export function connect() {
-    setWsStatus("connecting...");
+function connect() {
+    connectionStatus.innerText = "connecting...";
     socket = new WebSocket(wsUrl);
 
     socket.onerror = onWsError;
     socket.onopen = onConnect;
     socket.onclose = onDisconnect
     socket.onmessage = onSocketMsg;
-}
-
-export function sendSocket(msg) {
-    if (!socket) {
-        console.error("couldn't send msg, socket isn't set");
-        return
-    }
-    socket.send(msg);
 }
