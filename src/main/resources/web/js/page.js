@@ -1,6 +1,6 @@
 // Minecraft.id
-import {icanhazepoch, icanhazip} from "./util.mjs";
-import {getCorsProxy, setCorsProxy} from "./cors_proxy.mjs";
+import {icanhazepoch, icanhazip} from "./util.js";
+import {getCorsProxy, setCorsProxy} from "./cors_proxy.js";
 import {
     findAccountByMs,
     getActiveAccounts,
@@ -8,8 +8,8 @@ import {
     loginMc,
     loginMs, MicrosoftAccount,
     MojangAccount
-} from "./account_manager.mjs";
-import {connect, getWsUrl, removeToken, sendSocket, setWsUrl, unlisten} from "./websocket.mjs";
+} from "./account_manager.js";
+import {connect, getWsUrl, removeToken, sendSocket, setWsUrl, unlisten} from "./websocket.js";
 
 let mcIdUsername = null;
 let mcauth_code = null;
@@ -78,7 +78,7 @@ function swCacheFiles() {
         action: "cache",
         urls: performance.getEntriesByType("resource")
             .map(it => it.name)
-            .filter(it => it.endsWith(".mjs") || it.endsWith(".js") || it.endsWith(".css") || it.endsWith(".png"))
+            .filter(it => it.endsWith(".js") || it.endsWith(".css") || it.endsWith(".png"))
     })); // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
 }
 

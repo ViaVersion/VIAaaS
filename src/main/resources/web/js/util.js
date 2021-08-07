@@ -1,4 +1,4 @@
-import {getCorsProxy} from "./cors_proxy.mjs";
+import {getCorsProxy} from "./cors_proxy.js";
 
 export function isSuccess(status) {
     return status >= 200 && status < 300;

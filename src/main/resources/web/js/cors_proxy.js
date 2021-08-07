@@ -1,4 +1,4 @@
-import {refreshCorsStatus} from "./page.mjs";
+import {refreshCorsStatus} from "./page.js";
 
 function defaultCors() {
     return "https://crp123-cors.herokuapp.com/";
