@@ -143,7 +143,7 @@ tasks.named<ProcessResources>("processResources") {
         )
     }
     filesMatching("**/*.js") {
-        filter<JsMinifyFilter>()
+        //filter<JsMinifyFilter>()
     }
     filesMatching("**/*.html") {
         filter<HtmlMinifyFilter>()
