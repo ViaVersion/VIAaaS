@@ -1,6 +1,6 @@
-import {getCorsProxy} from "./cors_proxy.js";
-import {checkFetchSuccess, filterNot, isSuccess} from "./util.js";
-import {addToast, refreshAccountList} from "./page.js";
+import {getCorsProxy} from "./cors_proxy.mjs";
+import {checkFetchSuccess, filterNot, isSuccess} from "./util.mjs";
+import {addToast, refreshAccountList} from "./page.mjs";
 
 let activeAccounts = [];
 

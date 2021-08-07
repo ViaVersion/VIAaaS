@@ -1,7 +1,7 @@
-import {authNotification} from "./notification.js";
-import {checkFetchSuccess} from "./util.js";
-import {findAccountByMcName} from "./account_manager.js";
-import {addListeningList, addToast, renderActions, resetHtml, setListenVisible, setWsStatus} from "./page.js";
+import {authNotification} from "./notification.mjs";
+import {checkFetchSuccess} from "./util.mjs";
+import {findAccountByMcName} from "./account_manager.mjs";
+import {addListeningList, addToast, renderActions, resetHtml, setListenVisible, setWsStatus} from "./page.mjs";
 
 let wsUrl = getWsUrl();
 let socket = null;
