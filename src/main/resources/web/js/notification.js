@@ -1,7 +1,8 @@
 // Notification
-var notificationCallbacks = {};
+let notificationCallbacks = {};
 $(() => {
-    new BroadcastChannel("viaaas-notification").addEventListener("message", handleSWMsg);
+    new BroadcastChannel("viaaas-notification")
+        .addEventListener("message", handleSWMsg);
 })
 
 function handleSWMsg(event) {
@@ -13,8 +14,8 @@ function handleSWMsg(event) {
     callback(data.action);
 }
 
-function authNotification(msg, yes, no) {
-    if (!navigator.serviceWorker || Notification.permission != "granted") {
+export function authNotification(msg, yes, no) {
+    if (!navigator.serviceWorker || Notification.permission !== "granted") {
         if (confirm(msg)) yes(); else no();
         return;
     }
@@ -23,21 +24,21 @@ function authNotification(msg, yes, no) {
         r.showNotification("Click to allow auth impersionation", {
             body: msg,
             tag: tag,
-            vibrate: [200,10,100,200,100,10,100,10,200],
+            vibrate: [200, 10, 100, 200, 100, 10, 100, 10, 200],
             actions: [
                 {action: "reject", title: "Reject"},
                 {action: "confirm", title: "Confirm"}
             ]
         });
         notificationCallbacks[tag] = action => {
-            if (action == "reject") {
+            if (action === "reject") {
                 no();
-            } else if (!action || action == "confirm") {
+            } else if (!action || action === "confirm") {
                 yes();
-            } else {
-                return;
             }
         };
-        setTimeout(() => { delete notificationCallbacks[tag] }, 30 * 1000);
+        setTimeout(() => {
+            delete notificationCallbacks[tag]
+        }, 30 * 1000);
     });
 }
