@@ -23,9 +23,30 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
     <meta content="no-referrer" name="referrer">
     <meta content="noindex" name="robots">
     <meta content="#0468a1" name="theme-color">
+
     <!-- https://www.srihash.org/ -->
-    <link class="css_async" disabled rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" integrity="sha512-usVBAd66/NpVNfBge19gws2j6JZinnca12rAe2l+d+QkLU9fiG02O1X8Q6hepIpr/EYKZvKx/I9WsnujJuOmBA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.bundle.min.js" integrity="sha512-72WD92hLs7T5FAXn3vkNZflWG6pglUDDpm87TeQmfSg8KnrymL2G30R7as4FmTwhgu9H7eSzDCX3mjitSecKnw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link class="css_async" disabled rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css"
+          integrity="sha512-F7WyTLiiiPqvu2pGumDR15med0MDkUIo5VTVyyfECR5DZmCnDhti9q5VID02ItWjq6fvDfMaBaDl2J3WdL1uxA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"
+            integrity="sha512-PqRelaJGXVuQ81N6wjUrRQelCDR7z8RvKGiR9SbSxKHPIt15eJDmIVv9EJgwq0XvgylszsjzvQ0+VyI2WtIshQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js"
+            integrity="sha512-lvWiOP+aMKHllm4THsjzNleVuGOh0WGniJ3lgu/nvCbex1LlaQSxySUjAu/LTJw9FhnSL/PVYoQcckg1Q03+fQ=="
+            crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js"
+            integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A=="
+            crossorigin="anonymous"></script>
+    <script defer crossorigin="anonymous"
+            integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
+            src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+    <script defer src="https://alcdn.msauth.net/browser/2.15.0/js/msal-browser.min.js"
+            integrity="sha384-/weuqUPkC0P9JxnstihEV1GHdWrheU9Qo3MbdTuxxKJM8l/cSTE5zGP5VBIM4TZN"
+            crossorigin="anonymous"></script>
+    <script defer src="js/page.js"></script>
+    <link rel="prefetch" href="js/worker.js" as="worker">
+    <link rel="prefetch" href="sw.js" as="serviceworker">
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-2">
@@ -78,16 +99,16 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
         <div class="mb-3">
             <p>See <a href="https://github.com/ViaVersion/VIAaaS/">README</a> for more details.</p>
             <form class="input-group" id="form_cors_proxy">
-              <label class="input-group-text" for="cors-proxy">CORS Proxy URL Prefix</label>
-              <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
-              <button class="btn btn-primary" type="submit">Save</button>
+                <label class="input-group-text" for="cors-proxy">CORS Proxy URL Prefix</label>
+                <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
+                <button class="btn btn-primary" type="submit">Save</button>
             </form>
         </div>
         <div class="mb-3">
             <form class="input-group" id="form_ws_url">
-              <label class="input-group-text" for="ws-url">WebSocket URL</label>
-              <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
-              <button class="btn btn-primary" type="submit">Save</button>
+                <label class="input-group-text" for="ws-url">WebSocket URL</label>
+                <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
+                <button class="btn btn-primary" type="submit">Save</button>
             </form>
         </div>
     </div>
@@ -99,20 +120,22 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
         </div>
         <div id="add-account">
             <div class="mb-3">
-              <label class="form-label" for="login_submit_ms">Add Microsoft account</label>
-              <form class="row" id="form_add_ms">
-                <div class="col-auto">
-                    <button class="btn btn-primary" id="login_submit_ms" type="submit">Login with Microsoft</button>
-                </div>
-              </form>
+                <label class="form-label" for="login_submit_ms">Add Microsoft account</label>
+                <form class="row" id="form_add_ms">
+                    <div class="col-auto">
+                        <button class="btn btn-primary" id="login_submit_ms" type="submit">Login with Microsoft</button>
+                    </div>
+                </form>
             </div>
             <div class="mb-2">
-              <label class="form-label" for="email">Add Mojang account</label>
-              <form class="input-group" id="form_add_mc">
-                <input aria-label="Email/Username" class="form-control" id="email" name="email" placeholder="mc@example.com" type="text">
-                <input aria-label="Password" class="form-control" id="password" name="password" placeholder="password" type="password">
-                <button class="btn btn-primary" id="login_submit_mc" type="submit">Login with Mojang</button>
-              </form>
+                <label class="form-label" for="email">Add Mojang account</label>
+                <form class="input-group" id="form_add_mc">
+                    <input aria-label="Email/Username" class="form-control" id="email" name="email"
+                           placeholder="mc@example.com" type="text">
+                    <input aria-label="Password" class="form-control" id="password" name="password"
+                           placeholder="password" type="password">
+                    <button class="btn btn-primary" id="login_submit_mc" type="submit">Login with Mojang</button>
+                </form>
             </div>
         </div>
     </div>
@@ -127,26 +150,32 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
             </div>
             <div class="modal-body">
                 <!-- Design somewhat stolen/inspired from Gnome -->
-                <img src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png" class="mx-auto d-block" alt="VIAaaS logo" width="150">
+                <img src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png"
+                     class="mx-auto d-block" alt="VIAaaS logo" width="150">
                 <div class="text-center mb-3">
-                  <h5>ViaVersion as a Service</h5>
-                  <h6>Standalone ViaVersion Proxy</h6>
+                    <h5>ViaVersion as a Service</h5>
+                    <h6>Standalone ViaVersion Proxy</h6>
                 </div>
                 <div class="text-center mb-3">
-                  <p class="mb-1">Copyright © 2020-2021 <a href="https://github.com/creeper123123321">creeper123123321</a></p>
-                  <p class="mb-1">Copyright © 2021 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a></p>
+                    <p class="mb-1">Copyright © 2020-2021 <a
+                            href="https://github.com/creeper123123321">creeper123123321</a></p>
+                    <p class="mb-1">Copyright © 2021 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a>
+                    </p>
                 </div>
                 <div>
-                  <p>VIAaaS is free software: you can redistribute it and/or modify it under the terms of the GNU
-                    Affero General Public License as published by the Free Software Foundation, either version 3 of the
-                    License,
-                    or (at your option) any later version.</p>
-                  <p>VIAaaS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-                    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
-                    General
-                    Public License for more details.</p>
-                  <p>You should have received a copy of the GNU Affero General Public License along with this program. If
-                    not, see <a href="https://gnu.org/licenses">https://gnu.org/licenses/</a>.</p>
+                    <p>VIAaaS is free software: you can redistribute it and/or modify it under the terms of the GNU
+                        Affero General Public License as published by the Free Software Foundation, either version 3 of
+                        the
+                        License,
+                        or (at your option) any later version.</p>
+                    <p>VIAaaS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+                        even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+                        Affero
+                        General
+                        Public License for more details.</p>
+                    <p>You should have received a copy of the GNU Affero General Public License along with this program.
+                        If
+                        not, see <a href="https://gnu.org/licenses">https://gnu.org/licenses/</a>.</p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -159,19 +188,5 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
 </div>
 
 <div class="toast-container position-absolute top-0 end-0 p-3" id="toasts"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js"
-    integrity="sha512-lvWiOP+aMKHllm4THsjzNleVuGOh0WGniJ3lgu/nvCbex1LlaQSxySUjAu/LTJw9FhnSL/PVYoQcckg1Q03+fQ=="
-    crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js"
-    integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A=="
-    crossorigin="anonymous"></script>
-<script crossorigin="anonymous"
-    integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
-    src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-<script src="https://alcdn.msauth.net/browser/2.15.0/js/msal-browser.min.js" integrity="sha384-/weuqUPkC0P9JxnstihEV1GHdWrheU9Qo3MbdTuxxKJM8l/cSTE5zGP5VBIM4TZN"
-    crossorigin="anonymous"></script>
-
-<script type="module" src="js/page.js"></script>
 </body>
 </html>
