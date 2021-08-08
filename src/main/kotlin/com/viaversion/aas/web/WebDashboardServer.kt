@@ -87,7 +87,7 @@ class WebDashboardServer {
     ): CompletableFuture<Unit> {
         val future = sessionHashCallbacks[hash]
         if (!listeners.containsKey(id)) {
-            future.completeExceptionally(StacklessException("UUID isn't listened. Use web auth."))
+            future.completeExceptionally(StacklessException("UUID $id isn't listened. Use web auth."))
         } else {
             CoroutineScope(coroutineContext).apply {
                 launch(Dispatchers.IO) {
