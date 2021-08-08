@@ -131,7 +131,7 @@ export class MojangAccount extends McAccount {
                 this.accessToken = json.accessToken;
                 this.clientToken = json.clientToken;
                 this.name = json.selectedProfile.name;
-                this.id = json.id;
+                this.id = json.selectedProfile.id;
                 saveRefreshAccounts();
             });
     }
