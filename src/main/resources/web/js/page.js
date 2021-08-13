@@ -246,7 +246,7 @@ function ohNo() {
                 console.log("time seems synchronized");
             }
         })
-        if (!BroadcastChannel) addToast("Unsupported browser", "This browser doesn't support required APIs");
+        try {!BroadcastChannel} catch(e) {addToast("Unsupported browser", "This browser doesn't support required APIs");}
         new Date().getDay() === 3 && console.log("it's snapshot day 🐸 my dudes");
         new Date().getDate() === 1 && new Date().getMonth() === 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $99");
     } catch (e) {
