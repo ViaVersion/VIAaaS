@@ -132,12 +132,10 @@ function refreshAccountList() {
 
 function renderActions() {
     actions.innerHTML = "";
-    try {
-        if (Notification.permission === "default") {
-            actions.innerHTML += '<p><a href="javascript:" id="notificate">Enable notifications</a></p>';
-            $("#notificate").on("click", () => Notification.requestPermission().then(renderActions)); // i'm lazy
-        }
-    } catch (ignored) { } // Why apple??? Why you don't support notifications???
+    if (Notification.permission === "default") {
+        actions.innerHTML += '<p><a href="javascript:" id="notificate">Enable notifications</a></p>';
+        $("#notificate").on("click", () => Notification.requestPermission().then(renderActions)); // i'm lazy
+    }
     if (listenVisible) {
         if (mcIdUsername != null && mcauth_code != null) {
             addAction("Listen to " + mcIdUsername, () => {
