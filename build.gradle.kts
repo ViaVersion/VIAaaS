@@ -66,7 +66,7 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.66.Final")
+    implementation("io.netty:netty-all:4.1.67.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.40.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.8.Final:linux-x86_64")
 
