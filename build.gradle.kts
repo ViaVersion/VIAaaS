@@ -1,5 +1,6 @@
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor
-import org.gradlewebtools.minify.minifier.js.JSMinifierOptions
+import org.gradlewebtools.minify.minifier.js.JsMinifier
+import org.gradlewebtools.minify.minifier.js.JsMinifierOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Files as JFiles
 
@@ -117,9 +118,7 @@ tasks {
 
 class JsMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader()) {
     init {
-        val minifier = org.gradlewebtools.minify.minifier.js.JsMinifier(
-            minifierOptions = JSMinifierOptions(originalFileNames = true)
-        )
+        val minifier = JsMinifier(minifierOptions = JsMinifierOptions(originalFileNames = true))
         val file = JFiles.createTempDirectory("via-").resolve("tmp-minify.js").toFile().also {
             it.writeText(reader.readText())
         }
