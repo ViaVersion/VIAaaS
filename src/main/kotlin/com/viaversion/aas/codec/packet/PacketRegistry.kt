@@ -5,6 +5,7 @@ import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.codec.packet.login.*
 import com.viaversion.aas.codec.packet.play.Kick
 import com.viaversion.aas.codec.packet.play.PluginMessage
+import com.viaversion.aas.codec.packet.play.SetPlayCompression
 import com.viaversion.aas.codec.packet.status.StatusPing
 import com.viaversion.aas.codec.packet.status.StatusPong
 import com.viaversion.aas.codec.packet.status.StatusRequest
@@ -73,6 +74,14 @@ object PacketRegistry {
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.PLUGIN_MESSAGE.id
             )
+        )
+
+        register(
+            State.PLAY,
+            Direction.CLIENTBOUND,
+            ::SetPlayCompression,
+            ProtocolVersion.v1_8.singleton,
+            ClientboundPackets1_8.SET_COMPRESSION.id
         )
     }
 

@@ -1,8 +1,8 @@
 package com.viaversion.aas.handler
 
 import com.viaversion.aas.codec.CryptoCodec
-import com.viaversion.aas.handler.state.HandshakeState
 import com.viaversion.aas.handler.state.ConnectionState
+import com.viaversion.aas.handler.state.HandshakeState
 import io.netty.channel.Channel
 
 class ConnectionData(

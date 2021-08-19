@@ -15,10 +15,14 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 	// stolen from Krypton (GPL) and modified
 	// https://github.com/astei/krypton/blob/master/src/main/java/me/steinborn/krypton/mod/shared/network/compression/MinecraftCompressEncoder.java
 	private static final int UNCOMPRESSED_CAP = 8 * 1024 * 1024; // 8MiB
-	private final int threshold;
+	private int threshold;
 	private VelocityCompressor compressor;
 
 	public CompressionCodec(int threshold) {
+		this.threshold = threshold;
+	}
+
+	public void setThreshold(int threshold) {
 		this.threshold = threshold;
 	}
 

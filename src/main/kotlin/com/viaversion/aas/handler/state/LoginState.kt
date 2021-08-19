@@ -10,6 +10,7 @@ import com.viaversion.aas.codec.packet.login.*
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
+import com.viaversion.aas.handler.setCompression
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -71,25 +72,13 @@ class LoginState : ConnectionState {
     }
 
     private fun handleCompression(handler: MinecraftHandler, setCompression: SetCompression) {
-        val pipe = handler.data.frontChannel.pipeline()
         val threshold = setCompression.threshold
-        val backPipe = pipe[MinecraftHandler::class.java].other!!.pipeline()
 
-        if (backPipe["compress"] != null) {
-            backPipe.remove("compress")
-        }
-        if (threshold != -1) {
-            backPipe.addAfter("frame", "compress", CompressionCodec(threshold))
-        }
+        setCompression(handler.data.backChannel!!, threshold)
 
         forward(handler, setCompression)
 
-        if (pipe["compress"] != null) {
-            pipe.remove("compress")
-        }
-        if (threshold != -1) {
-            pipe.addAfter("frame", "compress", CompressionCodec(threshold))
-        }
+        setCompression(handler.data.frontChannel, threshold)
     }
 
     fun authenticateOnlineFront(frontChannel: Channel) {

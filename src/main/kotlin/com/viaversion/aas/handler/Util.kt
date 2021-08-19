@@ -1,5 +1,6 @@
 package com.viaversion.aas.handler
 
+import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.readRemainingBytes
 import com.viaversion.aas.send
@@ -7,6 +8,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
+import io.netty.channel.Channel
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.proxy.HttpProxyHandler
 import io.netty.handler.proxy.Socks4ProxyHandler
@@ -52,6 +54,21 @@ fun encodeBrand(string: String, is17: Boolean): ByteArray {
             readRemainingBytes(buf)
         } finally {
             buf.release()
+        }
+    }
+}
+
+
+fun setCompression(channel: Channel, threshold: Int) {
+    val pipe = channel.pipeline()
+
+    if (threshold == -1) {
+        if (pipe["compress"] != null) pipe.remove("compress")
+    } else {
+        if (pipe["compress"] != null) {
+            pipe[CompressionCodec::class.java].setThreshold(threshold)
+        } else {
+            pipe.addAfter("frame", "compress", CompressionCodec(threshold))
         }
     }
 }

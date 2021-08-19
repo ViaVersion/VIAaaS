@@ -5,6 +5,7 @@ import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.UnknownPacket
 import com.viaversion.aas.codec.packet.play.Kick
 import com.viaversion.aas.codec.packet.play.PluginMessage
+import com.viaversion.aas.codec.packet.play.SetPlayCompression
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.*
 import com.viaversion.aas.parseProtocol
@@ -24,8 +25,19 @@ object PlayState : ConnectionState {
         when {
             packet is UnknownPacket && (packet.id !in 0..127) -> throw StacklessException("Invalid packet id!")
             packet is PluginMessage && !handler.frontEnd -> modifyPluginMessage(handler, packet)
+            packet is SetPlayCompression -> return handleCompression(handler, packet)
         }
         forward(handler, ReferenceCountUtil.retain(packet))
+    }
+
+    private fun handleCompression(handler: MinecraftHandler, packet: SetPlayCompression) {
+        val threshold = packet.threshold
+
+        setCompression(handler.data.backChannel!!, threshold)
+
+        forward(handler, packet)
+
+        setCompression(handler.data.frontChannel, threshold)
     }
 
     private fun modifyPluginMessage(handler: MinecraftHandler, pluginMessage: PluginMessage) {
