@@ -5,6 +5,8 @@ VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
 
 <img alt="VIAaaS Logo (VIA logo with structural formula of aspirin)" height="200" src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png">
 
+Address generator: https://jo0001.github.io/ViaSetup/aspirin
+
 Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Instances
 
 Discord: https://viaversion.com/discord
