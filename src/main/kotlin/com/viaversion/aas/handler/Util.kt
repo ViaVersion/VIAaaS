@@ -37,10 +37,14 @@ fun addProxyHandler(pipe: ChannelPipeline, proxyUri: URI?, socket: InetSocketAdd
 }
 
 fun decodeBrand(data: ByteArray, is17: Boolean): String {
-    return if (is17) {
-        String(data, Charsets.UTF_8)
-    } else {
-        Type.STRING.read(Unpooled.wrappedBuffer(data))
+    return when {
+        data.isEmpty() -> ""
+        is17 -> {
+            String(data, Charsets.UTF_8)
+        }
+        else -> {
+            Type.STRING.read(Unpooled.wrappedBuffer(data))
+        }
     }
 }
 

@@ -95,4 +95,5 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
         get() = this.getString("backend-proxy", "").let { if (it.isNullOrEmpty()) null else URI.create(it) }
     val protocolDetectorCache: Int
         get() = this.getInt("protocol-detector-cache", 30)
+    val compressionLevel: Int get() = this.getInt("compression-level", 6)
 }

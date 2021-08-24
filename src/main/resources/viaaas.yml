@@ -16,6 +16,8 @@ backend-proxy: ''
 # Migrated to backend-proxy
 backend-socks5-proxy-address: ''
 backend-socks5-proxy-port: 9050
+# Zlib Compression level
+compression-level: 6
 #
 ######
 # Crypto
