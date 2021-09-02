@@ -3,7 +3,6 @@ package com.viaversion.aas.handler.state
 import com.google.common.net.HostAndPort
 import com.google.gson.JsonPrimitive
 import com.viaversion.aas.*
-import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.login.*
@@ -21,6 +20,7 @@ import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
+import java.security.KeyPair
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ThreadLocalRandom
@@ -32,6 +32,7 @@ class LoginState : ConnectionState {
     var frontOnline: Boolean? = null
     lateinit var frontName: String
     lateinit var backAddress: HostAndPort
+    lateinit var cryptoKey: KeyPair
     var extraData: String? = null
     var backName: String? = null
     var started = false
@@ -88,7 +89,8 @@ class LoginState : ConnectionState {
 
         val cryptoRequest = CryptoRequest()
         cryptoRequest.serverId = frontServerId
-        cryptoRequest.publicKey = AspirinServer.mcCryptoKey.public
+        cryptoKey = AspirinServer.mcCryptoKey
+        cryptoRequest.publicKey = cryptoKey.public
         cryptoRequest.token = frontToken
 
         send(frontChannel, cryptoRequest, true)
@@ -163,15 +165,15 @@ class LoginState : ConnectionState {
 
     fun handleCryptoResponse(handler: MinecraftHandler, cryptoResponse: CryptoResponse) {
         val frontHash = let {
-            val frontKey = decryptRsa(AspirinServer.mcCryptoKey.private, cryptoResponse.encryptedKey)
-            val decryptedToken = decryptRsa(AspirinServer.mcCryptoKey.private, cryptoResponse.encryptedToken)
+            val frontKey = decryptRsa(cryptoKey.private, cryptoResponse.encryptedKey)
+            val decryptedToken = decryptRsa(cryptoKey.private, cryptoResponse.encryptedToken)
 
             if (!decryptedToken.contentEquals(frontToken)) throw StacklessException("Invalid verification token!")
 
             handler.data.frontChannel.pipeline()
                 .addBefore("frame", "crypto", CryptoCodec(aesKey(frontKey), aesKey(frontKey)))
 
-            generateServerHash(frontServerId, frontKey, AspirinServer.mcCryptoKey.public)
+            generateServerHash(frontServerId, frontKey, cryptoKey.public)
         }
 
         handler.data.frontChannel.setAutoRead(false)

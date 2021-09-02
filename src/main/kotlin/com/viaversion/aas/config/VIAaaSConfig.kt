@@ -62,7 +62,6 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     val bindAddress: String get() = this.getString("bind-address", "localhost")!!
     val hostName: List<String>
         get() = this.get("host-name", List::class.java, listOf("viaaas.localhost"))!!.map { it.toString() }
-    val mcRsaSize: Int get() = this.getInt("mc-rsa-size", 4096)
     val blockLocalAddress: Boolean get() = this.getBoolean("block-local-address", true)
     val requireHostName: Boolean get() = this.getBoolean("require-host-name", true)
     val defaultBackendPort: Int? get() = this.getInt("default-backend-port", 25565).let { if (it == -1) null else it }

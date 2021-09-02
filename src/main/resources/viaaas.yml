@@ -20,13 +20,6 @@ backend-socks5-proxy-port: 9050
 compression-level: 6
 #
 ######
-# Crypto
-######
-# Sets the RSA key size used for encrypting the AES symmetric key.
-# Minecraft default is 1024. See https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
-mc-rsa-size: 4096
-#
-######
 # VIAaaS virtual hosts options
 ######
 # Requires virtual host to contain the value from "host-name" as a suffix.

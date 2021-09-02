@@ -28,6 +28,7 @@ import io.netty.resolver.dns.DnsNameResolverBuilder
 import io.netty.util.concurrent.Future
 import java.io.File
 import java.net.InetAddress
+import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.util.concurrent.CompletableFuture
 
@@ -46,11 +47,22 @@ object AspirinServer {
     private val initFuture = CompletableFuture<Unit>()
     val bufferWaterMark = WriteBufferWaterMark(512 * 1024, 2048 * 1024)
 
-    // Minecraft doesn't have forward secrecy
-    val mcCryptoKey = KeyPairGenerator.getInstance("RSA").let {
-        it.initialize(VIAaaSConfig.mcRsaSize) // https://stackoverflow.com/questions/1904516/is-1024-bit-rsa-secure
-        it.genKeyPair()
+    // Minecraft crypto is very cursed: https://github.com/VelocityPowered/Velocity/issues/568
+    var mcCryptoKey = generateKey()
+    fun generateKey(): KeyPair {
+        return KeyPairGenerator.getInstance("RSA").let {
+            it.initialize(2048)
+            it.genKeyPair()
+        }
     }
+
+    init {
+        // This VIAaaS code idea is even more cursed
+        AspirinPlatform.runRepeatingSync({
+            mcCryptoKey = generateKey()
+        }, 10 * 60 * 20L) // regenerate each 10 min
+    }
+
     val parentLoop = eventLoopGroup()
     val childLoop = eventLoopGroup()
     var chFuture: ChannelFuture? = null

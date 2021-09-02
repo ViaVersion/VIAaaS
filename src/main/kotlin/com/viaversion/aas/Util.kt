@@ -82,12 +82,13 @@ suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
     return hostAndPort
 }
 
-fun decryptRsa(privateKey: PrivateKey, data: ByteArray) = Cipher.getInstance("RSA").let {
+// https://medium.com/asecuritysite-when-bob-met-alice/whats-so-special-about-pkcs-1-v1-5-and-the-attack-that-just-won-t-go-away-51ccf35d65b7
+fun decryptRsa(privateKey: PrivateKey, data: ByteArray) = Cipher.getInstance("RSA/ECB/PKCS1Padding").let {
     it.init(Cipher.DECRYPT_MODE, privateKey)
     it.doFinal(data)
 }
 
-fun encryptRsa(publicKey: PublicKey, data: ByteArray) = Cipher.getInstance("RSA").let {
+fun encryptRsa(publicKey: PublicKey, data: ByteArray) = Cipher.getInstance("RSA/ECB/PKCS1Padding").let {
     it.init(Cipher.ENCRYPT_MODE, publicKey)
     it.doFinal(data)
 }
