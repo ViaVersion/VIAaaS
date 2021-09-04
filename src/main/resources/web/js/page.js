@@ -350,7 +350,7 @@ function loadAccounts() {
     (JSON.parse(localStorage.getItem("viaaas_mc_accounts")) || []).forEach(it => {
         if (it.clientToken) {
             addActiveAccount(new MojangAccount(it.id, it.name, it.accessToken, it.clientToken))
-        } else if (it.msUser) {
+        } else if (it.msUser && myMSALObj.getAccountByUsername(it.msUser)) {
             addActiveAccount(new MicrosoftAccount(it.id, it.name, it.accessToken, it.msUser))
         }
     })
