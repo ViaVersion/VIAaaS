@@ -2,11 +2,11 @@
   "short_name": "VIAaaS",
   "name": "VIAaaS - ViaVersion as a Service",
   "icons": [{
-    "src": "https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png",
+    "src": "./logo.png",
     "sizes": "600x600",
     "type": "image/png"
   }],
-  "start_url": ".",
+  "start_url": "./index.html",
   "background_color": "#3367D6",
   "display": "standalone",
   "theme_color": "#0468a1",

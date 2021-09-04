@@ -69,7 +69,6 @@ function swCacheFiles() {
         action: "cache",
         urls: performance.getEntriesByType("resource")
             .map(it => it.name)
-            .filter(it => it.endsWith(".js") || it.endsWith(".css") || it.endsWith(".png"))
     })); // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
 }
 
@@ -240,7 +239,7 @@ function resetHtml() {
 function ohNo() {
     try {
         icanhazepoch().then(sec => {
-            if (Math.abs(Date.now() / 1000 - sec) > 15) {
+            if (Math.abs(Date.now() / 1000 - sec) > 10) {
                 addToast("Time isn't synchronized", "Please synchronize your computer time to NTP servers");
             } else {
                 console.log("time seems synchronized");

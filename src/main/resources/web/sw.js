@@ -11,14 +11,14 @@ self.addEventListener("notificationclick", event => {
 var CACHE = "network-or-cache";
 
 self.addEventListener("install", evt => {
-  evt.waitUntil(cache(["./"]));
+  evt.waitUntil(cache(["./index.html"]));
 });
 
 self.addEventListener("fetch", evt => {
-  if (evt.request.mode != "navigate") return;
+  if (!shouldCache(evt.request.url)
+    || evt.request.method != "GET") return;
   evt.respondWith(
-    fromNetwork(evt.request)
-      .catch(() => fromCache(evt.request))
+    fromCache(evt.request).catch(() => fromNetwork(evt.request))
   );
 });
 
@@ -28,8 +28,12 @@ addEventListener("message", e => {
   }
 });
 
+function shouldCache(it) {
+  return it.endsWith(".js") || it.endsWith(".css") || it.endsWith(".png") || it.endsWith(".html")
+}
+
 function cache(urls) {
-  return caches.open(CACHE).then(cache => cache.addAll(urls));
+  return caches.open(CACHE).then(cache => cache.addAll(urls.filter(shouldCache)));
 }
 
 function fromNetwork(request) {

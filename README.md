@@ -3,7 +3,7 @@ VIAaaS
 
 VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
 
-<img alt="VIAaaS Logo (VIA logo with structural formula of aspirin)" height="200" src="https://cdn.discordapp.com/attachments/316218802155028482/850014925622476820/unknown.png">
+<img alt="VIAaaS Logo (VIA logo with structural formula of aspirin)" height="200" src="https://viaversion.github.io/VIAaaS/src/main/resources/web/logo.png">
 
 Address generator: https://jo0001.github.io/ViaSetup/aspirin
 
@@ -29,8 +29,8 @@ Offline mode tutorial: https://youtu.be/lPdELnrxmp0
   and [ViaRewind](https://viaversion.com/rewind) translates the connections to backend server.
 - VIAaaS auth page stores account credentials in the player's browser local storage. Check for XSS vulnerabilities on
   your domain.
-- It requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that as
-  suspicious and block your account password if the IP address seems suspect.
+- It requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that as suspicious and block your account
+  password if the IP address seems suspect.
 - Account credentials aren't sent to VIAaaS instance, though it's intermediated by CORS Proxy.
 - The web page receives and validates a the session hash from VIAaaS instance.
 
@@ -64,7 +64,8 @@ java -jar VIAaaS-all.jar
 
 - For less chance of Mojang seeing the login as suspect, you (the player) should set up a CORS proxy on your machine.
 - Note the ending slash in cors-anywhere address
-- You can also try my public instance at https://crp123-cors.herokuapp.com/ ([source](https://github.com/creeper123123321/cors-anywhere/))
+- You can also try my public instance
+  at https://crp123-cors.herokuapp.com/ ([source](https://github.com/creeper123123321/cors-anywhere/))
 
 ### Setting up [cors-anywhere](https://www.npmjs.com/package/cors-anywhere) on local machine:
 
@@ -87,13 +88,14 @@ node server.js
 
 Web login:
 
-- You can use the same username for front-end and back-end connection. It's also possible to use an 
-  offline mode connection on front-end (use ``_of``).
+- You can use the same username for front-end and back-end connection. It's also possible to use an offline mode
+  connection on front-end (use ``_of``).
 - Go to VIAaaS auth webpage (default is https://localhost:25543/)
 - Listen to the username A (you'll use it to connect to the VIAaaS instance).
 - Add the account B (you'll use it in backend server).
 - Keep the page open
-- Connect with your account A to ```mc.example.com._u(account B).via.localhost``` (```_u``` can be removed if username is the same)
+- Connect with your account A to ```mc.example.com._u(account B).via.localhost``` (```_u``` can be removed if username
+  is the same)
 - Approve the login in the webpage
 
 Fabric client:
@@ -115,7 +117,8 @@ Fabric client:
 - You can use ``(option)_(value)`` too, like ``p_25565``.
 - ```server.example.net```: backend server address
 - ```_p```: backend port
-- ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name, replace ``.`` with ``_``). ```AUTO``` is default (1.8 fallback).
+- ```_v```: backend version ([protocol id](https://wiki.vg/Protocol_version_numbers) or name, replace ``.`` with ``_``)
+  . ```AUTO``` is default (1.8 fallback).
 - ```_o```: ```t``` to force online mode in frontend, ```f``` to force offline mode in frontend. If not set, it will be
   based on backend online mode.
 - ```_u```: username to use in backend connection
@@ -176,4 +179,5 @@ Fabric client:
 
 #### Can you support more versions / Is there some alternative?
 
-- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (lenni0451.net:25563)
+- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (lenni0451.net:
+  25563)
