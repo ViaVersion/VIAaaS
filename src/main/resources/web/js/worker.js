@@ -8,7 +8,6 @@ onmessage = function (e) {
 }
 
 function removePending(id) {
-    console.log("removing task" + id);
     pending = pending.filter(it => it !== id);
 }
 
@@ -27,7 +26,7 @@ function listenPoW(e) {
         msg = JSON.stringify({
             action: "offline_login",
             username: user,
-            date: Date.now(),
+            date: Date.now() - e.data.deltaTime,
             rand: Math.random()
         });
 

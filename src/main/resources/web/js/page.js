@@ -29,6 +29,8 @@ let accounts = document.getElementById("accounts-list");
 let cors_proxy_txt = document.getElementById("cors-proxy");
 let ws_url_txt = document.getElementById("ws-url");
 let listenVisible = false;
+// + deltaTime means that the clock is ahead
+let deltaTime = 0;
 let workers = [];
 $(() => {
     workers = new Array(navigator.hardwareConcurrency)
@@ -160,14 +162,13 @@ function renderActions() {
             let user = prompt("Offline username (case-sensitive):", "");
             if (!user) return;
             let taskId = Math.random();
-            workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId}));
+            workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
             addToast("Offline username", "Please wait a minute...");
         });
     }
 }
 
 function onWorkerMsg(e) {
-    console.log(e);
     if (e.data.action === "completed_pow") onCompletedPoW(e);
 }
 
@@ -239,8 +240,11 @@ function resetHtml() {
 function ohNo() {
     try {
         icanhazepoch().then(sec => {
-            if (Math.abs(Date.now() / 1000 - sec) > 10) {
+            const calcDelta = Date.now() - sec * 1000;
+            if (Math.abs(calcDelta) > 100000) {
                 addToast("Time isn't synchronized", "Please synchronize your computer time to NTP servers");
+                deltaTime = calcDelta;
+                console.log("applying delta time " + deltaTime);
             } else {
                 console.log("time seems synchronized");
             }
