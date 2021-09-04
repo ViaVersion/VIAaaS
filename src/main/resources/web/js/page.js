@@ -241,7 +241,7 @@ function ohNo() {
     try {
         icanhazepoch().then(sec => {
             const calcDelta = Date.now() - sec * 1000;
-            if (Math.abs(calcDelta) > 100000) {
+            if (Math.abs(calcDelta) > 10000) {
                 addToast("Time isn't synchronized", "Please synchronize your computer time to NTP servers");
                 deltaTime = calcDelta;
                 console.log("applying delta time " + deltaTime);
