@@ -258,13 +258,9 @@ function ohNo() {
 }
 
 // Util
-function isSuccess(status) {
-    return status >= 200 && status < 300;
-}
-
 function checkFetchSuccess(msg) {
     return r => {
-        if (!isSuccess(r.status)) throw r.status + " " + msg;
+        if (!r.ok) throw r.status + " " + msg;
         return r;
     };
 }
@@ -397,7 +393,7 @@ class McAccount {
             method: "post",
             body: JSON.stringify({accessToken: this.accessToken}),
             headers: {"content-type": "application/json"}
-        }).then(data => isSuccess(data.status));
+        }).then(data => data.ok);
     }
 
     joinGame(hash) {
@@ -454,7 +450,7 @@ class MojangAccount extends McAccount {
                 clientToken: this.clientToken
             }),
             headers: {"content-type": "application/json"}
-        }).then(data => isSuccess(data.status));
+        }).then(data => data.ok);
     }
 
     refresh() {
@@ -538,7 +534,7 @@ class MicrosoftAccount extends McAccount {
                 })
                     .then(profile => {
                         if (profile.status === 404) return {id: "MHF_Exclamation", name: "[DEMO]", access_token: ""};
-                        if (!isSuccess(profile.status)) throw "profile response not success";
+                        if (!profile.ok) throw "profile response not success";
                         return profile.json();
                     })
                     .then(jsonProfile => {
