@@ -12,7 +12,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.5.30"
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.39.0"
@@ -72,14 +72,14 @@ dependencies {
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.8.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:30.1.1-jre")
-    implementation("com.velocitypowered:velocity-native:3.0.0")
+    implementation("com.velocitypowered:velocity-native:3.0.1")
     implementation("net.coobird:thumbnailator:0.4.14")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.29")
 
     val log4jVer = "2.14.1"
     val slf4jVer = "1.7.32"
-    implementation("net.minecrell:terminalconsoleappender:1.2.0")
+    implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
@@ -87,7 +87,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.20.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "1.6.2"
+    val ktorVersion = "1.6.3"
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
