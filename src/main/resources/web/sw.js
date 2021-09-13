@@ -33,7 +33,8 @@ function shouldCache(it) {
 }
 
 function cache(urls) {
-  return caches.open(CACHE).then(cache => cache.addAll(urls.filter(shouldCache)));
+  // todo fix
+  //return caches.open(CACHE).then(cache => cache.addAll(urls.filter(shouldCache)));
 }
 
 function fromNetwork(request) {
