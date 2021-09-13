@@ -15,10 +15,10 @@
     <link href="logo.png" rel="icon">
     <link rel="manifest" href="manifest.json">
     <meta content="default-src 'self';
-style-src https://cdnjs.cloudflare.com/ 'self';
+style-src 'self' https://cdnjs.cloudflare.com/;
 img-src 'self' data: https://crafthead.net/ https://crafatar.com/;
 connect-src 'self' http://localhost:*/ https: wss:;
-script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/ 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"
+script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/ 'unsafe-hashes' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"
           http-equiv="Content-Security-Policy">
     <meta content="no-referrer" name="referrer">
     <meta content="noindex" name="robots">
