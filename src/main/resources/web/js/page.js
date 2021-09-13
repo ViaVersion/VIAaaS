@@ -48,15 +48,19 @@ $(() => {
 window.addEventListener('beforeinstallprompt', e => e.preventDefault());
 
 $(() => {
-    ohNo();
-    cors_proxy_txt.value = getCorsProxy();
-    ws_url_txt.value = getWsUrl();
+    $(".css_async").attr("disabled", null);
     $("form").on("submit", e => e.preventDefault());
+    $("a[href='javascript:']").on("click", e => e.preventDefault());
+    
+    ohNo();
+
+    cors_proxy_txt.value = getCorsProxy()
+    ws_url_txt.value = getWsUrl();
+
     $("#form_add_mc").on("submit", () => loginMc($("#email").val(), $("#password").val()));
     $("#form_add_ms").on("submit", () => loginMs());
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val()));
     $("#form_cors_proxy").on("submit", () => setCorsProxy($("#cors-proxy").val()));
-    $(".css_async").attr("disabled", null);
 
     refreshAccountList();
     setInterval(refreshCorsStatus, 10 * 60 * 1000); // Heroku auto sleeps in 30 min
