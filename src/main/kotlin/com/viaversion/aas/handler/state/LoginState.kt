@@ -143,6 +143,7 @@ class LoginState : ConnectionState {
                 val pluginReauthed = reauthMessage(handler, backName!!, backHash).await()
                 if (!pluginReauthed) {
                     AspirinServer.viaWebServer.requestSessionJoin(
+                        frontName,
                         playerId,
                         backName!!,
                         backHash,

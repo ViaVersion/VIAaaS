@@ -82,12 +82,13 @@ class WebDashboardServer {
         .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
 
     suspend fun requestSessionJoin(
+        frontName: String,
         id: UUID, name: String, hash: String,
         address: SocketAddress, backAddress: SocketAddress
     ): CompletableFuture<Unit> {
         val future = sessionHashCallbacks[hash]
         if (!listeners.containsKey(id)) {
-            future.completeExceptionally(StacklessException("UUID $id isn't listened. Use web auth."))
+            future.completeExceptionally(StacklessException("UUID $id ($frontName) isn't listened. Go to web auth."))
         } else {
             CoroutineScope(coroutineContext).apply {
                 launch(Dispatchers.IO) {
