@@ -12,7 +12,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.5.30"
+    kotlin("jvm") version "1.5.31"
     id("maven-publish")
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("com.github.ben-manes.versions") version "0.39.0"
@@ -67,8 +67,8 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.67.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.41.Final")
+    implementation("io.netty:netty-all:4.1.68.Final")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.43.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.8.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:30.1.1-jre")
@@ -96,7 +96,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:3.18.1")
+    implementation("com.auth0:java-jwt:3.18.2")
 }
 
 val run: JavaExec by tasks
