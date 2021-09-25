@@ -94,30 +94,19 @@ function refreshCorsStatus() {
 }
 
 function addMcAccountToList(account) {
-    let p = document.createElement("li");
-    p.className = "input-group d-flex";
-    let shead = document.createElement("span");
-    shead.className = "input-group-text";
-    let head = document.createElement("img");
-    shead.append(head);
-    let n = document.createElement("span");
-    n.className = "form-control";
-    let remove = document.createElement("a");
-    remove.className = "btn btn-danger";
-    n.innerText = " " + account.name + " " + (account instanceof MicrosoftAccount ? "(" + account.msUser + ") " : "");
-    remove.innerText = "Logout";
-    remove.href = "javascript:";
-    remove.onclick = () => {
-        account.logout();
-    };
-    head.width = 24;
-    head.alt = account.name + "'s head";
-    head.src = "https://crafthead.net/helm/" + account.id;
-    //(id.length == 36 || id.length == 32) ? "https://crafatar.com/avatars/" + id + "?overlay" : "https://crafthead.net/helm/" + id;
-    p.append(shead);
-    p.append(n);
-    p.append(remove);
-    accounts.appendChild(p);
+    let line = $(`<li class='input-group d-flex'>
+    <span class='input-group-text'><img width=24 class='mc-head'/></span>
+    <span class='form-control mc-user'></span>
+    <a class='btn btn-danger mc-remove' href='javascript:'>Logout</a>
+    </li>`);
+    let txt = account.name;
+    if (account instanceof MicrosoftAccount) txt += " (" + account.msUser + ")";
+    line.find(".mc-user").text(txt);
+    line.find(".mc-remove").on("click", () => account.logout());
+    let head = line.find(".mc-head");
+    head.attr("alt", account.name + "'s head");
+    head.attr("src", "https://crafthead.net/helm/" + account.id);
+    $(accounts).append(line);
 }
 
 function refreshAccountList() {
@@ -193,46 +182,59 @@ function addAction(text, onClick) {
 }
 
 function addListeningList(user, token) {
-    let p = document.createElement("p");
-    let head = document.createElement("img");
-    let n = document.createElement("span");
-    let remove = document.createElement("a");
-    n.innerText = " " + user + " ";
-    remove.innerText = "Unlisten";
-    remove.href = "javascript:";
-    remove.onclick = () => {
+    let line = $("<p><img width=24 class='head'/> <span class='username'></span> <a href='javascript:'>Unlisten</a></p>");
+    line.find(".username").text(user);
+    line.find("a").on("click", () => {
         removeToken(token);
         listening.removeChild(p);
         unlisten(user);
-    };
-    head.width = 24;
-    head.alt = user + "'s head";
-    head.src = "https://crafthead.net/helm/" + user;
-    p.append(head);
-    p.append(n);
-    p.append(remove);
-    listening.appendChild(p);
+    });
+    let head = line.find(".head");
+    head.attr("alt", user + "'s head");
+    head.attr("src", "https://crafthead.net/helm/" + user);
+    $(listening).append(line);
 }
 
-function addToast(title, msg) {
-    let toast = document.createElement("div");
-    document.getElementById("toasts").prepend(toast);
-    $(toast)
-        .attr("class", "toast")
-        .attr("role", "alert")
-        .attr("aria-live", "assertive")
-        .attr("aria-atomic", "true") // todo sanitize date \/
-        .html(`
-<div class="toast-header">
-  <strong class="me-auto toast_title_msg"></strong>
-  <small class="text-muted">${new Date().toLocaleString()}</small>
-  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-</div>
-<div class="toast-body"></div>
-        `);
-    $(toast).find(".toast_title_msg").text(title);
-    $(toast).find(".toast-body").text(msg);
-    new bootstrap.Toast(toast).show();
+function timeAgo() {
+    $("time.timeago").timeago();
+}
+
+function addToast(title, msg, yes = null, no = null) {
+    let toast = $(`<div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+ <div class="toast-header">
+   <strong class="me-auto toast_title_msg"></strong>
+   <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+ </div>
+ <div class="toast-body">
+   <pre class="txt"></pre>
+   <div class="btns mt-2 pt-2 border-top"></div>
+ </div>
+</div>`);
+    toast.find(".toast_title_msg").text(title);
+
+    let tBody = toast.find(".toast-body");
+    tBody.find(".txt").text(msg);
+
+    let btns = $(tBody).find(".btns");
+    let hasButtons = false;
+    if (yes != null) {
+        hasButtons = true;
+        let btn = $("<button type='button' data-bs-dismiss='toast' class='btn btn-primary btn-sm'>Yes</button>");
+        btn.on("click", yes);
+        btns.append(btn);
+    }
+    if (no != null) {
+        hasButtons = true;
+        let btn = $("<button type='button' data-bs-dismiss='toast' class='btn btn-secondary btn-sm'>No</button>");
+        btn.on("click", no);
+        btns.append(btn);
+    }
+    if (!hasButtons) {
+        btns.addClass("d-none");
+    }
+
+    $("#toasts").prepend(toast);
+    new bootstrap.Toast(toast[0]).show();
 }
 
 function resetHtml() {
@@ -305,7 +307,7 @@ function handleSWMsg(event) {
 
 function authNotification(msg, yes, no) {
     if (!navigator.serviceWorker || Notification.permission !== "granted") {
-        if (confirm(msg)) yes(); else no();
+        if (addToast("Allow auth impersonation?", msg, yes, no));
         return;
     }
     let tag = uuid.v4();
@@ -393,9 +395,13 @@ class McAccount {
     }
 
     checkActive() {
+        // todo why does this not work with MSA?
         return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {
             method: "post",
-            body: JSON.stringify({accessToken: this.accessToken}),
+            body: JSON.stringify({
+                accessToken: this.accessToken,
+                clientToken: this.clientToken || undefined
+            }),
             headers: {"content-type": "application/json"}
         }).then(data => data.ok);
     }
@@ -444,17 +450,6 @@ class MojangAccount extends McAccount {
             }),
             headers: {"content-type": "application/json"}
         }).then(checkFetchSuccess("not success logout"));
-    }
-
-    checkActive() {
-        return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {
-            method: "post",
-            body: JSON.stringify({
-                accessToken: this.accessToken,
-                clientToken: this.clientToken
-            }),
-            headers: {"content-type": "application/json"}
-        }).then(data => data.ok);
     }
 
     refresh() {
