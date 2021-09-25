@@ -195,10 +195,6 @@ function addListeningList(user, token) {
     $(listening).append(line);
 }
 
-function timeAgo() {
-    $("time.timeago").timeago();
-}
-
 function addToast(title, msg, yes = null, no = null) {
     let toast = $(`<div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
  <div class="toast-header">
