@@ -32,7 +32,7 @@ Offline mode tutorial: https://youtu.be/lPdELnrxmp0
 - It requires a CORS Proxy for calling Mojang APIs, which may make Mojang see that as suspicious and block your account
   password if the IP address seems suspect.
 - Account credentials aren't sent to VIAaaS instance, though it's intermediated by CORS Proxy.
-- The web page receives and validates a the session hash from VIAaaS instance.
+- The web page receives and validates the session hash from VIAaaS instance.
 
 ## Setting up server instance
 
@@ -128,21 +128,21 @@ Fabric client:
 
 - VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK.
 - Take care of browser local storage. Check for XSS vulnerabilities on your domain.
-- Check the security of CORS proxy, it will intermediate Mojang API calls.
+- Check the security of CORS proxy, it will be used for calls to Mojang API.
 - Mojang may lock your account when API is called from a suspect IP address.
 
 ## FAQ
 
 ### Accounts
 
-#### My Microsoft account <18 years old is not able to log in, it's giving XSTS error:
+#### My Microsoft account <18 years old is not able to log in, it's showing XSTS error:
 
 - Add your account to a family (see https://wiki.vg/Microsoft_Authentication_Scheme#Authenticate_with_XSTS)
 
-#### Why a online webpage for online mode?:
+#### Why to use an online webpage for online mode?:
 
 - It's easier to maintain in that way, because providing login via chat requires encoding and decoding more packets,
-  which reduces maintanability.
+  which reduces maintainability.
 - It allows your account password and token to be kept with you.
 
 #### How to use Microsoft Account?:
@@ -181,3 +181,7 @@ Fabric client:
 
 - See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (lenni0451.net:
   25563)
+
+#### Can I customize the files of HTTP server?
+
+- Add files to ``config/web/`` directory

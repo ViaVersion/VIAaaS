@@ -585,13 +585,6 @@ function loginMc(user, pass) {
     $("#form_add_mc input").val("");
 }
 
-// https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-javascript-auth-code
-const azureClientId = "a370fff9-7648-4dbf-b96e-2b4f8d539ac2";
-const whitelistedOrigin = [
-    "https://via-login.geyserconnect.net",
-    "https://via.re.yt.nom.br",
-    "https://viaaas.noxt.cf"
-];
 const loginRequest = {scopes: ["XboxLive.signin"]};
 let redirectUrl = "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
 if (location.hostname === "localhost" || whitelistedOrigin.includes(location.origin)) {

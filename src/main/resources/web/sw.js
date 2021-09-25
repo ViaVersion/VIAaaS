@@ -15,6 +15,7 @@ self.addEventListener("install", evt => {
 });
 
 self.addEventListener("fetch", evt => {
+  return; // todo fix
   if (!shouldCache(evt.request.url)
     || evt.request.method != "GET") return;
   evt.respondWith(
@@ -33,8 +34,8 @@ function shouldCache(it) {
 }
 
 function cache(urls) {
-  // todo fix
-  //return caches.open(CACHE).then(cache => cache.addAll(urls.filter(shouldCache)));
+  return; // todo fix
+  return caches.open(CACHE).then(cache => cache.addAll(urls.filter(shouldCache)));
 }
 
 function fromNetwork(request) {
