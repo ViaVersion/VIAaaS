@@ -10,9 +10,8 @@
     <meta content="VIAaaS" property="og:title">
     <meta content="VIAaaS - ViaVersion as a Service - Standalone ViaVersion Proxy" property="og:description">
     <meta content="game" property="og:type">
-    <meta content="logo.png"
-          property="og:image">
-    <link href="logo.png" rel="icon">
+    <meta content="img/logo.webp" property="og:image">
+    <link href="img/logo.webp" rel="icon">
     <link rel="manifest" href="manifest.json">
     <meta content="default-src 'self';
 style-src 'self' https://cdnjs.cloudflare.com/;
@@ -25,12 +24,12 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
     <meta content="#0468a1" name="theme-color">
 
     <!-- https://www.srihash.org/ -->
-    <link class="css_async" disabled rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css"
-          integrity="sha512-F7WyTLiiiPqvu2pGumDR15med0MDkUIo5VTVyyfECR5DZmCnDhti9q5VID02ItWjq6fvDfMaBaDl2J3WdL1uxA=="
+    <link class="async-css" rel="preload" as="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/css/bootstrap.min.css"
+          integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"
-            integrity="sha512-PqRelaJGXVuQ81N6wjUrRQelCDR7z8RvKGiR9SbSxKHPIt15eJDmIVv9EJgwq0XvgylszsjzvQ0+VyI2WtIshQ=="
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/js/bootstrap.min.js"
+            integrity="sha512-ewfXo9Gq53e1q1+WDTjaHAGZ8UvCWq0eXONhwDuIoaH8xz2r96uoAYaQCm1oQhnBfRXrvJztNXFsTloJfgbL5Q=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js"
             integrity="sha512-lvWiOP+aMKHllm4THsjzNleVuGOh0WGniJ3lgu/nvCbex1LlaQSxySUjAu/LTJw9FhnSL/PVYoQcckg1Q03+fQ=="
@@ -44,13 +43,13 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
     <script defer crossorigin="anonymous"
             integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
             src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-    <script defer src="https://alcdn.msauth.net/browser/2.15.0/js/msal-browser.min.js"
-            integrity="sha384-/weuqUPkC0P9JxnstihEV1GHdWrheU9Qo3MbdTuxxKJM8l/cSTE5zGP5VBIM4TZN"
+    <script defer src="https://alcdn.msauth.net/browser/2.17.0/js/msal-browser.min.js"
+            integrity="sha384-nPvMTGGQIdPr+oK09URmAR99LAk9PEVLJE+RJfjIH/QADFbVgGlF9tFdVbgSYC+c"
             crossorigin="anonymous"></script>
     <script defer src="js/config.js"></script>
     <script defer src="js/page.js"></script>
-    <link rel="prefetch" href="js/worker.js" as="worker">
-    <link rel="prefetch" href="sw.js" as="serviceworker">
+    <link rel="preload" href="js/worker.js" as="worker">
+    <link rel="preload" href="sw.js" as="serviceworker">
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-2">
@@ -154,7 +153,7 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
             </div>
             <div class="modal-body">
                 <!-- Design somewhat stolen/inspired from Gnome -->
-                <img src="logo.png"
+                <img loading="lazy" src="img/logo.webp"
                      class="mx-auto d-block" alt="VIAaaS logo" width="150">
                 <div class="text-center mb-3">
                     <h5>ViaVersion as a Service</h5>
@@ -169,22 +168,16 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
                 <div>
                     <p>VIAaaS is free software: you can redistribute it and/or modify it under the terms of the GNU
                         Affero General Public License as published by the Free Software Foundation, either version 3 of
-                        the
-                        License,
-                        or (at your option) any later version.</p>
+                        the License, or (at your option) any later version.</p>
                     <p>VIAaaS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
                         even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-                        Affero
-                        General
-                        Public License for more details.</p>
+                        Affero General Public License for more details.</p>
                     <p>You should have received a copy of the GNU Affero General Public License along with this program.
-                        If
-                        not, see <a href="https://gnu.org/licenses">https://gnu.org/licenses/</a>.</p>
+                        If not, see <a href="https://gnu.org/licenses">https://gnu.org/licenses/</a>.</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <a class="btn btn-secondary" href="https://github.com/ViaVersion/VIAaaS/" role="button">Source
-                    Code</a>
+                <a class="btn btn-secondary" href="https://github.com/ViaVersion/VIAaaS/" role="button">Source Code</a>
                 <button class="btn btn-primary" data-bs-dismiss="modal" type="button">Close</button>
             </div>
         </div>

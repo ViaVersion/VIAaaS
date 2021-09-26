@@ -2,9 +2,10 @@
   "short_name": "VIAaaS",
   "name": "VIAaaS - ViaVersion as a Service",
   "icons": [{
-    "src": "./logo.png",
-    "sizes": "600x600",
-    "type": "image/png"
+    "src": "./img/maskable_icon.webp",
+    "sizes": "857x857",
+    "type": "image/png",
+    "purpose": "any maskable"
   }],
   "start_url": "./index.html",
   "background_color": "#3367D6",

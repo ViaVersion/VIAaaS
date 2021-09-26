@@ -16,7 +16,6 @@ $(() => {
     }
     if (mcauth_code != null) {
         history.replaceState(null, null, "#");
-        renderActions();
     }
 });
 
@@ -40,21 +39,18 @@ $(() => {
 });
 $(() => {
     if (navigator.serviceWorker) {
-        navigator.serviceWorker.register("sw.js")
-            .then(() => swCacheFiles());
+        navigator.serviceWorker.register("sw.js").then(() => swCacheFiles());
     }
 })
 
 window.addEventListener('beforeinstallprompt', e => e.preventDefault());
 
 $(() => {
-    $(".css_async").attr("disabled", null);
+    $(".async-css").attr("rel", "stylesheet");
     $("form").on("submit", e => e.preventDefault());
     $("a[href='javascript:']").on("click", e => e.preventDefault());
-    
-    ohNo();
 
-    cors_proxy_txt.value = getCorsProxy()
+    cors_proxy_txt.value = getCorsProxy();
     ws_url_txt.value = getWsUrl();
 
     $("#form_add_mc").on("submit", () => loginMc($("#email").val(), $("#password").val()));
@@ -62,19 +58,22 @@ $(() => {
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val()));
     $("#form_cors_proxy").on("submit", () => setCorsProxy($("#cors-proxy").val()));
 
+    ohNo();
+
     refreshAccountList();
     setInterval(refreshCorsStatus, 10 * 60 * 1000); // Heroku auto sleeps in 30 min
     refreshCorsStatus();
     resetHtml();
-
-    connect();
 });
+
+$(() => {
+    connect();
+})
 
 function swCacheFiles() {
     navigator.serviceWorker.ready.then(ready => ready.active.postMessage({
         action: "cache",
-        urls: performance.getEntriesByType("resource")
-            .map(it => it.name)
+        urls: performance.getEntriesByType("resource").map(it => it.name)
     })); // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
 }
 
@@ -95,7 +94,7 @@ function refreshCorsStatus() {
 
 function addMcAccountToList(account) {
     let line = $(`<li class='input-group d-flex'>
-    <span class='input-group-text'><img width=24 class='mc-head'/></span>
+    <span class='input-group-text'><img loading="lazy" width=24 class='mc-head'/></span>
     <span class='form-control mc-user'></span>
     <a class='btn btn-danger mc-remove' href='javascript:'>Logout</a>
     </li>`);
@@ -182,7 +181,7 @@ function addAction(text, onClick) {
 }
 
 function addListeningList(user, token) {
-    let line = $("<p><img width=24 class='head'/> <span class='username'></span> <a href='javascript:'>Unlisten</a></p>");
+    let line = $("<p><img loading='lazy' width=24 class='head'/> <span class='username'></span> <a href='javascript:'>Unlisten</a></p>");
     line.find(".username").text(user);
     line.find("a").on("click", () => {
         removeToken(token);
@@ -251,7 +250,11 @@ function ohNo() {
                 console.log("time seems synchronized");
             }
         })
-        try {!BroadcastChannel} catch(e) {addToast("Unsupported browser", "This browser doesn't support required APIs");}
+        try {
+            !BroadcastChannel
+        } catch (e) {
+            addToast("Unsupported browser", "This browser doesn't support required APIs");
+        }
         new Date().getDay() === 3 && console.log("it's snapshot day 🐸 my dudes");
         new Date().getDate() === 1 && new Date().getMonth() === 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $99");
     } catch (e) {
@@ -288,8 +291,7 @@ function filterNot(array, item) {
 // Notification
 let notificationCallbacks = {};
 $(() => {
-    new BroadcastChannel("viaaas-notification")
-        .addEventListener("message", handleSWMsg);
+    new BroadcastChannel("viaaas-notification").addEventListener("message", handleSWMsg);
 })
 
 function handleSWMsg(event) {
@@ -303,7 +305,7 @@ function handleSWMsg(event) {
 
 function authNotification(msg, yes, no) {
     if (!navigator.serviceWorker || Notification.permission !== "granted") {
-        if (addToast("Allow auth impersonation?", msg, yes, no));
+        addToast("Allow auth impersonation?", msg, yes, no);
         return;
     }
     let tag = uuid.v4();
@@ -488,7 +490,7 @@ class MicrosoftAccount extends McAccount {
         if (!msAccount) return;
 
         const logoutRequest = {account: msAccount};
-        myMSALObj.logout(logoutRequest);
+        myMSALObj.logoutPopup(logoutRequest);
     }
 
     refresh() {
