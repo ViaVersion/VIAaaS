@@ -7,7 +7,7 @@
     "type": "image/png",
     "purpose": "any maskable"
   }],
-  "start_url": "./index.html",
+  "start_url": "./",
   "background_color": "#3367D6",
   "display": "standalone",
   "theme_color": "#0468a1",

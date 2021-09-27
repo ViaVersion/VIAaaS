@@ -39,22 +39,26 @@ class WebDashboardServer {
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val jwtAlgorithm = Algorithm.HMAC256(VIAaaSConfig.jwtSecret)
 
-    fun generateToken(account: UUID): String {
+    fun generateToken(account: UUID, username: String): String {
         return JWT.create()
+            .withIssuedAt(Date())
             .withExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(30))))
             .withSubject(account.toString())
+            .withClaim("name", username)
             .withAudience("viaaas_listen")
             .withIssuer("viaaas")
             .sign(jwtAlgorithm)
     }
 
-    fun checkToken(token: String): UUID? {
+    data class UserInfo(val id: UUID, val name: String?)
+
+    fun parseToken(token: String): UserInfo? {
         return try {
             val verified = JWT.require(jwtAlgorithm)
                 .withAnyOfAudience("viaaas_listen")
                 .build()
                 .verify(token)
-            UUID.fromString(verified.subject)
+            UserInfo(UUID.fromString(verified.subject), verified.getClaim("name").asString())
         } catch (e: JWTVerificationException) {
             null
         }

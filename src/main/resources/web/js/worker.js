@@ -38,9 +38,3 @@ function listenPoW(e) {
 
     postMessage({id: e.data.id, action: "completed_pow", msg: msg});
 }
-
-/* function sha512(s) {
-    const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
-    shaObj.update(s);
-    return shaObj.getHash("HEX");
-} */

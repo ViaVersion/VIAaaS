@@ -39,7 +39,8 @@ $(() => {
 });
 $(() => {
     if (navigator.serviceWorker) {
-        navigator.serviceWorker.register("sw.js").then(() => swCacheFiles());
+        navigator.serviceWorker.register("sw.js")
+            .then(() => setTimeout(() => swRefreshFiles(), 1000));
     }
 })
 
@@ -48,7 +49,6 @@ window.addEventListener('beforeinstallprompt', e => e.preventDefault());
 $(() => {
     $(".async-css").attr("rel", "stylesheet");
     $("form").on("submit", e => e.preventDefault());
-    $("a[href='javascript:']").on("click", e => e.preventDefault());
 
     cors_proxy_txt.value = getCorsProxy();
     ws_url_txt.value = getWsUrl();
@@ -70,11 +70,12 @@ $(() => {
     connect();
 })
 
-function swCacheFiles() {
+function swRefreshFiles() {
+    // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
     navigator.serviceWorker.ready.then(ready => ready.active.postMessage({
         action: "cache",
         urls: performance.getEntriesByType("resource").map(it => it.name)
-    })); // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
+    }));
 }
 
 function setWsStatus(txt) {
@@ -96,7 +97,7 @@ function addMcAccountToList(account) {
     let line = $(`<li class='input-group d-flex'>
     <span class='input-group-text'><img loading="lazy" width=24 class='mc-head'/></span>
     <span class='form-control mc-user'></span>
-    <a class='btn btn-danger mc-remove' href='javascript:'>Logout</a>
+    <button type="button" class='btn btn-danger mc-remove'>Logout</button>
     </li>`);
     let txt = account.name;
     if (account instanceof MicrosoftAccount) txt += " (" + account.msUser + ")";
@@ -126,8 +127,7 @@ function refreshAccountList() {
 function renderActions() {
     actions.innerHTML = "";
     if (Notification.permission === "default") {
-        actions.innerHTML += '<p><a href="javascript:" id="notificate">Enable notifications</a></p>';
-        $("#notificate").on("click", () => Notification.requestPermission().then(renderActions)); // i'm lazy
+        addAction("Enable notifications", () => Notification.requestPermission().then(renderActions));
     }
     if (listenVisible) {
         if (mcIdUsername != null && mcauth_code != null) {
@@ -141,7 +141,7 @@ function renderActions() {
                 renderActions();
             });
         }
-        addAction("Listen to frontend premium login in VIAaaS instance", () => {
+        addAction("Listen to frontend premium login", () => {
             let user = prompt("Premium username (case-sensitive): ", "");
             if (!user) return;
             let callbackUrl = new URL(location);
@@ -150,7 +150,7 @@ function renderActions() {
             location.href = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
                 + "?callback=" + encodeURIComponent(callbackUrl);
         });
-        addAction("Listen to frontend offline login in VIAaaS instance", () => {
+        addAction("Listen to frontend offline login", () => {
             let user = prompt("Offline username (case-sensitive):", "");
             if (!user) return;
             let taskId = Math.random();
@@ -171,21 +171,17 @@ function onCompletedPoW(e) {
 }
 
 function addAction(text, onClick) {
-    let p = document.createElement("p");
-    let link = document.createElement("a");
-    p.appendChild(link);
-    link.innerText = text;
-    link.href = "javascript:";
-    link.onclick = onClick;
-    actions.appendChild(p);
+    let line = $("<button type='button' class='btn btn-primary'></button>")
+    line.text(text).on("click", onClick);
+    $(actions).append(line);
 }
 
-function addListeningList(user, token) {
-    let line = $("<p><img loading='lazy' width=24 class='head'/> <span class='username'></span> <a href='javascript:'>Unlisten</a></p>");
-    line.find(".username").text(user);
-    line.find("a").on("click", () => {
+function addListeningList(user, username, token) {
+    let line = $("<p><img loading='lazy' width=24 class='head'/> <span class='username'></span> <button class='btn btn-danger' type='button'>Unlisten</button></p>");
+    line.find(".username").text(username || user);
+    line.find(".btn").on("click", () => {
         removeToken(token);
-        listening.removeChild(p);
+        line.remove();
         unlisten(user);
     });
     let head = line.find(".head");
@@ -719,7 +715,7 @@ function onSocketMsg(event) {
         }
     } else if (parsed.action === "listen_login_requests_result") {
         if (parsed.success) {
-            addListeningList(parsed.user, parsed.token);
+            addListeningList(parsed.user, parsed.username, parsed.token);
         } else {
             removeToken(parsed.token);
         }
