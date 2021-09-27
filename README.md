@@ -3,7 +3,7 @@ VIAaaS
 
 VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
 
-<img alt="VIAaaS Logo (VIA logo with structural formula of aspirin)" height="200" src="https://viaversion.github.io/VIAaaS/src/main/resources/web/logo.png">
+<img alt="VIAaaS Logo (VIA logo with structural formula of aspirin)" height="200" src="https://viaversion.github.io/VIAaaS/src/main/resources/web/img/logo.webp">
 
 Address generator: https://jo0001.github.io/ViaSetup/aspirin
 
