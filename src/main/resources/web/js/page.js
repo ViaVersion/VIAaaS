@@ -512,6 +512,21 @@ class MicrosoftAccount extends McAccount {
                 }),
                 headers: {"content-type": "application/json"}
             })
+                .then(data => {
+                    if (data.status !== 401) return data;
+                    return data.json().then(errorData => {
+                        let error = errorData.XErr;
+                        switch (error) {
+                            case 2148916233:
+                                throw "Xbox account not found";
+                            case 2148916235:
+                                throw "Xbox Live not available in this country";
+                            case 2148916238:
+                                throw "Account is underage, add it to a family";
+                        }
+                        throw "xsts error code " + error;
+                    });
+                })
                 .then(checkFetchSuccess("xsts response not success"))
                 .then(r => r.json()))
             .then(json => fetch(getCorsProxy() + "https://api.minecraftservices.com/authentication/login_with_xbox", {
@@ -526,8 +541,8 @@ class MicrosoftAccount extends McAccount {
                     headers: {"content-type": "application/json", "authorization": "Bearer " + json.access_token}
                 })
                     .then(profile => {
-                        if (profile.status === 404) return {id: "MHF_Exclamation", name: "[DEMO]", access_token: ""};
-                        if (!profile.ok) throw "profile response not success";
+                        if (profile.status === 404) throw "Minecraft profile not found";
+                        if (!profile.ok) throw "profile response not success " + profile.status;
                         return profile.json();
                     })
                     .then(jsonProfile => {

@@ -135,10 +135,6 @@ Fabric client:
 
 ### Accounts
 
-#### My Microsoft account <18 years old is not able to log in, it's showing XSTS error:
-
-- Add your account to a family (see https://wiki.vg/Microsoft_Authentication_Scheme#Authenticate_with_XSTS)
-
 #### Why to use an online webpage for online mode?:
 
 - It's easier to maintain in that way, because providing login via chat requires encoding and decoding more packets,
