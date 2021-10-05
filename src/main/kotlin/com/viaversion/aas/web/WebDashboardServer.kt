@@ -123,7 +123,7 @@ class WebDashboardServer {
                             info?.get("city")?.asString
                         }"
                     val msg = "Requester: $id $address ($ptr) ($ipString)\nBackend: $backAddress"
-                    listeners[id]?.forEach {
+                    listeners[id].forEach {
                         it.ws.send(JsonObject().also {
                             it.addProperty("action", "session_hash_request")
                             it.addProperty("user", name)
