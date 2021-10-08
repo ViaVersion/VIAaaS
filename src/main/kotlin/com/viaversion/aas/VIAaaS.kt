@@ -56,13 +56,7 @@ private fun setupSystem() {
 }
 
 private fun printSplash() {
-    println(
-        """\\        // // //\\  =>     //||     //||   /=====/ PROXY
-              | \\      // // //  \\       // ||    // ||  //
-              |  \\    // // //====\\     //==||   //==||  \====\   ${AspirinServer.version}
-              |   \\  // // //      \\   //   ||  //   ||      //
-              |<=  \\// // //        \\ //    || //    || /====/""".trimMargin()
-    )
+    println("VIAaaS ${AspirinServer.version}")
 }
 
 private fun initVia() {
