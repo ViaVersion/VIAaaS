@@ -15,8 +15,32 @@ import kotlin.math.absoluteValue
 
 class WebLogin : WebState {
     override suspend fun start(webClient: WebClient) {
-        webClient.ws.send("""{"action": "ad_minecraft_id_login"}""")
+        webClient.ws.send(JsonObject().also {
+            it.addProperty("action", "ad_minecraft_id_login")
+        }.toString())
         webClient.ws.flush()
+    }
+
+    override suspend fun onMessage(webClient: WebClient, msg: String) {
+        val obj = JsonParser.parseString(msg) as JsonObject
+
+        when (obj.getAsJsonPrimitive("action").asString) {
+            "offline_login" -> handleOfflineLogin(webClient, msg, obj)
+            "minecraft_id_login" -> handleMcIdLogin(webClient, msg, obj)
+            "listen_login_requests" -> handleListenLogins(webClient, msg, obj)
+            "unlisten_login_requests" -> handleUnlisten(webClient, msg, obj)
+            "session_hash_response" -> handleSessionResponse(webClient, msg, obj)
+            else -> throw StacklessException("invalid action!")
+        }
+
+        webClient.ws.flush()
+    }
+
+    override suspend fun disconnected(webClient: WebClient) {
+        webClient.listenedIds.forEach { webClient.unlistenId(it) }
+    }
+
+    override suspend fun onException(webClient: WebClient, exception: java.lang.Exception) {
     }
 
     private fun loginSuccessJson(username: String, uuid: UUID, token: String): JsonObject {
@@ -53,28 +77,28 @@ class WebLogin : WebState {
     }
 
     private suspend fun handleMcIdLogin(webClient: WebClient, msg: String, obj: JsonObject) {
-            val username = obj["username"].asString
-            val code = obj["code"].asString
+        val username = obj["username"].asString
+        val code = obj["code"].asString
 
-            val check = AspirinServer.httpClient.submitForm<JsonObject>(
-                "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
-                formParameters = parametersOf("code", code),
-            )
+        val check = AspirinServer.httpClient.submitForm<JsonObject>(
+            "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
+            formParameters = parametersOf("code", code),
+        )
 
-            if (check.getAsJsonPrimitive("valid").asBoolean) {
-                val mcIdUser = check["username"].asString
-                val uuid = check["uuid"]?.asString?.let { parseUndashedId(it.replace("-", "")) }
-                    ?: webClient.server.usernameIdCache[mcIdUser].await()
-                    ?: throw StacklessException("Failed to get UUID from minecraft.id")
+        if (check.getAsJsonPrimitive("valid").asBoolean) {
+            val mcIdUser = check["username"].asString
+            val uuid = check["uuid"]?.asString?.let { parseUndashedId(it.replace("-", "")) }
+                ?: webClient.server.usernameIdCache[mcIdUser].await()
+                ?: throw StacklessException("Failed to get UUID from minecraft.id")
 
-                val token = webClient.server.generateToken(uuid, mcIdUser)
-                webClient.ws.send(loginSuccessJson(mcIdUser, uuid, token).toString())
+            val token = webClient.server.generateToken(uuid, mcIdUser)
+            webClient.ws.send(loginSuccessJson(mcIdUser, uuid, token).toString())
 
-                webLogger.info("Token gen: ${webClient.id}: $mcIdUser $uuid")
-            } else {
-                webClient.ws.send(loginNotSuccess().toString())
-                webLogger.info("Token gen fail: ${webClient.id}: $username")
-            }
+            webLogger.info("Token gen: ${webClient.id}: $mcIdUser $uuid")
+        } else {
+            webClient.ws.send(loginNotSuccess().toString())
+            webLogger.info("Token gen fail: ${webClient.id}: $username")
+        }
     }
 
     private suspend fun handleListenLogins(webClient: WebClient, msg: String, obj: JsonObject) {
@@ -110,27 +134,5 @@ class WebLogin : WebState {
     private suspend fun handleSessionResponse(webClient: WebClient, msg: String, obj: JsonObject) {
         val hash = obj["session_hash"].asString
         webClient.server.sessionHashCallbacks.getIfPresent(hash)?.complete(Unit)
-    }
-
-    override suspend fun onMessage(webClient: WebClient, msg: String) {
-        val obj = JsonParser.parseString(msg) as JsonObject
-
-        when (obj.getAsJsonPrimitive("action").asString) {
-            "offline_login" -> handleOfflineLogin(webClient, msg, obj)
-            "minecraft_id_login" -> handleMcIdLogin(webClient, msg, obj)
-            "listen_login_requests" -> handleListenLogins(webClient, msg, obj)
-            "unlisten_login_requests" -> handleUnlisten(webClient, msg, obj)
-            "session_hash_response" -> handleSessionResponse(webClient, msg, obj)
-            else -> throw StacklessException("invalid action!")
-        }
-
-        webClient.ws.flush()
-    }
-
-    override suspend fun disconnected(webClient: WebClient) {
-        webClient.listenedIds.forEach { webClient.unlistenId(it) }
-    }
-
-    override suspend fun onException(webClient: WebClient, exception: java.lang.Exception) {
     }
 }

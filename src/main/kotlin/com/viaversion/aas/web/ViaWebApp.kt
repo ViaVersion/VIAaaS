@@ -26,7 +26,7 @@ class ViaWebApp(val viaWebServer: WebDashboardServer) {
             }
         }
         install(CallLogging) {
-            level = Level.INFO
+            level = Level.DEBUG
             this.format {
                 "${it.request.local.method.value} ${it.response.status()?.value} ${it.request.local.remoteHost} (O: ${it.request.origin.remoteHost}) " +
                         "${it.request.local.scheme}://${it.request.local.host}:${it.request.local.port}${it.request.local.uri}"
@@ -45,8 +45,14 @@ class ViaWebApp(val viaWebServer: WebDashboardServer) {
         install(PartialContent)
 
         routing {
+            routeStatic()
+            routeWs()
+        }
+    }
+
+    private fun Route.routeStatic() {
+        static {
             get("{path...}") {
-                // todo if-modified-since
                 val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")
                 val index = Path.of("index.html")
 
@@ -65,22 +71,24 @@ class ViaWebApp(val viaWebServer: WebDashboardServer) {
                     resource != null -> call.respond(resource)
                 }
             }
+        }
+    }
 
-            webSocket("/ws") {
-                try {
-                    viaWebServer.connected(this)
-                    incoming.consumeEach { frame ->
-                        if (frame is Frame.Text) {
-                            viaWebServer.onMessage(this, frame.readText())
-                        }
+    private fun Route.routeWs() {
+        webSocket("/ws") {
+            try {
+                viaWebServer.connected(this)
+                incoming.consumeEach { frame ->
+                    if (frame is Frame.Text) {
+                        viaWebServer.onMessage(this, frame.readText())
                     }
-                } catch (ignored: ClosedChannelException) {
-                } catch (e: Exception) {
-                    viaWebServer.onException(this, e)
-                    this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, "INTERNAL ERROR"))
-                } finally {
-                    viaWebServer.disconnected(this)
                 }
+            } catch (ignored: ClosedChannelException) {
+            } catch (e: Exception) {
+                viaWebServer.onException(this, e)
+                this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, "INTERNAL ERROR"))
+            } finally {
+                viaWebServer.disconnected(this)
             }
         }
     }
