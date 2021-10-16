@@ -23,17 +23,22 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
 
     fun reloadIcon() {
         val rawUrl = this.getString("favicon-url", "")!!
-        faviconUrl = when {
-            rawUrl.isEmpty() -> null
-            rawUrl.startsWith("data:image/png;base64,") -> rawUrl.filter { !it.isWhitespace() }
-            else -> "data:image/png;base64," + Base64.getEncoder().encodeToString(
-                ByteArrayOutputStream().also {
-                    Thumbnails.of(URL(rawUrl))
-                        .size(64, 64)
-                        .addFilter(Canvas(64, 64, Positions.CENTER, false))
-                        .outputFormat("png").toOutputStream(it)
-                }.toByteArray()
-            )
+        try {
+            faviconUrl = when {
+                rawUrl.isEmpty() -> null
+                rawUrl.startsWith("data:image/png;base64,") -> rawUrl.filter { !it.isWhitespace() }
+                else -> "data:image/png;base64," + Base64.getEncoder().encodeToString(
+                    ByteArrayOutputStream().also {
+                        Thumbnails.of(URL(rawUrl))
+                            .size(64, 64)
+                            .addFilter(Canvas(64, 64, Positions.CENTER, false))
+                            .outputFormat("png")
+                            .toOutputStream(it)
+                    }.toByteArray()
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

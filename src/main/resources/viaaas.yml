@@ -71,7 +71,7 @@ listening-ws-limit: 10
 # Misc
 #####
 # Favicon URL to use in disconnection messages.
-favicon-url: https://viaversion.github.io/VIAaaS/src/main/resources/web/logo.png
+favicon-url: https://raw.githubusercontent.com/ViaVersion/VIAaaS/396dcb40249ed0ef292e223c32e7f130699e7153/src/main/resources/web/logo.png
 # Requires online mode for front-end connections. May be useful for stopping bots.
 force-online-mode: false
 # Max players to allow connection. Use -1 to not limit

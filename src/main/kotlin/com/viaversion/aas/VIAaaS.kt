@@ -1,13 +1,11 @@
 package com.viaversion.aas
 
 import com.viaversion.aas.command.VIAaaSConsole
-import com.viaversion.aas.command.ViaAspirinCommand
-import com.viaversion.aas.platform.*
+import com.viaversion.aas.platform.AspirinBackwards
+import com.viaversion.aas.platform.AspirinPlatform
+import com.viaversion.aas.platform.AspirinRewind
 import com.viaversion.aas.protocol.registerAspirinProtocols
 import com.viaversion.aas.web.ViaWebApp
-import com.viaversion.viaversion.ViaManagerImpl
-import com.viaversion.viaversion.api.Via
-import com.viaversion.viaversion.api.data.MappingDataLoader
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.application.*
@@ -34,7 +32,7 @@ fun main(args: Array<String>) {
         Thread { VIAaaSConsole.start() }.start()
 
         AspirinServer.waitStopSignal()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         e.printStackTrace()
     } finally {
         AspirinServer.finish()
