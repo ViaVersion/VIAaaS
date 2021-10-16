@@ -60,15 +60,7 @@ private fun printSplash() {
 }
 
 private fun initVia() {
-    Via.init(
-        ViaManagerImpl.builder()
-            .injector(AspirinInjector())
-            .loader(AspirinLoader())
-            .commandHandler(ViaAspirinCommand)
-            .platform(AspirinPlatform).build()
-    )
-    MappingDataLoader.enableMappingsCache()
-    (Via.getManager() as ViaManagerImpl).init()
+    AspirinPlatform.initVia()
     AspirinRewind().init(ViaRewindConfigImpl(File("config/viarewind.yml")))
     AspirinBackwards().init(File("config/viabackwards"))
 

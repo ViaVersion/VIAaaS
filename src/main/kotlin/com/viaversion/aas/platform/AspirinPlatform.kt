@@ -2,8 +2,12 @@ package com.viaversion.aas.platform
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.viaversion.aas.AspirinServer
+import com.viaversion.aas.command.ViaAspirinCommand
 import com.viaversion.aas.config.AspirinViaConfig
+import com.viaversion.viaversion.ViaManagerImpl
+import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.data.MappingDataLoader
 import com.viaversion.viaversion.api.platform.ViaPlatform
 import com.viaversion.viaversion.libs.gson.JsonObject
 import com.viaversion.viaversion.util.VersionInfo
@@ -16,7 +20,7 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
 object AspirinPlatform : ViaPlatform<UUID> {
-    private val conf = AspirinViaConfig()
+    private lateinit var conf: AspirinViaConfig
     val executor = Executors.newCachedThreadPool(
         ThreadFactoryBuilder()
             .setNameFormat("Via-%d")
@@ -28,6 +32,21 @@ object AspirinPlatform : ViaPlatform<UUID> {
 
     init {
         eventLoop.execute(AspirinServer::waitMainStart)
+    }
+
+    fun initVia() {
+        Via.init(
+            ViaManagerImpl.builder()
+                .injector(AspirinInjector())
+                .loader(AspirinLoader())
+                .commandHandler(ViaAspirinCommand)
+                .platform(AspirinPlatform).build()
+        )
+        conf = AspirinViaConfig()
+
+        MappingDataLoader.enableMappingsCache()
+        (Via.getManager() as ViaManagerImpl).init()
+
     }
 
     override fun sendMessage(p0: UUID, p1: String) = Unit
