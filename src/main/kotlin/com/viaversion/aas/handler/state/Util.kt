@@ -40,6 +40,7 @@ private suspend fun createBackChannel(
         .option(ChannelOption.WRITE_BUFFER_WATER_MARK, AspirinServer.bufferWaterMark)
         .option(ChannelOption.IP_TOS, 0x18)
         .option(ChannelOption.TCP_NODELAY, true)
+        .option(ChannelOption.TCP_FASTOPEN_CONNECT, true)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // We need to show the error before the client timeout
         .resolver(NoopAddressResolverGroup.INSTANCE)
         .connect(socketAddr)

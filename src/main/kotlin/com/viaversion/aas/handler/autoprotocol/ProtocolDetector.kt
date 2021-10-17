@@ -44,6 +44,7 @@ object ProtocolDetector {
                     .resolver(NoopAddressResolverGroup.INSTANCE)
                     .channelFactory(channelSocketFactory(AspirinServer.childLoop))
                     .option(ChannelOption.TCP_NODELAY, true)
+                    .option(ChannelOption.TCP_FASTOPEN_CONNECT, true)
                     .option(ChannelOption.IP_TOS, 0x18)
                     .handler(object : ChannelInitializer<Channel>() {
                         override fun initChannel(channel: Channel) {
