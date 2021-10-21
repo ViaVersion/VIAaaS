@@ -117,7 +117,7 @@ object AspirinServer {
             .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, bufferWaterMark)
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
-            .childOption(ChannelOption.TCP_FASTOPEN, 32)
+            .option(ChannelOption.TCP_FASTOPEN, 32)
             .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
 
         ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
