@@ -60,9 +60,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.1.0-21w42a-SNAPSHOT"
+    val vvVer = "4.1.0-21w43a-SNAPSHOT"
     val vbVer = "4.1.0-21w42a-SNAPSHOT"
-    val vrVer = "f591a29"
+    val vrVer = "8a668a8"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
