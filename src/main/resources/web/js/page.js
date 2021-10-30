@@ -371,15 +371,11 @@ function getMicrosoftUsers() {
 }
 
 class McAccount {
-    id;
-    name;
-    accessToken;
-    loggedOut = false;
-
     constructor(id, username, accessToken) {
         this.id = id;
         this.name = username;
         this.accessToken = accessToken;
+        this.loggedOut = false;
     }
 
     logout() {
@@ -427,8 +423,6 @@ class McAccount {
 }
 
 class MojangAccount extends McAccount {
-    clientToken;
-
     constructor(id, username, accessToken, clientToken) {
         super(id, username, accessToken);
         this.clientToken = clientToken;
@@ -472,8 +466,6 @@ class MojangAccount extends McAccount {
 }
 
 class MicrosoftAccount extends McAccount {
-    msUser;
-
     constructor(id, username, accessToken, msUser) {
         super(id, username, accessToken);
         this.msUser = msUser;

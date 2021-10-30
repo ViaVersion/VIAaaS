@@ -1,3 +1,4 @@
+import com.google.javascript.jscomp.CompilerOptions.LanguageMode
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor
 import org.gradlewebtools.minify.minifier.js.JsMinifier
 import org.gradlewebtools.minify.minifier.js.JsMinifierOptions
@@ -48,12 +49,9 @@ extra.set("archivesBaseName", "VIAaaS")
 
 repositories {
     mavenCentral()
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://repo.viaversion.com/")
-    maven("https://repo.aikar.co/content/groups/aikar/")
-    maven("https://jitpack.io")
     maven("https://nexus.velocitypowered.com/repository/maven-public/")
-    mavenLocal()
+    maven("https://jitpack.io/")
 }
 
 dependencies {
@@ -117,8 +115,17 @@ tasks {
 }
 
 class JsMinifyFilter(reader: java.io.Reader) : java.io.FilterReader("".reader()) {
+    companion object {
+        val minifier = JsMinifier(
+            minifierOptions = JsMinifierOptions(
+                originalFileNames = true,
+                languageOut = LanguageMode.ECMASCRIPT_2020,
+                rewritePolyfills = true
+            )
+        )
+    }
+
     init {
-        val minifier = JsMinifier(minifierOptions = JsMinifierOptions(originalFileNames = true))
         val file = JFiles.createTempDirectory("via-").resolve("tmp-minify.js").toFile().also {
             it.writeText(reader.readText())
         }
@@ -142,7 +149,7 @@ tasks.named<ProcessResources>("processResources") {
         )
     }
     filesMatching("**/*.js") {
-        //filter<JsMinifyFilter>()
+        filter<JsMinifyFilter>()
     }
     filesMatching("**/*.html") {
         filter<HtmlMinifyFilter>()
