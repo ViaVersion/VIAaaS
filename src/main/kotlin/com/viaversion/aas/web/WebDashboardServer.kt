@@ -7,13 +7,13 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
-import com.google.gson.JsonObject
 import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.parseUndashedId
 import com.viaversion.aas.reverseLookup
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.webLogger
+import com.viaversion.viaversion.libs.gson.JsonObject
 import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.server.netty.*
@@ -42,6 +42,7 @@ class WebDashboardServer {
     fun generateToken(account: UUID, username: String): String {
         return JWT.create()
             .withIssuedAt(Date())
+            .withNotBefore(Date())
             .withExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(30))))
             .withSubject(account.toString())
             .withClaim("name", username)

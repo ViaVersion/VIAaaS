@@ -1,7 +1,6 @@
 package com.viaversion.aas.handler.state
 
 import com.google.common.net.HostAndPort
-import com.google.gson.JsonPrimitive
 import com.viaversion.aas.*
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.codec.packet.Packet
@@ -14,6 +13,7 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.libs.gson.JsonPrimitive
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
@@ -99,6 +99,7 @@ class LoginState : ConnectionState {
     fun reauthMessage(handler: MinecraftHandler, backName: String, backHash: String): CompletableFuture<Boolean> {
         if (!handler.data.frontEncrypted
             || handler.data.frontVer!! < ProtocolVersion.v1_13.version
+            || !frontName.equals(backName, ignoreCase = true)
         ) {
             callbackPluginReauth.complete(false)
             return callbackPluginReauth
@@ -106,12 +107,11 @@ class LoginState : ConnectionState {
 
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
-            Type.STRING.write(buf, backName)
             Type.STRING.write(buf, backHash)
 
             val packet = PluginRequest()
             packet.id = ThreadLocalRandom.current().nextInt()
-            packet.channel = "viaaas:reauth"
+            packet.channel = "openauthmod:join"
             packet.data = readRemainingBytes(buf)
             send(handler.data.frontChannel, packet, true)
             pendingReauth = packet.id

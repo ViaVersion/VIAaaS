@@ -100,7 +100,7 @@ Web login:
 
 Fabric client:
 
-- Install [ParacetamolAuth](https://github.com/creeper123123321/ParacetamolAuth) in your Fabric client.
+- Install [OpenAuthMod](https://github.com/RaphiMC/OpenAuthMod) in your Fabric client.
 - Join the server: ```mc.example.net.via.localhost```
 - Approve the login
 
