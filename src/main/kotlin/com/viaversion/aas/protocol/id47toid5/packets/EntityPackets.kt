@@ -59,14 +59,14 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
 
     this.registerClientbound(ClientboundPackets1_7.SPAWN_ENTITY, object : PacketRemapper() {
         override fun registerMap() {
-            map(Type.VAR_INT)
-            map(Type.BYTE)
-            map(Type.INT)
-            map(Type.INT)
-            map(Type.INT)
-            map(Type.BYTE)
-            map(Type.BYTE)
-            map(Type.INT)
+            map(Type.VAR_INT) // id
+            map(Type.BYTE) // type
+            map(Type.INT) // x
+            map(Type.INT) // y
+            map(Type.INT) // z
+            map(Type.BYTE) // pitch
+            map(Type.BYTE) // yaw
+            map(Type.INT) // data
             handler { packetWrapper ->
                 val type = packetWrapper.get(Type.BYTE, 0)
                 var x = packetWrapper.get(Type.INT, 0)
@@ -107,12 +107,12 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
                 packetWrapper.set(Type.INT, 3, data)
             }
             handler { packetWrapper ->
-                val entityID: Int = packetWrapper.get(Type.VAR_INT, 0)
+                val entityID = packetWrapper.get(Type.VAR_INT, 0)
                 val typeID = packetWrapper.get(Type.BYTE, 0).toInt()
                 val tracker = packetWrapper.user().get(EntityTracker::class.java)!!
                 val type: Entity1_10Types.EntityType = Entity1_10Types.getTypeFromId(typeID, true)
-                tracker.clientEntityTypes[entityID] = type
-                tracker.sendMetadataBuffer(entityID)
+                tracker.addEntity(entityID, type)
+                tracker.flushMetadataBuffer(entityID)
             }
         }
     })
@@ -135,18 +135,11 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
                 val entityID: Int = packetWrapper.get(Type.VAR_INT, 0)
                 val typeID = packetWrapper.get(Type.UNSIGNED_BYTE, 0).toInt()
                 val tracker = packetWrapper.user().get(EntityTracker::class.java)!!
-                tracker.clientEntityTypes.put(entityID, Entity1_10Types.getTypeFromId(typeID, false))
-                tracker.sendMetadataBuffer(entityID)
-            }
-            handler { wrapper ->
-                val metadataList = wrapper.get(Types1_8.METADATA_LIST, 0)
-                val entityID: Int = wrapper.get(Type.VAR_INT, 0)
-                val tracker = wrapper.user().get(EntityTracker::class.java)!!
-                if (tracker.clientEntityTypes.containsKey(entityID)) {
-                    MetadataRewriter.transform(tracker.clientEntityTypes[entityID], metadataList)
-                } else {
-                    wrapper.cancel()
-                }
+                tracker.addEntity(entityID, Entity1_10Types.getTypeFromId(typeID, false))
+                tracker.flushMetadataBuffer(entityID)
+
+                val metadataList = packetWrapper.get(Types1_8.METADATA_LIST, 0)
+                MetadataRewriter.transform(tracker.getType(entityID), metadataList)
             }
         }
     })
@@ -160,8 +153,8 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             handler { packetWrapper ->
                 val entityID = packetWrapper.get(Type.VAR_INT, 0)
                 val tracker = packetWrapper.user().get(EntityTracker::class.java)!!
-                tracker.clientEntityTypes.put(entityID, Entity1_10Types.EntityType.PAINTING)
-                tracker.sendMetadataBuffer(entityID)
+                tracker.addEntity(entityID, Entity1_10Types.EntityType.PAINTING)
+                tracker.flushMetadataBuffer(entityID)
             }
         }
     })
@@ -176,8 +169,8 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             handler { packetWrapper ->
                 val entityID: Int = packetWrapper.get(Type.VAR_INT, 0)
                 val tracker = packetWrapper.user().get(EntityTracker::class.java)!!
-                tracker.clientEntityTypes.put(entityID, Entity1_10Types.EntityType.EXPERIENCE_ORB)
-                tracker.sendMetadataBuffer(entityID)
+                tracker.addEntity(entityID, Entity1_10Types.EntityType.EXPERIENCE_ORB)
+                tracker.flushMetadataBuffer(entityID)
             }
         }
     })
@@ -270,8 +263,8 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
                 val metadataList = wrapper.get(Types1_8.METADATA_LIST, 0)
                 val entityID: Int = wrapper.get(Type.VAR_INT, 0)
                 val tracker = wrapper.user().get(EntityTracker::class.java)!!
-                if (tracker.clientEntityTypes.containsKey(entityID)) {
-                    MetadataRewriter.transform(tracker.clientEntityTypes[entityID], metadataList)
+                if (tracker.hasEntity(entityID)) {
+                    MetadataRewriter.transform(tracker.getType(entityID), metadataList)
                     if (metadataList.isEmpty()) wrapper.cancel()
                 } else {
                     tracker.addMetadataToBuffer(entityID, metadataList)
@@ -330,8 +323,8 @@ fun Protocol1_8To1_7_6.registerEntityPackets() {
             handler { packetWrapper ->
                 val entityID: Int = packetWrapper.get(Type.VAR_INT, 0)
                 val tracker = packetWrapper.user().get(EntityTracker::class.java)!!
-                tracker.clientEntityTypes[entityID] = Entity1_10Types.EntityType.LIGHTNING
-                tracker.sendMetadataBuffer(entityID)
+                tracker.addEntity(entityID, Entity1_10Types.EntityType.LIGHTNING)
+                tracker.flushMetadataBuffer(entityID)
             }
         }
     })

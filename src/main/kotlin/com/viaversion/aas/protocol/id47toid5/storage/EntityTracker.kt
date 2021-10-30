@@ -10,32 +10,39 @@ import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.version.Types1_8
 import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.ClientboundPackets1_7
-import java.util.concurrent.ConcurrentHashMap
 
 class EntityTracker(user: UserConnection) : StoredObject(user) {
-    val clientEntityTypes = ConcurrentHashMap<Int, Entity1_10Types.EntityType>()
-    private val metadataBuffer = ConcurrentHashMap<Int, MutableList<Metadata>>()
+    private val clientEntityTypes = HashMap<Int, Entity1_10Types.EntityType>()
+    private val metadataBuffer = HashMap<Int, MutableList<Metadata>>()
     fun removeEntity(entityId: Int) {
         clientEntityTypes.remove(entityId)
+        metadataBuffer.remove(entityId)
     }
+
+    fun getType(entityId: Int) = clientEntityTypes[entityId]
+
+    fun addEntity(entityId: Int, type: Entity1_10Types.EntityType) {
+        clientEntityTypes[entityId] = type
+    }
+
+    fun hasEntity(entityId: Int) = clientEntityTypes.containsKey(entityId)
 
     fun addMetadataToBuffer(entityID: Int, metadataList: MutableList<Metadata>) {
         metadataBuffer.computeIfAbsent(entityID) { mutableListOf() }.addAll(metadataList)
     }
 
-    fun getBufferedMetadata(entityId: Int): List<Metadata> {
-        return metadataBuffer[entityId]!!
-    }
+    fun flushMetadataBuffer(entityId: Int) {
+        val buffer = metadataBuffer[entityId] ?: return
 
-    fun sendMetadataBuffer(entityId: Int) {
-        if (!metadataBuffer.containsKey(entityId)) return
         val wrapper = PacketWrapper.create(ClientboundPackets1_7.ENTITY_METADATA, null, this.user)
         wrapper.write(Type.VAR_INT, entityId)
-        wrapper.write(Types1_8.METADATA_LIST, metadataBuffer[entityId])
-        MetadataRewriter.transform(clientEntityTypes[entityId], metadataBuffer[entityId]!!)
-        if (metadataBuffer[entityId]!!.isNotEmpty()) {
+        wrapper.write(Types1_8.METADATA_LIST, buffer)
+
+        MetadataRewriter.transform(clientEntityTypes[entityId], buffer)
+
+        if (buffer.isNotEmpty()) {
             try {
-                wrapper.send(Protocol1_8To1_7_6::class.java)
+                wrapper.scheduleSend(Protocol1_8To1_7_6::class.java)
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }

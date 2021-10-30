@@ -197,7 +197,7 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
 
     this.registerServerbound(ServerboundPackets1_8.PLAYER_DIGGING, object : PacketRemapper() {
         override fun registerMap() {
-            map(Type.UNSIGNED_BYTE, Type.BYTE) //Status
+            map(Type.VAR_INT) //Status
             map(TypeRemapper(Type.POSITION), xyzUBytePosWriter)
             map(Type.BYTE) //Face
         }

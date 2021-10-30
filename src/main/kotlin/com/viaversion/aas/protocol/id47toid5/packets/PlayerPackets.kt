@@ -182,8 +182,8 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
             handler { packetWrapper ->
                 val entityID: Int = packetWrapper.get(Type.VAR_INT, 0)
                 val tracker: EntityTracker = packetWrapper.user().get(EntityTracker::class.java)!!
-                tracker.clientEntityTypes[entityID] = Entity1_10Types.EntityType.PLAYER
-                tracker.sendMetadataBuffer(entityID)
+                tracker.addEntity(entityID, Entity1_10Types.EntityType.PLAYER)
+                tracker.flushMetadataBuffer(entityID)
             }
         }
     })
@@ -375,29 +375,28 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
             map(Type.STRING)
             handler { packetWrapper ->
                 val channel = packetWrapper.get(Type.STRING, 0)
-                if (channel.equals("MC|ItemName", ignoreCase = true)) {
-                    val name: ByteArray = packetWrapper.read(Type.STRING).toByteArray(Charsets.UTF_8)
-                    packetWrapper.write(Type.REMAINING_BYTES, name)
-                } else if (channel.equals("MC|BEdit", ignoreCase = true) || channel.equals(
-                        "MC|BSign",
-                        ignoreCase = true
-                    )
-                ) {
-                    packetWrapper.read(Type.SHORT) //length
-                    val book: Item = packetWrapper.read(Types1_7_6_10.COMPRESSED_NBT_ITEM)
-                    val tag = book.tag()
-                    if (tag != null && tag.contains("pages")) {
-                        val pages = tag.get<ListTag>("pages")
-                        if (pages != null) {
-                            (0 until pages.size()).forEach { i ->
-                                val page = pages.get<StringTag>(i)
-                                var value: String? = page.value
-                                value = ChatUtil.jsonToLegacy(value)
-                                page.value = value
+                when (channel) {
+                    "MC|ItemName" -> {
+                        val name: ByteArray = packetWrapper.read(Type.STRING).toByteArray(Charsets.UTF_8)
+                        packetWrapper.write(Type.REMAINING_BYTES, name)
+                    }
+                    "MC|BEdit", "MC|BSign" ->{
+                        packetWrapper.read(Type.SHORT) //length
+                        val book: Item = packetWrapper.read(Types1_7_6_10.COMPRESSED_NBT_ITEM)
+                        val tag = book.tag()
+                        if (tag != null && tag.contains("pages")) {
+                            val pages = tag.get<ListTag>("pages")
+                            if (pages != null) {
+                                (0 until pages.size()).forEach { i ->
+                                    val page = pages.get<StringTag>(i)
+                                    var value: String? = page.value
+                                    value = ChatUtil.jsonToLegacy(value)
+                                    page.value = value
+                                }
                             }
                         }
+                        packetWrapper.write(Type.ITEM, book)
                     }
-                    packetWrapper.write(Type.ITEM, book)
                 }
                 packetWrapper.cancel()
                 packetWrapper.packetType = null
