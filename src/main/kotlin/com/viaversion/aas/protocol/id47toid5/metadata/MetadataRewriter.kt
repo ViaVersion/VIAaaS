@@ -10,7 +10,7 @@ object MetadataRewriter {
     fun transform(type: Entity1_10Types.EntityType?, list: MutableList<Metadata>) {
         for (entry in ArrayList(list)) {
             try {
-                val value = entry.value
+                val oldValue = entry.value
                 val metaIndex = MetaIndex1_8to1_7_6_10.searchIndex(type, entry.id())
 
                 if (metaIndex == null || metaIndex.newType == MetaType1_8.NonExistent) {
@@ -18,11 +18,11 @@ object MetadataRewriter {
                     continue
                 }
 
-                entry.setMetaType(metaIndex.newType)
                 entry.setId(metaIndex.newIndex)
+                entry.setMetaTypeUnsafe(metaIndex.newType)
                 when (metaIndex.newType) {
                     MetaType1_8.Byte -> {
-                        var byteValue = (value as Number).toByte()
+                        var byteValue = (oldValue as Number).toByte()
 
                         if (metaIndex == MetaIndex1_8to1_7_6_10.HUMAN_SKIN_FLAGS) {
                             val cape = byteValue.toInt() == 2
@@ -30,11 +30,11 @@ object MetadataRewriter {
                         }
                         entry.value = byteValue
                     }
-                    MetaType1_8.Int -> entry.value = (value as Number).toInt()
-                    MetaType1_8.Short -> entry.value = (value as Number).toShort()
-                    MetaType1_8.Float -> entry.value = (value as Number).toFloat()
-                    MetaType1_8.String -> entry.value = value.toString()
-                    MetaType1_8.Slot, MetaType1_8.Position, MetaType1_8.Rotation -> entry.value = value
+                    MetaType1_8.Int -> entry.value = (oldValue as Number).toInt()
+                    MetaType1_8.Short -> entry.value = (oldValue as Number).toShort()
+                    MetaType1_8.Float -> entry.value = (oldValue as Number).toFloat()
+                    MetaType1_8.String -> entry.value = oldValue.toString()
+                    MetaType1_8.Slot, MetaType1_8.Position, MetaType1_8.Rotation -> entry.value = oldValue
                     else -> throw Exception("unknown metatype ${metaIndex.newType}")
                 }
             } catch (e: Exception) {
