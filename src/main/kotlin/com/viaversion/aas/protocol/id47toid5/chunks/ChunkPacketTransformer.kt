@@ -5,6 +5,8 @@ import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.CustomByteType
 import com.viaversion.viaversion.protocol.packet.PacketWrapperImpl
+import io.netty.buffer.ByteBufAllocator
+import io.netty.buffer.Unpooled
 import java.util.stream.IntStream
 import java.util.zip.Inflater
 import kotlin.streams.toList
@@ -55,61 +57,78 @@ object ChunkPacketTransformer {
 
     @Throws(Exception::class)
     fun transformChunkBulk(packetWrapper: PacketWrapper) {
-        val columnCount = packetWrapper.read(Type.SHORT).toInt() //short1
-        val compressedSize = packetWrapper.read(Type.INT) //size
-        val skyLightSent = packetWrapper.read(Type.BOOLEAN) //h
-        val chunkX = IntArray(columnCount) //a
-        val chunkZ = IntArray(columnCount) //b
-        val primaryBitMask = IntArray(columnCount) //c
-        val addBitMask = IntArray(columnCount) //d
-        val inflatedBuffers = arrayOfNulls<ByteArray>(columnCount) //inflatedBuffers
-        var customByteType = CustomByteType(compressedSize)
-        val buildBuffer = packetWrapper.read(customByteType) //buildBuffer
-        var data = ByteArray(196864 * columnCount) //abyte
+        val columnCount = packetWrapper.read(Type.SHORT).toInt()
+        val compressedSize = packetWrapper.read(Type.INT)
+        val skyLightSent = packetWrapper.read(Type.BOOLEAN)
+        val chunkX = IntArray(columnCount)
+        val chunkZ = IntArray(columnCount)
+        val primaryBitMask = IntArray(columnCount)
+        val compressedData = packetWrapper.read(CustomByteType(compressedSize))
+
+        val decompressedData = ByteArray(196864 * columnCount)
         val inflater = Inflater()
-        inflater.setInput(buildBuffer, 0, compressedSize)
         try {
-            inflater.inflate(data)
+            inflater.setInput(compressedData)
+            inflater.inflate(decompressedData)
         } finally {
             inflater.end()
         }
-        var cursor = 0
+
+        val decompressedBuf = Unpooled.wrappedBuffer(decompressedData)
+
+        val chunks = arrayOfNulls<Chunk1_8to1_7_6_10>(columnCount)
+
         for (column in 0 until columnCount) {
             chunkX[column] = packetWrapper.read(Type.INT)
             chunkZ[column] = packetWrapper.read(Type.INT)
             primaryBitMask[column] = packetWrapper.read(Type.SHORT).toInt()
-            addBitMask[column] = packetWrapper.read(Type.SHORT).toInt()
+            val addBitMask = packetWrapper.read(Type.SHORT).toInt()
+
             var primaryCount = 0
             var secondaryCount = 0
-            (0 until 16).forEach {
-                primaryCount += primaryBitMask[column] shr it and 1
-                secondaryCount += addBitMask[column] shr it and 1
+            for (chunkY in 0 until 16) {
+                primaryCount += primaryBitMask[column].shr(chunkY).and(1)
+                secondaryCount += addBitMask.shr(chunkY).and(1)
             }
+
             var copySize = 8192 * primaryCount + 256
             copySize += 2048 * secondaryCount
             if (skyLightSent) {
                 copySize += 2048 * primaryCount
             }
-            inflatedBuffers[column] = ByteArray(copySize)
-            System.arraycopy(data, cursor, inflatedBuffers[column]!!, 0, copySize)
-            cursor += copySize
+
+            val columnData = ByteArray(copySize)
+            decompressedBuf.readBytes(columnData)
+
+            chunks[column] = Chunk1_8to1_7_6_10(
+                columnData, primaryBitMask[column],
+                addBitMask, skyLightSent, true
+            )
         }
-        val chunks = arrayOfNulls<Chunk1_8to1_7_6_10>(columnCount)
-        (0 until columnCount).forEach {
-            chunks[it] =
-                Chunk1_8to1_7_6_10(inflatedBuffers[it]!!, primaryBitMask[it], addBitMask[it], skyLightSent, true)
-        }
+
         packetWrapper.write(Type.BOOLEAN, skyLightSent)
         packetWrapper.write(Type.VAR_INT, columnCount)
-        (0 until columnCount).forEach {
-            packetWrapper.write(Type.INT, chunkX[it])
-            packetWrapper.write(Type.INT, chunkZ[it])
-            packetWrapper.write(Type.UNSIGNED_SHORT, primaryBitMask[it])
+
+        for (column in 0 until columnCount) {
+            packetWrapper.write(Type.INT, chunkX[column])
+            packetWrapper.write(Type.INT, chunkZ[column])
+            packetWrapper.write(Type.UNSIGNED_SHORT, primaryBitMask[column])
         }
-        (0 until columnCount).forEach {
-            data = chunks[it]!!.get1_8Data()
-            customByteType = CustomByteType(data.size)
-            packetWrapper.write(customByteType, data)
+
+        for (column in 0 until columnCount) {
+            val columnData = chunks[column]!!.get1_8Data()
+            packetWrapper.write(CustomByteType(columnData.size), columnData)
+        }
+
+        val buffer = ByteBufAllocator.DEFAULT.buffer()
+        try {
+            packetWrapper.writeToBuffer(buffer)
+            Type.VAR_INT.readPrimitive(buffer) // packet id
+            packetWrapper.clearPacket()
+
+            (packetWrapper as PacketWrapperImpl).inputBuffer!!.writeBytes(buffer)
+        } finally {
+            buffer.release()
         }
     }
 
@@ -127,14 +146,15 @@ object ChunkPacketTransformer {
         }
         packetWrapper.write(Type.INT, chunkX)
         packetWrapper.write(Type.INT, chunkZ)
-        packetWrapper.write(Type.BLOCK_CHANGE_RECORD_ARRAY, IntStream.range(0, size)
-            .mapToObj {
-                val encodedPos = (positions[it].toInt())
-                val x = encodedPos.ushr(12).and(0xF)
-                val y = encodedPos.and(0xFF)
-                val z = encodedPos.ushr(8).and(0xF)
-                BlockChangeRecord1_8(x, y, z, blocks[it].toInt())
-            }.toList().toTypedArray()
+        packetWrapper.write(
+            Type.BLOCK_CHANGE_RECORD_ARRAY, IntStream.range(0, size)
+                .mapToObj {
+                    val encodedPos = (positions[it].toInt())
+                    val x = encodedPos.ushr(12).and(0xF)
+                    val y = encodedPos.and(0xFF)
+                    val z = encodedPos.ushr(8).and(0xF)
+                    BlockChangeRecord1_8(x, y, z, blocks[it].toInt())
+                }.toList().toTypedArray()
         )
     }
 }
