@@ -581,7 +581,7 @@ function loginMc(user, pass) {
     $("#form_add_mc input").val("");
 }
 
-const loginRequest = {scopes: ["XboxLive.signin"]};
+const loginRequest = {scopes: ["XboxLive.signin"], prompt: "select_account"};
 let redirectUrl = "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
 if (location.hostname === "localhost" || whitelistedOrigin.includes(location.origin)) {
     redirectUrl = location.origin + location.pathname;
