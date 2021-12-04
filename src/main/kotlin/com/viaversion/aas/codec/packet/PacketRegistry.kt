@@ -20,6 +20,7 @@ import com.viaversion.viaversion.protocols.protocol1_15to1_14_4.ClientboundPacke
 import com.viaversion.viaversion.protocols.protocol1_16_2to1_16_1.ClientboundPackets1_16_2
 import com.viaversion.viaversion.protocols.protocol1_16to1_15_2.ClientboundPackets1_16
 import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ClientboundPackets1_17
+import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPackets1_18
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
@@ -59,7 +60,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.DISCONNECT.id,
                 ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.DISCONNECT.id,
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.DISCONNECT.id,
-                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.DISCONNECT.id
+                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.DISCONNECT.id,
+                ProtocolVersion.v1_18.singleton to ClientboundPackets1_18.DISCONNECT.id
             )
         )
 
@@ -72,7 +74,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_18.singleton to ClientboundPackets1_18.PLUGIN_MESSAGE.id
             )
         )
 

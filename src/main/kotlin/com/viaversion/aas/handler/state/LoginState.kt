@@ -18,6 +18,7 @@ import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import java.security.KeyPair
@@ -98,25 +99,40 @@ class LoginState : ConnectionState {
 
     fun reauthMessage(handler: MinecraftHandler, backName: String, backHash: String): CompletableFuture<Boolean> {
         if (!handler.data.frontEncrypted
-            || handler.data.frontVer!! < ProtocolVersion.v1_13.version
             || !frontName.equals(backName, ignoreCase = true)
         ) {
             callbackPluginReauth.complete(false)
             return callbackPluginReauth
         }
 
-        val buf = ByteBufAllocator.DEFAULT.buffer()
-        try {
-            Type.STRING.write(buf, backHash)
+        if (handler.data.frontVer!! < ProtocolVersion.v1_13.version) {
+            encodeOpenAuth(backHash).forEach { data ->
+                send(handler.data.frontChannel, SetCompression().also { it.threshold = data })
+            }
+            send(
+                handler.data.frontChannel,
+                SetCompression().also { it.threshold = handler.data.compressionLevel },
+                flush = true
+            )
 
-            val packet = PluginRequest()
-            packet.id = ThreadLocalRandom.current().nextInt()
-            packet.channel = "openauthmod:join"
-            packet.data = readRemainingBytes(buf)
-            send(handler.data.frontChannel, packet, true)
-            pendingReauth = packet.id
-        } finally {
-            buf.release()
+            handler.coroutineScope.launch {
+                delay(5000)
+                callbackPluginReauth.complete(false)
+            }
+        } else {
+            val buf = ByteBufAllocator.DEFAULT.buffer()
+            try {
+                Type.STRING.write(buf, backHash)
+
+                val packet = PluginRequest()
+                packet.id = ThreadLocalRandom.current().nextInt()
+                packet.channel = "openauthmod:join"
+                packet.data = readRemainingBytes(buf)
+                send(handler.data.frontChannel, packet, true)
+                pendingReauth = packet.id
+            } finally {
+                buf.release()
+            }
         }
         return callbackPluginReauth
     }
@@ -192,7 +208,13 @@ class LoginState : ConnectionState {
     }
 
     fun handleLoginStart(handler: MinecraftHandler, loginStart: LoginStart) {
-        if (started) throw StacklessException("Login already started")
+        if (started) {
+            if (loginStart.username.startsWith(OPENAUTH_MAGIC_PREFIX)) {
+                callbackPluginReauth.complete(loginStart.username.removePrefix(OPENAUTH_MAGIC_PREFIX).toBoolean())
+                return
+            }
+            throw StacklessException("Login already started")
+        }
         started = true
 
         VIAaaSConfig.maxPlayers?.let {

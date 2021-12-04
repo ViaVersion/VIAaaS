@@ -13,6 +13,7 @@ import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.server.netty.*
 import io.netty.bootstrap.Bootstrap
+import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
@@ -20,9 +21,11 @@ import io.netty.handler.proxy.ProxyHandler
 import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withTimeout
+import java.math.BigInteger
 import java.net.Inet4Address
 import java.net.InetSocketAddress
 import java.net.URI
+import kotlin.math.ceil
 
 private suspend fun createBackChannel(
     handler: MinecraftHandler,
@@ -151,3 +154,30 @@ suspend fun connectBack(
 
     tryBackAddresses(handler, addresses, state, extraData)
 }
+
+// https://github.com/RaphiMC/OpenAuthMod/blob/fa66e78fe5c0e748c1b8c61624bf283fb8bc06dd/src/main/java/com/github/oam/utils/IntTo3ByteCodec.java#L16
+fun encodeOpenAuth(hash: String): IntArray {
+    val buffer = Unpooled.wrappedBuffer(BigInteger(hash, 16).toByteArray())
+    val out = IntArray(2 + ceil(buffer.readableBytes().toDouble() / 3.0).toInt())
+    val magic = 0xfdebf3fd.toInt()
+
+    out[0] = magic
+    out[out.size - 1] = magic
+
+    for (i in 1 until out.size - 1) {
+        var int = 1.shl(31)
+            .or(1.shl(30)).or(buffer.readUnsignedByte().toInt().shl(16))
+        if (buffer.isReadable) {
+            int = int.or(1.shl(29)).or(buffer.readUnsignedByte().toInt().shl(8))
+        }
+        if (buffer.isReadable) {
+            int = int.or(1.shl(28)).or(buffer.readUnsignedByte().toInt())
+        }
+
+        out[i] = int
+    }
+
+    return out
+}
+
+val OPENAUTH_MAGIC_PREFIX = String(byteArrayOf(2, 20, 12, 3), Charsets.UTF_8)

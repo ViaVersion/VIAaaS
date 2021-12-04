@@ -32,6 +32,10 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 		this.threshold = threshold;
 	}
 
+	public int getThreshold() {
+		return threshold;
+	}
+
 	@Override
 	public void handlerAdded(ChannelHandlerContext ctx) {
 		var level = VIAaaSConfig.INSTANCE.getCompressionLevel();

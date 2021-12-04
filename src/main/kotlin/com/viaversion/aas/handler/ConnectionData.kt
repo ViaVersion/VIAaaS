@@ -1,5 +1,6 @@
 package com.viaversion.aas.handler
 
+import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.handler.state.ConnectionState
 import com.viaversion.aas.handler.state.HandshakeState
@@ -15,4 +16,5 @@ class ConnectionData(
     val frontHandler get() = frontChannel.pipeline()[MinecraftHandler::class.java]
     val backHandler get() = backChannel?.pipeline()?.get(MinecraftHandler::class.java)
     val frontEncrypted get() = frontChannel.pipeline()[CryptoCodec::class.java] != null
+    val compressionLevel get() = frontChannel.pipeline()[CompressionCodec::class.java]?.threshold ?: -1
 }
