@@ -52,6 +52,7 @@ repositories {
     maven("https://repo.viaversion.com/")
     maven("https://nexus.velocitypowered.com/repository/maven-public/")
     maven("https://jitpack.io/")
+    maven("https://repository.apache.org/snapshots/")
 }
 
 dependencies {
@@ -75,7 +76,7 @@ dependencies {
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.29")
 
-    val log4jVer = "2.14.1"
+    val log4jVer = "2.15.1-SNAPSHOT"
     val slf4jVer = "1.7.32"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
