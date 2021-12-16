@@ -13,7 +13,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.6.0"
+    kotlin("jvm") version "1.6.10"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.39.0"
     id("com.github.johnrengelman.shadow") version "7.1.0"
@@ -65,9 +65,9 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.70.Final")
+    implementation("io.netty:netty-all:4.1.72.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.46.Final")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.10.Final:linux-x86_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.11.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.0")
@@ -85,7 +85,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "1.6.6"
+    val ktorVersion = "1.6.7"
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
