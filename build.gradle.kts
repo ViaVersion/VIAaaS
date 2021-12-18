@@ -71,11 +71,11 @@ dependencies {
 
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.0")
-    implementation("net.coobird:thumbnailator:0.4.14")
+    implementation("net.coobird:thumbnailator:0.4.15")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-    implementation("org.yaml:snakeyaml:1.29")
+    implementation("org.yaml:snakeyaml:1.30")
 
-    val log4jVer = "2.16.0"
+    val log4jVer = "2.17.0"
     val slf4jVer = "1.7.32"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
