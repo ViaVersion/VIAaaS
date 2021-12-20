@@ -66,7 +66,7 @@ fun encodeBrand(string: String, is17: Boolean): ByteArray {
 fun setCompression(channel: Channel, threshold: Int) {
     val pipe = channel.pipeline()
 
-    if (threshold == -1) {
+    if (threshold <= 0) {
         if (pipe["compress"] != null) pipe.remove("compress")
     } else {
         if (pipe["compress"] != null) {

@@ -28,12 +28,12 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 		this.threshold = threshold;
 	}
 
-	public void setThreshold(int threshold) {
-		this.threshold = threshold;
-	}
-
 	public int getThreshold() {
 		return threshold;
+	}
+
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
 	}
 
 	@Override
@@ -114,10 +114,10 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 		}
 
 		if (claimedUncompressedSize < threshold) {
-			throw new DecoderException("Badly compressed packet - size of $claimedUncompressedSize is below server threshold of $threshold");
+			throw new DecoderException("Badly compressed packet - size of " + claimedUncompressedSize + " is below server threshold of " + threshold);
 		}
 		if (claimedUncompressedSize > UNCOMPRESSED_CAP) {
-			throw new DecoderException("Badly compressed packet - size of $claimedUncompressedSize is larger than maximum of $UNCOMPRESSED_CAP");
+			throw new DecoderException("Badly compressed packet - size of " + claimedUncompressedSize + " is larger than maximum of " + UNCOMPRESSED_CAP);
 		}
 		var compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, input);
 		var decompressed = MoreByteBufUtils.preferredBuffer(ctx.alloc(), compressor, claimedUncompressedSize);
