@@ -452,6 +452,13 @@ class MojangAccount extends McAccount {
             }),
             headers: {"content-type": "application/json"},
         })
+            .then(r => {
+                if (r.status == 403) {
+                    this.logout();
+                    throw "403, token expired?";
+                }
+                return r;
+            })
             .then(checkFetchSuccess("code"))
             .then(r => r.json())
             .then(json => {
