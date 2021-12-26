@@ -1,16 +1,13 @@
 // Minecraft.id
-let mcIdUsername = null;
-let mcauth_code = null;
-let mcauth_success = null;
+let urlParams = new URLSearchParams();
+window.location.hash.substr(1).split("?")
+    .map(it => new URLSearchParams(it)
+    .forEach((a, b) => urlParams.append(b, a)));
+let mcIdUsername = urlParams.get("username");
+let mcauth_code = urlParams.get("mcauth_code");
+let mcauth_success = urlParams.get("mcauth_success");
 
 $(() => {
-    let urlParams = new URLSearchParams();
-    window.location.hash.substr(1).split("?")
-        .map(it => new URLSearchParams(it)
-            .forEach((a, b) => urlParams.append(b, a)));
-    mcIdUsername = urlParams.get("username");
-    mcauth_code = urlParams.get("mcauth_code");
-    mcauth_success = urlParams.get("mcauth_success");
     if (mcauth_success === "false") {
         addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg"));
     }
@@ -124,39 +121,48 @@ function refreshAccountList() {
         });
 }
 
+$("#en_notific").on("click", () => Notification.requestPermission().then(renderActions));
+$("#listen_premium").on("click", () => {
+    let user = prompt("Premium username (case-sensitive): ", "");
+    if (!user) return;
+    let callbackUrl = new URL(location);
+    callbackUrl.search = "";
+    callbackUrl.hash = "#username=" + encodeURIComponent(user);
+    location.href = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
+        + "?callback=" + encodeURIComponent(callbackUrl);
+});
+$("#listen_offline").on("click", () => {
+    let user = prompt("Offline username (case-sensitive): ", "");
+    if (!user) return;
+    let taskId = Math.random();
+    workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
+    addToast("Offline username", "Please wait a minute...");
+});
+$("#listen_continue").append(document.createTextNode(mcIdUsername)).on("click", () => {
+    sendSocket(JSON.stringify({
+        "action": "minecraft_id_login",
+        "username": mcIdUsername,
+        "code": mcauth_code
+    }));
+    mcauth_code = null;
+    renderActions();
+});
+
 function renderActions() {
-    actions.innerHTML = "";
+    $("#en_notific").hide();
+    $("#listen_continue").hide();
+    $("#listen_premium").hide();
+    $("#listen_offline").hide();
+
     if (Notification.permission === "default") {
-        addAction("Enable notifications", () => Notification.requestPermission().then(renderActions));
+        $("#en_notific").show();
     }
     if (listenVisible) {
         if (mcIdUsername != null && mcauth_code != null) {
-            addAction("Listen to " + mcIdUsername, () => {
-                sendSocket(JSON.stringify({
-                    "action": "minecraft_id_login",
-                    "username": mcIdUsername,
-                    "code": mcauth_code
-                }));
-                mcauth_code = null;
-                renderActions();
-            });
+            $("#listen_continue").show();
         }
-        addAction("Listen to frontend premium login", () => {
-            let user = prompt("Premium username (case-sensitive): ", "");
-            if (!user) return;
-            let callbackUrl = new URL(location);
-            callbackUrl.search = "";
-            callbackUrl.hash = "#username=" + encodeURIComponent(user);
-            location.href = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
-                + "?callback=" + encodeURIComponent(callbackUrl);
-        });
-        addAction("Listen to frontend offline login", () => {
-            let user = prompt("Offline username (case-sensitive):", "");
-            if (!user) return;
-            let taskId = Math.random();
-            workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
-            addToast("Offline username", "Please wait a minute...");
-        });
+        $("#listen_premium").show();
+        $("#listen_offline").show();
     }
 }
 
@@ -168,12 +174,6 @@ function onCompletedPoW(e) {
     addToast("Offline username", "Completed proof of work");
     workers.forEach(it => it.postMessage({action: "cancel", id: e.data.id}));
     sendSocket(e.data.msg);
-}
-
-function addAction(text, onClick) {
-    let line = $("<button type='button' class='btn btn-primary'></button>")
-    line.text(text).on("click", onClick);
-    $(actions).append(line);
 }
 
 function addListeningList(user, username, token) {
@@ -252,7 +252,7 @@ function ohNo() {
             addToast("Unsupported browser", "This browser doesn't support required APIs");
         }
         new Date().getDay() === 3 && console.log("it's snapshot day 🐸 my dudes");
-        new Date().getDate() === 1 && new Date().getMonth() === 3 && addToast("WARNING", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for $99");
+        new Date().getDate() === 1 && new Date().getMonth() === 3 && addToast("LICENSE EXPIRED", "Your ViaVersion has expired, please renew it at https://viaversion.com/ for only $99");
     } catch (e) {
         console.log(e);
     }
@@ -278,10 +278,6 @@ function icanhazepoch() {
         .then(checkFetchSuccess("code"))
         .then(r => r.text())
         .then(it => parseInt(it.trim()))
-}
-
-function filterNot(array, item) {
-    return array.filter(it => it !== item);
 }
 
 // Notification
@@ -379,7 +375,7 @@ class McAccount {
     }
 
     logout() {
-        activeAccounts = filterNot(activeAccounts, this);
+        activeAccounts = activeAccounts.filter(it => it !== this);
         saveRefreshAccounts();
         this.loggedOut = true;
     }
@@ -628,10 +624,6 @@ $(() => myMSALObj.handleRedirectPromise().then((resp) => {
 }));
 
 function getTokenPopup(username, request) {
-    /**
-     * See here for more info on account retrieval:
-     * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-common/docs/Accounts.md
-     */
     request.account = myMSALObj.getAccountByUsername(username);
     return myMSALObj.acquireTokenSilent(request).catch(error => {
         console.warn("silent token acquisition fails.");

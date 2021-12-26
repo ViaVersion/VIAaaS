@@ -89,8 +89,13 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
         <p>WebSocket connection status: <span class="text-white bg-dark" id="connection_status">?</span></p>
         <p>CORS Proxy status: <span class="text-white bg-dark" id="cors_status">?</span></p>
         <hr>
-        <p>Listening to logins from: <span id="listening"></span></p>
-        <p><span id="actions"></span></p>
+        <p>Listening to frontend logins from: <span id="listening"></span></p>
+        <div id="actions">
+            <button id="en_notific" type="button" class="btn btn-primary">Enable notifications</button>
+            <button id="listen_continue" type="button" class="btn btn-primary">Listen to </button>
+            <button id="listen_premium" type="button" class="btn btn-primary">Listen to premium login</button>
+            <button id="listen_offline" type="button" class="btn btn-primary">Listen to offline mode login</button>
+        </div>
     </div>
 
     <div aria-labelledby="settings-tab" class="tab-pane fade" id="settings">
