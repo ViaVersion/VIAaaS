@@ -113,9 +113,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 			return;
 		}
 
-		if (claimedUncompressedSize < threshold) {
-			throw new DecoderException("Badly compressed packet - size of " + claimedUncompressedSize + " is below server threshold of " + threshold);
-		}
+		// 1.18 clients now accept compressed packets under threshold...?
 		if (claimedUncompressedSize > UNCOMPRESSED_CAP) {
 			throw new DecoderException("Badly compressed packet - size of " + claimedUncompressedSize + " is larger than maximum of " + UNCOMPRESSED_CAP);
 		}
