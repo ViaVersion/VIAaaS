@@ -16,7 +16,7 @@ plugins {
     kotlin("jvm") version "1.6.10"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.39.0"
-    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     id("com.palantir.git-version") version "0.12.3"
     id("org.gradlewebtools.minify") version "1.3.0" apply false
 }
@@ -75,7 +75,7 @@ dependencies {
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.30")
 
-    val log4jVer = "2.17.0"
+    val log4jVer = "2.17.1"
     val slf4jVer = "1.7.32"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
