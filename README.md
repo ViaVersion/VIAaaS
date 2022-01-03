@@ -175,7 +175,7 @@ Fabric client:
 
 #### Can you support more versions / Is there some alternative?
 
-- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (viaproxy.lenni0451.net)
+- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (viaproxy.raphimc.net)
 
 #### Can I customize the files of HTTP server?
 
