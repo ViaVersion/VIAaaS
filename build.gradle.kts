@@ -15,7 +15,7 @@ plugins {
     application
     kotlin("jvm") version "1.6.10"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.39.0"
+    id("com.github.ben-manes.versions") version "0.41.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("com.palantir.git-version") version "0.12.3"
     id("org.gradlewebtools.minify") version "1.3.0" apply false
@@ -65,18 +65,18 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.72.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.46.Final")
+    implementation("io.netty:netty-all:4.1.73.Final")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.47.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.11.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.0")
-    implementation("net.coobird:thumbnailator:0.4.15")
+    implementation("net.coobird:thumbnailator:0.4.16")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.30")
 
     val log4jVer = "2.17.1"
-    val slf4jVer = "1.7.32"
+    val slf4jVer = "1.7.33"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
@@ -94,7 +94,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:3.18.2")
+    implementation("com.auth0:java-jwt:3.18.3")
 }
 
 val run: JavaExec by tasks
