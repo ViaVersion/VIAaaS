@@ -9,7 +9,7 @@
 # Port used for binding
 port: 25565
 # Address to bind
-bind-address: localhost
+bind-address: 0.0.0.0
 # Proxy used to connect to backend servers
 # Example: socks5://localhost:9050, socks4://localhost:9050, http://foo:bar@localhost:9080
 backend-proxy: ''

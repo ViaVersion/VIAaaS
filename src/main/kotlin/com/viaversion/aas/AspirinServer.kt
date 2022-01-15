@@ -129,7 +129,7 @@ object AspirinServer {
     fun generateCert() {
         File("config/https.jks").apply {
             parentFile.mkdirs()
-            if (!exists()) generateCertificate(this)
+            if (!exists()) generateCertificate(this, keySizeInBits = 4096, algorithm = "SHA384withRSA")
         }
     }
 
