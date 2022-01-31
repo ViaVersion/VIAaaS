@@ -1,6 +1,7 @@
 package com.viaversion.aas.handler.state
 
 import com.google.common.net.HostAndPort
+import com.google.gson.JsonPrimitive
 import com.viaversion.aas.*
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.codec.packet.Packet
@@ -13,7 +14,6 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.libs.gson.JsonPrimitive
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext

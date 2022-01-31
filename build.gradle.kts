@@ -7,7 +7,7 @@ import java.nio.file.Files as JFiles
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.7.2") }
+    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.7.3") }
 }
 
 plugins {
@@ -58,16 +58,16 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.1.2-SNAPSHOT"
-    val vbVer = "4.1.2-SNAPSHOT"
+    val vvVer = "4.2.0-22w03a-SNAPSHOT"
+    val vbVer = "4.2.0-22w03a-SNAPSHOT"
     val vrVer = "d8bee0a"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
     implementation("io.netty:netty-all:4.1.73.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.47.Final")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.11.Final:linux-x86_64")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.48.Final")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.12.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.0")
@@ -76,7 +76,7 @@ dependencies {
     implementation("org.yaml:snakeyaml:1.30")
 
     val log4jVer = "2.17.1"
-    val slf4jVer = "1.7.33"
+    val slf4jVer = "1.7.35"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
@@ -85,12 +85,20 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "1.6.7"
+    val ktorVersion = "2.0.0-beta-1"
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
-    implementation("io.ktor:ktor-websockets:$ktorVersion")
+    implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-client-gson:$ktorVersion")
+    implementation("io.ktor:ktor-server-caching-headers:$ktorVersion")
+    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
+    implementation("io.ktor:ktor-server-compression:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-default-headers:$ktorVersion")
+    implementation("io.ktor:ktor-server-forwarded-header:$ktorVersion")
+    implementation("io.ktor:ktor-server-partial-content:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
     implementation("io.ktor:ktor-client-java:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 

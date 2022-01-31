@@ -7,16 +7,17 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
+import com.google.gson.JsonObject
 import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.parseUndashedId
 import com.viaversion.aas.reverseLookup
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.webLogger
-import com.viaversion.viaversion.libs.gson.JsonObject
+import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.http.cio.websocket.*
 import io.ktor.server.netty.*
+import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import io.netty.handler.codec.dns.DefaultDnsQuestion
 import io.netty.handler.codec.dns.DnsPtrRecord
@@ -34,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.coroutineContext
 
-class WebDashboardServer {
+class WebServer {
     // I don't think i'll need more than 1k/day
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val jwtAlgorithm = Algorithm.HMAC256(VIAaaSConfig.jwtSecret)
@@ -77,7 +78,7 @@ class WebDashboardServer {
         .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
             CoroutineScope(Dispatchers.IO).async {
                 AspirinServer.httpClient
-                    .get<JsonObject?>("https://api.mojang.com/users/profiles/minecraft/$name")
+                    .get("https://api.mojang.com/users/profiles/minecraft/$name").body<JsonObject?>()
                     ?.get("id")?.asString?.let { parseUndashedId(it) }
             }.asCompletableFuture()
         })
@@ -103,7 +104,7 @@ class WebDashboardServer {
                         try {
                             val cleanedIp = address.hostString.substringBefore("%")
                             val ipLookup = async(Dispatchers.IO) {
-                                AspirinServer.httpClient.get<JsonObject>("https://ipinfo.io/$cleanedIp")
+                                AspirinServer.httpClient.get("https://ipinfo.io/$cleanedIp").body<JsonObject>()
                             }
                             val dnsQuery = AspirinServer.dnsResolver
                                 .resolveAll(DefaultDnsQuestion(reverseLookup(address.address), DnsRecordType.PTR))

@@ -3,13 +3,13 @@ package com.viaversion.aas.web
 import com.google.common.collect.Sets
 import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.config.VIAaaSConfig
-import io.ktor.features.*
-import io.ktor.websocket.*
+import io.ktor.server.plugins.*
+import io.ktor.server.websocket.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 data class WebClient(
-    val server: WebDashboardServer,
+    val server: WebServer,
     val ws: WebSocketServerSession,
     val state: WebState,
 ) {

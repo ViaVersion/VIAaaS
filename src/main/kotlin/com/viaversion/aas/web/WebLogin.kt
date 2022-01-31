@@ -4,9 +4,10 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.viaversion.aas.*
 import com.viaversion.aas.util.StacklessException
+import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
-import io.ktor.http.cio.websocket.*
+import io.ktor.websocket.*
 import kotlinx.coroutines.future.await
 import java.net.URLEncoder
 import java.time.Duration
@@ -80,10 +81,10 @@ class WebLogin : WebState {
         val username = obj["username"].asString
         val code = obj["code"].asString
 
-        val check = AspirinServer.httpClient.submitForm<JsonObject>(
+        val check = AspirinServer.httpClient.submitForm(
             "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
             formParameters = parametersOf("code", code),
-        )
+        ).body<JsonObject>()
 
         if (check.getAsJsonPrimitive("valid").asBoolean) {
             val mcIdUser = check["username"].asString

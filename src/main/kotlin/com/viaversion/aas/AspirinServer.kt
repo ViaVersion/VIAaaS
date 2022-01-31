@@ -7,17 +7,18 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.FrontEndInit
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.platform.AspirinPlatform
-import com.viaversion.aas.web.WebDashboardServer
+import com.viaversion.aas.web.WebServer
 import com.viaversion.viaversion.ViaManagerImpl
 import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.update.Version
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.java.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.network.tls.certificates.*
+import io.ktor.serialization.gson.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.netty.bootstrap.ServerBootstrap
@@ -41,7 +42,7 @@ object AspirinServer {
             .readText()
     ).asJsonObject["version"].asString
     val cleanedVer get() = version.substringBefore("+")
-    var viaWebServer = WebDashboardServer()
+    var viaWebServer = WebServer()
     private var serverFinishing = CompletableFuture<Unit>()
     private var finishedFuture = CompletableFuture<Unit>()
     private val initFuture = CompletableFuture<Unit>()
@@ -74,8 +75,8 @@ object AspirinServer {
         install(UserAgent) {
             agent = "VIAaaS/$cleanedVer"
         }
-        install(JsonFeature) {
-            serializer = GsonSerializer()
+        install(ContentNegotiation) {
+            gson()
         }
     }
 
@@ -146,8 +147,8 @@ object AspirinServer {
 
     suspend fun updaterCheckMessage(): String {
         return try {
-            val latestData =
-                httpClient.get<JsonObject>("https://api.github.com/repos/viaversion/viaaas/releases/latest")
+            val latestData = httpClient.get("https://api.github.com/repos/viaversion/viaaas/releases/latest")
+                .body<JsonObject>()
             val latest = Version(latestData["tag_name"]!!.asString.removePrefix("v"))
             val current = Version(cleanedVer)
             when {

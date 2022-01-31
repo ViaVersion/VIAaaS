@@ -1,12 +1,13 @@
 package com.viaversion.aas.web
 
-import io.ktor.application.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.http.content.*
+import io.ktor.server.plugins.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import io.ktor.util.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
@@ -16,7 +17,7 @@ import java.nio.channels.ClosedChannelException
 import java.nio.file.Path
 import java.time.Duration
 
-class ViaWebApp(val viaWebServer: WebDashboardServer) {
+class ViaWebApp(val viaWebServer: WebServer) {
     fun Application.main() {
         install(DefaultHeaders)
         install(ConditionalHeaders)

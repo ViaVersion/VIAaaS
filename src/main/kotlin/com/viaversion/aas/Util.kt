@@ -9,6 +9,7 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.server.netty.*
 import io.netty.buffer.ByteBuf
@@ -193,7 +194,7 @@ suspend fun hasJoined(username: String, hash: String): JsonObject {
         AspirinServer.httpClient.get(
             "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
                     UrlEscapers.urlFormParameterEscaper().escape(username) + "&serverId=$hash"
-        )
+        ).body()
     } catch (e: Exception) {
         throw StacklessException("Couldn't authenticate with session servers", e)
     }
