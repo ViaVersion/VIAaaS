@@ -138,7 +138,7 @@ $("#listen_offline").on("click", () => {
     workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
     addToast("Offline username", "Please wait a minute...");
 });
-$("#listen_continue").append(document.createTextNode(mcIdUsername)).on("click", () => {
+$("#listen_continue").append(document.createTextNode(" " + mcIdUsername)).on("click", () => {
     sendSocket(JSON.stringify({
         "action": "minecraft_id_login",
         "username": mcIdUsername,

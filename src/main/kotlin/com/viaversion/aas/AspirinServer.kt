@@ -28,10 +28,13 @@ import io.netty.channel.WriteBufferWaterMark
 import io.netty.resolver.dns.DnsNameResolverBuilder
 import io.netty.util.concurrent.Future
 import java.io.File
+import java.lang.management.ManagementFactory
 import java.net.InetAddress
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.util.concurrent.CompletableFuture
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
 
 object AspirinServer {
     var ktorServer: NettyApplicationEngine? = null
@@ -125,6 +128,10 @@ object AspirinServer {
 
         viaaasLogger.info("Using compression: ${Natives.compress.loadedVariant}, crypto: ${Natives.cipher.loadedVariant}")
         viaaasLogger.info("Binded minecraft into " + chFuture!!.sync().channel().localAddress())
+        viaaasLogger.info(
+            "Application started in " + ManagementFactory.getRuntimeMXBean().uptime
+                .milliseconds.toDouble(DurationUnit.SECONDS) + "s"
+        )
     }
 
     fun generateCert() {

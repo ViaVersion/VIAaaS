@@ -78,6 +78,8 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
                     <ul aria-labelledby="aboutDropdown" class="dropdown-menu dropdown-menu-dark">
                         <li><a class="dropdown-item" data-bs-toggle="modal" href="#aboutModal" role="tab">About
                             VIAaaS</a></li>
+                        <li><a class="dropdown-item" data-bs-toggle="modal" href="#privacyModal" role="tab">Privacy</a>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -91,7 +93,7 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
         <hr>
         <p>Listening to frontend logins from: <span id="listening"></span></p>
         <div id="actions">
-            <button id="listen_continue" type="button" class="btn btn-primary">Listen to </button>
+            <button id="listen_continue" type="button" class="btn btn-primary">Listen to</button>
             <button id="listen_premium" type="button" class="btn btn-primary">Listen to premium login</button>
             <button id="listen_offline" type="button" class="btn btn-primary">Listen to offline mode login</button>
         </div>
@@ -164,7 +166,8 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
                 <div class="text-center mb-3">
                     <p class="mb-1">Copyright © 2020-2022 <a
                             href="https://github.com/creeper123123321">creeper123123321</a></p>
-                    <p class="mb-1">Copyright © 2021-2022 <a href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a>
+                    <p class="mb-1">Copyright © 2021-2022 <a
+                            href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a>
                     </p>
                 </div>
                 <div>
@@ -181,6 +184,53 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
             <div class="modal-footer">
                 <a class="btn btn-secondary" href="https://github.com/ViaVersion/VIAaaS/" role="button">Source Code</a>
                 <button class="btn btn-primary" data-bs-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="privacyModalLabel" class="modal fade" id="privacyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">Privacy</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>Data collected by instance:</p>
+                    <ul>
+                        <li>access date and time</li>
+                        <li>backend Minecraft server IP</li>
+                        <li>IP address, port, approximate geolocation, ASN and reverse DNS lookup</li>
+                        <li>query string</li>
+                        <li>usernames</li>
+                    </ul>
+                    <p>Why are these data collected?</p>
+                    <ul>
+                        <li>analytics</li>
+                        <li>troubleshooting</li>
+                    </ul>
+                    <p>When are data collected?</p>
+                    <ul>
+                        <li>accessing web service</li>
+                        <li>connecting to Minecraft proxy service</li>
+                    </ul>
+                    <p>Third parties</p>
+                    <ul>
+                        <li><a href="https://cloudflare.com">Cloudflare</a>: CDN and libraries</li>
+                        <li><a href="https://github.com/creeper123123321/cors-anywhere/">creeper123123321's CORS
+                            Anywhere</a>: proxy for Mojang API
+                        </li>
+                        <li><a href="https://ipinfo.io">IPInfo.io</a>: provides info about IP address</li>
+                        <li><a href="https://microsoft.com">Microsoft</a>: login service</li>
+                        <li><a href="https://mojang.com">Mojang</a>: login service</li>
+                        <li><a href="https://minecraft.id">MinecraftID</a>: authenticates usernames</li>
+                        <li><a href="https://major.io/icanhazip-com-faq/">icanhazip.com</a>: returns IP address and Unix
+                            time
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
