@@ -98,9 +98,9 @@ Web login:
   is the same)
 - Approve the login in the webpage
 
-Fabric client:
+Fabric/Forge client:
 
-- Install [OpenAuthMod](https://github.com/RaphiMC/OpenAuthMod) in your Fabric client.
+- Install [OpenAuthMod](https://github.com/RaphiMC/OpenAuthMod) in your Fabric or Forge client.
 - Join the server: ```mc.example.net.via.localhost```
 - Approve the login
 
