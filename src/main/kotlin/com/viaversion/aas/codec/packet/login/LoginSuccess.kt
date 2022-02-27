@@ -16,7 +16,7 @@ class LoginSuccess : Packet {
             protocolVersion >= ProtocolVersion.v1_16.version -> {
                 Type.UUID_INT_ARRAY.read(byteBuf)
             }
-            protocolVersion >= ProtocolVersion.v1_7_6.version -> {
+            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == 1 -> {
                 UUID.fromString(Type.STRING.read(byteBuf))
             }
             else -> parseUndashedId(Type.STRING.read(byteBuf))
@@ -29,7 +29,7 @@ class LoginSuccess : Packet {
             protocolVersion >= ProtocolVersion.v1_16.version -> {
                 Type.UUID_INT_ARRAY.write(byteBuf, id)
             }
-            protocolVersion >= ProtocolVersion.v1_7_6.version -> {
+            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == 1 -> {
                 Type.STRING.write(byteBuf, id.toString())
             }
             else -> Type.STRING.write(byteBuf, id.toString().replace("-", ""))

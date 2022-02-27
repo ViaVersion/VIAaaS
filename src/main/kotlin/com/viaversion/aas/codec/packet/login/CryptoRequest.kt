@@ -16,7 +16,7 @@ class CryptoRequest : Packet {
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         serverId = Type.STRING.read(byteBuf)
-        if (protocolVersion >= ProtocolVersion.v1_8.version) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == 1) {
             publicKey = KeyFactory.getInstance("RSA")
                 .generatePublic(X509EncodedKeySpec(Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)))
             token = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
@@ -29,7 +29,7 @@ class CryptoRequest : Packet {
 
     override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.STRING.write(byteBuf, serverId)
-        if (protocolVersion >= ProtocolVersion.v1_8.version) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == 1) {
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, publicKey.encoded)
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, token)
         } else {

@@ -11,7 +11,7 @@ class CryptoResponse : Packet {
     lateinit var encryptedToken: ByteArray
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
-        if (protocolVersion >= ProtocolVersion.v1_8.version) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == 1) {
             encryptedKey = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
             encryptedToken = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
         } else {
@@ -21,7 +21,7 @@ class CryptoResponse : Packet {
     }
 
     override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
-        if (protocolVersion >= ProtocolVersion.v1_8.version) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == 1) {
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedKey)
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedToken)
         } else {
