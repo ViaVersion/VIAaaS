@@ -23,7 +23,6 @@ plugins {
 
 application {
     mainClass.set("com.viaversion.aas.VIAaaSKt")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
 java {
@@ -58,7 +57,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.2.0"
+    val vvVer = "4.2.1"
     val vbVer = "4.2.0"
     val vrVer = "ae62eba"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
