@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.2.1"
-    val vbVer = "4.2.0"
+    val vvVer = "4.2.2-SNAPSHOT"
+    val vbVer = "4.2.1-SNAPSHOT"
     val vrVer = "ae62eba"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
