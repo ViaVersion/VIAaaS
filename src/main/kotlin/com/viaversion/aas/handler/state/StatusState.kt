@@ -1,25 +1,27 @@
 package com.viaversion.aas.handler.state
 
+import com.google.common.net.HostAndPort
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.viaversion.aas.AspirinServer
+import com.viaversion.aas.*
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.UnknownPacket
 import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
-import com.viaversion.aas.parseProtocol
-import com.viaversion.aas.send
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
-object StatusState : ConnectionState {
+class StatusState : ConnectionState {
     override val state: State
         get() = State.STATUS
+    var address: HostAndPort? = null
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         if (packet is UnknownPacket) throw StacklessException("Invalid packet")
@@ -71,5 +73,20 @@ object StatusState : ConnectionState {
         }.toString()
         send(handler.data.frontChannel, packet, flush = true)
         handler.data.state = StatusKicked()
+    }
+
+    override fun start(handler: MinecraftHandler) {
+        handler.data.frontChannel.setAutoRead(false)
+        handler.coroutineScope.launch(Dispatchers.IO) {
+            try {
+                if (address != null) {
+                    connectBack(handler, address!!, state)
+                } else {
+                    handler.disconnect("VIAaaS")
+                }
+            } catch (e: Exception) {
+                handler.data.frontChannel.fireExceptionCaughtIfOpen(e)
+            }
+        }
     }
 }

@@ -1,9 +1,12 @@
 package com.viaversion.aas.web
 
+import com.google.common.net.HostAndPort
+import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.viaversion.aas.*
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
@@ -27,10 +30,11 @@ class WebLogin : WebState {
 
         when (obj.getAsJsonPrimitive("action").asString) {
             "offline_login" -> handleOfflineLogin(webClient, msg, obj)
-            "minecraft_id_login" -> handleMcIdLogin(webClient, msg, obj)
-            "listen_login_requests" -> handleListenLogins(webClient, msg, obj)
-            "unlisten_login_requests" -> handleUnlisten(webClient, msg, obj)
-            "session_hash_response" -> handleSessionResponse(webClient, msg, obj)
+            "minecraft_id_login" -> handleMcIdLogin(webClient, obj)
+            "listen_login_requests" -> handleListenLogins(webClient, obj)
+            "unlisten_login_requests" -> handleUnlisten(webClient, obj)
+            "session_hash_response" -> handleSessionResponse(webClient, obj)
+            "parameters_response" -> handleParametersResponse(webClient, obj)
             else -> throw StacklessException("invalid action!")
         }
 
@@ -77,7 +81,7 @@ class WebLogin : WebState {
         webLogger.info("Token gen: ${webClient.id}: offline $username $uuid")
     }
 
-    private suspend fun handleMcIdLogin(webClient: WebClient, msg: String, obj: JsonObject) {
+    private suspend fun handleMcIdLogin(webClient: WebClient, obj: JsonObject) {
         val username = obj["username"].asString
         val code = obj["code"].asString
 
@@ -102,7 +106,7 @@ class WebLogin : WebState {
         }
     }
 
-    private suspend fun handleListenLogins(webClient: WebClient, msg: String, obj: JsonObject) {
+    private suspend fun handleListenLogins(webClient: WebClient, obj: JsonObject) {
         val token = obj.getAsJsonPrimitive("token").asString
         val user = webClient.server.parseToken(token)
         val response = JsonObject().also {
@@ -121,7 +125,7 @@ class WebLogin : WebState {
         webClient.ws.send(response.toString())
     }
 
-    private suspend fun handleUnlisten(webClient: WebClient, msg: String, obj: JsonObject) {
+    private suspend fun handleUnlisten(webClient: WebClient, obj: JsonObject) {
         val uuid = UUID.fromString(obj.getAsJsonPrimitive("uuid").asString)
         webLogger.info("Unlisten: ${webClient.id}: $uuid")
         val response = JsonObject().also {
@@ -132,8 +136,26 @@ class WebLogin : WebState {
         webClient.ws.send(response.toString())
     }
 
-    private suspend fun handleSessionResponse(webClient: WebClient, msg: String, obj: JsonObject) {
+    private fun handleSessionResponse(webClient: WebClient, obj: JsonObject) {
         val hash = obj["session_hash"].asString
         webClient.server.sessionHashCallbacks.getIfPresent(hash)?.complete(Unit)
+    }
+
+    private fun handleParametersResponse(webClient: WebClient, obj: JsonObject) {
+        val callback = UUID.fromString(obj["callback"].asString)
+        webClient.server.addressCallbacks[callback].complete(
+            WebServer.AddressInfo(
+                backVersion = obj["version"].asString.let {
+                    var protocol = Ints.tryParse(it)
+                    if (protocol == null) {
+                        val ver = ProtocolVersion.getClosest(it)
+                        if (ver != null) protocol = ver.version
+                    }
+                    protocol ?: -2
+                },
+                backHostAndPort = HostAndPort.fromParts(obj["host"].asString, obj["port"].asInt),
+                frontOnline = obj["frontOnline"].asString.toBooleanStrictOrNull()
+            )
+        )
     }
 }

@@ -32,7 +32,7 @@ class LoginState : ConnectionState {
     lateinit var frontServerId: String
     var frontOnline: Boolean? = null
     lateinit var frontName: String
-    lateinit var backAddress: HostAndPort
+    var backAddress: HostAndPort? = null
     lateinit var cryptoKey: KeyPair
     var extraData: String? = null
     var backName: String? = null
@@ -226,15 +226,24 @@ class LoginState : ConnectionState {
 
         handler.coroutineScope.launch(Dispatchers.IO) {
             try {
+                if (backAddress == null) {
+                    mcLogger.info("Requesting address info from web for $frontName")
+                    val info = AspirinServer.viaWebServer.requestAddressInfo(frontName).await()
+                    backAddress = info.backHostAndPort
+                    handler.data.backServerVer = info.backVersion
+                    frontOnline = info.frontOnline
+                }
+                if (VIAaaSConfig.forceOnlineMode) frontOnline = true
                 if (frontOnline != null) {
                     when (frontOnline) {
                         false -> callbackPlayerId.complete(generateOfflinePlayerUuid(frontName))
                         true -> authenticateOnlineFront(handler.data.frontChannel) // forced
+                        else -> {}
                     }
                     val id = callbackPlayerId.await()
                     mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
                 }
-                connectBack(handler, backAddress.host, backAddress.port, State.LOGIN, extraData)
+                connectBack(handler, HostAndPort.fromParts(backAddress!!.host, backAddress!!.port), State.LOGIN, extraData)
                 loginStart.username = backName!!
                 send(handler.data.backChannel!!, loginStart, true)
             } catch (e: Exception) {

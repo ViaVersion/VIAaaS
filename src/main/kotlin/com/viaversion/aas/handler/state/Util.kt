@@ -51,7 +51,7 @@ private suspend fun createBackChannel(
         .channel()
     (channel.pipeline()["proxy"] as? ProxyHandler)?.connectFuture()?.suspendAwait()
 
-    mcLogger.info("+ ${state.name.substring(0, 1)} ${handler.endRemoteAddress} -> $socketAddr")
+    mcLogger.info("+ ${state.name[0]} ${handler.endRemoteAddress} -> $socketAddr")
     handler.data.backChannel = channel as SocketChannel
 
     autoDetectVersion(handler, socketAddr)
@@ -143,12 +143,11 @@ private suspend fun resolveBackendAddresses(hostAndPort: HostAndPort): List<Inet
 
 suspend fun connectBack(
     handler: MinecraftHandler,
-    address: String,
-    port: Int,
+    address: HostAndPort,
     state: State,
     extraData: String? = null
 ) {
-    val addresses = resolveBackendAddresses(HostAndPort.fromParts(address, port))
+    val addresses = resolveBackendAddresses(address)
 
     if (addresses.isEmpty()) throw StacklessException("Hostname has no IP addresses")
 

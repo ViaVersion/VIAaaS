@@ -91,12 +91,32 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
         <p>WebSocket connection status: <span class="text-white bg-dark" id="connection_status">?</span></p>
         <p>CORS Proxy status: <span class="text-white bg-dark" id="cors_status">?</span></p>
         <hr>
-        <p>Listening to frontend logins from: <span id="listening"></span></p>
+        <p>Listening to frontend logins from:</p>
+        <div id="listening"></div>
         <div id="actions">
-            <button id="listen_continue" type="button" class="btn btn-primary">Listen to</button>
+            <button id="listen_continue" type="button" class="btn btn-primary">Listen to <span id="mcIdUsername"></span>
+            </button>
             <button id="listen_premium" type="button" class="btn btn-primary">Listen to premium login</button>
             <button id="listen_offline" type="button" class="btn btn-primary">Listen to offline mode login</button>
         </div>
+        <hr>
+        <p>Connecting to backend server:</p>
+        <div id="connect">
+            <form class="input-group">
+                <input id="connect_address" type="text" class="form-control" placeholder="Address">
+                <input id="connect_port" type="number" min="1" max="65535" class="form-control"
+                       placeholder="Port">
+                <input id="connect_version" type="text" class="form-control" placeholder="Version">
+                <select class="form-select" id="connect_online">
+                    <option value="null" selected>Front Online Mode...</option>
+                    <option>AUTO</option>
+                    <option value="true">Force online</option>
+                    <option value="false">Force offline (recommended for Geyser)</option>
+                </select>
+            </form>
+        </div>
+        <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">address
+            generator</a></p>
     </div>
 
     <div aria-labelledby="settings-tab" class="tab-pane fade" id="settings">

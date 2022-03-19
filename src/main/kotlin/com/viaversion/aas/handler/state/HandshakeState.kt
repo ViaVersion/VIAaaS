@@ -7,16 +7,12 @@ import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.config.VIAaaSConfig
-import com.viaversion.aas.fireExceptionCaughtIfOpen
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.setAutoRead
 import com.viaversion.aas.util.AddressParser
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
@@ -52,7 +48,7 @@ class HandshakeState : ConnectionState {
     private fun handleNextState(handler: MinecraftHandler, packet: Handshake) {
         handler.data.frontVer = packet.protocolId
         when (packet.nextState.ordinal) {
-            1 -> handler.data.state = StatusState
+            1 -> handler.data.state = StatusState()
             2 -> handler.data.state = LoginState()
             else -> throw StacklessException("Invalid next state")
         }
@@ -63,36 +59,42 @@ class HandshakeState : ConnectionState {
         val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "").ifEmpty { null }
         val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
 
-        val parsed = VIAaaSConfig.hostName.map {
-            AddressParser().parse(virtualHostNoExtra, it)
-        }.sortedBy {
-            it.viaSuffix == null
-        }.first()
+        val parsed = AddressParser().parse(virtualHostNoExtra, VIAaaSConfig.hostName)
 
         val backProto = parsed.protocol ?: -2
         val hadHostname = parsed.viaSuffix != null
 
-        packet.address = parsed.serverAddress!!
-        packet.port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
+        val backAddress = parsed.serverAddress!!
+        val port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
+        val host = HostAndPort.fromParts(backAddress, port)
 
         var frontOnline = parsed.online
-        if (VIAaaSConfig.forceOnlineMode) frontOnline = true
+
+        val addressFromWeb = VIAaaSConfig.hostName.any { parsed.serverAddress.equals(it, ignoreCase = true) }
 
         handler.data.backServerVer = backProto
         (handler.data.state as? LoginState)?.also {
             it.frontOnline = frontOnline
             it.backName = parsed.username
-            it.backAddress = HostAndPort.fromParts(packet.address, packet.port)
+            if (!addressFromWeb) {
+                it.backAddress = host
+            }
             it.extraData = extraData
+        }
+        (handler.data.state as? StatusState)?.also {
+            if (!addressFromWeb) {
+                it.address = host
+            }
         }
 
         val playerAddr = handler.data.frontHandler.endRemoteAddress
         mcLogger.debug(
-            "HS: $playerAddr ${handler.data.state.state.toString().substring(0, 1)} " +
+            "HS: $playerAddr ${handler.data.state.state.name[0]} " +
                     "$virtualHostNoExtra $virtualPort v${handler.data.frontVer}"
         )
 
-        if (!hadHostname && VIAaaSConfig.requireHostName) {
+        if (!hadHostname && VIAaaSConfig.requireHostName && !addressFromWeb
+        ) {
             throw StacklessException("Missing parts in hostname")
         }
     }
@@ -104,20 +106,7 @@ class HandshakeState : ConnectionState {
         checkRateLimit(handler, packet.nextState)
         handleVirtualHost(handler, packet)
 
-        connectStatus(handler, ctx, packet)
-    }
-
-    private fun connectStatus(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Handshake) {
-        if (packet.nextState == State.STATUS) { // see LoginState for LOGIN
-            handler.data.frontChannel.setAutoRead(false)
-            handler.coroutineScope.launch(Dispatchers.IO) {
-                try {
-                    connectBack(handler, packet.address, packet.port, packet.nextState)
-                } catch (e: Exception) {
-                    ctx.channel().fireExceptionCaughtIfOpen(e)
-                }
-            }
-        }
+        handler.data.state.start(handler)
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {

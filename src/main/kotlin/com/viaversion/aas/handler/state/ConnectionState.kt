@@ -32,4 +32,7 @@ interface ConnectionState {
         logDisconnect(handler, "-")
         handler.other?.close()
     }
+
+    fun start(handler: MinecraftHandler) {
+    }
 }

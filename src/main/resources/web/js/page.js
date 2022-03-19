@@ -1,6 +1,6 @@
 // Minecraft.id
 let urlParams = new URLSearchParams();
-window.location.hash.substr(1).split("?")
+window.location.hash.substring(1).split("?")
     .map(it => new URLSearchParams(it)
     .forEach((a, b) => urlParams.append(b, a)));
 let mcIdUsername = urlParams.get("username");
@@ -138,7 +138,8 @@ $("#listen_offline").on("click", () => {
     workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
     addToast("Offline username", "Please wait a minute...");
 });
-$("#listen_continue").append(document.createTextNode(" " + mcIdUsername)).on("click", () => {
+$("#mcIdUsername").text(mcIdUsername);
+$("#listen_continue").on("click", () => {
     sendSocket(JSON.stringify({
         "action": "minecraft_id_login",
         "username": mcIdUsername,
@@ -449,7 +450,7 @@ class MojangAccount extends McAccount {
             headers: {"content-type": "application/json"},
         })
             .then(r => {
-                if (r.status == 403) {
+                if (r.status === 403) {
                     this.logout();
                     throw "403, token expired?";
                 }
@@ -547,6 +548,13 @@ class MicrosoftAccount extends McAccount {
                         saveRefreshAccounts();
                     })
             );
+    }
+
+    checkActive() {
+        return fetch(getCorsProxy() + "https://api.minecraftservices.com/entitlements/mcstore", {
+            method: "get",
+            headers: {"authorization": "Bearer " + this.accessToken}
+        }).then(data => data.ok);
     }
 }
 
@@ -727,7 +735,20 @@ function onSocketMsg(event) {
         }
     } else if (parsed.action === "session_hash_request") {
         handleJoinRequest(parsed);
+    } else if (parsed.action === "parameters_request") {
+        handleParametersRequest(parsed);
     }
+}
+
+function handleParametersRequest(parsed) {
+    socket.send(JSON.stringify({
+        action: "parameters_response",
+        callback: parsed["callback"],
+        version: $("#connect_version").val(),
+        host: $("#connect_address").val(),
+        port: parseInt($("#connect_port").val()) || 25565,
+        frontOnline: $("#connect_online").val()
+    }));
 }
 
 function listenStoredTokens() {

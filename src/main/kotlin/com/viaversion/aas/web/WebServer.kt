@@ -7,13 +7,11 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
+import com.google.common.net.HostAndPort
 import com.google.gson.JsonObject
-import com.viaversion.aas.AspirinServer
+import com.viaversion.aas.*
 import com.viaversion.aas.config.VIAaaSConfig
-import com.viaversion.aas.parseUndashedId
-import com.viaversion.aas.reverseLookup
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.aas.webLogger
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.server.netty.*
@@ -25,6 +23,7 @@ import io.netty.handler.codec.dns.DnsRecordType
 import io.netty.util.ReferenceCountUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.asCompletableFuture
+import kotlinx.coroutines.future.await
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.time.Duration
@@ -78,14 +77,63 @@ class WebServer {
         .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
             CoroutineScope(Dispatchers.IO).async {
                 AspirinServer.httpClient
-                    .get("https://api.mojang.com/users/profiles/minecraft/$name").body<JsonObject?>()
-                    ?.get("id")?.asString?.let { parseUndashedId(it) }
+                    .get("https://api.mojang.com/users/profiles/minecraft/$name")
+                    .body<JsonObject?>()?.get("id")?.asString?.let { parseUndashedId(it) }
             }.asCompletableFuture()
         })
 
     val sessionHashCallbacks = CacheBuilder.newBuilder()
         .expireAfterWrite(30, TimeUnit.SECONDS)
         .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
+    val addressCallbacks = CacheBuilder.newBuilder()
+        .expireAfterWrite(30, TimeUnit.SECONDS)
+        .build<UUID, CompletableFuture<AddressInfo>>(CacheLoader.from { _ -> CompletableFuture() })
+
+    data class AddressInfo(val backVersion: Int, val backHostAndPort: HostAndPort, var frontOnline: Boolean? = null)
+
+    suspend fun requestAddressInfo(frontName: String): CompletableFuture<AddressInfo> {
+        var onlineId: UUID? = null
+        try {
+            onlineId = usernameIdCache[frontName].await()
+        } catch (e: java.lang.Exception) {
+            webLogger.debug("Couldn't get online uuid for $frontName", e)
+        }
+        val offlineId = generateOfflinePlayerUuid(frontName)
+
+        val callbackId = UUID.randomUUID()
+        val future = addressCallbacks.get(callbackId)
+        CoroutineScope(coroutineContext).apply {
+            launch(Dispatchers.IO) {
+                run sending@{
+                    onlineId?.let {
+                        if (sendRequestAddress(it, callbackId)) return@sending
+                    }
+                    if (sendRequestAddress(offlineId, callbackId)) return@sending
+                    future.completeExceptionally(StacklessException("Username $frontName not listened. Use web auth to select backend server address."))
+                }
+            }
+            launch {
+                delay(20_000)
+                future.completeExceptionally(StacklessException("No response from browser"))
+            }
+        }
+        return future
+    }
+
+    private suspend fun sendRequestAddress(uuid: UUID, callbackId: UUID): Boolean {
+        var sent = false
+        listeners.get(uuid).forEach {
+            it.ws.send(
+                JsonObject().also {
+                    it.addProperty("action", "parameters_request")
+                    it.addProperty("callback", callbackId.toString())
+                }.toString()
+            )
+            it.ws.flush()
+            sent = true
+        }
+        return sent
+    }
 
     suspend fun requestSessionJoin(
         frontName: String,

@@ -17,7 +17,7 @@ self.addEventListener("fetch", evt => {
     if (!shouldCache(evt.request.url)
         || evt.request.method !== "GET") return;
     evt.respondWith(
-        fromCache(evt.request).catch(() => fromNetwork(evt.request))
+        fromNetwork(evt.request).catch(() => fromCache(evt.request))
     );
 });
 

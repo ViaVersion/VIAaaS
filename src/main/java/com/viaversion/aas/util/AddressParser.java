@@ -5,9 +5,7 @@ import com.google.common.primitives.Ints;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import kotlin.text.StringsKt;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class AddressParser {
@@ -19,11 +17,18 @@ public class AddressParser {
 	public String username;
 	public Boolean online;
 
-	public AddressParser parse(String address, String viaHostName) {
-		address = StringsKt.removeSuffix(address, ".");
-		String suffixRemoved = StringsKt.removeSuffix(address, "." + viaHostName);
+	public AddressParser parse(String rawAddress, List<String> viaHostName) {
+		String address = StringsKt.removeSuffix(rawAddress, ".");
 
-		if (suffixRemoved.equals(address)) {
+		String suffix = viaHostName.stream()
+				.filter(s -> StringsKt.endsWith("." + address, s, true))
+				.findAny()
+				.orElse(null);
+
+		String suffixRemoved;
+		if (suffix != null) {
+			suffixRemoved = StringsKt.removeSuffix(address, "." + suffix);
+		} else {
 			serverAddress = address;
 			return this;
 		}
@@ -43,7 +48,7 @@ public class AddressParser {
 
 		serverAddress = String.join(".", Lists.reverse(serverParts));
 		viaOptions = String.join(".", Lists.reverse(optionsParts));
-		viaSuffix = viaHostName;
+		viaSuffix = suffix;
 
 		return this;
 	}
@@ -61,7 +66,7 @@ public class AddressParser {
 		}
 
 		String arg = part.substring(2);
-		switch (option) {
+		switch (option.toLowerCase(Locale.ROOT)) {
 			case "o": {
 				parseOnlineMode(arg);
 				break;

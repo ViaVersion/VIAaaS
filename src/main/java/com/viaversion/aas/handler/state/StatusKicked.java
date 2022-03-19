@@ -41,4 +41,9 @@ public class StatusKicked implements ConnectionState {
 	public void onInactivated(@NotNull MinecraftHandler handler) {
 		ConnectionState.DefaultImpls.onInactivated(this, handler);
 	}
+
+	@Override
+	public void start(@NotNull MinecraftHandler handler) {
+		ConnectionState.DefaultImpls.start(this, handler);
+	}
 }
