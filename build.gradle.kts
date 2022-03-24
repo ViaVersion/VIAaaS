@@ -17,7 +17,7 @@ plugins {
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("com.palantir.git-version") version "0.13.0"
+    id("com.palantir.git-version") version "0.14.0"
     id("org.gradlewebtools.minify") version "1.3.0" apply false
 }
 
@@ -64,9 +64,9 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.74.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.50.Final")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.12.Final:linux-x86_64")
+    implementation("io.netty:netty-all:4.1.75.Final")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.51.Final")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.13.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.0")
@@ -101,7 +101,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:3.18.3")
+    implementation("com.auth0:java-jwt:3.19.0")
 }
 
 val run: JavaExec by tasks

@@ -232,6 +232,7 @@ class LoginState : ConnectionState {
                     backAddress = info.backHostAndPort
                     handler.data.backServerVer = info.backVersion
                     frontOnline = info.frontOnline
+                    info.backName?.also { backName = info.backName }
                 }
                 if (VIAaaSConfig.forceOnlineMode) frontOnline = true
                 if (frontOnline != null) {
@@ -243,7 +244,12 @@ class LoginState : ConnectionState {
                     val id = callbackPlayerId.await()
                     mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
                 }
-                connectBack(handler, HostAndPort.fromParts(backAddress!!.host, backAddress!!.port), State.LOGIN, extraData)
+                connectBack(
+                    handler,
+                    HostAndPort.fromParts(backAddress!!.host, backAddress!!.port),
+                    State.LOGIN,
+                    extraData
+                )
                 loginStart.username = backName!!
                 send(handler.data.backChannel!!, loginStart, true)
             } catch (e: Exception) {

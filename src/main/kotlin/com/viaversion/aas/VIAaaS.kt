@@ -40,10 +40,6 @@ fun main(args: Array<String>) {
 }
 
 private fun setupSystem() {
-    // Stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/Velocity.java
-    if (System.getProperty("io.netty.allocator.maxOrder") == null) {
-        System.setProperty("io.netty.allocator.maxOrder", "9")
-    }
     // https://logging.apache.org/log4j/2.x/log4j-jul/index.html
     if (System.getProperty("java.util.logging.manager") == null) {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")

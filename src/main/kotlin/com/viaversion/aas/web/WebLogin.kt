@@ -154,7 +154,8 @@ class WebLogin : WebState {
                     protocol ?: -2
                 },
                 backHostAndPort = HostAndPort.fromParts(obj["host"].asString, obj["port"].asInt),
-                frontOnline = obj["frontOnline"].asString.toBooleanStrictOrNull()
+                frontOnline = obj["frontOnline"].asString.toBooleanStrictOrNull(),
+                backName = obj["backName"]?.asString
             )
         )
     }

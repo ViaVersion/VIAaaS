@@ -20,7 +20,6 @@ $(() => {
 let connectionStatus = document.getElementById("connection_status");
 let corsStatus = document.getElementById("cors_status");
 let listening = document.getElementById("listening");
-let actions = document.getElementById("actions");
 let accounts = document.getElementById("accounts-list");
 let cors_proxy_txt = document.getElementById("cors-proxy");
 let ws_url_txt = document.getElementById("ws-url");
@@ -50,7 +49,7 @@ $(() => {
     cors_proxy_txt.value = getCorsProxy();
     ws_url_txt.value = getWsUrl();
 
-    $("#form_add_mc").on("submit", () => loginMc($("#email").val(), $("#password").val()));
+    $("#form_add_mc").on("submit", () => loginMc($("#mc_email").val(), $("#mc_password").val()));
     $("#form_add_ms").on("submit", () => loginMs());
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val()));
     $("#form_cors_proxy").on("submit", () => setCorsProxy($("#cors-proxy").val()));
@@ -129,7 +128,7 @@ $("#listen_premium").on("click", () => {
     callbackUrl.search = "";
     callbackUrl.hash = "#username=" + encodeURIComponent(user);
     location.href = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
-        + "?callback=" + encodeURIComponent(callbackUrl);
+        + "?callback=" + encodeURIComponent(callbackUrl.toString());
 });
 $("#listen_offline").on("click", () => {
     let user = prompt("Offline username (case-sensitive): ", "");
@@ -248,7 +247,7 @@ function ohNo() {
             }
         })
         try {
-            !BroadcastChannel
+            new BroadcastChannel("test");
         } catch (e) {
             addToast("Unsupported browser", "This browser doesn't support required APIs");
         }
@@ -382,7 +381,6 @@ class McAccount {
     }
 
     checkActive() {
-        // todo why does this not work with MSA?
         return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {
             method: "post",
             body: JSON.stringify({
@@ -741,13 +739,15 @@ function onSocketMsg(event) {
 }
 
 function handleParametersRequest(parsed) {
+    let url = new URL("https://" + $("#connect_address").val());
     socket.send(JSON.stringify({
         action: "parameters_response",
         callback: parsed["callback"],
         version: $("#connect_version").val(),
-        host: $("#connect_address").val(),
-        port: parseInt($("#connect_port").val()) || 25565,
-        frontOnline: $("#connect_online").val()
+        host: url.hostname,
+        port: parseInt(url.port || 25565),
+        frontOnline: $("#connect_online").val(),
+        backName: $("#connect_user").val() || undefined
     }));
 }
 

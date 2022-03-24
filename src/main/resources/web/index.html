@@ -103,16 +103,15 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
         <p>Connecting to backend server:</p>
         <div id="connect">
             <form class="input-group">
-                <input id="connect_address" type="text" class="form-control" placeholder="Address">
-                <input id="connect_port" type="number" min="1" max="65535" class="form-control"
-                       placeholder="Port">
-                <input id="connect_version" type="text" class="form-control" placeholder="Version">
-                <select class="form-select" id="connect_online">
+                <input id="connect_address" type="text" class="form-control" placeholder="Address:Port" aria-label="Address and Port">
+                <input id="connect_version" type="text" class="form-control" placeholder="Version" aria-label="Version">
+                <select class="form-select" id="connect_online" aria-label="Online Mode">
                     <option value="null" selected>Front Online Mode...</option>
                     <option>AUTO</option>
                     <option value="true">Force online</option>
                     <option value="false">Force offline (recommended for Geyser)</option>
                 </select>
+                <input id="connect_user" type="text" class="form-control" placeholder="Back Username" aria-label="Backend Username">
             </form>
         </div>
         <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">address
@@ -147,7 +146,7 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
         </div>
         <div id="add-account">
             <div class="mb-3">
-                <label class="form-label" for="login_submit_ms">Add Microsoft account</label>
+                <label class="form-label" for="form_add_ms">Add Microsoft account</label>
                 <form class="row" id="form_add_ms">
                     <div class="col-auto">
                         <button class="btn btn-primary" id="login_submit_ms" type="submit">Login with Microsoft</button>
@@ -155,12 +154,12 @@ script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.
                 </form>
             </div>
             <div class="mb-2">
-                <label class="form-label" for="email">Add Mojang account</label>
+                <label class="form-label" for="form_add_mc">Add Mojang account</label>
                 <form class="input-group" id="form_add_mc" action="javascript:">
-                    <input aria-label="Email/Username" class="form-control" id="email"
-                           placeholder="mc@example.com" type="text">
-                    <input aria-label="Password" class="form-control" id="password"
-                           placeholder="password" type="password">
+                    <input aria-label="Email/Username" class="form-control" id="mc_email"
+                           placeholder="Username" type="text">
+                    <input aria-label="Password" class="form-control" id="mc_password"
+                           placeholder="Password" type="password">
                     <button class="btn btn-primary" id="login_submit_mc" type="submit">Login with Mojang</button>
                 </form>
             </div>

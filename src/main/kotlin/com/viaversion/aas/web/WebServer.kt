@@ -89,7 +89,7 @@ class WebServer {
         .expireAfterWrite(30, TimeUnit.SECONDS)
         .build<UUID, CompletableFuture<AddressInfo>>(CacheLoader.from { _ -> CompletableFuture() })
 
-    data class AddressInfo(val backVersion: Int, val backHostAndPort: HostAndPort, var frontOnline: Boolean? = null)
+    data class AddressInfo(val backVersion: Int, val backHostAndPort: HostAndPort, var frontOnline: Boolean? = null, var backName: String? = null)
 
     suspend fun requestAddressInfo(frontName: String): CompletableFuture<AddressInfo> {
         var onlineId: UUID? = null
