@@ -73,6 +73,7 @@ class StatusState : ConnectionState {
         }.toString()
         send(handler.data.frontChannel, packet, flush = true)
         handler.data.state = StatusKicked()
+        handler.data.state.start(handler)
     }
 
     override fun start(handler: MinecraftHandler) {

@@ -68,7 +68,7 @@ class HandshakeState : ConnectionState {
         val port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
         val host = HostAndPort.fromParts(backAddress, port)
 
-        var frontOnline = parsed.online
+        val frontOnline = parsed.online
 
         val addressFromWeb = VIAaaSConfig.hostName.any { parsed.serverAddress.equals(it, ignoreCase = true) }
 
