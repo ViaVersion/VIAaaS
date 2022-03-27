@@ -18,7 +18,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("com.palantir.git-version") version "0.14.0"
-    id("org.gradlewebtools.minify") version "1.3.0" apply false
+    id("org.gradlewebtools.minify") version "1.3.1" apply false
 }
 
 application {
@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.0-22w11a-SNAPSHOT"
-    val vbVer = "4.3.0-22w11a-SNAPSHOT"
+    val vvVer = "4.3.0-22w12a-SNAPSHOT"
+    val vbVer = "4.3.0-22w12a-SNAPSHOT"
     val vrVer = "ae62eba"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
