@@ -6,7 +6,7 @@
             <PatternLayout
                     pattern="%d{HH:mm:ss} %style{%highlight{%level}{FATAL=red dark, ERROR=red, WARN=yellow bright, INFO=cyan bright, DEBUG=green, TRACE=white}} [%thread] [%logger] %minecraftFormatting{%msg}%n"/>
         </TerminalConsole>
-        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>

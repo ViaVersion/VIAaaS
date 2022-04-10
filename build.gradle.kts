@@ -13,11 +13,11 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.6.20"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("com.palantir.git-version") version "0.14.0"
+    id("com.palantir.git-version") version "0.15.0"
     id("org.gradlewebtools.minify") version "1.3.1" apply false
 }
 
@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.0-22w12a-SNAPSHOT"
-    val vbVer = "4.3.0-22w12a-SNAPSHOT"
+    val vvVer = "4.3.0-22w14a-SNAPSHOT"
+    val vbVer = "4.3.0-22w14a-SNAPSHOT"
     val vrVer = "ae62eba"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
@@ -101,7 +101,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:3.19.0")
+    implementation("com.auth0:java-jwt:3.19.1")
 }
 
 val run: JavaExec by tasks
