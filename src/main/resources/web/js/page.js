@@ -78,10 +78,6 @@ function setWsStatus(txt) {
     connectionStatus.innerText = txt;
 }
 
-function setListenVisible(visible) {
-    listenVisible = visible;
-}
-
 function refreshCorsStatus() {
     corsStatus.innerText = "...";
     icanhazip(true).then(ip => {
@@ -715,8 +711,8 @@ function handleJoinRequest(parsed) {
 
 function onSocketMsg(event) {
     let parsed = JSON.parse(event.data);
-    if (parsed.action === "ad_minecraft_id_login") {
-        setListenVisible(true);
+    if (parsed.action === "ad_login_methods") {
+        listenVisible = true;
         renderActions();
     } else if (parsed.action === "login_result") {
         if (!parsed.success) {

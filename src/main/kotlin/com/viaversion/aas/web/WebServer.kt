@@ -12,7 +12,7 @@ import com.google.gson.JsonObject
 import com.viaversion.aas.*
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
-import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.server.netty.*
 import io.ktor.server.websocket.*
@@ -89,7 +89,12 @@ class WebServer {
         .expireAfterWrite(30, TimeUnit.SECONDS)
         .build<UUID, CompletableFuture<AddressInfo>>(CacheLoader.from { _ -> CompletableFuture() })
 
-    data class AddressInfo(val backVersion: Int, val backHostAndPort: HostAndPort, var frontOnline: Boolean? = null, var backName: String? = null)
+    data class AddressInfo(
+        val backVersion: Int,
+        val backHostAndPort: HostAndPort,
+        var frontOnline: Boolean? = null,
+        var backName: String? = null
+    )
 
     suspend fun requestAddressInfo(frontName: String): CompletableFuture<AddressInfo> {
         var onlineId: UUID? = null
@@ -174,12 +179,12 @@ class WebServer {
                         }"
                     val msg = "Requester: $id $address ($ptr) ($ipString)\nBackend: $backAddress"
                     listeners[id].forEach {
-                        it.ws.send(JsonObject().also {
+                        it.ws.sendSerialized(JsonObject().also {
                             it.addProperty("action", "session_hash_request")
                             it.addProperty("user", name)
                             it.addProperty("session_hash", hash)
                             it.addProperty("message", msg)
-                        }.toString())
+                        })
                         it.ws.flush()
                     }
                 }
@@ -215,7 +220,7 @@ class WebServer {
         clients.remove(ws)
     }
 
-    suspend fun onException(ws: WebSocketServerSession, exception: Exception) {
+    suspend fun onException(ws: WebSocketServerSession, exception: Throwable) {
         val client = clients[ws]!!
         webLogger.info("WS Error: ${client.id} $exception")
         webLogger.debug("Ws exception: ", exception)

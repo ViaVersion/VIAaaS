@@ -13,9 +13,10 @@ import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.update.Version
 import io.ktor.client.*
-import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.serialization.gson.*

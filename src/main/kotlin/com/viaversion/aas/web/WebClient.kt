@@ -31,7 +31,6 @@ data class WebClient(
         listenedIds.add(uuid)
         return server.listeners.put(uuid, this)
     }
-
     fun unlistenId(uuid: UUID): Boolean {
         server.listeners.remove(uuid, this)
         return listenedIds.remove(uuid)

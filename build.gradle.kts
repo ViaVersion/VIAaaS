@@ -57,14 +57,14 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.0-22w14a-SNAPSHOT"
-    val vbVer = "4.3.0-22w14a-SNAPSHOT"
-    val vrVer = "ae62eba"
+    val vvVer = "4.3.0-22w15a-SNAPSHOT"
+    val vbVer = "4.3.0-22w15a-SNAPSHOT"
+    val vrVer = "daa5e21"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.75.Final")
+    implementation("io.netty:netty-all:4.1.76.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.51.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.13.Final:linux-x86_64")
 
@@ -84,10 +84,10 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.0.0-beta-1"
-    implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
+    val ktorVersion = "2.0.0"
+    implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-caching-headers:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-compression:$ktorVersion")
@@ -96,10 +96,10 @@ dependencies {
     implementation("io.ktor:ktor-server-forwarded-header:$ktorVersion")
     implementation("io.ktor:ktor-server-partial-content:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
-    implementation("io.ktor:ktor-client-java:$ktorVersion")
+    implementation("io.ktor:ktor-client-java-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
 
     implementation("com.auth0:java-jwt:3.19.1")
 }

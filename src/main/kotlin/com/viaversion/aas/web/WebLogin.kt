@@ -10,7 +10,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
-import io.ktor.websocket.*
+import io.ktor.server.websocket.*
 import kotlinx.coroutines.future.await
 import java.net.URLEncoder
 import java.time.Duration
@@ -19,16 +19,16 @@ import kotlin.math.absoluteValue
 
 class WebLogin : WebState {
     override suspend fun start(webClient: WebClient) {
-        webClient.ws.send(JsonObject().also {
-            it.addProperty("action", "ad_minecraft_id_login")
-        }.toString())
+        webClient.ws.sendSerialized(JsonObject().also {
+            it.addProperty("action", "ad_login_methods")
+        })
         webClient.ws.flush()
     }
 
     override suspend fun onMessage(webClient: WebClient, msg: String) {
         val obj = JsonParser.parseString(msg) as JsonObject
 
-        when (obj.getAsJsonPrimitive("action").asString) {
+        when (obj["action"].asString) {
             "offline_login" -> handleOfflineLogin(webClient, msg, obj)
             "minecraft_id_login" -> handleMcIdLogin(webClient, obj)
             "listen_login_requests" -> handleListenLogins(webClient, obj)
@@ -45,7 +45,7 @@ class WebLogin : WebState {
         webClient.listenedIds.forEach { webClient.unlistenId(it) }
     }
 
-    override suspend fun onException(webClient: WebClient, exception: java.lang.Exception) {
+    override suspend fun onException(webClient: WebClient, exception: Throwable) {
     }
 
     private fun loginSuccessJson(username: String, uuid: UUID, token: String): JsonObject {
@@ -67,7 +67,7 @@ class WebLogin : WebState {
 
     private suspend fun handleOfflineLogin(webClient: WebClient, msg: String, obj: JsonObject) {
         if (!sha512Hex(msg.toByteArray(Charsets.UTF_8)).startsWith("00000")) throw StacklessException("PoW failed")
-        if ((obj.getAsJsonPrimitive("date").asLong - System.currentTimeMillis())
+        if ((obj["date"].asLong - System.currentTimeMillis())
                 .absoluteValue > Duration.ofSeconds(20).toMillis()
         ) {
             throw StacklessException("Invalid PoW date")
@@ -76,7 +76,7 @@ class WebLogin : WebState {
         val uuid = generateOfflinePlayerUuid(username)
 
         val token = webClient.server.generateToken(uuid, username)
-        webClient.ws.send(loginSuccessJson(username, uuid, token).toString())
+        webClient.ws.sendSerialized(loginSuccessJson(username, uuid, token))
 
         webLogger.info("Token gen: ${webClient.id}: offline $username $uuid")
     }
@@ -90,24 +90,24 @@ class WebLogin : WebState {
             formParameters = parametersOf("code", code),
         ).body<JsonObject>()
 
-        if (check.getAsJsonPrimitive("valid").asBoolean) {
+        if (check["valid"].asBoolean) {
             val mcIdUser = check["username"].asString
             val uuid = check["uuid"]?.asString?.let { parseUndashedId(it.replace("-", "")) }
                 ?: webClient.server.usernameIdCache[mcIdUser].await()
                 ?: throw StacklessException("Failed to get UUID from minecraft.id")
 
             val token = webClient.server.generateToken(uuid, mcIdUser)
-            webClient.ws.send(loginSuccessJson(mcIdUser, uuid, token).toString())
+            webClient.ws.sendSerialized(loginSuccessJson(mcIdUser, uuid, token))
 
             webLogger.info("Token gen: ${webClient.id}: $mcIdUser $uuid")
         } else {
-            webClient.ws.send(loginNotSuccess().toString())
+            webClient.ws.sendSerialized(loginNotSuccess())
             webLogger.info("Token gen fail: ${webClient.id}: $username")
         }
     }
 
     private suspend fun handleListenLogins(webClient: WebClient, obj: JsonObject) {
-        val token = obj.getAsJsonPrimitive("token").asString
+        val token = obj["token"].asString
         val user = webClient.server.parseToken(token)
         val response = JsonObject().also {
             it.addProperty("action", "listen_login_requests_result")
@@ -122,18 +122,18 @@ class WebLogin : WebState {
             response.addProperty("success", false)
             webLogger.info("Listen fail: ${webClient.id}")
         }
-        webClient.ws.send(response.toString())
+        webClient.ws.sendSerialized(response)
     }
 
     private suspend fun handleUnlisten(webClient: WebClient, obj: JsonObject) {
-        val uuid = UUID.fromString(obj.getAsJsonPrimitive("uuid").asString)
+        val uuid = UUID.fromString(obj["uuid"].asString)
         webLogger.info("Unlisten: ${webClient.id}: $uuid")
         val response = JsonObject().also {
             it.addProperty("action", "unlisten_login_requests_result")
             it.addProperty("uuid", uuid.toString())
             it.addProperty("success", webClient.unlistenId(uuid))
         }
-        webClient.ws.send(response.toString())
+        webClient.ws.sendSerialized(response)
     }
 
     private fun handleSessionResponse(webClient: WebClient, obj: JsonObject) {

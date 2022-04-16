@@ -1,19 +1,26 @@
 package com.viaversion.aas.web
 
 import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.server.application.*
+import io.ktor.serialization.gson.*
 import io.ktor.server.http.content.*
+import io.ktor.server.application.*
 import io.ktor.server.plugins.*
+import io.ktor.server.plugins.cachingheaders.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.conditionalheaders.*
+import io.ktor.server.plugins.defaultheaders.*
+import io.ktor.server.plugins.forwardedheaders.*
+import io.ktor.server.plugins.partialcontent.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.util.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.consumeEach
 import org.slf4j.event.Level
 import java.io.File
-import java.nio.channels.ClosedChannelException
 import java.nio.file.Path
 import java.time.Duration
 
@@ -22,8 +29,8 @@ class ViaWebApp(val viaWebServer: WebServer) {
         install(DefaultHeaders)
         install(ConditionalHeaders)
         install(CachingHeaders) {
-            options {
-                CachingOptions(CacheControl.MaxAge(600, visibility = CacheControl.Visibility.Public))
+            options { _, _ ->
+                io.ktor.http.content.CachingOptions(CacheControl.MaxAge(600, visibility = CacheControl.Visibility.Public))
             }
         }
         install(CallLogging) {
@@ -37,9 +44,10 @@ class ViaWebApp(val viaWebServer: WebServer) {
             maxFrameSize = Short.MAX_VALUE.toLong()
             pingPeriod = Duration.ofSeconds(20)
             timeout = Duration.ofSeconds(15)
+            contentConverter = GsonWebsocketContentConverter()
         }
-        install(XForwardedHeaderSupport)
-        install(ForwardedHeaderSupport)
+        install(XForwardedHeaders)
+        install(ForwardedHeaders)
         // i think we aren't vulnerable to breach, dynamic things are websockets
         // https://ktor.io/docs/compression.html#security
         install(Compression)
@@ -84,8 +92,8 @@ class ViaWebApp(val viaWebServer: WebServer) {
                         viaWebServer.onMessage(this, frame.readText())
                     }
                 }
-            } catch (ignored: ClosedChannelException) {
-            } catch (e: Exception) {
+            } catch (ignored: ClosedReceiveChannelException) {
+            } catch (e: Throwable) {
                 viaWebServer.onException(this, e)
                 this.close(CloseReason(CloseReason.Codes.INTERNAL_ERROR, "INTERNAL ERROR"))
             } finally {

@@ -5,7 +5,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.libs.fastutil.ints.IntLinkedOpenHashSet;
 import com.viaversion.viaversion.libs.fastutil.ints.IntSortedSet;
 import com.viaversion.viaversion.libs.gson.JsonObject;
-import de.gerrygames.viarewind.sponge.VersionInfo;
+import de.gerrygames.viarewind.velocity.VersionInfo;
 
 public class AspirinInjector implements ViaInjector {
 	@Override

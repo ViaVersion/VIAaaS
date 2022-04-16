@@ -10,6 +10,7 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
 import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.server.netty.*
 import io.netty.buffer.ByteBuf
