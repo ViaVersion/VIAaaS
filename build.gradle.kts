@@ -13,7 +13,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.6.20"
+    kotlin("jvm") version "1.6.21"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.0-22w15a-SNAPSHOT"
-    val vbVer = "4.3.0-22w15a-SNAPSHOT"
+    val vvVer = "4.3.0-22w16b-SNAPSHOT"
+    val vbVer = "4.3.0-22w16b-SNAPSHOT"
     val vrVer = "daa5e21"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
