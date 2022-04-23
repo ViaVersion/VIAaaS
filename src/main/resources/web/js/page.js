@@ -481,7 +481,7 @@ class MicrosoftAccount extends McAccount {
 
     refresh() {
         super.refresh();
-        return getTokenPopup(this.msUser, loginRequest)
+        return getTokenPopup(this.msUser, getLoginRequest())
             .then(response => fetch("https://user.auth.xboxlive.com/user/authenticate", {
                 method: "post",
                 body: JSON.stringify({
@@ -586,7 +586,9 @@ function loginMc(user, pass) {
     $("#form_add_mc input").val("");
 }
 
-const loginRequest = {scopes: ["XboxLive.signin"], prompt: "select_account"};
+function getLoginRequest() {
+    return {scopes: ["XboxLive.signin"]};
+}
 let redirectUrl = "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
 if (location.hostname === "localhost" || whitelistedOrigin.includes(location.origin)) {
     redirectUrl = location.origin + location.pathname;
@@ -599,7 +601,7 @@ const msalConfig = {
         redirectUri: redirectUrl,
     },
     cache: {
-        cacheLocation: "sessionStorage",
+        cacheLocation: "localStorage",
         storeAuthStateInCookie: false,
     }
 };
@@ -607,7 +609,9 @@ const msalConfig = {
 const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
 function loginMs() {
-    myMSALObj.loginRedirect(loginRequest);
+    let req = getLoginRequest();
+    req.prompt = "select_account";
+    myMSALObj.loginRedirect(req);
 }
 
 $(() => myMSALObj.handleRedirectPromise().then((resp) => {
@@ -627,6 +631,7 @@ $(() => myMSALObj.handleRedirectPromise().then((resp) => {
 
 function getTokenPopup(username, request) {
     request.account = myMSALObj.getAccountByUsername(username);
+    request.loginHint = username;
     return myMSALObj.acquireTokenSilent(request).catch(error => {
         console.warn("silent token acquisition fails.");
         if (error instanceof msal.InteractionRequiredAuthError) {
