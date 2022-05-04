@@ -100,6 +100,7 @@ class LoginState : ConnectionState {
     fun reauthMessage(handler: MinecraftHandler, backName: String, backHash: String): CompletableFuture<Boolean> {
         if (!handler.data.frontEncrypted
             || !frontName.equals(backName, ignoreCase = true)
+            || handler.data.frontVer!! < ProtocolVersion.v1_8.version
         ) {
             callbackPluginReauth.complete(false)
             return callbackPluginReauth
