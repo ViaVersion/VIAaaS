@@ -9,6 +9,7 @@ import com.viaversion.aas.protocol.id47toid5.storage.Scoreboard
 import com.viaversion.aas.protocol.id47toid5.storage.Tablist
 import com.viaversion.aas.protocol.xyzToPosition
 import com.viaversion.aas.protocol.xyzUBytePos
+import com.viaversion.aas.util.SignableProperty
 import com.viaversion.viaversion.api.minecraft.entities.Entity1_10Types
 import com.viaversion.viaversion.api.minecraft.item.Item
 import com.viaversion.viaversion.api.protocol.packet.PacketWrapper
@@ -103,12 +104,12 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                 packetWrapper.write(Type.UUID, uuid)
                 val name = ChatColorUtil.stripColor(packetWrapper.read(Type.STRING)) //Name
                 val dataCount = packetWrapper.read(Type.VAR_INT) //DataCunt
-                val properties = ArrayList<Tablist.Property>()
+                val properties = ArrayList<SignableProperty>()
                 for (i in 0 until dataCount) {
                     val key: String = packetWrapper.read(Type.STRING) //Name
                     val value: String = packetWrapper.read(Type.STRING) //Value
                     val signature: String = packetWrapper.read(Type.STRING) //Signature
-                    properties.add(Tablist.Property(key, value, signature))
+                    properties.add(SignableProperty(key, value, signature))
                 }
                 val x = packetWrapper.passthrough(Type.INT) //x
                 val y = packetWrapper.passthrough(Type.INT) //y
@@ -148,7 +149,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     packetPlayerListItem.write(Type.STRING, newentry.name)
                     packetPlayerListItem.write(Type.VAR_INT, dataCount)
                     for (property in newentry.properties) {
-                        packetPlayerListItem.write(Type.STRING, property.name)
+                        packetPlayerListItem.write(Type.STRING, property.key)
                         packetPlayerListItem.write(Type.STRING, property.value)
                         packetPlayerListItem.write(Type.BOOLEAN, property.signature != null)
                         if (property.signature != null) packetPlayerListItem.write(Type.STRING, property.signature)
@@ -227,7 +228,7 @@ fun Protocol1_8To1_7_6.registerPlayerPackets() {
                     packetWrapper.write(Type.STRING, entry.name)
                     packetWrapper.write(Type.VAR_INT, entry.properties.size)
                     for (property in entry.properties) {
-                        packetWrapper.write(Type.STRING, property.name)
+                        packetWrapper.write(Type.STRING, property.key)
                         packetWrapper.write(Type.STRING, property.value)
                         packetWrapper.write(Type.BOOLEAN, property.signature != null)
                         if (property.signature != null) packetWrapper.write(Type.STRING, property.signature)

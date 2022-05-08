@@ -21,7 +21,7 @@ public class AddressParser {
 		String address = StringsKt.removeSuffix(rawAddress, ".");
 
 		String suffix = viaHostName.stream()
-				.filter(s -> StringsKt.endsWith("." + address, s, true))
+				.filter(s -> StringsKt.endsWith("." + address, s, false))
 				.findAny()
 				.orElse(null);
 

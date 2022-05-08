@@ -10,6 +10,7 @@ import com.viaversion.aas.codec.packet.status.StatusPing
 import com.viaversion.aas.codec.packet.status.StatusPong
 import com.viaversion.aas.codec.packet.status.StatusRequest
 import com.viaversion.aas.codec.packet.status.StatusResponse
+import com.viaversion.aas.protocol.sharewareVersion
 import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -21,6 +22,7 @@ import com.viaversion.viaversion.protocols.protocol1_16_2to1_16_1.ClientboundPac
 import com.viaversion.viaversion.protocols.protocol1_16to1_15_2.ClientboundPackets1_16
 import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ClientboundPackets1_17
 import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPackets1_18
+import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ClientboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
@@ -38,12 +40,23 @@ object PacketRegistry {
         register(State.LOGIN, Direction.SERVERBOUND, ::LoginStart, Range.all(), 0)
         register(State.LOGIN, Direction.SERVERBOUND, ::CryptoResponse, Range.all(), 1)
         register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13.version), 2)
+        register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, sharewareVersion.singleton, 2)
 
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginDisconnect, Range.all(), 0)
         register(State.LOGIN, Direction.CLIENTBOUND, ::CryptoRequest, Range.all(), 1)
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginSuccess, Range.all(), 2)
-        register(State.LOGIN, Direction.CLIENTBOUND, ::SetCompression, Range.all(), 3)
-        register(State.LOGIN, Direction.CLIENTBOUND, ::PluginRequest, Range.atLeast(ProtocolVersion.v1_13.version), 4)
+        register(
+            State.LOGIN, Direction.CLIENTBOUND, ::SetCompression, mapOf(
+                Range.atLeast(ProtocolVersion.v1_8.version) to 3,
+                sharewareVersion.singleton to 3
+            )
+        )
+        register(
+            State.LOGIN, Direction.CLIENTBOUND, ::PluginRequest, mapOf(
+                Range.atLeast(ProtocolVersion.v1_13.version) to 4,
+                sharewareVersion.singleton to 4
+            )
+        )
 
         register(State.STATUS, Direction.SERVERBOUND, ::StatusRequest, Range.all(), 0)
         register(State.STATUS, Direction.SERVERBOUND, ::StatusPing, Range.all(), 1)
@@ -61,7 +74,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.DISCONNECT.id,
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.DISCONNECT.id,
                 ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.DISCONNECT.id,
-                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.DISCONNECT.id
+                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.DISCONNECT.id,
+                ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.DISCONNECT.id
             )
         )
 
@@ -75,7 +89,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.PLUGIN_MESSAGE.id
             )
         )
 

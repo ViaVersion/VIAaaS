@@ -28,7 +28,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 class LoginState : ConnectionState {
     val callbackPlayerId = CompletableFuture<UUID>()
-    lateinit var frontToken: ByteArray
+    lateinit var frontNonce: ByteArray
     lateinit var frontServerId: String
     var frontOnline: Boolean? = null
     lateinit var frontName: String
@@ -84,15 +84,15 @@ class LoginState : ConnectionState {
     }
 
     fun authenticateOnlineFront(frontChannel: Channel) {
-        // We'll use non-vanilla server id, public key size and token size
-        frontToken = generate128Bits()
+        // We'll use non-vanilla server id, public key size and nonce size
+        frontNonce = generate128Bits()
         frontServerId = generateServerId()
 
         val cryptoRequest = CryptoRequest()
         cryptoRequest.serverId = frontServerId
         cryptoKey = AspirinServer.mcCryptoKey
         cryptoRequest.publicKey = cryptoKey.public
-        cryptoRequest.token = frontToken
+        cryptoRequest.nonce = frontNonce
 
         send(frontChannel, cryptoRequest, true)
     }
@@ -141,7 +141,7 @@ class LoginState : ConnectionState {
     fun handleCryptoRequest(handler: MinecraftHandler, cryptoRequest: CryptoRequest) {
         val backServerId = cryptoRequest.serverId
         val backPublicKey = cryptoRequest.publicKey
-        val backToken = cryptoRequest.token
+        val backNonce = cryptoRequest.nonce
 
         if (!callbackPlayerId.isDone) {
             authenticateOnlineFront(handler.data.frontChannel)
@@ -171,7 +171,7 @@ class LoginState : ConnectionState {
 
                 val cryptoResponse = CryptoResponse()
                 cryptoResponse.encryptedKey = encryptRsa(backPublicKey, backKey)
-                cryptoResponse.encryptedToken = encryptRsa(backPublicKey, backToken)
+                cryptoResponse.encryptedNonce = encryptRsa(backPublicKey, backNonce)
 
                 forward(frontHandler, cryptoResponse, true)
                 backChan.pipeline().addBefore("frame", "crypto", CryptoCodec(aesKey(backKey), aesKey(backKey)))
@@ -184,9 +184,12 @@ class LoginState : ConnectionState {
     fun handleCryptoResponse(handler: MinecraftHandler, cryptoResponse: CryptoResponse) {
         val frontHash = let {
             val frontKey = decryptRsa(cryptoKey.private, cryptoResponse.encryptedKey)
-            val decryptedToken = decryptRsa(cryptoKey.private, cryptoResponse.encryptedToken)
-
-            if (!decryptedToken.contentEquals(frontToken)) throw StacklessException("Invalid verification token!")
+            if (cryptoResponse.encryptedNonce != null) {
+                val decryptedNonce = decryptRsa(cryptoKey.private, cryptoResponse.encryptedNonce!!)
+                if (!decryptedNonce.contentEquals(frontNonce)) throw StacklessException("Invalid verification nonce!")
+            } else {
+                // todo handle rsa signature
+            }
 
             handler.data.frontChannel.pipeline()
                 .addBefore("frame", "crypto", CryptoCodec(aesKey(frontKey), aesKey(frontKey)))

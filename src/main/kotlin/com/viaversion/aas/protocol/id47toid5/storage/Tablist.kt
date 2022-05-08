@@ -1,5 +1,6 @@
 package com.viaversion.aas.protocol.id47toid5.storage
 
+import com.viaversion.aas.util.SignableProperty
 import com.viaversion.viaversion.api.connection.StoredObject
 import com.viaversion.viaversion.api.connection.UserConnection
 import java.util.*
@@ -27,10 +28,9 @@ class Tablist(user: UserConnection?) : StoredObject(user) {
     class TabListEntry(var name: String, var uuid: UUID) {
         var displayName: String? = null
         var ping = 0
-        var properties = mutableListOf<Property>()
+        var properties = mutableListOf<SignableProperty>()
     }
 
-    class Property(var name: String?, var value: String?, var signature: String?)
     companion object {
         fun shouldUpdateDisplayName(oldName: String?, newName: String?): Boolean {
             return oldName == null && newName != null || oldName != null && newName == null || oldName != null && oldName != newName
