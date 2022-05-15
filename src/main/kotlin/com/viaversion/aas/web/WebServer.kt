@@ -43,7 +43,7 @@ class WebServer {
         return JWT.create()
             .withIssuedAt(Date())
             .withNotBefore(Date())
-            .withExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(30))))
+            .withExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(180))))
             .withSubject(account.toString())
             .withClaim("name", username)
             .withAudience("viaaas_listen")
@@ -51,7 +51,17 @@ class WebServer {
             .sign(jwtAlgorithm)
     }
 
-    data class UserInfo(val id: UUID, val name: String?)
+    // todo implement token renewal
+    suspend fun renewToken(token: String): String? {
+        val info = parseToken(token) ?: return null
+        var name = info.name ?: "(unknown)"
+        if (info.id.version() == 4) { // random
+            name = idToProfileCache[info.id].await()?.get("name")?.asString ?: name
+        }
+        return generateToken(info.id, name)
+    }
+
+    data class UserInfo(val id: UUID, val name: String?, val expiration: Date)
 
     fun parseToken(token: String): UserInfo? {
         return try {
@@ -59,7 +69,11 @@ class WebServer {
                 .withAnyOfAudience("viaaas_listen")
                 .build()
                 .verify(token)
-            UserInfo(UUID.fromString(verified.subject), verified.getClaim("name").asString())
+            UserInfo(
+                UUID.fromString(verified.subject),
+                verified.getClaim("name").asString(),
+                verified.expiresAt
+            )
         } catch (e: JWTVerificationException) {
             null
         }
@@ -72,13 +86,23 @@ class WebServer {
             .hashSetValues()
             .build<UUID, WebClient>()
     )
-    val usernameIdCache = CacheBuilder.newBuilder()
+    val usernameToIdCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
             CoroutineScope(Dispatchers.IO).async {
                 AspirinServer.httpClient
                     .get("https://api.mojang.com/users/profiles/minecraft/$name")
                     .body<JsonObject?>()?.get("id")?.asString?.let { parseUndashedId(it) }
+            }.asCompletableFuture()
+        })
+
+    val idToProfileCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.HOURS)
+        .build<UUID, CompletableFuture<JsonObject?>>(CacheLoader.from { id ->
+            CoroutineScope(Dispatchers.IO).async {
+                AspirinServer.httpClient
+                    .get("https://sessionserver.mojang.com/session/minecraft/profile/$id")
+                    .body<JsonObject?>()
             }.asCompletableFuture()
         })
 
@@ -99,7 +123,7 @@ class WebServer {
     suspend fun requestAddressInfo(frontName: String): CompletableFuture<AddressInfo> {
         var onlineId: UUID? = null
         try {
-            onlineId = usernameIdCache[frontName].await()
+            onlineId = usernameToIdCache[frontName].await()
         } catch (e: java.lang.Exception) {
             webLogger.debug("Couldn't get online uuid for $frontName", e)
         }

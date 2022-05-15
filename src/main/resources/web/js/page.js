@@ -716,26 +716,32 @@ function handleJoinRequest(parsed) {
 
 function onSocketMsg(event) {
     let parsed = JSON.parse(event.data);
-    if (parsed.action === "ad_login_methods") {
-        listenVisible = true;
-        renderActions();
-    } else if (parsed.action === "login_result") {
-        if (!parsed.success) {
-            addToast("Couldn't verify Minecraft account", "VIAaaS returned failed response");
-        } else {
-            listen(parsed.token);
-            saveToken(parsed.token);
-        }
-    } else if (parsed.action === "listen_login_requests_result") {
-        if (parsed.success) {
-            addListeningList(parsed.user, parsed.username, parsed.token);
-        } else {
-            removeToken(parsed.token);
-        }
-    } else if (parsed.action === "session_hash_request") {
-        handleJoinRequest(parsed);
-    } else if (parsed.action === "parameters_request") {
-        handleParametersRequest(parsed);
+    switch (parsed.action) {
+        case "ad_login_methods":
+            listenVisible = true;
+            renderActions();
+            break;
+        case "login_result":
+            if (!parsed.success) {
+                addToast("Couldn't verify Minecraft account", "VIAaaS returned failed response");
+            } else {
+                listen(parsed.token);
+                saveToken(parsed.token);
+            }
+            break;
+        case "listen_login_requests_result":
+            if (parsed.success) {
+                addListeningList(parsed.user, parsed.username, parsed.token);
+            } else {
+                removeToken(parsed.token);
+            }
+            break;
+        case "session_hash_request":
+            handleJoinRequest(parsed);
+            break;
+        case "parameters_request":
+            handleParametersRequest(parsed);
+            break;
     }
 }
 

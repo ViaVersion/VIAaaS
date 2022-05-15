@@ -93,7 +93,7 @@ class WebLogin : WebState {
         if (check["valid"].asBoolean) {
             val mcIdUser = check["username"].asString
             val uuid = check["uuid"]?.asString?.let { parseUndashedId(it.replace("-", "")) }
-                ?: webClient.server.usernameIdCache[mcIdUser].await()
+                ?: webClient.server.usernameToIdCache[mcIdUser].await()
                 ?: throw StacklessException("Failed to get UUID from minecraft.id")
 
             val token = webClient.server.generateToken(uuid, mcIdUser)
