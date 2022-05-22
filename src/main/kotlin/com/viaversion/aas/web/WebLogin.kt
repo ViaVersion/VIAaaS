@@ -8,12 +8,14 @@ import com.viaversion.aas.*
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.server.websocket.*
 import kotlinx.coroutines.future.await
 import java.net.URLEncoder
 import java.time.Duration
+import java.time.Instant
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -35,6 +37,7 @@ class WebLogin : WebState {
             "unlisten_login_requests" -> handleUnlisten(webClient, obj)
             "session_hash_response" -> handleSessionResponse(webClient, obj)
             "parameters_response" -> handleParametersResponse(webClient, obj)
+            "save_access_token" -> handleSaveAccessToken(webClient, obj)
             else -> throw StacklessException("invalid action!")
         }
 
@@ -144,7 +147,7 @@ class WebLogin : WebState {
     private fun handleParametersResponse(webClient: WebClient, obj: JsonObject) {
         val callback = UUID.fromString(obj["callback"].asString)
         webClient.server.addressCallbacks[callback].complete(
-            WebServer.AddressInfo(
+            AddressInfo(
                 backVersion = obj["version"].asString.let {
                     var protocol = Ints.tryParse(it)
                     if (protocol == null) {
@@ -158,5 +161,14 @@ class WebLogin : WebState {
                 backName = obj["backName"]?.asString
             )
         )
+    }
+
+    private suspend fun handleSaveAccessToken(webClient: WebClient, obj: JsonObject) {
+        val accessToken = obj["mc_access_token"].asString
+        val profile = AspirinServer.httpClient.get("https://api.minecraftservices.com/minecraft/profile") {
+            header("Authorization", "Bearer $accessToken")
+        }.body<JsonObject>()
+        val uuid = parseUndashedId(profile["id"].asString)
+        webClient.server.minecraftAccessTokens.put(uuid, accessToken)
     }
 }

@@ -10,7 +10,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
     try {
         setupSystem()
         printSplash()
-        CoroutineScope(Dispatchers.IO).launch { viaaasLogger.info(AspirinServer.updaterCheckMessage()) }
+        CoroutineScope(Job()).launch { viaaasLogger.info(AspirinServer.updaterCheckMessage()) }
         AspirinServer.generateCert()
         initVia()
         AspirinServer.listenPorts(args)

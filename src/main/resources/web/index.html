@@ -92,19 +92,24 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
         <p>WebSocket connection status: <span class="text-white bg-dark" id="connection_status">?</span></p>
         <p>CORS Proxy status: <span class="text-white bg-dark" id="cors_status">?</span></p>
         <hr>
-        <p>Listening to frontend logins from:</p>
+        <p>Listening to front-end logins from:</p>
         <div id="listening"></div>
         <div id="actions">
             <button id="listen_continue" type="button" class="btn btn-primary">Listen to <span id="mcIdUsername"></span>
             </button>
-            <button id="listen_premium" type="button" class="btn btn-primary">Listen to premium login</button>
-            <button id="listen_offline" type="button" class="btn btn-primary">Listen to offline mode login</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#listenModal"
+                    id="listen_open">Listen to logins
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendTokenModal"
+                    id="send_token_open">Send Access Token
+            </button>
         </div>
         <hr>
         <p>Connecting to backend server:</p>
         <div id="connect">
-            <form class="input-group">
-                <input id="connect_address" type="text" class="form-control" placeholder="Address:Port" aria-label="Address and Port">
+            <form class="input-group mb-3">
+                <input id="connect_address" type="text" class="form-control" placeholder="Address:Port"
+                       aria-label="Address and Port">
                 <input id="connect_version" type="text" class="form-control" placeholder="Version" aria-label="Version">
                 <select class="form-select" id="connect_online" aria-label="Online Mode">
                     <option value="null" selected>Front Online Mode...</option>
@@ -112,11 +117,12 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <option value="true">Force online</option>
                     <option value="false">Force offline (recommended for Geyser)</option>
                 </select>
-                <input id="connect_user" type="text" class="form-control" placeholder="Back Username" aria-label="Backend Username">
+                <input id="connect_user" type="text" class="form-control" placeholder="Back Username"
+                       aria-label="Backend Username">
             </form>
+            <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">the address
+                generator</a> to specify the server</p>
         </div>
-        <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">address
-            generator</a></p>
     </div>
 
     <div aria-labelledby="settings-tab" class="tab-pane fade" id="settings">
@@ -253,6 +259,67 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="listenModalLabel" class="modal fade" id="listenModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <form id="form_listen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="listenModalLabel">Listen to logins</h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <p>The instance will send impersonation requests to this page. Please note
+                        that they're verified by UUID, so offline and online accounts
+                        are considered different.</p>
+                    <p>VIAaaS will also request the address parameters when they're not specified.
+                        They're verified by username. Online-mode listeners have priority.</p>
+                    <div class="mb-3">
+                        <label for="listen_username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="listen_username">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="listen_online" checked>
+                        <label for="listen_online" class="form-check-label">Online Mode</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Listen</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="listenModalLabel" class="modal fade" id="sendTokenModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <form id="form_send_token">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sendTokenModalLabel">Save Access Token in Instance</h5>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <p>The instance will cache your Minecraft access token, allowing you to connect without keeping
+                        this page open.</p>
+                    <p>Note that the access token expires in ~1 day and a compromised instance may access your account
+                        with malicious intents.</p>
+                    <p>You'll need to connect as online-mode in the front-end. It's not possible to use the cached
+                        token when changing the backend username</p>
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="send_token_user">Account</label>
+                        <select class="form-select" id="send_token_user">
+                            <option selected>Choose...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Send</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 

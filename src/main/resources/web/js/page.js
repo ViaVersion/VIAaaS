@@ -2,7 +2,7 @@
 let urlParams = new URLSearchParams();
 window.location.hash.substring(1).split("?")
     .map(it => new URLSearchParams(it)
-    .forEach((a, b) => urlParams.append(b, a)));
+        .forEach((a, b) => urlParams.append(b, a)));
 let mcIdUsername = urlParams.get("username");
 let mcauth_code = urlParams.get("mcauth_code");
 let mcauth_success = urlParams.get("mcauth_success");
@@ -53,6 +53,10 @@ $(() => {
     $("#form_add_ms").on("submit", () => loginMs());
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val()));
     $("#form_cors_proxy").on("submit", () => setCorsProxy($("#cors-proxy").val()));
+    $("#form_listen").on("submit", () => submittedListen());
+    $("#form_send_token").on("submit", () => submittedSendToken());
+    $("#en_notific").on("click", () => Notification.requestPermission().then(renderActions));
+    $("#listen_continue").on("click", () => clickedListenContinue());
 
     ohNo();
 
@@ -101,40 +105,54 @@ function addMcAccountToList(account) {
     $(accounts).append(line);
 }
 
+function addListSendToken(username) {
+    let line = $("<option class='mc_username'></option>");
+    line.text(username);
+    $("#send_token_user").append(line);
+}
+
 function refreshAccountList() {
     accounts.innerHTML = "";
+    $("#send_token_user .mc_username").remove();
     getActiveAccounts()
-        .filter(it => it instanceof MojangAccount)
         .sort((a, b) => a.name.localeCompare(b.name))
-        .forEach(it => addMcAccountToList(it));
-    getMicrosoftUsers()
-        .sort((a, b) => a.localeCompare(b))
-        .forEach(username => {
-            let mcAcc = findAccountByMs(username);
-            if (!mcAcc) return;
-            addMcAccountToList(mcAcc);
+        .forEach(it => {
+            addMcAccountToList(it)
+            addListSendToken(it.name)
         });
 }
 
-$("#en_notific").on("click", () => Notification.requestPermission().then(renderActions));
-$("#listen_premium").on("click", () => {
-    let user = prompt("Premium username (case-sensitive): ", "");
-    if (!user) return;
-    let callbackUrl = new URL(location);
-    callbackUrl.search = "";
-    callbackUrl.hash = "#username=" + encodeURIComponent(user);
-    location.href = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
-        + "?callback=" + encodeURIComponent(callbackUrl.toString());
-});
-$("#listen_offline").on("click", () => {
-    let user = prompt("Offline username (case-sensitive): ", "");
-    if (!user) return;
-    let taskId = Math.random();
-    workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
-    addToast("Offline username", "Please wait a minute...");
-});
 $("#mcIdUsername").text(mcIdUsername);
-$("#listen_continue").on("click", () => {
+
+function submittedListen() {
+    let user = $("#listen_username").val();
+    if (!user) return;
+    if ($("#listen_online")[0].checked) {
+        let callbackUrl = new URL(location);
+        callbackUrl.search = "";
+        callbackUrl.hash = "#username=" + encodeURIComponent(user);
+        location.href = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
+            + "?callback=" + encodeURIComponent(callbackUrl.toString());
+    } else {
+        let taskId = Math.random();
+        workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
+        addToast("Offline username", "Please wait a minute...");
+    }
+}
+
+function submittedSendToken() {
+    findAccountByMcName($("#send_token_user").val())
+        .acquireActiveToken()
+        .then(acc => {
+            sendSocket(JSON.stringify({
+                "action": "save_access_token",
+                "mc_access_token": acc.accessToken
+            }))
+        })
+        .catch(e => addToast("Failed to send access token", e));
+}
+
+function clickedListenContinue() {
     sendSocket(JSON.stringify({
         "action": "minecraft_id_login",
         "username": mcIdUsername,
@@ -142,13 +160,13 @@ $("#listen_continue").on("click", () => {
     }));
     mcauth_code = null;
     renderActions();
-});
+}
 
 function renderActions() {
     $("#en_notific").hide();
     $("#listen_continue").hide();
-    $("#listen_premium").hide();
-    $("#listen_offline").hide();
+    $("#listen_open").hide();
+    $("#send_token_open").hide();
 
     if (Notification.permission === "default") {
         $("#en_notific").show();
@@ -157,8 +175,8 @@ function renderActions() {
         if (mcIdUsername != null && mcauth_code != null) {
             $("#listen_continue").show();
         }
-        $("#listen_premium").show();
-        $("#listen_offline").show();
+        $("#listen_open").show();
+        $("#send_token_open").show();
     }
 }
 
@@ -356,10 +374,6 @@ function saveRefreshAccounts() {
 
 function getActiveAccounts() {
     return activeAccounts;
-}
-
-function getMicrosoftUsers() {
-    return (myMSALObj.getAllAccounts() || []).map(it => it.username);
 }
 
 class McAccount {
@@ -589,6 +603,7 @@ function loginMc(user, pass) {
 function getLoginRequest() {
     return {scopes: ["XboxLive.signin"]};
 }
+
 let redirectUrl = "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
 if (location.hostname === "localhost" || whitelistedOrigin.includes(location.origin)) {
     redirectUrl = location.origin + location.pathname;

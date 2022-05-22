@@ -10,7 +10,7 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.proxy.ProxyConnectException
 import io.netty.handler.proxy.ProxyHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import java.net.SocketAddress
 import java.nio.channels.ClosedChannelException
@@ -22,7 +22,7 @@ class MinecraftHandler(
     lateinit var endRemoteAddress: SocketAddress
     val other: Channel? get() = if (frontEnd) data.backChannel else data.frontChannel
     var loggedDc = false
-    val coroutineScope = CoroutineScope(Dispatchers.Default)
+    val coroutineScope = CoroutineScope(Job())
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         if (!ctx.channel().isActive) return

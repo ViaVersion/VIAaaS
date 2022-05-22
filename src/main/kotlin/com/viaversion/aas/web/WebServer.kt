@@ -7,13 +7,14 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.collect.MultimapBuilder
 import com.google.common.collect.Multimaps
-import com.google.common.net.HostAndPort
 import com.google.gson.JsonObject
 import com.viaversion.aas.*
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
 import io.ktor.client.call.body
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.server.netty.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
@@ -32,12 +33,48 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.coroutineContext
 
 class WebServer {
-    // I don't think i'll need more than 1k/day
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val jwtAlgorithm = Algorithm.HMAC256(VIAaaSConfig.jwtSecret)
+    val coroutineScope = CoroutineScope(Job())
+
+    // Minecraft account -> WebClient
+    val listeners = Multimaps.synchronizedSetMultimap(
+        MultimapBuilder.SetMultimapBuilder
+            .hashKeys()
+            .hashSetValues()
+            .build<UUID, WebClient>()
+    )
+    val usernameToIdCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.HOURS)
+        .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
+            coroutineScope.async {
+                AspirinServer.httpClient
+                    .get("https://api.mojang.com/users/profiles/minecraft/$name")
+                    .body<JsonObject?>()?.get("id")?.asString?.let { parseUndashedId(it) }
+            }.asCompletableFuture()
+        })
+
+    val idToProfileCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(1, TimeUnit.HOURS)
+        .build<UUID, CompletableFuture<JsonObject?>>(CacheLoader.from { id ->
+            coroutineScope.async {
+                AspirinServer.httpClient
+                    .get("https://sessionserver.mojang.com/session/minecraft/profile/$id")
+                    .body<JsonObject?>()
+            }.asCompletableFuture()
+        })
+
+    val sessionHashCallbacks = CacheBuilder.newBuilder()
+        .expireAfterWrite(30, TimeUnit.SECONDS)
+        .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
+    val addressCallbacks = CacheBuilder.newBuilder()
+        .expireAfterWrite(30, TimeUnit.SECONDS)
+        .build<UUID, CompletableFuture<AddressInfo>>(CacheLoader.from { _ -> CompletableFuture() })
+    val minecraftAccessTokens = CacheBuilder.newBuilder()
+        .expireAfterWrite(10, TimeUnit.MINUTES)
+        .build<UUID, String>()
 
     fun generateToken(account: UUID, username: String): String {
         return JWT.create()
@@ -61,8 +98,6 @@ class WebServer {
         return generateToken(info.id, name)
     }
 
-    data class UserInfo(val id: UUID, val name: String?, val expiration: Date)
-
     fun parseToken(token: String): UserInfo? {
         return try {
             val verified = JWT.require(jwtAlgorithm)
@@ -79,47 +114,6 @@ class WebServer {
         }
     }
 
-    // Minecraft account -> WebClient
-    val listeners = Multimaps.synchronizedSetMultimap(
-        MultimapBuilder.SetMultimapBuilder
-            .hashKeys()
-            .hashSetValues()
-            .build<UUID, WebClient>()
-    )
-    val usernameToIdCache = CacheBuilder.newBuilder()
-        .expireAfterWrite(1, TimeUnit.HOURS)
-        .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
-            CoroutineScope(Dispatchers.IO).async {
-                AspirinServer.httpClient
-                    .get("https://api.mojang.com/users/profiles/minecraft/$name")
-                    .body<JsonObject?>()?.get("id")?.asString?.let { parseUndashedId(it) }
-            }.asCompletableFuture()
-        })
-
-    val idToProfileCache = CacheBuilder.newBuilder()
-        .expireAfterWrite(1, TimeUnit.HOURS)
-        .build<UUID, CompletableFuture<JsonObject?>>(CacheLoader.from { id ->
-            CoroutineScope(Dispatchers.IO).async {
-                AspirinServer.httpClient
-                    .get("https://sessionserver.mojang.com/session/minecraft/profile/$id")
-                    .body<JsonObject?>()
-            }.asCompletableFuture()
-        })
-
-    val sessionHashCallbacks = CacheBuilder.newBuilder()
-        .expireAfterWrite(30, TimeUnit.SECONDS)
-        .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
-    val addressCallbacks = CacheBuilder.newBuilder()
-        .expireAfterWrite(30, TimeUnit.SECONDS)
-        .build<UUID, CompletableFuture<AddressInfo>>(CacheLoader.from { _ -> CompletableFuture() })
-
-    data class AddressInfo(
-        val backVersion: Int,
-        val backHostAndPort: HostAndPort,
-        var frontOnline: Boolean? = null,
-        var backName: String? = null
-    )
-
     suspend fun requestAddressInfo(frontName: String): CompletableFuture<AddressInfo> {
         var onlineId: UUID? = null
         try {
@@ -131,7 +125,7 @@ class WebServer {
 
         val callbackId = UUID.randomUUID()
         val future = addressCallbacks.get(callbackId)
-        CoroutineScope(coroutineContext).apply {
+        coroutineScope.apply {
             launch(Dispatchers.IO) {
                 run sending@{
                     onlineId?.let {
@@ -164,16 +158,31 @@ class WebServer {
         return sent
     }
 
+    suspend fun joinWithCachedToken(playerId: UUID, hash: String): Boolean {
+        val accessToken = minecraftAccessTokens.getIfPresent(playerId) ?: return false
+        return AspirinServer.httpClient.post("https://sessionserver.mojang.com/session/minecraft/join") {
+            setBody(JsonObject().also {
+                it.addProperty("accessToken", accessToken)
+                it.addProperty("selectedProfile", playerId.toString().replace("-", ""))
+                it.addProperty("serverId", hash)
+            })
+            contentType(ContentType.Application.Json)
+        }.bodyAsText().isEmpty()
+    }
+
     suspend fun requestSessionJoin(
         frontName: String,
         id: UUID, name: String, hash: String,
         address: SocketAddress, backAddress: SocketAddress
     ): CompletableFuture<Unit> {
+        if (frontName.equals(name, ignoreCase = true) && joinWithCachedToken(id, hash)) {
+            return CompletableFuture.completedFuture(Unit)
+        }
         val future = sessionHashCallbacks[hash]
         if (!listeners.containsKey(id)) {
             future.completeExceptionally(StacklessException("UUID $id ($frontName) isn't listened. Go to web auth."))
         } else {
-            CoroutineScope(coroutineContext).apply {
+            coroutineScope.apply {
                 launch(Dispatchers.IO) {
                     var info: JsonObject? = null
                     var ptr: String? = null

@@ -1,5 +1,6 @@
 package com.viaversion.aas.codec;
 
+import com.viaversion.aas.UtilKt;
 import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.aas.codec.packet.PacketRegistry;
 import com.viaversion.aas.handler.MinecraftHandler;
@@ -51,6 +52,7 @@ public class MinecraftCodec extends MessageToMessageCodec<ByteBuf, Packet> {
 				handler.getFrontEnd() ? Direction.SERVERBOUND : Direction.CLIENTBOUND
 		));
 		if (msg.isReadable()) {
+			UtilKt.getMcLogger().debug("Remaining bytes in packet {}", out);
 			throw new StacklessException("Remaining bytes!!!");
 		}
 	}
