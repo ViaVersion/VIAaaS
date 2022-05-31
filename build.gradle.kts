@@ -38,7 +38,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.4.16+" + try {
+version = "0.4.17+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
