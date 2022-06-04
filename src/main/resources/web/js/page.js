@@ -105,20 +105,22 @@ function addMcAccountToList(account) {
     $(accounts).append(line);
 }
 
-function addListSendToken(username) {
+function addUsernameList(username) {
     let line = $("<option class='mc_username'></option>");
     line.text(username);
     $("#send_token_user").append(line);
+    $("#backend_user_list").append(line.clone());
 }
 
 function refreshAccountList() {
     accounts.innerHTML = "";
     $("#send_token_user .mc_username").remove();
+    $("#backend_user_list .mc_username").remove();
     getActiveAccounts()
         .sort((a, b) => a.name.localeCompare(b.name))
         .forEach(it => {
             addMcAccountToList(it)
-            addListSendToken(it.name)
+            addUsernameList(it.name)
         });
 }
 
@@ -420,7 +422,7 @@ class McAccount {
     acquireActiveToken() {
         return this.checkActive().then(success => {
             if (!success) {
-                return this.refresh();
+                return this.refresh().then(() => this);
             }
             return this;
         }).catch(e => addToast("Failed to refresh token!", e));

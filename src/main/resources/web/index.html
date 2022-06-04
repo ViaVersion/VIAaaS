@@ -118,7 +118,8 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <option value="false">Force offline (recommended for Geyser)</option>
                 </select>
                 <input id="connect_user" type="text" class="form-control" placeholder="Back Username"
-                       aria-label="Backend Username">
+                       aria-label="Backend Username" list="backend_user_list">
+                <datalist id="backend_user_list"></datalist>
             </form>
             <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">the address
                 generator</a> to specify the server</p>
