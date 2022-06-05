@@ -30,7 +30,6 @@ import io.netty.resolver.dns.DnsNameResolverBuilder
 import io.netty.util.concurrent.Future
 import java.io.File
 import java.lang.management.ManagementFactory
-import java.net.InetAddress
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.util.concurrent.CompletableFuture
@@ -122,15 +121,15 @@ object AspirinServer {
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .option(ChannelOption.TCP_FASTOPEN, 32)
-        VIAaaSConfig.port.forEach {
-            chFutures.add(serverBootstrap.bind(InetAddress.getByName(VIAaaSConfig.bindAddress), it))
+        VIAaaSConfig.bindAddresses.forEach {
+            chFutures.add(serverBootstrap.bind(it.host, it.port))
         }
 
         ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
 
         viaaasLogger.info("Using compression: ${Natives.compress.loadedVariant}, crypto: ${Natives.cipher.loadedVariant}")
         chFutures.forEach {
-            viaaasLogger.info("Binded minecraft into into " + it.sync().channel().localAddress())
+            viaaasLogger.info("Binded minecraft into " + it.sync().channel().localAddress())
         }
         viaaasLogger.info(
             "Application started in " + ManagementFactory.getRuntimeMXBean().uptime

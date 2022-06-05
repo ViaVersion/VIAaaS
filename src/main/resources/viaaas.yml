@@ -6,26 +6,17 @@
 ######
 # Minecraft networking
 ######
-# Port used for binding
-port: 25565
-# Address to bind
-bind-address: 0.0.0.0
+# Socket address to bind, default port is 25565
+bind-addresses: ["0.0.0.0"]
 # Proxy used to connect to backend servers
 # Example: socks5://localhost:9050, socks4://localhost:9050, http://foo:bar@localhost:9080
 backend-proxy: ''
-# Migrated to backend-proxy
-backend-socks5-proxy-address: ''
-backend-socks5-proxy-port: 9050
 # Zlib Compression level
 compression-level: 6
 #
 ######
 # VIAaaS virtual hosts options
 ######
-# A list of default address parsers if the address host-name is missing
-#default-address-parsers
-#  - "25565:test.geysermc.org"
-default-address-parsers: []
 # Requires virtual host to contain the value from "host-name" as a suffix.
 # A false value will allow virtual hosts with no suffix, connecting to the hostname sent by client.
 # A false value could be used for transparent proxying or for MiTM.
@@ -38,6 +29,13 @@ host-name:
 # Default port to be used when connecting to the backend server.
 # Use -1 to reuse the port sent by client, useful for transparent proxying.
 default-backend-port: 25565
+# A list of backend address if the address host-name is missing
+# It will be chosen via virtual port
+# May be useful for BungeeCord
+# default-backends:
+#   -1: "anyport.example.com._v1_12._of"
+#   25565: "test.geysermc.org._v1_8"
+default-parameters: {}
 #
 ######
 # Address filtering
@@ -88,3 +86,12 @@ protocol-detector-cache: 30
 #####
 # Secret key used to generate Minecraft tokens for listening logins
 jwt-secret: ''
+
+#####
+# Replaced to new options
+#####
+backend-socks5-proxy-address: ''
+backend-socks5-proxy-port: 9050
+backend-address: ''
+bind-address: ''
+port: ''
