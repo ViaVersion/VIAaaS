@@ -57,7 +57,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.0-1.19-pre3-SNAPSHOT"
+    val vvVer = "4.3.0-1.19-rc2-SNAPSHOT"
     val vbVer = "4.3.0-1.19-pre2-SNAPSHOT"
     val vrVer = "d189537"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
@@ -66,7 +66,7 @@ dependencies {
 
     implementation("io.netty:netty-all:4.1.77.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.52.Final")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.13.Final:linux-x86_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.14.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.0")
