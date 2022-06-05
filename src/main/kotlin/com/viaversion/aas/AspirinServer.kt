@@ -70,7 +70,7 @@ object AspirinServer {
 
     val parentLoop = eventLoopGroup()
     val childLoop = eventLoopGroup()
-    var chFuture: ChannelFuture? = null
+    var chFutures = mutableListOf<ChannelFuture>()
     val dnsResolver = DnsNameResolverBuilder(childLoop.next())
         .socketChannelFactory(channelSocketFactory(childLoop))
         .channelFactory(channelDatagramFactory(childLoop))
@@ -95,11 +95,10 @@ object AspirinServer {
             mainFinishSignal()
             ktorServer?.stop(1000, 1000)
             httpClient.close()
-            listOf<Future<*>?>(
-                chFuture?.channel()?.close(),
+            (chFutures.map { it.channel().close() } + listOf<Future<*>?>(
                 parentLoop.shutdownGracefully(),
                 childLoop.shutdownGracefully()
-            )
+            ))
                 .forEach { it?.sync() }
         }
     }
@@ -115,7 +114,7 @@ object AspirinServer {
     fun mainStartSignal() = initFuture.complete(Unit)
 
     fun listenPorts(args: Array<String>) {
-        chFuture = ServerBootstrap()
+        val serverBootstrap = ServerBootstrap()
             .group(parentLoop, childLoop)
             .channelFactory(channelServerSocketFactory(parentLoop))
             .childHandler(FrontEndInit)
@@ -123,12 +122,16 @@ object AspirinServer {
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .option(ChannelOption.TCP_FASTOPEN, 32)
-            .bind(InetAddress.getByName(VIAaaSConfig.bindAddress), VIAaaSConfig.port)
+        VIAaaSConfig.ports.forEach {
+            chFutures.add(serverBootstrap.bind(InetAddress.getByName(VIAaaSConfig.bindAddress), it))
+        }
 
         ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
 
         viaaasLogger.info("Using compression: ${Natives.compress.loadedVariant}, crypto: ${Natives.cipher.loadedVariant}")
-        viaaasLogger.info("Binded minecraft into " + chFuture!!.sync().channel().localAddress())
+        chFutures.forEach {
+            viaaasLogger.info("Binded minecraft into into " + it.sync().channel().localAddress())
+        }
         viaaasLogger.info(
             "Application started in " + ManagementFactory.getRuntimeMXBean().uptime
                 .milliseconds.toDouble(DurationUnit.SECONDS) + "s"
