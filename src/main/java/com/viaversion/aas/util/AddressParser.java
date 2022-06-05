@@ -17,6 +17,26 @@ public class AddressParser {
 	public String username;
 	public Boolean online;
 
+	public AddressParser parse(String address) {
+		boolean stopOptions = false;
+		List<String> optionsParts = new ArrayList<>();
+		List<String> serverParts = new ArrayList<>();
+
+		for (String part : Lists.reverse(Arrays.asList(address.split(Pattern.quote("."))))) {
+			if (!stopOptions && parseOption(part)) {
+				optionsParts.add(part);
+				continue;
+			}
+			stopOptions = true;
+			serverParts.add(part);
+		}
+
+		serverAddress = String.join(".", Lists.reverse(serverParts));
+		viaOptions = String.join(".", Lists.reverse(optionsParts));
+
+		return this;
+	}
+
 	public AddressParser parse(String rawAddress, List<String> viaHostName) {
 		String address = StringsKt.removeSuffix(rawAddress, ".");
 
@@ -33,21 +53,7 @@ public class AddressParser {
 			return this;
 		}
 
-		boolean stopOptions = false;
-		List<String> optionsParts = new ArrayList<>();
-		List<String> serverParts = new ArrayList<>();
-
-		for (String part : Lists.reverse(Arrays.asList(suffixRemoved.split(Pattern.quote("."))))) {
-			if (!stopOptions && parseOption(part)) {
-				optionsParts.add(part);
-				continue;
-			}
-			stopOptions = true;
-			serverParts.add(part);
-		}
-
-		serverAddress = String.join(".", Lists.reverse(serverParts));
-		viaOptions = String.join(".", Lists.reverse(optionsParts));
+		parse(suffixRemoved);
 		viaSuffix = suffix;
 
 		return this;

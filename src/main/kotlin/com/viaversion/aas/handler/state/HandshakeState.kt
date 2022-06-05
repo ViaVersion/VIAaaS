@@ -59,10 +59,16 @@ class HandshakeState : ConnectionState {
         val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "").ifEmpty { null }
         val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
 
-        val parsed = AddressParser().parse(virtualHostNoExtra, VIAaaSConfig.hostName)
+        var parsed = AddressParser().parse(virtualHostNoExtra, VIAaaSConfig.hostName)
+        val hadHostname = parsed.viaSuffix != null
+        var useDefault = false;
+
+        if (!hadHostname && VIAaaSConfig.defaultAddressParsers.containsKey(virtualPort)) {
+            parsed = VIAaaSConfig.defaultAddressParsers[virtualPort]
+            useDefault = true
+        }
 
         val backProto = parsed.protocol ?: -2
-        val hadHostname = parsed.viaSuffix != null
 
         val backAddress = parsed.serverAddress!!
         val port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
@@ -93,7 +99,7 @@ class HandshakeState : ConnectionState {
                     "$virtualHostNoExtra $virtualPort v${handler.data.frontVer}"
         )
 
-        if (!hadHostname && VIAaaSConfig.requireHostName && !addressFromWeb
+        if (!useDefault && !hadHostname && VIAaaSConfig.requireHostName && !addressFromWeb
         ) {
             throw StacklessException("Missing parts in hostname")
         }

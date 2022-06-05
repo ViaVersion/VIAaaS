@@ -122,7 +122,7 @@ object AspirinServer {
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .option(ChannelOption.TCP_FASTOPEN, 32)
-        VIAaaSConfig.ports.forEach {
+        VIAaaSConfig.port.forEach {
             chFutures.add(serverBootstrap.bind(InetAddress.getByName(VIAaaSConfig.bindAddress), it))
         }
 

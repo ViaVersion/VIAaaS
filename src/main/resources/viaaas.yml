@@ -22,6 +22,10 @@ compression-level: 6
 ######
 # VIAaaS virtual hosts options
 ######
+# A list of default address parsers if the address host-name is missing
+#default-address-parsers
+#  - "25565:test.geysermc.org"
+default-address-parsers: []
 # Requires virtual host to contain the value from "host-name" as a suffix.
 # A false value will allow virtual hosts with no suffix, connecting to the hostname sent by client.
 # A false value could be used for transparent proxying or for MiTM.

@@ -1,6 +1,7 @@
 package com.viaversion.aas.config
 
 import com.viaversion.aas.secureRandom
+import com.viaversion.aas.util.AddressParser
 import com.viaversion.viaversion.util.Config
 import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.filters.Canvas
@@ -63,7 +64,14 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
         }
     }
 
-    val ports: List<Int> get() = Objects.toString(this.get("port", Any::class.java, "25565"))!!.split(',').map { it.trim().toInt() }.distinct()
+    val port: List<Int> get() = Objects.toString(this.get("port", Any::class.java, "25565"))!!.split(',').map { it.trim().toInt() }.distinct()
+    val defaultAddressParsers: Map<Int, AddressParser> get() = this.getStringList("default-address-parsers")!!.map {
+        val split = it.split(':', limit = 2)
+        if (split.size != 2) {
+            throw IllegalArgumentException("Invalid default address parser: $it")
+        }
+        split[0].trim().toInt() to AddressParser().parse(split[1].trim())
+    }.toMap()
     val bindAddress: String get() = this.getString("bind-address", "localhost")!!
     val hostName: List<String>
         get() = this.get("host-name", List::class.java, listOf("viaaas.localhost"))!!.map { it.toString() }
