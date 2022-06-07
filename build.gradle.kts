@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.0-1.19-rc2-SNAPSHOT"
-    val vbVer = "4.3.0-1.19-pre2-SNAPSHOT"
+    val vvVer = "4.3.0"
+    val vbVer = "4.3.0"
     val vrVer = "d189537"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
@@ -84,7 +84,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.0.1"
+    val ktorVersion = "2.0.2"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
