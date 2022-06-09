@@ -1,7 +1,6 @@
 package com.viaversion.aas.codec.packet.handshake
 
 import com.viaversion.aas.codec.packet.Packet
-import com.viaversion.aas.mcLogger
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.types.StringType
