@@ -13,7 +13,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.6.21"
+    kotlin("jvm") version "1.7.0"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -57,15 +57,15 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.0"
-    val vbVer = "4.3.0"
+    val vvVer = "4.3.2-SNAPSHOT"
+    val vbVer = "4.3.1-SNAPSHOT"
     val vrVer = "d189537"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
     implementation("io.netty:netty-all:4.1.77.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.52.Final")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.53.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.14.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.1-jre")
