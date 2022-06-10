@@ -35,6 +35,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     var backendProxy: URI? = null
     var protocolDetectorCache: Int = 30
     var compressionLevel: Int = 6
+    var bungeeCord: Boolean = false
 
     init {
         reloadConfig()
@@ -79,6 +80,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
         backendProxy = this.getString("backend-proxy", "").let { if (it.isNullOrEmpty()) null else URI.create(it) }
         protocolDetectorCache = this.getInt("protocol-detector-cache", 30)
         compressionLevel = this.getInt("compression-level", 6)
+        bungeeCord = this.getBoolean("bungee-cord", false)
     }
 
     fun reloadIcon() {

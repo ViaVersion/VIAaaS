@@ -36,6 +36,8 @@ default-backend-port: 25565
 #   -1: "anyport.example.com._v1_12._of"
 #   25565: "test.geysermc.org._v1_8"
 default-parameters: {}
+# Enable if this proxy is behind a BungeeCord proxy
+bungee-cord: false
 #
 ######
 # Address filtering
