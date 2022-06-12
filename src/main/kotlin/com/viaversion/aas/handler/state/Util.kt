@@ -11,9 +11,10 @@ import com.viaversion.aas.handler.forward
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.type.Type
 import io.ktor.server.netty.*
 import io.netty.bootstrap.Bootstrap
-import io.netty.buffer.Unpooled
+import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
 import io.netty.channel.socket.SocketChannel
@@ -21,7 +22,6 @@ import io.netty.handler.proxy.ProxyHandler
 import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withTimeout
-import java.math.BigInteger
 import java.net.Inet4Address
 import java.net.InetSocketAddress
 import java.net.URI
@@ -154,29 +154,34 @@ suspend fun connectBack(
     tryBackAddresses(handler, addresses, state, extraData)
 }
 
+val openAuthMagic = 0xfdebf3fd.toInt()
+
 // https://github.com/RaphiMC/OpenAuthMod/blob/fa66e78fe5c0e748c1b8c61624bf283fb8bc06dd/src/main/java/com/github/oam/utils/IntTo3ByteCodec.java#L16
-fun encodeOpenAuth(hash: String): IntArray {
-    val buffer = Unpooled.wrappedBuffer(BigInteger(hash, 16).toByteArray())
-    val out = IntArray(2 + ceil(buffer.readableBytes().toDouble() / 3.0).toInt())
-    val magic = 0xfdebf3fd.toInt()
+fun encodeCompressionOpenAuth(channel: String, id: Int, data: ByteArray): IntArray {
+    val buffer = ByteBufAllocator.DEFAULT.buffer()
+    try {
+        Type.STRING.write(buffer, channel)
+        Type.VAR_INT.writePrimitive(buffer, id)
+        buffer.writeBytes(data)
+        val out = IntArray(2 + ceil(buffer.readableBytes() / 3.0).toInt())
 
-    out[0] = magic
-    out[out.size - 1] = magic
+        out[0] = openAuthMagic
+        out[out.size - 1] = openAuthMagic
 
-    for (i in 1 until out.size - 1) {
-        var int = 1.shl(31)
-            .or(1.shl(30)).or(buffer.readUnsignedByte().toInt().shl(16))
-        if (buffer.isReadable) {
-            int = int.or(1.shl(29)).or(buffer.readUnsignedByte().toInt().shl(8))
+        for (i in 1 until out.size - 1) {
+            var entry = 0xC0000000.toInt().or(buffer.readUnsignedByte().toInt().shl(16))
+            if (buffer.isReadable) {
+                entry = entry.or(0x20000000).or(buffer.readUnsignedByte().toInt().shl(8))
+            }
+            if (buffer.isReadable) {
+                entry = entry.or(0x10000000).or(buffer.readUnsignedByte().toInt())
+            }
+
+            out[i] = entry
         }
-        if (buffer.isReadable) {
-            int = int.or(1.shl(28)).or(buffer.readUnsignedByte().toInt())
-        }
 
-        out[i] = int
+        return out
+    } finally {
+        buffer.release()
     }
-
-    return out
 }
-
-val OPENAUTH_MAGIC_PREFIX = String(byteArrayOf(2, 20, 12, 3), Charsets.UTF_8)

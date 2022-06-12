@@ -15,6 +15,7 @@ import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
 import io.netty.buffer.ByteBufAllocator
+import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
@@ -37,11 +38,9 @@ class LoginState : ConnectionState {
     var extraData: String? = null
     var backName: String? = null
     var started = false
-    override val state: State
-        get() = State.LOGIN
-    override val logDcInfo: Boolean
-        get() = true
-    var callbackPluginReauth = CompletableFuture<Boolean>()
+    override val state: State get() = State.LOGIN
+    override val logDcInfo: Boolean get() = true
+    val callbackReauth = CompletableFuture<Boolean>()
     var pendingReauth: Int? = null
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
@@ -59,13 +58,19 @@ class LoginState : ConnectionState {
     }
 
     private fun handlePluginResponse(handler: MinecraftHandler, packet: PluginResponse) {
-        if (packet.id == pendingReauth) {
-            callbackPluginReauth.complete(packet.success)
-            pendingReauth = null
-
-            return
-        }
+        if (handleReauthResponse(packet)) return
         forward(handler, packet)
+    }
+
+    private fun handleReauthResponse(packet: PluginResponse): Boolean {
+        if (packet.id == pendingReauth) {
+            pendingReauth = null
+            val buf = Unpooled.wrappedBuffer(packet.data)
+            callbackReauth.complete(buf.readBoolean())
+
+            return true
+        }
+        return false
     }
 
     private fun handleLoginSuccess(handler: MinecraftHandler, loginSuccess: LoginSuccess) {
@@ -77,9 +82,7 @@ class LoginState : ConnectionState {
         val threshold = setCompression.threshold
 
         setCompression(handler.data.backChannel!!, threshold)
-
         forward(handler, setCompression)
-
         setCompression(handler.data.frontChannel, threshold)
     }
 
@@ -102,13 +105,25 @@ class LoginState : ConnectionState {
             || !frontName.equals(backName, ignoreCase = true)
             || handler.data.frontVer!! < ProtocolVersion.v1_8.version
         ) {
-            callbackPluginReauth.complete(false)
-            return callbackPluginReauth
+            callbackReauth.complete(false)
+            return callbackReauth
         }
 
+        pendingReauth = ThreadLocalRandom.current().nextInt()
+        val buf = ByteBufAllocator.DEFAULT.buffer()
+        try {
+            Type.STRING.write(buf, backHash)
+            sendOpenAuthRequest(handler, "oam:join", pendingReauth!!, readRemainingBytes(buf))
+        } finally {
+            buf.release()
+        }
+        return callbackReauth
+    }
+
+    private fun sendOpenAuthRequest(handler: MinecraftHandler, channel: String, id: Int, data: ByteArray) {
         if (handler.data.frontVer!! < ProtocolVersion.v1_13.version) {
-            encodeOpenAuth(backHash).forEach { data ->
-                send(handler.data.frontChannel, SetCompression().also { it.threshold = data })
+            encodeCompressionOpenAuth(channel, id, data).forEach { entry ->
+                send(handler.data.frontChannel, SetCompression().also { it.threshold = entry })
             }
             send(
                 handler.data.frontChannel,
@@ -118,24 +133,15 @@ class LoginState : ConnectionState {
 
             handler.coroutineScope.launch {
                 delay(5000)
-                callbackPluginReauth.complete(false)
+                callbackReauth.complete(false)
             }
         } else {
-            val buf = ByteBufAllocator.DEFAULT.buffer()
-            try {
-                Type.STRING.write(buf, backHash)
-
-                val packet = PluginRequest()
-                packet.id = ThreadLocalRandom.current().nextInt()
-                packet.channel = "openauthmod:join"
-                packet.data = readRemainingBytes(buf)
-                send(handler.data.frontChannel, packet, true)
-                pendingReauth = packet.id
-            } finally {
-                buf.release()
-            }
+            val packet = PluginRequest()
+            packet.id = id
+            packet.channel = channel
+            packet.data = data
+            send(handler.data.frontChannel, packet, true)
         }
-        return callbackPluginReauth
     }
 
     fun handleCryptoRequest(handler: MinecraftHandler, cryptoRequest: CryptoRequest) {
@@ -182,6 +188,17 @@ class LoginState : ConnectionState {
     }
 
     fun handleCryptoResponse(handler: MinecraftHandler, cryptoResponse: CryptoResponse) {
+        if ("oam:data".encodeToByteArray().contentEquals(cryptoResponse.encryptedNonce)) {
+            val buffer = Unpooled.wrappedBuffer(cryptoResponse.encryptedKey)
+            val id = Type.VAR_INT.readPrimitive(buffer)
+            val data = readRemainingBytes(buffer)
+            if (handleReauthResponse(PluginResponse().also {
+                    it.success = true
+                    it.id = id
+                    it.data = data
+                })) return
+        }
+
         val frontHash = let {
             val frontKey = decryptRsa(cryptoKey.private, cryptoResponse.encryptedKey)
             if (cryptoResponse.encryptedNonce != null) {
@@ -212,13 +229,7 @@ class LoginState : ConnectionState {
     }
 
     fun handleLoginStart(handler: MinecraftHandler, loginStart: LoginStart) {
-        if (started) {
-            if (loginStart.username.startsWith(OPENAUTH_MAGIC_PREFIX)) {
-                callbackPluginReauth.complete(loginStart.username.removePrefix(OPENAUTH_MAGIC_PREFIX).toBoolean())
-                return
-            }
-            throw StacklessException("Login already started")
-        }
+        if (started) throw StacklessException("Login already started")
         started = true
 
         VIAaaSConfig.maxPlayers?.let {
