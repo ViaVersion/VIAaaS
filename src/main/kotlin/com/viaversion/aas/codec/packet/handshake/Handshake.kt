@@ -15,7 +15,7 @@ class Handshake : Packet {
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         protocolId = Type.VAR_INT.readPrimitive(byteBuf)
-        address = StringType(255).read(byteBuf)
+        address = Type.STRING.read(byteBuf)
         port = byteBuf.readUnsignedShort()
         nextState = State.values()[Type.VAR_INT.readPrimitive(byteBuf)]
     }
