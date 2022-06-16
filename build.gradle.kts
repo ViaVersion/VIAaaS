@@ -49,7 +49,7 @@ extra.set("archivesBaseName", "VIAaaS")
 repositories {
     mavenCentral()
     maven("https://repo.viaversion.com/")
-    maven("https://nexus.velocitypowered.com/repository/maven-public/")
+    maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://jitpack.io/")
 }
 
@@ -64,12 +64,12 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.77.Final")
+    implementation("io.netty:netty-all:4.1.78.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.53.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.14.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("com.velocitypowered:velocity-native:3.1.0")
+    implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
     implementation("net.coobird:thumbnailator:0.4.17")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.30")
