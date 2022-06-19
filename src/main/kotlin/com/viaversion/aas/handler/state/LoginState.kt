@@ -65,9 +65,12 @@ class LoginState : ConnectionState {
     private fun handleReauthResponse(packet: PluginResponse): Boolean {
         if (packet.id == pendingReauth) {
             pendingReauth = null
-            val buf = Unpooled.wrappedBuffer(packet.data)
-            callbackReauth.complete(buf.readBoolean())
-
+            if (packet.success) {
+                val buf = Unpooled.wrappedBuffer(packet.data)
+                callbackReauth.complete(buf.readBoolean())
+            } else {
+                callbackReauth.complete(false)
+            }
             return true
         }
         return false
