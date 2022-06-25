@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit
 class WebServer {
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
     val jwtAlgorithm = Algorithm.HMAC256(VIAaaSConfig.jwtSecret)
-    val coroutineScope = CoroutineScope(Job())
+    val coroutineScope = CoroutineScope(SupervisorJob())
 
     // Minecraft account -> WebClient
     val listeners = Multimaps.synchronizedSetMultimap(
@@ -136,7 +136,7 @@ class WebServer {
                 }
             }
             launch {
-                delay(20_000)
+                delay(10_000)
                 future.completeExceptionally(StacklessException("No response from browser"))
             }
         }

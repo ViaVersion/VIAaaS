@@ -95,31 +95,43 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
         <p>Listening to front-end logins from:</p>
         <div id="listening"></div>
         <div id="actions">
-            <button id="listen_continue" type="button" class="btn btn-primary">Listen to <span id="mcIdUsername"></span>
+            <button type="button" class="btn btn-primary" id="listen_continue">Listen to <span
+                    id="mcIdUsername"></span>
             </button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#listenModal"
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#listenModal"
                     id="listen_open">Listen to logins
             </button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendTokenModal"
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#sendTokenModal"
                     id="send_token_open">Send Access Token
             </button>
         </div>
         <hr>
         <p>Connecting to backend server:</p>
         <div id="connect">
-            <form class="input-group mb-3">
-                <input id="connect_address" type="text" class="form-control" placeholder="Address:Port"
-                       aria-label="Address and Port">
-                <input id="connect_version" type="text" class="form-control" placeholder="Version" aria-label="Version">
-                <select class="form-select" id="connect_online" aria-label="Online Mode">
-                    <option value="null" selected>Front Online Mode...</option>
-                    <option>AUTO</option>
-                    <option value="true">Force online</option>
-                    <option value="false">Force offline (recommended for Geyser)</option>
-                </select>
-                <input id="connect_user" type="text" class="form-control" placeholder="Back Username"
-                       aria-label="Backend Username" list="backend_user_list">
-                <datalist id="backend_user_list"></datalist>
+            <form class="input-group mb-3 row g-3 justify-content-md-center">
+                <div class="col-md-auto">
+                    <input id="connect_address" type="text" class="form-control" placeholder="Address:Port"
+                           aria-label="Address and Port" size="20">
+                </div>
+                <div class="col-md-auto">
+                    <input id="connect_version" type="text" class="form-control col-auto" placeholder="Version"
+                           aria-label="Version" size="6">
+                </div>
+                <div class="col-md-auto">
+                    <select class="form-select" id="connect_online" aria-label="Online Mode" size="1">
+                        <option value="null" selected>Front Online Mode...</option>
+                        <option>AUTO</option>
+                        <option value="true">Force online</option>
+                        <option value="false">Force offline (recommended for Geyser)</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <input id="connect_user" type="text" class="form-control" placeholder="Back Username"
+                           aria-label="Backend Username" list="backend_user_list" size="16" maxlength="16">
+                    <datalist id="backend_user_list"></datalist>
+                </div>
             </form>
             <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">the address
                 generator</a> to specify the server</p>
@@ -155,20 +167,26 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
         <div id="add-account">
             <div class="mb-3">
                 <label class="form-label" for="form_add_ms">Add Microsoft account</label>
-                <form class="row" id="form_add_ms">
-                    <div class="col-auto">
+                <form class="row justify-content-md-center" id="form_add_ms">
+                    <div class="col-md-auto">
                         <button class="btn btn-primary" id="login_submit_ms" type="submit">Login with Microsoft</button>
                     </div>
                 </form>
             </div>
             <div class="mb-2">
                 <label class="form-label" for="form_add_mc">Add Mojang account</label>
-                <form class="input-group" id="form_add_mc" action="javascript:">
-                    <input aria-label="Email/Username" class="form-control" id="mc_email"
-                           placeholder="Username" type="text">
-                    <input aria-label="Password" class="form-control" id="mc_password"
-                           placeholder="Password" type="password">
-                    <button class="btn btn-primary" id="login_submit_mc" type="submit">Login with Mojang</button>
+                <form class="input-group row justify-content-md-center" id="form_add_mc" action="javascript:">
+                    <div class="col-md-auto">
+                        <input aria-label="Email/Username" class="form-control" id="mc_email"
+                               placeholder="Username" type="text">
+                    </div>
+                    <div class="col-md-auto">
+                        <input aria-label="Password" class="form-control" id="mc_password"
+                               placeholder="Password" type="password">
+                    </div>
+                    <div class="col-md-auto">
+                        <button class="btn btn-primary" id="login_submit_mc" type="submit">Login with Mojang</button>
+                    </div>
                 </form>
             </div>
         </div>
