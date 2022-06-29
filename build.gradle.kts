@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.3.2-SNAPSHOT"
-    val vbVer = "4.3.1-SNAPSHOT"
+    val vvVer = "4.3.2-1.19.1-rc1-SNAPSHOT"
+    val vbVer = "4.3.1-1.19.1-pre1-SNAPSHOT"
     val vrVer = "d189537"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
@@ -84,7 +84,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.0.2"
+    val ktorVersion = "2.0.3"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -101,7 +101,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:3.19.2")
+    implementation("com.auth0:java-jwt:4.0.0")
 }
 
 val run: JavaExec by tasks
