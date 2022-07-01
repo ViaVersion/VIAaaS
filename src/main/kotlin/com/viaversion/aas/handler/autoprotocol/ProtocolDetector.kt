@@ -24,16 +24,17 @@ import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.resolver.NoopAddressResolverGroup
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 object ProtocolDetector {
+    val coroutineScope = CoroutineScope(SupervisorJob())
     private val loader = CacheLoader.from<InetSocketAddress, CompletableFuture<ProtocolVersion>> { address ->
         val future = CompletableFuture<ProtocolVersion>()
-        CoroutineScope(Job()).launch {
+        coroutineScope.launch {
             try {
                 val proxyUri = VIAaaSConfig.backendProxy
                 val proxySocket = if (proxyUri == null) null else {
