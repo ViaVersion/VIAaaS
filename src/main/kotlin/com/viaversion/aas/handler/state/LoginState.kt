@@ -269,6 +269,9 @@ class LoginState : ConnectionState {
                     extraData
                 )
                 loginStart.username = backName!!
+                // todo implement profile public key?
+                loginStart.profileKey = null
+                loginStart.profileId = null
                 send(handler.data.backChannel!!, loginStart, true)
             } catch (e: Exception) {
                 handler.data.frontChannel.fireExceptionCaughtIfOpen(e)
