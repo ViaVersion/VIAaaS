@@ -72,5 +72,7 @@ object AspirinPlatform : ViaPlatform<UUID> {
     override fun getPlatformVersion() = AspirinServer.version
     override fun getPluginVersion() = VersionInfo.VERSION
     override fun isOldClientsAllowed() = true
+    override fun hasPlugin(name: String?)= false
+
     override fun isProxy() = true
 }
