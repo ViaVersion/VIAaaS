@@ -180,7 +180,7 @@ class WebServer {
         }
         val future = sessionHashCallbacks[hash]
         if (!listeners.containsKey(id)) {
-            future.completeExceptionally(StacklessException("UUID $id ($frontName) isn't listened. Go to web auth."))
+            future.completeExceptionally(StacklessException("UUID $id ($frontName) isn't listened. Go to web auth for reauthing."))
         } else {
             coroutineScope.apply {
                 launch(Dispatchers.IO) {
