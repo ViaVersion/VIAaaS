@@ -17,7 +17,7 @@
 style-src 'self' https://cdnjs.cloudflare.com/;
 img-src 'self' data: https://crafthead.net/ https://crafatar.com/;
 connect-src 'self' http://localhost:*/ https: wss:;
-script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/ 'unsafe-hashes' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=';
+script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/;
 frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
           http-equiv="Content-Security-Policy">
     <meta content="no-referrer" name="referrer">
@@ -26,12 +26,13 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
 
     <!-- https://www.srihash.org/ -->
     <link class="async-css" rel="preload" as="style"
-          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/css/bootstrap.min.css"
-          integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA=="
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css"
+          integrity="sha512-GQGU0fMMi238uA+a/bdWJfpUGKUkBdgfFdgBm72SUQ6BeyWjoY/ton0tEjH+OSH9iP4Dfh+7HM0I9f5eR0L/4w=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.1/js/bootstrap.min.js"
-            integrity="sha512-ewfXo9Gq53e1q1+WDTjaHAGZ8UvCWq0eXONhwDuIoaH8xz2r96uoAYaQCm1oQhnBfRXrvJztNXFsTloJfgbL5Q=="
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.min.js"
+            integrity="sha512-OvBgP9A2JBgiRad/mM36mkzXSXaJE9BEIENnVEmeZdITvwT09xnxLtT4twkCa8m/loMbPHsvPl0T8lRGVBwjlQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Safari workaround -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/HTML5Notification/3.0.0/Notification.min.js"
             integrity="sha512-gx0m7Qoum1Bb0KrP6AEZSt0e+o2xMEyStAz2TNGXGqR4HSVgPveWFQdtE06FRvJmmp8HdkJklOLYiV3aZN6tQg=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -41,8 +42,8 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
     <script defer crossorigin="anonymous"
             integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
             src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-    <script defer src="https://alcdn.msauth.net/browser/2.19.0/js/msal-browser.min.js"
-            integrity="sha384-VK+6hHt27itNFksZdEeXofJXdAhmlizHbC/a1TUUJm/Yq6gOuAjXKkiiCaGbFsnd"
+    <script defer src="https://alcdn.msauth.net/browser/2.27.0/js/msal-browser.min.js"
+            integrity="sha384-IlUQkOwOI6mWk8GNIWu8hpPE1sasxSg3gGjZo0dncq6IhHsTlH51mp5mhFYS5po1"
             crossorigin="anonymous"></script>
     <script defer src="js/config.js"></script>
     <script defer src="js/page.js"></script>

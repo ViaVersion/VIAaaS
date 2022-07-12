@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "ES2015",
+    "lib": [
+      "ES2018",
+      "DOM"
+    ],
+    "moduleResolution": "Node",
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "removeComments": true
+  },
+  "include": [
+    "js/**.ts"
+  ]
+}
