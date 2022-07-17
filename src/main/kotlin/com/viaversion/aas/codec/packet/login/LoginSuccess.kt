@@ -17,7 +17,7 @@ class LoginSuccess : Packet {
     override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         id = when {
             protocolVersion >= ProtocolVersion.v1_16.version -> {
-                Type.UUID_INT_ARRAY.read(byteBuf)
+                Type.UUID.read(byteBuf)
             }
             protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == 1 -> {
                 UUID.fromString(Type.STRING.read(byteBuf))
@@ -33,7 +33,7 @@ class LoginSuccess : Packet {
     override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         when {
             protocolVersion >= ProtocolVersion.v1_16.version -> {
-                Type.UUID_INT_ARRAY.write(byteBuf, id)
+                Type.UUID.write(byteBuf, id)
             }
             protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == 1 -> {
                 Type.STRING.write(byteBuf, id.toString())

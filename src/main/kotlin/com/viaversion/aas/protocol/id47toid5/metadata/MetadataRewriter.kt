@@ -19,8 +19,7 @@ object MetadataRewriter {
                 }
 
                 entry.setId(metaIndex.newIndex)
-                entry.setMetaTypeUnsafe(metaIndex.newType)
-                when (metaIndex.newType) {
+                val newValue = when (metaIndex.newType) {
                     MetaType1_8.Byte -> {
                         var byteValue = (oldValue as Number).toByte()
 
@@ -28,15 +27,16 @@ object MetadataRewriter {
                             val cape = byteValue.toInt() == 2
                             byteValue = (if (cape) 127 else 125).toByte()
                         }
-                        entry.value = byteValue
+                        byteValue
                     }
-                    MetaType1_8.Int -> entry.value = (oldValue as Number).toInt()
-                    MetaType1_8.Short -> entry.value = (oldValue as Number).toShort()
-                    MetaType1_8.Float -> entry.value = (oldValue as Number).toFloat()
-                    MetaType1_8.String -> entry.value = oldValue.toString()
-                    MetaType1_8.Slot, MetaType1_8.Position, MetaType1_8.Rotation -> entry.value = oldValue
+                    MetaType1_8.Int -> (oldValue as Number).toInt()
+                    MetaType1_8.Short -> (oldValue as Number).toShort()
+                    MetaType1_8.Float -> (oldValue as Number).toFloat()
+                    MetaType1_8.String -> oldValue.toString()
+                    MetaType1_8.Slot, MetaType1_8.Position, MetaType1_8.Rotation -> oldValue
                     else -> throw Exception("unknown metatype ${metaIndex.newType}")
                 }
+                entry.setTypeAndValue(metaIndex.newType, newValue)
             } catch (e: Exception) {
                 if (!Via.getPlatform().conf.isSuppressMetadataErrors) {
                     Via.getPlatform().logger.warning("Metadata Exception: $e $list")
