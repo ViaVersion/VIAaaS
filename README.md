@@ -1,6 +1,10 @@
 VIAaaS
 ---
 
+[![ViaVersion Discord](https://img.shields.io/badge/chat-on%20discord-blue.svg)](https://viaversion.com/discord)
+[![Powered by ViaVersion](https://img.shields.io/badge/Powered%20by-ViaVersion-blue.svg)](https://viaversion.com/)
+
+
 VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
 
 <img alt="VIAaaS Logo (VIA logo with structural formula of aspirin)" height="200" src="https://viaversion.github.io/VIAaaS/src/main/resources/web/img/logo.webp">
@@ -8,10 +12,6 @@ VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
 Address generator: https://jo0001.github.io/ViaSetup/aspirin
 
 Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Instances
-
-Discord: https://viaversion.com/discord
-
-Supported versions: https://viaversion.com/
 
 ## Demo
 
@@ -21,6 +21,8 @@ Using with GeyserConnect: https://youtu.be/_LItAIIFmsI
 
 Using with GeyserConnect on offline mode: https://youtu.be/-hZESD61nSU
 
+Using with OpenAuthMod: https://youtu.be/h3EfNSxxf8k
+
 Offline mode tutorial: https://youtu.be/lPdELnrxmp0
 
 ## How does it work?
@@ -29,7 +31,7 @@ Offline mode tutorial: https://youtu.be/lPdELnrxmp0
   and [ViaRewind](https://viaversion.com/rewind) translates the connections to backend server.
 - VIAaaS auth page stores account credentials in the player's browser local storage.
 - It requires a CORS Proxy for calling Mojang APIs.
-- Account credentials aren't sent to VIAaaS instance, though it's proxied by CORS Proxy.
+- Account credentials aren't sent to VIAaaS instance by default.
 - The web page receives and validates the joinGame's session hash from VIAaaS instance.
 
 ## Setting up server instance
@@ -51,24 +53,21 @@ java -jar VIAaaS-all.jar
 
 ### How to create a public server
 
-- You need a DNS wildcard pointing to VIAaaS instance, like ``*.example.com -> 192.168.123.123``. You can
-  use [DuckDNS](https://duckdns.org/) DDNS service.
+- You need a DNS wildcard pointing to VIAaaS instance, like ``*.example.com -> 192.168.123.123``.
 - Configure the hostname in the config
 - Open the Minecraft port (25565)
-- The HTTPS page needs a valid SSL certificate, you can use [Apache](https://httpd.apache.org/) (with
-  a [Let's Encrypt](https://letsencrypt.org/) certificate) as a reverse proxy. See apache_copypasta.txt file.
+- The HTTPS page needs a valid SSL certificate, you can use a reverse proxy like [Apache](https://httpd.apache.org/) (with
+  a [Let's Encrypt](https://letsencrypt.org/) certificate).
 
 ## CORS Proxy
 
-- Due to Mojang API not allowing CORS request, we need to use a CORS proxy
-- For less chance of Mojang seeing the login as suspect, you (the player) should set up a CORS proxy on your machine.
+- Due to Mojang API not allowing cross-origin requests, we need to use a CORS proxy
 - Note the ending slash in cors-anywhere address
-- The default CORS Proxy is hosted at https://crp123-cors.herokuapp.com/
-  ([source](https://github.com/creeper123123321/cors-anywhere/))
 
 ## Usage for players
 
-You can also connect to ```via.localhost`` and set the address parameters via web page.
+You'll need to specify which server you want to connect through address parameters
+added as prefix in ``via.localhost`` or via web page (default https://localhost:25543/).
 
 #### Offline mode:
 
@@ -88,8 +87,8 @@ Web login:
 Web login via token caching:
 
 - Open the web page and save your account in your browser
-- Send your access token to the instance
-- Connect with ```mc.example.com.via.localhost```
+- Send your access token to the instance. After that you can close the page.
+- Connect to ```mc.example.com.via.localhost``` with the account you sent the token.
 
 Fabric/Forge client:
 
@@ -122,8 +121,6 @@ Fabric/Forge client:
 - VIAaaS may trigger anti-cheats, due to block, item, movement and other differences between versions. USE AT OWN RISK.
 - Take care of browser local storage. Check for XSS vulnerabilities on your domain.
 - Check the security of CORS proxy, it will be used for calling to Mojang API.
-- Mojang may [lock](https://wiki.geysermc.org/geyser/common-issues/#mojang-resetting-account-credentials) your account
-  when API is called from a suspect IP address.
 
 ## FAQ
 
@@ -137,8 +134,6 @@ Fabric/Forge client:
 
 #### How to use Microsoft Account?:
 
-- If you are using a public VIAaaS instance, use this page https://viaversion.github.io/VIAaaS/ and configure the
-  WebSocket address.
 - If you're an administrator of the instance, edit ```config/web/js/config.js``` (default is in the jar) and
   configure your [Azure Client ID](https://wiki.vg/Microsoft_Authentication_Scheme#Microsoft_OAuth_Flow) and your domain
   whitelist.
@@ -147,7 +142,6 @@ Fabric/Forge client:
 
 #### How to use IPv6?:
 
-- When listening to 0.0.0.0, it should listen on IPv6 too.
 - The hostname parser currently doesn't support direct IPv6, but you can use a DNS name with https://sslip.io/
 
 #### I'm getting a DNS error/"Unknown host" while connecting to via.localhost
@@ -168,7 +162,7 @@ Fabric/Forge client:
 #### Can I use it to connect to .onion Minecraft hidden servers?
 
 - You can use .onion addresses if the instance is proxying the backend connections to TOR. Note that VIAaaS may log your
-  requests, and that your DNS queries may be unencrypted.
+  requests, and that your DNS queries may be sent unencrypted.
 
 #### Can you support more versions / Is there some alternative?
 
