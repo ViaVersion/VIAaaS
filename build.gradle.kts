@@ -13,7 +13,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -57,15 +57,15 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.4.0-1.19.1-pre5-SNAPSHOT"
-    val vbVer = "4.4.0-1.19.1-pre5-SNAPSHOT"
+    val vvVer = "4.4.0-1.19.1-rc2-SNAPSHOT"
+    val vbVer = "4.4.0-1.19.1-pre6-SNAPSHOT"
     val vrVer = "d189537"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.78.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.53.Final")
+    implementation("io.netty:netty-all:4.1.79.Final")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.54.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.14.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.1-jre")
@@ -74,7 +74,7 @@ dependencies {
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.30")
 
-    val log4jVer = "2.17.2"
+    val log4jVer = "2.18.0"
     val slf4jVer = "1.7.36"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
