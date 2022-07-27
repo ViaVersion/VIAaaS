@@ -38,7 +38,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.4.17+" + try {
+version = "0.4.18+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.4.0-1.19.1-rc2-SNAPSHOT"
-    val vbVer = "4.4.0-1.19.1-pre6-SNAPSHOT"
+    val vvVer = "4.4.0"
+    val vbVer = "4.4.0"
     val vrVer = "f879184"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
