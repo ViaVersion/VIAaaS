@@ -5,9 +5,12 @@ import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.UnknownPacket
 import com.viaversion.aas.codec.packet.play.Kick
 import com.viaversion.aas.codec.packet.play.PluginMessage
+import com.viaversion.aas.codec.packet.play.ServerboundChatCommand
+import com.viaversion.aas.codec.packet.play.ServerboundChatMessage
 import com.viaversion.aas.codec.packet.play.SetPlayCompression
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.*
+import com.viaversion.aas.mcLogger
 import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.writeFlushClose
@@ -26,6 +29,13 @@ object PlayState : ConnectionState {
             packet is UnknownPacket && (packet.id !in 0..127) -> throw StacklessException("Invalid packet id!")
             packet is PluginMessage && !handler.frontEnd -> modifyPluginMessage(handler, packet)
             packet is SetPlayCompression -> return handleCompression(handler, packet)
+            packet is Kick -> mcLogger.debug(
+                "{} disconnected on play: {}",
+                handler.endRemoteAddress.toString(),
+                packet.msg
+            )
+            packet is ServerboundChatCommand -> modifyChatCommand(packet)
+            packet is ServerboundChatMessage -> modifyChatMessage(packet)
         }
         forward(handler, ReferenceCountUtil.retain(packet))
     }
@@ -55,6 +65,16 @@ object PlayState : ConnectionState {
                 pluginMessage.data = encodeBrand(brand, is17(handler))
             }
         }
+    }
+
+    private fun modifyChatCommand(chatCommand: ServerboundChatCommand) {
+        // todo handle signatures?
+        chatCommand.isSignedPreview = false
+        chatCommand.signatures = emptyArray()
+    }
+
+    private fun modifyChatMessage(chatMessage: ServerboundChatMessage) {
+        chatMessage.signature = byteArrayOf()
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {

@@ -14,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import java.net.SocketAddress
 import java.nio.channels.ClosedChannelException
+import java.util.concurrent.ThreadLocalRandom
 
 class MinecraftHandler(
     val data: ConnectionData,
@@ -61,8 +62,9 @@ class MinecraftHandler(
         if (cause is ProxyConnectException && failedProxy(ctx)) return
         if (cause is CancelCodecException) return
         if (cause is ClosedChannelException) return
-        mcLogger.debug("Exception: ", cause)
-        disconnect("$cause")
+        val exceptionId = ThreadLocalRandom.current().nextInt().toUInt().toString(36)
+        mcLogger.debug("Exception $exceptionId: ", cause)
+        disconnect("$cause #$exceptionId")
     }
 
     fun disconnect(s: String) {

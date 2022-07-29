@@ -48,13 +48,18 @@ class LoginState : ConnectionState {
             is LoginStart -> handleLoginStart(handler, packet)
             is CryptoResponse -> handleCryptoResponse(handler, packet)
             is PluginResponse -> handlePluginResponse(handler, packet)
-            is LoginDisconnect -> forward(handler, packet)
+            is LoginDisconnect -> handleLoginDisconnect(handler, packet)
             is CryptoRequest -> handleCryptoRequest(handler, packet)
             is LoginSuccess -> handleLoginSuccess(handler, packet)
             is SetCompression -> handleCompression(handler, packet)
             is PluginRequest -> forward(handler, packet)
             else -> throw StacklessException("Invalid packet!")
         }
+    }
+
+    private fun handleLoginDisconnect(handler: MinecraftHandler, packet: LoginDisconnect) {
+        mcLogger.debug("{} disconnected on login: {}", handler.endRemoteAddress.toString(), packet.msg)
+        forward(handler, packet)
     }
 
     private fun handlePluginResponse(handler: MinecraftHandler, packet: PluginResponse) {

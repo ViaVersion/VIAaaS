@@ -10,7 +10,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 
 val sharewareVersion = ProtocolVersion.register(1, "3D Shareware v1.34")
 fun registerAspirinProtocols() {
-    Via.getManager().protocolManager.setOnlyCheckLoweringPathEntries(false) // Fixes 1.19.1 -> 1.18.2 -> 1.19 path
+    Via.getManager().protocolManager.maxPathDeltaIncrease = -1 // shareware id is weird
     Via.getManager().protocolManager.registerProtocol(Protocol1_8To1_7_6, ProtocolVersion.v1_8, ProtocolVersion.v1_7_6)
     // todo fix version checks
     Via.getManager().protocolManager.registerProtocol(ProtocolSharewareto1_14(), sharewareVersion, ProtocolVersion.v1_14)

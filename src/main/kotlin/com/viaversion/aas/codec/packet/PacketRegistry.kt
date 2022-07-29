@@ -7,6 +7,8 @@ import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.codec.packet.login.*
 import com.viaversion.aas.codec.packet.play.Kick
 import com.viaversion.aas.codec.packet.play.PluginMessage
+import com.viaversion.aas.codec.packet.play.ServerboundChatCommand
+import com.viaversion.aas.codec.packet.play.ServerboundChatMessage
 import com.viaversion.aas.codec.packet.play.SetPlayCompression
 import com.viaversion.aas.codec.packet.status.StatusPing
 import com.viaversion.aas.codec.packet.status.StatusPong
@@ -25,7 +27,9 @@ import com.viaversion.viaversion.protocols.protocol1_16to1_15_2.ClientboundPacke
 import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ClientboundPackets1_17
 import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPackets1_18
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ClientboundPackets1_19_1
+import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ServerboundPackets1_19_1
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ClientboundPackets1_19
+import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
@@ -36,6 +40,7 @@ import java.util.function.Supplier
 object PacketRegistry {
     // state, direction, packet id, protocol version -> entry
     val entriesDecoding = hashMapOf<Triple<State, Direction, Int>, RangeMap<Int, DecodingInfo>>()
+
     // direction, type, protocol version -> entry
     val entriesEncoding = hashMapOf<Pair<Direction, Class<out Packet>>, RangeMap<Int, EncodingInfo>>()
 
@@ -80,7 +85,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.DISCONNECT.id,
                 ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.DISCONNECT.id,
                 ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.DISCONNECT.id,
-                ProtocolVersion.v1_19..ProtocolVersion.v1_19_1 to ClientboundPackets1_19.DISCONNECT.id
+                ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.DISCONNECT.id,
+                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id
             )
         )
         register(
@@ -104,6 +110,20 @@ object PacketRegistry {
             ::SetPlayCompression,
             ProtocolVersion.v1_8.singleton,
             ClientboundPackets1_8.SET_COMPRESSION.id
+        )
+        register(
+            State.PLAY, Direction.SERVERBOUND, ::ServerboundChatCommand,
+            mapOf(
+                ProtocolVersion.v1_19.singleton to ServerboundPackets1_19.CHAT_COMMAND.id,
+                ProtocolVersion.v1_19_1.singleton to ServerboundPackets1_19_1.CHAT_COMMAND.id
+            )
+        )
+        register(
+            State.PLAY, Direction.SERVERBOUND, ::ServerboundChatMessage,
+            mapOf(
+                ProtocolVersion.v1_19.singleton to ServerboundPackets1_19.CHAT_MESSAGE.id,
+                ProtocolVersion.v1_19_1.singleton to ServerboundPackets1_19_1.CHAT_MESSAGE.id
+            )
         )
     }
 
