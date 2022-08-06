@@ -84,6 +84,12 @@ class LoginState : ConnectionState {
     }
 
     private fun handleLoginSuccess(handler: MinecraftHandler, loginSuccess: LoginSuccess) {
+        if (handler.data.compressionLevel == -1) {
+            // Enable front-end compression
+            val threshold = 256
+            forward(handler, SetCompression().also { it.threshold = threshold })
+            setCompression(handler.data.frontChannel, threshold)
+        }
         handler.data.state = PlayState()
         forward(handler, loginSuccess)
     }
