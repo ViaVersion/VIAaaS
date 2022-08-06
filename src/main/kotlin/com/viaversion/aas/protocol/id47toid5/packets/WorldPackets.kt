@@ -199,7 +199,6 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
         override fun registerMap() {
             map(Type.VAR_INT) //Status
             map(TypeRemapper(Type.POSITION), xyzUBytePosWriter)
-            map(Type.BYTE) //Face
         }
     })
 
