@@ -7,14 +7,14 @@ window.location.hash.substring(1).split("?")
     .map(it => new URLSearchParams(it)
         .forEach((a, b) => urlParams.append(b, a)));
 let mcIdUsername = urlParams.get("username");
-let mcauth_code = urlParams.get("mcauth_code");
-let mcauth_success = urlParams.get("mcauth_success");
+let mcIdCode = urlParams.get("mcauth_code");
+let mcIdSuccess = urlParams.get("mcauth_success");
 
 $(() => {
-    if (mcauth_success === "false") {
+    if (mcIdSuccess === "false") {
         addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg"));
     }
-    if (mcauth_code != null) {
+    if (mcIdCode != null) {
         history.replaceState(null, null, "#");
     }
 });
@@ -51,13 +51,12 @@ $(() => {
     cors_proxy_txt.value = getCorsProxy();
     ws_url_txt.value = getWsUrl();
 
-    $("#form_add_mc").on("submit", () => loginMc($("#mc_email").val() as string, $("#mc_password").val() as string));
     $("#form_add_ms").on("submit", () => loginMs());
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val() as string));
     $("#form_cors_proxy").on("submit", () => setCorsProxy($("#cors-proxy").val() as string));
     $("#form_listen").on("submit", () => submittedListen());
     $("#form_send_token").on("submit", () => submittedSendToken());
-    $("#en_notific").on("click", () => Notification.requestPermission().then(renderActions));
+    $("#en_notifications").on("click", () => Notification.requestPermission().then(renderActions));
     $("#listen_continue").on("click", () => clickedListenContinue());
     window.addEventListener('beforeinstallprompt', e => e.preventDefault());
 
@@ -99,7 +98,6 @@ function addMcAccountToList(account: McAccount) {
     <button type="button" class='btn btn-danger mc-remove'>Logout</button>
     </li>`);
     let txt = account.name;
-    if (account instanceof MicrosoftAccount) txt += " (" + account.msUser + ")";
     line.find(".mc-user").text(txt);
     line.find(".mc-remove").on("click", () => account.logout());
     let head = line.find(".mc-head");
@@ -161,23 +159,23 @@ function clickedListenContinue() {
     sendSocket(JSON.stringify({
         "action": "minecraft_id_login",
         "username": mcIdUsername,
-        "code": mcauth_code
+        "code": mcIdCode
     }));
-    mcauth_code = null;
+    mcIdCode = null;
     renderActions();
 }
 
 function renderActions() {
-    $("#en_notific").hide();
+    $("#en_notifications").hide();
     $("#listen_continue").hide();
     $("#listen_open").hide();
     $("#send_token_open").hide();
 
     if (Notification.permission === "default") {
-        $("#en_notific").show();
+        $("#en_notifications").show();
     }
     if (listenVisible) {
-        if (mcIdUsername != null && mcauth_code != null) {
+        if (mcIdUsername != null && mcIdCode != null) {
             $("#listen_continue").show();
         }
         $("#listen_open").show();
@@ -196,15 +194,20 @@ function onCompletedPoW(e: MessageEvent) {
 }
 
 function addListeningList(userId: string, username: string, token: string) {
-    let line = $("<p><img alt='?' src='?' loading='lazy' width=24 class='head'/> <span class='username'></span> <button class='btn btn-danger' type='button'>Unlisten</button></p>");
-    line.find(".username").text(username || userId);
+    let line = $(`<li class='list-group-item d-flex justify-content-between align-items-center p-1'>
+        <span class='ms-2'><img alt='?' src='?' loading='lazy' width=24 class='mc-head'/></span>
+        <span class='username'></span>
+        <button class='btn btn-danger' type='button'>Unlisten</button>
+    </li>`);
+    let displayName = username || userId;
+    line.find(".username").text(displayName);
     line.find(".btn").on("click", () => {
         removeToken(token);
         line.remove();
         unlisten(userId);
     });
-    let head = line.find(".head");
-    head.attr("alt", userId + "'s head");
+    let head = line.find(".mc-head");
+    head.attr("alt", displayName + "'s head");
     head.attr("src", "https://crafthead.net/helm/" + userId);
     $(listening).append(line);
 }
@@ -256,7 +259,7 @@ function resetHtml() {
 
 function ohNo() {
     try {
-        icanhazepoch().then(sec => {
+        getNetworkTimestamp().then(sec => {
             const calcDelta = Date.now() - sec * 1000;
             if (Math.abs(calcDelta) > 10000) {
                 addToast("Time isn't synchronized", "Please synchronize your computer time to NTP servers");
@@ -293,7 +296,7 @@ async function getIpAddress(cors: boolean): Promise<String> {
         .then(it => it.trim());
 }
 
-function icanhazepoch() {
+function getNetworkTimestamp() {
     return fetch("https://icanhazepoch.com")
         .then(checkFetchSuccess("code"))
         .then(r => r.text())
@@ -331,7 +334,7 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
                 {action: "reject", title: "Reject"},
                 {action: "confirm", title: "Confirm"}
             ]
-        });
+        }).then(() => {});
         notificationCallbacks.set(tag, action => {
             if (action === "reject") {
                 no();
@@ -365,7 +368,7 @@ let activeAccounts: Array<McAccount> = [];
 function loadAccounts() {
     (JSON.parse(localStorage.getItem("viaaas_mc_accounts")) || []).forEach((it: any) => {
         if (it.clientToken) {
-            addActiveAccount(new MojangAccount(it.id, it.name, it.accessToken, it.clientToken))
+            // Mojang auth doesn't work on multiplayer anymore
         } else if (it.msUser && myMSALObj.getAccountByUsername(it.msUser)) {
             addActiveAccount(new MicrosoftAccount(it.id, it.name, it.accessToken, it.msUser))
         }
@@ -403,14 +406,7 @@ class McAccount {
     }
 
     async checkActive(): Promise<boolean> {
-        return fetch(getCorsProxy() + "https://authserver.mojang.com/validate", {
-            method: "post",
-            body: JSON.stringify({
-                accessToken: this.accessToken,
-                clientToken: (this as any).clientToken || undefined
-            }),
-            headers: {"content-type": "application/json"}
-        }).then(data => data.ok);
+        return true;
     }
 
     async joinGame(hash: string): Promise<void> {
@@ -440,59 +436,6 @@ class McAccount {
                 return Promise.resolve();
             })
             .catch(e => addToast("Failed to refresh token!", e));
-    }
-}
-
-class MojangAccount extends McAccount {
-    public clientToken: string;
-
-    constructor(id: string, username: string, accessToken: string, clientToken: string) {
-        super(id, username, accessToken);
-        this.clientToken = clientToken;
-    }
-
-    override async logout() {
-        await super.logout();
-        await fetch(getCorsProxy() + "https://authserver.mojang.com/invalidate", {
-            method: "post",
-            body: JSON.stringify({
-                accessToken: this.accessToken,
-                clientToken: this.clientToken
-            }),
-            headers: {"content-type": "application/json"}
-        }).then(checkFetchSuccess("not success logout"));
-    }
-
-    override async refresh() {
-        console.log("refreshing " + this.id);
-        let jsonResp = await fetch(getCorsProxy() + "https://authserver.mojang.com/refresh", {
-            method: "post",
-            body: JSON.stringify({
-                accessToken: this.accessToken,
-                clientToken: this.clientToken
-            }),
-            headers: {"content-type": "application/json"},
-        })
-            .then(async r => {
-                if (r.status === 403) {
-                    try {
-                        await this.logout();
-                    } catch (e) {
-                        console.error(e);
-                    }
-                    throw "403, token expired?";
-                }
-                return r;
-            })
-            .then(checkFetchSuccess("code"))
-            .then(r => r.json());
-
-        console.log("refreshed " + jsonResp.selectedProfile.id);
-        this.accessToken = jsonResp.accessToken;
-        this.clientToken = jsonResp.clientToken;
-        this.name = jsonResp.selectedProfile.name;
-        this.id = jsonResp.selectedProfile.id;
-        saveRefreshAccounts();
     }
 }
 
@@ -596,28 +539,6 @@ function findAccountByMs(username: string) {
 function addActiveAccount(acc: McAccount) {
     activeAccounts.push(acc)
     saveRefreshAccounts()
-}
-
-function loginMc(user: string, pass: string) {
-    // @ts-ignore
-    const clientToken = uuid.v4();
-    fetch(getCorsProxy() + "https://authserver.mojang.com/authenticate", {
-        method: "post",
-        body: JSON.stringify({
-            agent: {name: "Minecraft", version: 1},
-            username: user,
-            password: pass,
-            clientToken: clientToken,
-        }),
-        headers: {"content-type": "application/json"}
-    }).then(checkFetchSuccess("code"))
-        .then(r => r.json())
-        .then(data => {
-            let acc = new MojangAccount(data.selectedProfile.id, data.selectedProfile.name, data.accessToken, data.clientToken);
-            addActiveAccount(acc);
-            return acc;
-        }).catch(e => addToast("Failed to login", e));
-    $("#form_add_mc input").val("");
 }
 
 function getLoginRequest() {
