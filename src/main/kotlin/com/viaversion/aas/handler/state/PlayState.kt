@@ -18,7 +18,7 @@ import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
 import io.netty.util.ReferenceCountUtil
 
-object PlayState : ConnectionState {
+class PlayState : ConnectionState {
     override val state: State
         get() = State.PLAY
     override val logDcInfo: Boolean

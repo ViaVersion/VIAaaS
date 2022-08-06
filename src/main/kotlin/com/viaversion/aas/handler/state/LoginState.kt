@@ -84,7 +84,7 @@ class LoginState : ConnectionState {
     }
 
     private fun handleLoginSuccess(handler: MinecraftHandler, loginSuccess: LoginSuccess) {
-        handler.data.state = PlayState
+        handler.data.state = PlayState()
         forward(handler, loginSuccess)
     }
 
