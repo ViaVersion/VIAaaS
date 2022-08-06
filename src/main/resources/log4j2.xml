@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- parts stolen from https://github.com/GeyserMC/Geyser/blob/4a425df20d1b4fa3cd614910a269f3d3f2609535/bootstrap/standalone/src/main/resources/log4j2.xml -->
+<!-- parts stolen from https://github.com/GeyserMC/Geyser/blob/3c27273eac3a13b051523cb004f4ca521885576e/bootstrap/standalone/src/main/resources/log4j2.xml -->
 <Configuration status="WARN">
     <Appenders>
         <TerminalConsole name="TerminalConsole">
             <PatternLayout
-                    pattern="%d{HH:mm:ss} %style{%highlight{%level}{FATAL=red dark, ERROR=red, WARN=yellow bright, INFO=cyan bright, DEBUG=green, TRACE=white}} [%thread] [%logger] %minecraftFormatting{%msg}%n"/>
+                    pattern="%d{HH:mm:ss} %style{%highlight{%level}{FATAL=red blink, ERROR=red, WARN=yellow bright, INFO=cyan bright, DEBUG=green, TRACE=white}} [%thread] [%logger] %minecraftFormatting{%msg}%n"/>
         </TerminalConsole>
         <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
-            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %msg%n"/>
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %minecraftFormatting{%msg}{strip}%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy size="200 MB"/>
@@ -15,7 +15,7 @@
             </Policies>
         </RollingRandomAccessFile>
         <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz">
-            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %msg%n"/>
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %minecraftFormatting{%msg}{strip}%n"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="20 MB"/>
                 <OnStartupTriggeringPolicy/>

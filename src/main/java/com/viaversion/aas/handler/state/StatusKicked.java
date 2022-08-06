@@ -46,4 +46,9 @@ public class StatusKicked implements ConnectionState {
 	public void start(@NotNull MinecraftHandler handler) {
 		UtilKt.setAutoRead(handler.getData().getFrontChannel(), true);
 	}
+
+	@Override
+	public boolean getKickedByServer() {
+		return ConnectionState.DefaultImpls.getKickedByServer(this);
+	}
 }

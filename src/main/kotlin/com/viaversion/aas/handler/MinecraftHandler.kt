@@ -22,6 +22,7 @@ class MinecraftHandler(
 ) : SimpleChannelInboundHandler<Packet>() {
     lateinit var endRemoteAddress: SocketAddress
     val other: Channel? get() = if (frontEnd) data.backChannel else data.frontChannel
+    val backEnd: Boolean get() = !frontEnd
     var loggedDc = false
     val coroutineScope = CoroutineScope(SupervisorJob())
 

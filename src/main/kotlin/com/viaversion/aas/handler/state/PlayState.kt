@@ -23,21 +23,27 @@ object PlayState : ConnectionState {
         get() = State.PLAY
     override val logDcInfo: Boolean
         get() = true
+    override var kickedByServer = false
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         when {
             packet is UnknownPacket && (packet.id !in 0..127) -> throw StacklessException("Invalid packet id!")
-            packet is PluginMessage && !handler.frontEnd -> modifyPluginMessage(handler, packet)
+            packet is PluginMessage -> modifyPluginMessage(handler, packet)
             packet is SetPlayCompression -> return handleCompression(handler, packet)
-            packet is Kick -> mcLogger.debug(
-                "{} disconnected on play: {}",
-                handler.endRemoteAddress.toString(),
-                packet.msg
-            )
+            packet is Kick -> handleKick(handler, packet)
             packet is ServerboundChatCommand -> modifyChatCommand(packet)
             packet is ServerboundChatMessage -> modifyChatMessage(packet)
         }
         forward(handler, ReferenceCountUtil.retain(packet))
+    }
+
+    private fun handleKick(handler: MinecraftHandler, packet: Kick) {
+        kickedByServer = true
+        mcLogger.debug(
+            "{} disconnected on play: {}",
+            handler.endRemoteAddress.toString(),
+            packet.msg
+        )
     }
 
     private fun handleCompression(handler: MinecraftHandler, packet: SetPlayCompression) {
@@ -51,6 +57,7 @@ object PlayState : ConnectionState {
     }
 
     private fun modifyPluginMessage(handler: MinecraftHandler, pluginMessage: PluginMessage) {
+        if (handler.frontEnd) return
         when (pluginMessage.channel) {
             "MC|Brand", "brand", "minecraft:brand" -> {
                 if (!VIAaaSConfig.showBrandInfo) return

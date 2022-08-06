@@ -52,7 +52,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
 	private boolean isBackend(ChannelHandlerContext ctx) {
 		var handler = ctx.pipeline().get(MinecraftHandler.class);
-		return handler != null && !handler.getFrontEnd();
+		return handler != null && handler.getBackEnd();
 	}
 
 	private void useTestCompressor() {

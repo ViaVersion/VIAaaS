@@ -42,6 +42,7 @@ class LoginState : ConnectionState {
     override val logDcInfo: Boolean get() = true
     val callbackReauth = CompletableFuture<Boolean>()
     var pendingReauth: Int? = null
+    override var kickedByServer = false
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         when (packet) {
@@ -58,6 +59,7 @@ class LoginState : ConnectionState {
     }
 
     private fun handleLoginDisconnect(handler: MinecraftHandler, packet: LoginDisconnect) {
+        kickedByServer = true
         mcLogger.debug("{} disconnected on login: {}", handler.endRemoteAddress.toString(), packet.msg)
         forward(handler, packet)
     }
