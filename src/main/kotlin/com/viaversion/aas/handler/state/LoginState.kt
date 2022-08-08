@@ -84,7 +84,7 @@ class LoginState : ConnectionState {
     }
 
     private fun handleLoginSuccess(handler: MinecraftHandler, loginSuccess: LoginSuccess) {
-        if (handler.data.compressionLevel == -1) {
+        if (handler.data.compressionLevel == -1 && handler.data.frontVer!! >= ProtocolVersion.v1_8.version) {
             // Enable front-end compression
             val threshold = 256
             forward(handler, SetCompression().also { it.threshold = threshold })

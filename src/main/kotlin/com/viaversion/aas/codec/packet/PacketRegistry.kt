@@ -15,6 +15,7 @@ import com.viaversion.aas.codec.packet.status.StatusPong
 import com.viaversion.aas.codec.packet.status.StatusRequest
 import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.protocol.sharewareVersion
+import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -203,7 +204,8 @@ object PacketRegistry {
         val id = if (packet is UnknownPacket) {
             packet.id
         } else {
-            getPacketId(packet.javaClass, protocolVersion, direction)!!
+            getPacketId(packet.javaClass, protocolVersion, direction)
+                ?: throw StacklessException("Failed to get id for " + packet::class.java.simpleName)
         }
         Type.VAR_INT.writePrimitive(byteBuf, id)
         packet.encode(byteBuf, protocolVersion)
