@@ -17,12 +17,11 @@ interface ConnectionState {
 
     private fun logDisconnect(handler: MinecraftHandler, msg: String?) {
         val reason = msg ?: if (handler.backEnd && kickedByServer) "kicked" else "-"
-        val formatted = "- ${handler.endRemoteAddress}: $reason"
         if (logDcInfo && !handler.loggedDc) {
             handler.loggedDc = true
-            mcLogger.info(formatted)
+            mcLogger.info("- {}: {}", handler.endRemoteAddress, reason)
         } else {
-            mcLogger.debug(formatted)
+            mcLogger.debug("- {}: {}", handler.endRemoteAddress, reason)
         }
     }
 

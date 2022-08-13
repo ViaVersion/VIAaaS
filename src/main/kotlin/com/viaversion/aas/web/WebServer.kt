@@ -119,7 +119,7 @@ class WebServer {
         try {
             onlineId = usernameToIdCache[frontName].await()
         } catch (e: java.lang.Exception) {
-            webLogger.debug("Couldn't get online uuid for $frontName", e)
+            webLogger.debug("Couldn't get online uuid for {}", frontName, e)
         }
         val offlineId = generateOfflinePlayerUuid(frontName)
 
@@ -233,7 +233,7 @@ class WebServer {
     suspend fun connected(ws: WebSocketServerSession) {
         val loginState = WebLogin()
         val client = WebClient(this, ws, loginState)
-        webLogger.info("+ WS: ${client.id}")
+        webLogger.info("+ WS: {}", client.id)
         clients[ws] = client
         loginState.start(client)
     }
@@ -248,14 +248,14 @@ class WebServer {
 
     suspend fun disconnected(ws: WebSocketServerSession) {
         val client = clients[ws]!!
-        webLogger.info("- WS: ${client.id}")
+        webLogger.info("- WS: {}", client.id)
         client.state.disconnected(client)
         clients.remove(ws)
     }
 
     suspend fun onException(ws: WebSocketServerSession, exception: Throwable) {
         val client = clients[ws]!!
-        webLogger.info("WS Error: ${client.id} $exception")
+        webLogger.info("WS Error: {} {}", client.id, exception.toString())
         webLogger.debug("Ws exception: ", exception)
         client.state.onException(client, exception)
     }

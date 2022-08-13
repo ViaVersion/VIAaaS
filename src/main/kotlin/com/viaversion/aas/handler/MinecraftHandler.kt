@@ -64,7 +64,7 @@ class MinecraftHandler(
         if (cause is CancelCodecException) return
         if (cause is ClosedChannelException) return
         val exceptionId = ThreadLocalRandom.current().nextInt().toUInt().toString(36)
-        mcLogger.debug("Exception $exceptionId: ", cause)
+        mcLogger.debug("Exception {}: ", exceptionId, cause)
         disconnect("$cause #$exceptionId")
     }
 

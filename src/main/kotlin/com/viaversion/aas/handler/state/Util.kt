@@ -51,7 +51,11 @@ private suspend fun createBackChannel(
         .channel()
     (channel.pipeline()["proxy"] as? ProxyHandler)?.connectFuture()?.suspendAwait()
 
-    mcLogger.info("+ ${state.name[0]} ${handler.endRemoteAddress} -> $socketAddr")
+    if (state == State.LOGIN) {
+        mcLogger.info("+ L {} -> {}", handler.endRemoteAddress, socketAddr)
+    } else {
+        mcLogger.debug("+ {} {} -> {}", state.name[0], handler.endRemoteAddress, socketAddr)
+    }
     handler.data.backChannel = channel as SocketChannel
 
     autoDetectVersion(handler, socketAddr)
@@ -77,7 +81,7 @@ private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: Ine
                 ProtocolDetector.detectVersion(socketAddr).await()
             }
         } catch (e: Exception) {
-            mcLogger.warn("Failed to detect version of $socketAddr: $e")
+            mcLogger.warn("Failed to detect version of {}: {}", socketAddr, e.toString())
             mcLogger.debug("Stacktrace: ", e)
         }
 

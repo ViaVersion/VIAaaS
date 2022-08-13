@@ -23,7 +23,7 @@ class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : C
         val ver = JsonParser.parseString(packet.msg).asJsonObject
             .getAsJsonObject("version")["protocol"].asInt.parseProtocol()
         future.complete(ver)
-        mcLogger.info("A.D.: ${handler.endRemoteAddress} $ver")
+        mcLogger.info("A.D.: {} {}", handler.endRemoteAddress, ver)
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {

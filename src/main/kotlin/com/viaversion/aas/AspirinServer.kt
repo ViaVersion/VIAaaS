@@ -127,9 +127,13 @@ object AspirinServer {
 
         ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
 
-        viaaasLogger.info("Using compression: ${Natives.compress.loadedVariant}, crypto: ${Natives.cipher.loadedVariant}")
+        viaaasLogger.info(
+            "Using compression: {}, crypto: {}",
+            Natives.compress.loadedVariant,
+            Natives.cipher.loadedVariant
+        )
         chFutures.forEach {
-            viaaasLogger.info("Binded minecraft into " + it.sync().channel().localAddress())
+            viaaasLogger.info("Binded minecraft into {}", it.sync().channel().localAddress())
         }
         viaaasLogger.info(
             "Application started in " + ManagementFactory.getRuntimeMXBean().uptime

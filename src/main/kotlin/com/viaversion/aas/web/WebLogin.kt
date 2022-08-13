@@ -81,7 +81,7 @@ class WebLogin : WebState {
         val token = webClient.server.generateToken(uuid, username)
         webClient.ws.sendSerialized(loginSuccessJson(username, uuid, token))
 
-        webLogger.info("Token gen: ${webClient.id}: offline $username $uuid")
+        webLogger.info("Token gen: {}: offline {} {}", webClient.id, username, uuid)
     }
 
     private suspend fun handleMcIdLogin(webClient: WebClient, obj: JsonObject) {
@@ -102,10 +102,10 @@ class WebLogin : WebState {
             val token = webClient.server.generateToken(uuid, mcIdUser)
             webClient.ws.sendSerialized(loginSuccessJson(mcIdUser, uuid, token))
 
-            webLogger.info("Token gen: ${webClient.id}: $mcIdUser $uuid")
+            webLogger.info("Token gen: {}: {} {}", webClient.id, mcIdUser, uuid)
         } else {
             webClient.ws.sendSerialized(loginNotSuccess())
-            webLogger.info("Token gen fail: ${webClient.id}: $username")
+            webLogger.info("Token gen fail: {}: {}", webClient.id, username)
         }
     }
 
@@ -120,17 +120,17 @@ class WebLogin : WebState {
             response.addProperty("success", true)
             response.addProperty("user", user.id.toString())
             response.addProperty("username", user.name)
-            webLogger.info("Listen: ${webClient.id}: $user")
+            webLogger.info("Listen: {}: {}", webClient.id, user)
         } else {
             response.addProperty("success", false)
-            webLogger.info("Listen fail: ${webClient.id}")
+            webLogger.info("Listen fail: {}", webClient.id)
         }
         webClient.ws.sendSerialized(response)
     }
 
     private suspend fun handleUnlisten(webClient: WebClient, obj: JsonObject) {
         val uuid = UUID.fromString(obj["uuid"].asString)
-        webLogger.info("Unlisten: ${webClient.id}: $uuid")
+        webLogger.info("Unlisten: {}: {}", webClient.id, uuid)
         val response = JsonObject().also {
             it.addProperty("action", "unlisten_login_requests_result")
             it.addProperty("uuid", uuid.toString())

@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
     try {
         setupSystem()
         printSplash()
-        CoroutineScope(Job()).launch { viaaasLogger.info(AspirinServer.updaterCheckMessage()) }
+        CoroutineScope(Job()).launch { viaaasLogger.info("{}", AspirinServer.updaterCheckMessage()) }
         AspirinServer.generateCert()
         initVia()
         AspirinServer.listenPorts(args)

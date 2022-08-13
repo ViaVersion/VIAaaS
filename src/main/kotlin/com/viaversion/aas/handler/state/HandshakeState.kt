@@ -99,8 +99,8 @@ class HandshakeState : ConnectionState {
 
         val playerAddr = handler.data.frontHandler.endRemoteAddress
         mcLogger.debug(
-            "HS: $playerAddr ${handler.data.state.state.name[0]} " +
-                    "$virtualHostNoExtra $virtualPort v${handler.data.frontVer}"
+            "HS: {} {} {} {} v{}",
+            playerAddr, handler.data.state.state.name, virtualHostNoExtra, virtualPort, handler.data.frontVer
         )
 
         if (!usedDefault && !hadHostname && VIAaaSConfig.requireHostName && !addressFromWeb

@@ -178,7 +178,10 @@ class LoginState : ConnectionState {
                 val backKey = generate128Bits()
                 val backHash = generateServerHash(backServerId, backKey, backPublicKey)
 
-                mcLogger.info("Session req: ${handler.data.frontHandler.endRemoteAddress} ($playerId $frontName) $backName")
+                mcLogger.info(
+                    "Session req: {} ({} {}) {}",
+                    handler.data.frontHandler.endRemoteAddress, playerId, frontName, backName
+                )
                 val pluginReauthed = reauthMessage(handler, backName!!, backHash).await()
                 if (!pluginReauthed) {
                     AspirinServer.viaWebServer.requestSessionJoin(
@@ -258,7 +261,7 @@ class LoginState : ConnectionState {
         handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 if (backAddress == null) {
-                    mcLogger.info("Requesting address info from web for $frontName")
+                    mcLogger.info("Requesting address info from web for {}", frontName)
                     val info = AspirinServer.viaWebServer.requestAddressInfo(frontName).await()
                     backAddress = info.backHostAndPort
                     handler.data.backServerVer = info.backVersion
@@ -273,7 +276,7 @@ class LoginState : ConnectionState {
                         else -> {}
                     }
                     val id = callbackPlayerId.await()
-                    mcLogger.info("Login: ${handler.endRemoteAddress} $frontName $id")
+                    mcLogger.info("Login: {} {} {}", handler.endRemoteAddress, frontName, id)
                 }
                 connectBack(
                     handler,
