@@ -88,7 +88,7 @@ class PlayState : ConnectionState {
         super.disconnect(handler, msg)
         writeFlushClose(
             handler.data.frontChannel,
-            Kick().also { it.msg = JsonPrimitive("[VIAaaS] §c$msg").toString() },
+            Kick().also { it.msg = JsonPrimitive("[VIAaaS] §c$msg") },
             delay = is17(handler)
         )
     }

@@ -310,7 +310,7 @@ $(() => {
 })
 
 function handleSWMsg(event: MessageEvent) {
-    console.log("sw msg: " + event);
+    console.log("sw msg: ", event);
     let data = event.data;
     let callback = notificationCallbacks.get(data.tag as string);
     notificationCallbacks.delete(data.tag as string);
@@ -704,7 +704,12 @@ function onWsMsg(event: MessageEvent) {
 }
 
 function handleParametersRequest(parsed: any) {
-    let url = new URL("https://" + $("#connect_address").val());
+    let url: URL = new URL("https://0.0.0.0");
+    try {
+        url = new URL("https://" + $("#connect_address").val());
+    } catch (e) {
+        console.log(e);
+    }
     socket.send(JSON.stringify({
         action: "parameters_response",
         callback: parsed["callback"],
@@ -733,6 +738,7 @@ function onWsError(e: any) {
 }
 
 function onWsClose(evt: CloseEvent) {
+    console.log(evt);
     setWsStatus("disconnected with close code " + evt.code + " and reason: " + evt.reason);
     resetHtml();
     setTimeout(connect, 5000);

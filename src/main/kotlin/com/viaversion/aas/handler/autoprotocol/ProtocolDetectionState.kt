@@ -1,6 +1,5 @@
 package com.viaversion.aas.handler.autoprotocol
 
-import com.google.gson.JsonParser
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.handler.MinecraftHandler
@@ -20,7 +19,7 @@ class ProtocolDetectionState(val future: CompletableFuture<ProtocolVersion>) : C
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         handler.data.frontChannel.close()
         if (packet !is StatusResponse) throw StacklessException("Unexpected packet")
-        val ver = JsonParser.parseString(packet.msg).asJsonObject
+        val ver = packet.msg.asJsonObject
             .getAsJsonObject("version")["protocol"].asInt.parseProtocol()
         future.complete(ver)
         mcLogger.info("A.D.: {} {}", handler.endRemoteAddress, ver)

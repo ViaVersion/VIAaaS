@@ -91,7 +91,6 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
 <div class="container tab-content" id="content">
     <div aria-labelledby="home-tab" class="tab-pane fade show active" id="home">
         <p>WebSocket connection status: <span class="text-white bg-dark" id="connection_status">?</span></p>
-        <p>CORS Proxy status: <span class="text-white bg-dark" id="cors_status">?</span></p>
         <hr>
         <div class="mb-3">
             <p>Listening to front-end logins from:</p>
@@ -114,26 +113,26 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
         <p>Connecting to backend server:</p>
         <div id="connect">
             <form class="input-group mb-3 row g-3 justify-content-md-center">
-                <div class="col-md-auto">
+                <div class="col-md-4">
                     <input id="connect_address" type="text" class="form-control" placeholder="Address:Port"
-                           aria-label="Address and Port" size="20">
+                           aria-label="Address and Port">
                 </div>
-                <div class="col-md-auto">
+                <div class="col-md-2">
                     <input id="connect_version" type="text" class="form-control col-auto" placeholder="Version"
-                           aria-label="Version" size="6">
+                           aria-label="Version">
                 </div>
-                <div class="col-md-auto">
-                    <select class="form-select" id="connect_online" aria-label="Online Mode" size="1">
-                        <option value="null" selected>Front Online Mode...</option>
-                        <option>AUTO</option>
-                        <option value="true">Force online</option>
-                        <option value="false">Force offline (recommended for Geyser)</option>
-                    </select>
-                </div>
-                <div class="col-md-auto">
+                <div class="col-md-2">
                     <input id="connect_user" type="text" class="form-control" placeholder="Back Username"
-                           aria-label="Backend Username" list="backend_user_list" size="16" maxlength="16">
+                           aria-label="Backend Username" list="backend_user_list" maxlength="16">
                     <datalist id="backend_user_list"></datalist>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="connect_online" aria-label="Online Mode">
+                        <option value="null" selected>Front Auth...</option>
+                        <option>AUTO</option>
+                        <option value="true">Online</option>
+                        <option value="false">Offline (recommended for Geyser)</option>
+                    </select>
                 </div>
             </form>
             <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">the address
@@ -143,22 +142,29 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
 
     <div aria-labelledby="settings-tab" class="tab-pane fade" id="settings">
         <div class="mb-3">
-            <p>See <a href="https://github.com/ViaVersion/VIAaaS/">README</a> for more details.</p>
-            <form class="input-group" id="form_cors_proxy">
-                <label class="input-group-text" for="cors-proxy">CORS Proxy</label>
-                <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
-                <button class="btn btn-primary" type="submit">Save</button>
-            </form>
-        </div>
-        <div class="mb-3">
-            <form class="input-group" id="form_ws_url">
-                <label class="input-group-text" for="ws-url">WebSocket</label>
-                <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
-                <button class="btn btn-primary" type="submit">Save</button>
-            </form>
-        </div>
-        <div class="mb-3">
             <button id="en_notifications" type="button" class="btn btn-primary">Enable browser notifications</button>
+        </div>
+        <div class="mb-3">
+            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvConf"
+                    aria-expanded="false" aria-controls="collapseAdvConfig">Advanced
+            </button>
+        </div>
+        <div class="collapse" id="collapseAdvConf">
+            <div class="mb-3">
+                <p>CORS Proxy status: <span class="text-white bg-dark" id="cors_status">?</span></p>
+                <form class="input-group" id="form_cors_proxy">
+                    <label class="input-group-text" for="cors-proxy">CORS Proxy</label>
+                    <input class="form-control" id="cors-proxy" placeholder="http://localhost:8080/" type="url">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                </form>
+            </div>
+            <div class="mb-3">
+                <form class="input-group" id="form_ws_url">
+                    <label class="input-group-text" for="ws-url">WebSocket</label>
+                    <input class="form-control" id="ws-url" placeholder="wss://viaaas.example.com/ws" type="url">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -234,13 +240,17 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <ul>
                         <li>access date and time</li>
                         <li>backend Minecraft server IP</li>
-                        <li>IP address, port, approximate geolocation, ASN and reverse DNS lookup</li>
-                        <li>query string</li>
-                        <li>usernames</li>
+                        <li>client IP address, port, protocol version, approximate geolocation,
+                            ASN and reverse DNS lookup
+                        </li>
+                        <li>disconnection reason</li>
+                        <li>HTTP query string</li>
+                        <li>Minecraft usernames</li>
                     </ul>
                     <p>Why are these data collected?</p>
                     <ul>
                         <li>analytics</li>
+                        <li>improving our services</li>
                         <li>troubleshooting</li>
                     </ul>
                     <p>When are data collected?</p>

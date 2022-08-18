@@ -299,7 +299,7 @@ class LoginState : ConnectionState {
         super.disconnect(handler, msg)
 
         val packet = LoginDisconnect()
-        packet.msg = JsonPrimitive("[VIAaaS] §c$msg").toString()
+        packet.msg = JsonPrimitive("[VIAaaS] §c$msg")
         writeFlushClose(handler.data.frontChannel, packet)
     }
 }
