@@ -274,7 +274,7 @@ $(() => {
     new BroadcastChannel("viaaas-notification").addEventListener("message", handleSWMsg);
 });
 function handleSWMsg(event) {
-    console.log("sw msg: " + event);
+    console.log("sw msg: ", event);
     let data = event.data;
     let callback = notificationCallbacks.get(data.tag);
     notificationCallbacks.delete(data.tag);
@@ -617,7 +617,13 @@ function onWsMsg(event) {
     }
 }
 function handleParametersRequest(parsed) {
-    let url = new URL("https://" + $("#connect_address").val());
+    let url = new URL("https://0.0.0.0");
+    try {
+        url = new URL("https://" + $("#connect_address").val());
+    }
+    catch (e) {
+        console.log(e);
+    }
     socket.send(JSON.stringify({
         action: "parameters_response",
         callback: parsed["callback"],
@@ -642,6 +648,7 @@ function onWsError(e) {
     resetHtml();
 }
 function onWsClose(evt) {
+    console.log(evt);
     setWsStatus("disconnected with close code " + evt.code + " and reason: " + evt.reason);
     resetHtml();
     setTimeout(connect, 5000);
