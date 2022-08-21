@@ -57,8 +57,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.4.2-SNAPSHOT"
-    val vbVer = "4.4.2-SNAPSHOT"
+    val vvVer = "4.4.2"
+    val vbVer = "4.4.2"
     val vrVer = "f879184"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
@@ -75,12 +75,12 @@ dependencies {
     implementation("org.yaml:snakeyaml:1.30")
 
     val log4jVer = "2.18.0"
-    val slf4jVer = "1.7.36"
+    val slf4jVer = "2.0.0"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVer")
+    implementation("org.apache.logging.log4j:log4j-slf4j18-impl:$log4jVer")
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
@@ -91,6 +91,7 @@ dependencies {
     implementation("io.ktor:ktor-server-caching-headers:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-compression:$ktorVersion")
+    implementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-default-headers:$ktorVersion")
     implementation("io.ktor:ktor-server-forwarded-header:$ktorVersion")

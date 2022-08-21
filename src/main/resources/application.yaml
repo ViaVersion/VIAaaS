@@ -1,0 +1,12 @@
+# https://ktor.io/docs/configurations.html#configuration-file
+ktor:
+  deployment:
+    sslPort: 25543
+  application:
+    modules: [ "com.viaversion.aas.VIAaaSKt.mainWeb" ]
+  security:
+    ssl:
+      keyStore: config/https.jks
+      keyAlias: mykey
+      keyStorePassword: changeit
+      privateKeyPassword: changeit
