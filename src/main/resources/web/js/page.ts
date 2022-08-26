@@ -63,7 +63,7 @@ $(() => {
     ohNo();
 
     refreshAccountList();
-    setInterval(refreshCorsStatus, 10 * 60 * 1000); // Heroku auto sleeps in 30 min
+    setInterval(refreshCorsStatus, 10 * 60 * 1000);
     refreshCorsStatus();
     resetHtml();
 });
@@ -282,14 +282,14 @@ function ohNo() {
 }
 
 // Util
-function checkFetchSuccess(msg: String): (a: Response) => Response {
+function checkFetchSuccess(msg: string): (a: Response) => Response {
     return (r: Response): Response => {
         if (!r.ok) throw r.status + " " + msg;
         return r;
     };
 }
 
-async function getIpAddress(cors: boolean): Promise<String> {
+async function getIpAddress(cors: boolean): Promise<string> {
     return fetch((cors ? getCorsProxy() : "") + "https://ipv4.icanhazip.com")
         .then(checkFetchSuccess("code"))
         .then(r => r.text())
@@ -349,11 +349,11 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
 }
 
 // Cors proxy
-function defaultCors() {
-    return "https://crp123-cors.herokuapp.com/";
+function defaultCors(): string {
+    return defaultCorsProxy || "https://cors.re.yt.nom.br/";
 }
 
-function getCorsProxy() {
+function getCorsProxy(): string {
     return localStorage.getItem("viaaas_cors_proxy") || defaultCors();
 }
 
@@ -639,20 +639,20 @@ function removeToken(token: string) {
     localStorage.setItem("viaaas_tokens", JSON.stringify(hTokens));
 }
 
-function getTokens(): Array<String> {
+function getTokens(): Array<string> {
     return (JSON.parse(localStorage.getItem("viaaas_tokens")) || {})[wsUrl] || [];
 }
 
 // Websocket
-function listen(token: String) {
+function listen(token: string) {
     socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
 }
 
-function unlisten(id: String) {
+function unlisten(id: string) {
     socket.send(JSON.stringify({"action": "unlisten_login_requests", "uuid": id}));
 }
 
-function confirmJoin(hash: String) {
+function confirmJoin(hash: string) {
     socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 
