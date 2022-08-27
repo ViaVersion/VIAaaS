@@ -312,7 +312,7 @@ function authNotification(msg, yes, no) {
     });
 }
 function defaultCors() {
-    return defaultCorsProxy || "https://cors.re.yt.nom.br/";
+    return self.defaultCorsProxy || "https://cors.re.yt.nom.br/";
 }
 function getCorsProxy() {
     return localStorage.getItem("viaaas_cors_proxy") || defaultCors();

@@ -350,7 +350,8 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
 
 // Cors proxy
 function defaultCors(): string {
-    return defaultCorsProxy || "https://cors.re.yt.nom.br/";
+    // @ts-ignore
+    return self.defaultCorsProxy || "https://cors.re.yt.nom.br/";
 }
 
 function getCorsProxy(): string {
