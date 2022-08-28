@@ -22,7 +22,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 	private static final int UNCOMPRESSED_CAP = 8 * 1024 * 1024; // 8MiB
 	private int threshold;
 	private VelocityCompressor compressor;
-	private VelocityCompressor testingCompressor;
+	private VelocityCompressor candidateCompressor;
 
 	public CompressionCodec(int threshold) {
 		this.threshold = threshold;
@@ -38,16 +38,27 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
 	@Override
 	public void handlerAdded(ChannelHandlerContext ctx) {
-		var level = VIAaaSConfig.INSTANCE.getCompressionLevel();
 
-		var cNative = Natives.compress.get().create(level);
+		var cNative = createCompressor(true);
 		if (isBackend(ctx) && !Natives.compress.getLoadedVariant().equalsIgnoreCase("java")) {
 			// Workaround for Lilypad backend servers
-			compressor = JavaVelocityCompressor.FACTORY.create(level);
-			testingCompressor = cNative;
+			compressor = createCompressor(false);
+			candidateCompressor = cNative;
 		} else {
 			compressor = cNative;
 		}
+	}
+
+	private VelocityCompressor createCompressor(boolean allowNative) {
+		var level = VIAaaSConfig.INSTANCE.getCompressionLevel();
+		if (!allowNative) return JavaVelocityCompressor.FACTORY.create(Math.min(level, 9));
+		return Natives.compress.get().create(level);
+	}
+
+	@Override
+	public void handlerRemoved(ChannelHandlerContext ctx) {
+		compressor.close();
+		discardCandidate();
 	}
 
 	private boolean isBackend(ChannelHandlerContext ctx) {
@@ -55,22 +66,16 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 		return handler != null && handler.getBackEnd();
 	}
 
-	private void useTestCompressor() {
+	private void promoteCandidate() {
 		compressor.close();
-		compressor = testingCompressor;
-		testingCompressor = null;
+		compressor = candidateCompressor;
+		candidateCompressor = null;
 	}
 
-	private void discardTestCompressor() {
-		if (testingCompressor == null) return;
-		testingCompressor.close();
-		testingCompressor = null; // Discard it, compressor doesn't know how to decompress this
-	}
-
-	@Override
-	public void handlerRemoved(ChannelHandlerContext ctx) {
-		compressor.close();
-		discardTestCompressor();
+	private void discardCandidate() {
+		if (candidateCompressor == null) return;
+		candidateCompressor.close();
+		candidateCompressor = null;
 	}
 
 	@Override
@@ -131,10 +136,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 			}
 			out.add(decompressed.retain());
 
-			if (testingCompressor != null) {
-				compatibleIn.readerIndex(readerI);
-				testCompressor(compatibleIn, claimedUncompressedSize);
-			}
+			testCandidateDecompression(compatibleIn, readerI, claimedUncompressedSize);
 
 			input.clear();
 		} finally {
@@ -143,16 +145,18 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 		}
 	}
 
-	private void testCompressor(ByteBuf in, int claimedUncompressedSize) {
+	private void testCandidateDecompression(ByteBuf in, int readerIndex, int claimedUncompressedSize) {
+		if (candidateCompressor == null) return;
+		in.readerIndex(readerIndex);
 		var testOut = ByteBufAllocator.DEFAULT.buffer();
 		try {
-			testingCompressor.inflate(in, testOut, claimedUncompressedSize);
+			candidateCompressor.inflate(in, testOut, claimedUncompressedSize);
 
 			if (Math.random() <= 0.001) { // Runs more tests
-				useTestCompressor();
+				promoteCandidate();
 			}
 		} catch (DataFormatException eTest) {
-			discardTestCompressor();
+			discardCandidate(); // LilyPad
 		} finally {
 			testOut.release();
 		}
