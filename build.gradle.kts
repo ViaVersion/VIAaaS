@@ -59,12 +59,12 @@ dependencies {
 
     val vvVer = "4.4.3-SNAPSHOT"
     val vbVer = "4.4.2"
-    val vrVer = "f879184"
+    val vrVer = "0476674"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.79.Final")
+    implementation("io.netty:netty-all:4.1.80.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.54.Final")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.14.Final:linux-x86_64")
 
