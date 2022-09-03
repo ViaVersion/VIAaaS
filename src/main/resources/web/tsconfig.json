@@ -3,7 +3,7 @@
     "target": "ES2018",
     "module": "ES2015",
     "lib": [
-      "ES2018",
+      "ES2021",
       "DOM"
     ],
     "moduleResolution": "Node",

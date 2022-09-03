@@ -1,5 +1,6 @@
 /// <reference path='config.js' />
 "use strict"
+// Note that some APIs only work on HTTPS
 
 // Minecraft.id
 let urlParams = new URLSearchParams();
@@ -26,6 +27,7 @@ let listening = document.getElementById("listening");
 let accounts = document.getElementById("accounts-list");
 let cors_proxy_txt = document.getElementById("cors-proxy") as HTMLInputElement;
 let ws_url_txt = document.getElementById("ws-url") as HTMLInputElement;
+let instance_suffix_input = document.getElementById("instance_suffix") as HTMLInputElement;
 let listenVisible = false;
 // + deltaTime means that the clock is ahead
 let deltaTime = 0;
@@ -47,9 +49,13 @@ $(() => {
     $(".async-css").attr("rel", "stylesheet");
     $("form").on("submit", e => e.preventDefault());
     $("a[href='javascript:']").on("click", e => e.preventDefault());
+    $("[data-bs-toggle='tooltip']").get().forEach(it => {
+        new bootstrap.Tooltip(it);
+    });
 
     cors_proxy_txt.value = getCorsProxy();
     ws_url_txt.value = getWsUrl();
+    instance_suffix_input.defaultValue = getDefaultInstanceSuffix();
 
     $("#form_add_ms").on("submit", () => loginMs());
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val() as string));
@@ -58,10 +64,13 @@ $(() => {
     $("#form_send_token").on("submit", () => submittedSendToken());
     $("#en_notifications").on("click", () => Notification.requestPermission().then(renderActions));
     $("#listen_continue").on("click", () => clickedListenContinue());
-    window.addEventListener('beforeinstallprompt', e => e.preventDefault());
+    $("#address_info_form").on("input", () => generateAddress());
+    $("#generated_address").on("click", () => copyGeneratedAddress());
+    $(window).on("beforeinstallprompt", e => e.preventDefault());
 
     ohNo();
 
+    generateAddress();
     refreshAccountList();
     setInterval(refreshCorsStatus, 10 * 60 * 1000);
     refreshCorsStatus();
@@ -123,6 +132,36 @@ function refreshAccountList() {
             addMcAccountToList(it)
             addUsernameList(it.name)
         });
+}
+
+function copyGeneratedAddress() {
+    navigator.clipboard.writeText($("#generated_address").text()).catch(e => console.log(e));
+}
+
+function generateAddress() {
+    let backAddress = $("#connect_address").val();
+    try {
+        let url = new URL("https://" + backAddress);
+        let finalAddress = "";
+        let host = url.hostname;
+        let version = $("#connect_version").val().toString().replaceAll(".", "_");
+        let username = $("#connect_user").val();
+        let onlineMode = $("#connect_online").val().toString();
+        if (host.includes(":") || host.includes("[")) {
+            host = host.replaceAll(":", "-")
+                .replaceAll(/[\[\]]/g, "") + ".sslip.io";
+        }
+        finalAddress += host;
+        if (url.port) finalAddress += "._p" + url.port;
+        if (version) finalAddress += "._v" + version;
+        if (username) finalAddress += "._u" + username;
+        if (onlineMode) finalAddress += "._o" + onlineMode.substring(0, 1);
+        finalAddress += "." + $("#instance_suffix").val();
+        $("#generated_address").text(finalAddress)
+    } catch (e) {
+        console.log(e);
+        $("#generated_address").text("");
+    }
 }
 
 $("#mcIdUsername").text(mcIdUsername);
@@ -352,6 +391,11 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
 function defaultCors(): string {
     // @ts-ignore
     return self.defaultCorsProxy || "https://cors.re.yt.nom.br/";
+}
+
+function getDefaultInstanceSuffix(): string {
+    // @ts-ignore
+    return self.defaultInstanceSuffix || location.hostname;
 }
 
 function getCorsProxy(): string {

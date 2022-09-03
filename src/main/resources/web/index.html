@@ -26,24 +26,24 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
 
     <!-- https://www.srihash.org/ -->
     <link class="async-css" rel="preload" as="style"
-          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css"
-          integrity="sha512-GQGU0fMMi238uA+a/bdWJfpUGKUkBdgfFdgBm72SUQ6BeyWjoY/ton0tEjH+OSH9iP4Dfh+7HM0I9f5eR0L/4w=="
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/css/bootstrap.min.css"
+          integrity="sha512-XWTTruHZEYJsxV3W/lSXG1n3Q39YIWOstqvmFsdNEEQfHoZ6vm6E9GK2OrF6DSJSpIbRbi+Nn0WDPID9O7xB2Q=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.min.js"
-            integrity="sha512-OvBgP9A2JBgiRad/mM36mkzXSXaJE9BEIENnVEmeZdITvwT09xnxLtT4twkCa8m/loMbPHsvPl0T8lRGVBwjlQ=="
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/js/bootstrap.bundle.min.js"
+            integrity="sha512-9GacT4119eY3AcosfWtHMsT5JyZudrexyEVzTBWV3viP/YfB9e2pEy3N7WXL3SV6ASXpTU0vzzSxsbfsuUH4sQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Safari workaround -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/HTML5Notification/3.0.0/Notification.min.js"
             integrity="sha512-gx0m7Qoum1Bb0KrP6AEZSt0e+o2xMEyStAz2TNGXGqR4HSVgPveWFQdtE06FRvJmmp8HdkJklOLYiV3aZN6tQg=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js"
-            integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A=="
-            crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
+            integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script defer crossorigin="anonymous"
             integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
             src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-    <script defer src="https://alcdn.msauth.net/browser/2.27.0/js/msal-browser.min.js"
-            integrity="sha384-IlUQkOwOI6mWk8GNIWu8hpPE1sasxSg3gGjZo0dncq6IhHsTlH51mp5mhFYS5po1"
+    <script defer src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"
+            integrity="sha384-ei8xVSyFPTuRnbO1sdYy5qJT6Kd9neBfVG8AjZySEwdMG1GhCThbceSqxJnx0Ci3"
             crossorigin="anonymous"></script>
     <script defer src="js/config.js"></script>
     <script defer src="js/page.js"></script>
@@ -110,33 +110,88 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
             </button>
         </div>
         <hr>
-        <p>Connecting to backend server:</p>
+        <p>Connecting to server:</p>
         <div id="connect">
-            <form class="input-group mb-3 row g-3 justify-content-md-center">
-                <div class="col-md-4">
+            <form class="input-group mb-3 row g-3 justify-content-md-center" id="address_info_form">
+                <div class="col-md-3">
                     <input id="connect_address" type="text" class="form-control" placeholder="Address:Port"
                            aria-label="Address and Port">
                 </div>
                 <div class="col-md-2">
-                    <input id="connect_version" type="text" class="form-control col-auto" placeholder="Version"
-                           aria-label="Version">
+                    <div class="input-group">
+                        <span class="input-group-text"><abbr title="Version">v</abbr></span>
+                        <input id="connect_version" type="text" class="form-control col-auto" placeholder="Version"
+                               aria-label="Version" list="backend_version_list">
+                    </div>
+                    <datalist id="backend_version_list">
+                        <option>AUTO</option>
+                        <option value="1.19.2">1.19.1/2</option>
+                        <option>1.19</option>
+                        <option>1.18.2</option>
+                        <option value="1.18.1">1.18(.1)</option>
+                        <option>1.17.1</option>
+                        <option>1.17</option>
+                        <option value="1.16.5">1.16.4/5</option>
+                        <option>1.16.3</option>
+                        <option>1.16.2</option>
+                        <option>1.16.1</option>
+                        <option>1.16</option>
+                        <option>1.15.2</option>
+                        <option>1.15.1</option>
+                        <option>1.15</option>
+                        <option>1.14.4</option>
+                        <option>1.14.3</option>
+                        <option>1.14.2</option>
+                        <option>1.14.1</option>
+                        <option>1.14</option>
+                        <option>1.13.2</option>
+                        <option>1.13.1</option>
+                        <option>1.13</option>
+                        <option>1.12.2</option>
+                        <option>1.12.1</option>
+                        <option>1.12</option>
+                        <option value="1.11.2">1.11.1/2</option>
+                        <option>1.11</option>
+                        <option value="1.10">1.10.x</option>
+                        <option value="1.9.4">1.9.3/4</option>
+                        <option>1.9.2</option>
+                        <option>1.9.1</option>
+                        <option>1.9</option>
+                        <option>1.8.x</option>
+                        <option value="1.7.10">1.7.6-10</option>
+                        <option value="1.7.5">1.7.2-5</option>
+                    </datalist>
                 </div>
                 <div class="col-md-2">
-                    <input id="connect_user" type="text" class="form-control" placeholder="Back Username"
-                           aria-label="Backend Username" list="backend_user_list" maxlength="16">
+                    <div class="input-group">
+                        <span class="input-group-text"><abbr title="Username">u</abbr></span>
+                        <input id="connect_user" type="text" class="form-control" placeholder="Back Username"
+                               aria-label="Backend Username" list="backend_user_list" maxlength="16">
+                    </div>
                     <datalist id="backend_user_list"></datalist>
                 </div>
                 <div class="col-md-2">
-                    <select class="form-select" id="connect_online" aria-label="Online Mode">
-                        <option value="null" selected>Front Auth...</option>
-                        <option>AUTO</option>
-                        <option value="true">Online</option>
-                        <option value="false">Offline (recommended for Geyser)</option>
-                    </select>
+                    <div class="input-group">
+                        <span class="input-group-text"><abbr title="Online Mode">o</abbr></span>
+                        <select class="form-select" id="connect_online" aria-label="Online Mode">
+                            <option value="" selected>Front Auth...</option>
+                            <option>AUTO</option>
+                            <option value="true">Online</option>
+                            <option value="false">Offline (recommended for Geyser)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group">
+                        <span class="input-group-text">.</span>
+                        <input id="instance_suffix" type="text" class="form-control"
+                               placeholder="Instance Suffix" aria-label="Instance Suffix" readonly>
+                    </div>
                 </div>
             </form>
-            <p>You can also use <a href="https://jo0001.github.io/ViaSetup/aspirin" id="viasetup_address">the address
-                generator</a> to specify the server</p>
+            <p>You can also use this address to specify the server:
+                <span class="font-monospace" id="generated_address" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="Click to copy"></span></p>
         </div>
     </div>
 
@@ -318,10 +373,10 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <p>The instance will cache your Minecraft access token, allowing you to connect without keeping
-                        this page open.</p>
-                    <p>Note that the access token expires in ~1 day and a compromised instance may access your account
-                        with malicious intents.</p>
+                    <p>The instance will cache your Minecraft access token for some minutes, allowing you to connect
+                        without keeping this page open.</p>
+                    <p>Note that the access token are valid for ~1 day and a compromised instance may be used to access
+                        your account.</p>
                     <p>You'll need to connect as online-mode in the front-end. It's not possible to use the cached
                         token when changing the backend username</p>
                     <div class="input-group mb-3">

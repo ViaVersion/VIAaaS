@@ -9,3 +9,5 @@ const whitelistedOrigin = [
 ];
 // Default CORS Proxy config
 const defaultCorsProxy = "https://cors.re.yt.nom.br/";
+// Default instance suffix, in format "viaaas.example.com[:25565]", null to use the page hostname;
+const defaultInstanceSuffix = null;
