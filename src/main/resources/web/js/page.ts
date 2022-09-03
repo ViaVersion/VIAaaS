@@ -389,13 +389,19 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
 
 // Cors proxy
 function defaultCors(): string {
-    // @ts-ignore
-    return self.defaultCorsProxy || "https://cors.re.yt.nom.br/";
+    try {
+        return defaultCorsProxy;
+    } catch (e) {
+        return "https://cors.re.yt.nom.br/";
+    }
 }
 
 function getDefaultInstanceSuffix(): string {
-    // @ts-ignore
-    return self.defaultInstanceSuffix || location.hostname;
+    try {
+        return defaultInstanceSuffix;
+    } catch (e) {
+        return location.hostname;
+    }
 }
 
 function getCorsProxy(): string {

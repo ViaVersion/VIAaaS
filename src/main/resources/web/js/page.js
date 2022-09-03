@@ -353,10 +353,20 @@ function authNotification(msg, yes, no) {
     });
 }
 function defaultCors() {
-    return self.defaultCorsProxy || "https://cors.re.yt.nom.br/";
+    try {
+        return defaultCorsProxy;
+    }
+    catch (e) {
+        return "https://cors.re.yt.nom.br/";
+    }
 }
 function getDefaultInstanceSuffix() {
-    return self.defaultInstanceSuffix || location.hostname;
+    try {
+        return defaultInstanceSuffix;
+    }
+    catch (e) {
+        return location.hostname;
+    }
 }
 function getCorsProxy() {
     return localStorage.getItem("viaaas_cors_proxy") || defaultCors();
