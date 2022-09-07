@@ -15,7 +15,6 @@ import io.ktor.server.websocket.*
 import kotlinx.coroutines.future.await
 import java.net.URLEncoder
 import java.time.Duration
-import java.time.Instant
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -170,5 +169,6 @@ class WebLogin : WebState {
         }.body<JsonObject>()
         val uuid = parseUndashedId(profile["id"].asString)
         webClient.server.minecraftAccessTokens.put(uuid, accessToken)
+        webLogger.info("Received token: {} {}", webClient.id, uuid)
     }
 }
