@@ -1,5 +1,4 @@
 /// <reference path='config.js' />
-"use strict"
 // Note that some APIs only work on HTTPS
 
 // Minecraft.id
@@ -13,18 +12,18 @@ let mcIdSuccess = urlParams.get("mcauth_success");
 
 $(() => {
     if (mcIdSuccess === "false") {
-        addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg"));
+        addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg") ?? "");
     }
     if (mcIdCode != null) {
-        history.replaceState(null, null, "#");
+        history.replaceState(null, "", "#");
     }
 });
 
 // Page
-let connectionStatus = document.getElementById("connection_status");
-let corsStatus = document.getElementById("cors_status");
-let listening = document.getElementById("listening");
-let accounts = document.getElementById("accounts-list");
+let connectionStatus = document.getElementById("connection_status")!!;
+let corsStatus = document.getElementById("cors_status")!!;
+let listening = document.getElementById("listening")!!;
+let accounts = document.getElementById("accounts-list")!!;
 let cors_proxy_txt = document.getElementById("cors-proxy") as HTMLInputElement;
 let ws_url_txt = document.getElementById("ws-url") as HTMLInputElement;
 let instance_suffix_input = document.getElementById("instance_suffix") as HTMLInputElement;
@@ -56,6 +55,10 @@ $(() => {
     cors_proxy_txt.value = getCorsProxy();
     ws_url_txt.value = getWsUrl();
     instance_suffix_input.defaultValue = getDefaultInstanceSuffix();
+    if (location.host.endsWith("github.io")) {
+        instance_suffix_input.readOnly = false;
+        instance_suffix_input.disabled = false;
+    }
 
     $("#form_add_ms").on("submit", () => loginMs());
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val() as string));
@@ -83,7 +86,7 @@ $(() => {
 
 function swRefreshFiles() {
     // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
-    navigator.serviceWorker.ready.then(ready => ready.active.postMessage({
+    navigator.serviceWorker.ready.then(ready => ready.active?.postMessage({
         action: "cache",
         urls: performance.getEntriesByType("resource").map(it => it.name)
     }));
@@ -144,9 +147,9 @@ function generateAddress() {
         let url = new URL("https://" + backAddress);
         let finalAddress = "";
         let host = url.hostname;
-        let version = $("#connect_version").val().toString().replaceAll(".", "_");
+        let version = $("#connect_version").val()?.toString().replaceAll(".", "_");
         let username = $("#connect_user").val();
-        let onlineMode = $("#connect_online").val().toString();
+        let onlineMode = $("#connect_online").val()?.toString();
         if (host.includes(":") || host.includes("[")) {
             host = host.replaceAll(":", "-")
                 .replaceAll(/[\[\]]/g, "") + ".sslip.io";
@@ -164,7 +167,7 @@ function generateAddress() {
     }
 }
 
-$("#mcIdUsername").text(mcIdUsername);
+$("#mcIdUsername").text(mcIdUsername ?? "");
 
 function submittedListen() {
     let user = $("#listen_username").val() as string;
@@ -184,11 +187,12 @@ function submittedListen() {
 
 function submittedSendToken() {
     let account = findAccountByMcName($("#send_token_user").val() as string)
+    if (!account) return;
     account.acquireActiveToken()
         .then(() => {
             sendSocket(JSON.stringify({
                 "action": "save_access_token",
-                "mc_access_token": account.accessToken
+                "mc_access_token": account?.accessToken
             }))
         })
         .catch(e => addToast("Failed to send access token", e));
@@ -251,7 +255,7 @@ function addListeningList(userId: string, username: string, token: string) {
     $(listening).append(line);
 }
 
-function addToast(title: string, msg: string, yes: () => void = null, no: () => void = null) {
+function addToast(title: string, msg: string, yes: (() => void) | null = null, no: (() => void) | null = null) {
     let toast = $(`<div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
  <div class="toast-header">
    <strong class="me-auto toast_title_msg"></strong>
@@ -286,7 +290,6 @@ function addToast(title: string, msg: string, yes: () => void = null, no: () => 
     }
 
     $("#toasts").prepend(toast);
-    // @ts-ignore
     new bootstrap.Toast(toast[0]).show();
 }
 
@@ -373,7 +376,8 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
                 {action: "reject", title: "Reject"},
                 {action: "confirm", title: "Confirm"}
             ]
-        }).then(() => {});
+        }).then(() => {
+        });
         notificationCallbacks.set(tag, action => {
             if (action === "reject") {
                 no();
@@ -389,12 +393,10 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
 
 // Cors proxy
 function defaultCors(): string {
-    // @ts-ignore
     return self.defaultCorsProxy || "https://cors.re.yt.nom.br/";
 }
 
 function getDefaultInstanceSuffix(): string {
-    // @ts-ignore
     return self.defaultInstanceSuffix || location.hostname;
 }
 
@@ -411,7 +413,9 @@ function setCorsProxy(url: string) {
 let activeAccounts: Array<McAccount> = [];
 
 function loadAccounts() {
-    (JSON.parse(localStorage.getItem("viaaas_mc_accounts")) || []).forEach((it: any) => {
+    let serialized = localStorage.getItem("viaaas_mc_accounts");
+    let parsed = serialized ? JSON.parse(serialized) : [];
+    parsed.forEach((it: any) => {
         if (it.clientToken) {
             // Mojang auth doesn't work on multiplayer anymore
         } else if (it.msUser && myMSALObj.getAccountByUsername(it.msUser)) {
@@ -573,7 +577,7 @@ class MicrosoftAccount extends McAccount {
     }
 }
 
-function findAccountByMcName(name: string) {
+function findAccountByMcName(name: string): McAccount | undefined {
     return activeAccounts.find(it => it.name.toLowerCase() === name.toLowerCase());
 }
 
@@ -612,7 +616,7 @@ const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
 function loginMs() {
     let req = getLoginRequest();
-    (req as any)["prompt"] = "select_account";
+    (req as any).prompt = "select_account";
     myMSALObj.loginRedirect(req);
 }
 
@@ -669,7 +673,8 @@ function setWsUrl(url: string) {
 
 // Tokens
 function saveToken(token: string) {
-    let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
+    let serialized = localStorage.getItem("viaaas_tokens")
+    let hTokens = serialized ? JSON.parse(serialized) : {};
     let tokens = getTokens();
     tokens.push(token);
     hTokens[wsUrl] = tokens;
@@ -677,7 +682,8 @@ function saveToken(token: string) {
 }
 
 function removeToken(token: string) {
-    let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
+    let serialized = localStorage.getItem("viaaas_tokens");
+    let hTokens = serialized ? JSON.parse(serialized) : {};
     let tokens = getTokens();
     tokens = tokens.filter(it => it !== token);
     hTokens[wsUrl] = tokens;
@@ -685,20 +691,22 @@ function removeToken(token: string) {
 }
 
 function getTokens(): Array<string> {
-    return (JSON.parse(localStorage.getItem("viaaas_tokens")) || {})[wsUrl] || [];
+    let serialized = localStorage.getItem("viaaas_tokens");
+    let parsed = serialized? JSON.parse(serialized) : {};
+    return parsed[wsUrl] || [];
 }
 
 // Websocket
 function listen(token: string) {
-    socket.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
+    socket?.send(JSON.stringify({"action": "listen_login_requests", "token": token}));
 }
 
 function unlisten(id: string) {
-    socket.send(JSON.stringify({"action": "unlisten_login_requests", "uuid": id}));
+    socket?.send(JSON.stringify({"action": "unlisten_login_requests", "uuid": id}));
 }
 
 function confirmJoin(hash: string) {
-    socket.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
+    socket?.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 
 function handleJoinRequest(parsed: any) {
@@ -755,9 +763,9 @@ function handleParametersRequest(parsed: any) {
     } catch (e) {
         console.log(e);
     }
-    socket.send(JSON.stringify({
+    socket?.send(JSON.stringify({
         action: "parameters_response",
-        callback: parsed["callback"],
+        callback: parsed.callback,
         version: $("#connect_version").val(),
         host: url.hostname,
         port: parseInt(url.port) || 25565,
@@ -770,33 +778,41 @@ function listenStoredTokens() {
     getTokens().forEach(listen);
 }
 
-function onWsConnect() {
-    setWsStatus("connected");
+function onWsConnect(e: Event) {
+    let msg = "connected";
+    let socketHost = new URL(socket!!.url).host;
+    if (socketHost != location.host) msg += ` to ${socketHost}`;
+    setWsStatus(msg);
     resetHtml();
     listenStoredTokens();
 }
 
-function onWsError(e: any) {
+function onWsError(e: Event) {
     console.log(e);
-    setWsStatus("socket error");
     resetHtml();
 }
 
 function onWsClose(evt: CloseEvent) {
     console.log(evt);
-    setWsStatus("disconnected with close code " + evt.code + " and reason: " + evt.reason);
+    setWsStatus(`disconnected: ${evt.code} ${evt.reason}`);
+    socket = null;
     resetHtml();
     setTimeout(connect, 5000);
 }
 
 function connect() {
     setWsStatus("connecting...");
-    socket = new WebSocket(wsUrl);
-
-    socket.onerror = onWsError;
-    socket.onopen = onWsConnect;
-    socket.onclose = onWsClose;
-    socket.onmessage = onWsMsg;
+    try {
+        socket = new WebSocket(wsUrl);
+        socket.addEventListener("error", onWsError);
+        socket.addEventListener("open", onWsConnect);
+        socket.addEventListener("close", onWsClose);
+        socket.addEventListener("message", onWsMsg);
+    } catch (e: any) {
+        console.log(e);
+        setWsStatus(`error: ${e.toString()}`);
+        setTimeout(connect, 5000);
+    }
 }
 
 function sendSocket(msg: string) {

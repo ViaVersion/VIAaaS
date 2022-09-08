@@ -59,7 +59,7 @@ dependencies {
 
     val vvVer = "4.4.3-SNAPSHOT"
     val vbVer = "4.4.2"
-    val vrVer = "e6b8b69"
+    val vrVer = "9e4ac93"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
@@ -72,7 +72,7 @@ dependencies {
     implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
     implementation("net.coobird:thumbnailator:0.4.17")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-    implementation("org.yaml:snakeyaml:1.30")
+    implementation("org.yaml:snakeyaml:1.31")
 
     val log4jVer = "2.18.0"
     val slf4jVer = "2.0.0"

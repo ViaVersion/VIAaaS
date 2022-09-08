@@ -7,11 +7,12 @@ let mcIdUsername = urlParams.get("username");
 let mcIdCode = urlParams.get("mcauth_code");
 let mcIdSuccess = urlParams.get("mcauth_success");
 $(() => {
+    var _a;
     if (mcIdSuccess === "false") {
-        addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg"));
+        addToast("Couldn't authenticate with Minecraft.ID", (_a = urlParams.get("mcauth_msg")) !== null && _a !== void 0 ? _a : "");
     }
     if (mcIdCode != null) {
-        history.replaceState(null, null, "#");
+        history.replaceState(null, "", "#");
     }
 });
 let connectionStatus = document.getElementById("connection_status");
@@ -46,6 +47,10 @@ $(() => {
     cors_proxy_txt.value = getCorsProxy();
     ws_url_txt.value = getWsUrl();
     instance_suffix_input.defaultValue = getDefaultInstanceSuffix();
+    if (location.host.endsWith("github.io")) {
+        instance_suffix_input.readOnly = false;
+        instance_suffix_input.disabled = false;
+    }
     $("#form_add_ms").on("submit", () => loginMs());
     $("#form_ws_url").on("submit", () => setWsUrl($("#ws-url").val()));
     $("#form_cors_proxy").on("submit", () => setCorsProxy($("#cors-proxy").val()));
@@ -67,10 +72,13 @@ $(() => {
     connect();
 });
 function swRefreshFiles() {
-    navigator.serviceWorker.ready.then(ready => ready.active.postMessage({
-        action: "cache",
-        urls: performance.getEntriesByType("resource").map(it => it.name)
-    }));
+    navigator.serviceWorker.ready.then(ready => {
+        var _a;
+        return (_a = ready.active) === null || _a === void 0 ? void 0 : _a.postMessage({
+            action: "cache",
+            urls: performance.getEntriesByType("resource").map(it => it.name)
+        });
+    });
 }
 function setWsStatus(txt) {
     connectionStatus.innerText = txt;
@@ -116,14 +124,15 @@ function copyGeneratedAddress() {
     navigator.clipboard.writeText($("#generated_address").text()).catch(e => console.log(e));
 }
 function generateAddress() {
+    var _a, _b;
     let backAddress = $("#connect_address").val();
     try {
         let url = new URL("https://" + backAddress);
         let finalAddress = "";
         let host = url.hostname;
-        let version = $("#connect_version").val().toString().replaceAll(".", "_");
+        let version = (_a = $("#connect_version").val()) === null || _a === void 0 ? void 0 : _a.toString().replaceAll(".", "_");
         let username = $("#connect_user").val();
-        let onlineMode = $("#connect_online").val().toString();
+        let onlineMode = (_b = $("#connect_online").val()) === null || _b === void 0 ? void 0 : _b.toString();
         if (host.includes(":") || host.includes("[")) {
             host = host.replaceAll(":", "-")
                 .replaceAll(/[\[\]]/g, "") + ".sslip.io";
@@ -145,7 +154,7 @@ function generateAddress() {
         $("#generated_address").text("");
     }
 }
-$("#mcIdUsername").text(mcIdUsername);
+$("#mcIdUsername").text(mcIdUsername !== null && mcIdUsername !== void 0 ? mcIdUsername : "");
 function submittedListen() {
     let user = $("#listen_username").val();
     if (!user)
@@ -165,11 +174,13 @@ function submittedListen() {
 }
 function submittedSendToken() {
     let account = findAccountByMcName($("#send_token_user").val());
+    if (!account)
+        return;
     account.acquireActiveToken()
         .then(() => {
         sendSocket(JSON.stringify({
             "action": "save_access_token",
-            "mc_access_token": account.accessToken
+            "mc_access_token": account === null || account === void 0 ? void 0 : account.accessToken
         }));
     })
         .catch(e => addToast("Failed to send access token", e));
@@ -338,7 +349,8 @@ function authNotification(msg, yes, no) {
                 { action: "reject", title: "Reject" },
                 { action: "confirm", title: "Confirm" }
             ]
-        }).then(() => { });
+        }).then(() => {
+        });
         notificationCallbacks.set(tag, action => {
             if (action === "reject") {
                 no();
@@ -367,7 +379,9 @@ function setCorsProxy(url) {
 }
 let activeAccounts = [];
 function loadAccounts() {
-    (JSON.parse(localStorage.getItem("viaaas_mc_accounts")) || []).forEach((it) => {
+    let serialized = localStorage.getItem("viaaas_mc_accounts");
+    let parsed = serialized ? JSON.parse(serialized) : [];
+    parsed.forEach((it) => {
         if (it.clientToken) {
         }
         else if (it.msUser && myMSALObj.getAccountByUsername(it.msUser)) {
@@ -539,7 +553,7 @@ const msalConfig = {
 const myMSALObj = new msal.PublicClientApplication(msalConfig);
 function loginMs() {
     let req = getLoginRequest();
-    req["prompt"] = "select_account";
+    req.prompt = "select_account";
     myMSALObj.loginRedirect(req);
 }
 $(() => myMSALObj.handleRedirectPromise().then((resp) => {
@@ -587,30 +601,34 @@ function setWsUrl(url) {
     location.reload();
 }
 function saveToken(token) {
-    let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
+    let serialized = localStorage.getItem("viaaas_tokens");
+    let hTokens = serialized ? JSON.parse(serialized) : {};
     let tokens = getTokens();
     tokens.push(token);
     hTokens[wsUrl] = tokens;
     localStorage.setItem("viaaas_tokens", JSON.stringify(hTokens));
 }
 function removeToken(token) {
-    let hTokens = JSON.parse(localStorage.getItem("viaaas_tokens")) || {};
+    let serialized = localStorage.getItem("viaaas_tokens");
+    let hTokens = serialized ? JSON.parse(serialized) : {};
     let tokens = getTokens();
     tokens = tokens.filter(it => it !== token);
     hTokens[wsUrl] = tokens;
     localStorage.setItem("viaaas_tokens", JSON.stringify(hTokens));
 }
 function getTokens() {
-    return (JSON.parse(localStorage.getItem("viaaas_tokens")) || {})[wsUrl] || [];
+    let serialized = localStorage.getItem("viaaas_tokens");
+    let parsed = serialized ? JSON.parse(serialized) : {};
+    return parsed[wsUrl] || [];
 }
 function listen(token) {
-    socket.send(JSON.stringify({ "action": "listen_login_requests", "token": token }));
+    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({ "action": "listen_login_requests", "token": token }));
 }
 function unlisten(id) {
-    socket.send(JSON.stringify({ "action": "unlisten_login_requests", "uuid": id }));
+    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({ "action": "unlisten_login_requests", "uuid": id }));
 }
 function confirmJoin(hash) {
-    socket.send(JSON.stringify({ action: "session_hash_response", session_hash: hash }));
+    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({ action: "session_hash_response", session_hash: hash }));
 }
 function handleJoinRequest(parsed) {
     authNotification("Allow auth impersonation from VIAaaS instance?\nAccount: "
@@ -668,9 +686,9 @@ function handleParametersRequest(parsed) {
     catch (e) {
         console.log(e);
     }
-    socket.send(JSON.stringify({
+    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({
         action: "parameters_response",
-        callback: parsed["callback"],
+        callback: parsed.callback,
         version: $("#connect_version").val(),
         host: url.hostname,
         port: parseInt(url.port) || 25565,
@@ -681,29 +699,40 @@ function handleParametersRequest(parsed) {
 function listenStoredTokens() {
     getTokens().forEach(listen);
 }
-function onWsConnect() {
-    setWsStatus("connected");
+function onWsConnect(e) {
+    let msg = "connected";
+    let socketHost = new URL(socket.url).host;
+    if (socketHost != location.host)
+        msg += ` to ${socketHost}`;
+    setWsStatus(msg);
     resetHtml();
     listenStoredTokens();
 }
 function onWsError(e) {
     console.log(e);
-    setWsStatus("socket error");
     resetHtml();
 }
 function onWsClose(evt) {
     console.log(evt);
-    setWsStatus("disconnected with close code " + evt.code + " and reason: " + evt.reason);
+    setWsStatus(`disconnected: ${evt.code} ${evt.reason}`);
+    socket = null;
     resetHtml();
     setTimeout(connect, 5000);
 }
 function connect() {
     setWsStatus("connecting...");
-    socket = new WebSocket(wsUrl);
-    socket.onerror = onWsError;
-    socket.onopen = onWsConnect;
-    socket.onclose = onWsClose;
-    socket.onmessage = onWsMsg;
+    try {
+        socket = new WebSocket(wsUrl);
+        socket.addEventListener("error", onWsError);
+        socket.addEventListener("open", onWsConnect);
+        socket.addEventListener("close", onWsClose);
+        socket.addEventListener("message", onWsMsg);
+    }
+    catch (e) {
+        console.log(e);
+        setWsStatus(`error: ${e.toString()}`);
+        setTimeout(connect, 5000);
+    }
 }
 function sendSocket(msg) {
     if (!socket) {

@@ -11,7 +11,9 @@
     "noImplicitOverride": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "removeComments": true
+    "removeComments": true,
+    "alwaysStrict": true,
+    "strict": true
   },
   "include": [
     "js/**.ts"
