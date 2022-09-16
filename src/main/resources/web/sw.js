@@ -14,43 +14,51 @@ self.addEventListener("install", () => {
 });
 
 self.addEventListener("fetch", evt => {
-    if (!shouldCache(evt.request.url)
-        || evt.request.method !== "GET") return;
-    evt.respondWith(
-        fromNetwork(evt.request).catch(() => fromCache(evt.request))
-    );
-});
-
-addEventListener("message", e => {
-    if (e.data.action === "cache") {
-        e.waitUntil(cache(e.data.urls));
+    if (!shouldCache(evt.request.url) || evt.request.method !== "GET") return;
+    if (isImmutable(evt.request.url)) {
+        evt.respondWith(fromCache(evt.request).catch(() => tryNetworkAndCache(evt.request)));
+    } else {
+        evt.respondWith(tryNetworkAndCache(evt.request).catch(() => fromCache(evt.request)));
     }
 });
+
+function isImmutable(url) {
+    let parsed = new URL(url);
+    return ["cdnjs.cloudflare.com", "alcdn.msauth.net"].indexOf(parsed.host) !== -1;
+}
 
 function shouldCache(it) {
     return [".js", ".css", ".png", ".html", ".webp", "manifest.json"].findIndex(end => it.endsWith(end)) !== -1
         || it === new URL("./", self.location).toString()
 }
 
-function cache(urls) {
-    let filtered = Array.from(new Set(urls.filter(shouldCache)));
-    return caches.open(cacheId).then(cache => cache.addAll(filtered));
-}
-
-function fromNetwork(request) {
+function tryNetworkAndCache(request) {
     return fetch(request)
-        .then(response => {
+        .then(async response => {
             if (!shouldCache(response.url)) return response;
 
-            // Let's cache it when loading for the first time
-            return caches.open(cacheId)
-                .then(it => it.add(request))
-                .then(() => response);
+            try {
+                await fromCache(request);
+            } catch (e) {
+                console.log("caching due to: " + e);
+                let cache = await caches.open(cacheId);
+                await cache.add(request);
+            }
+            return response;
         });
 }
 
 function fromCache(request) {
     return caches.open(cacheId)
-        .then(cache => cache.match(request))
-        .then(matching => matching || Promise.reject("no-match"));
+        .then(async cache => {
+            let matching = await cache.match(request);
+            if (matching == null) return Promise.reject("no match");
+
+            let timeDiff = new Date() - new Date(matching.headers.get("date"));
+            if (!isImmutable(request.url) && timeDiff >= 24 * 60 * 60 * 1000) {
+                await cache.delete(request);
+                return Promise.reject("expired");
+            }
+            return matching;
+        });
 }

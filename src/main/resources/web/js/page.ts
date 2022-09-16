@@ -39,8 +39,10 @@ $(() => {
 });
 $(() => {
     if (navigator.serviceWorker) {
-        navigator.serviceWorker.register("sw.js")
-            .then(() => setTimeout(() => swRefreshFiles(), 1000));
+        navigator.serviceWorker.register("sw.js").catch(e => {
+            console.log(e);
+            addToast("Failed to install service worker", e.toString());
+        });
     }
 })
 
@@ -83,14 +85,6 @@ $(() => {
 $(() => {
     connect();
 })
-
-function swRefreshFiles() {
-    // https://stackoverflow.com/questions/46830493/is-there-any-way-to-cache-all-files-of-defined-folder-path-in-service-worker
-    navigator.serviceWorker.ready.then(ready => ready.active?.postMessage({
-        action: "cache",
-        urls: performance.getEntriesByType("resource").map(it => it.name)
-    }));
-}
 
 function setWsStatus(txt: string) {
     connectionStatus.innerText = txt;

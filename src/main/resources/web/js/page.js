@@ -33,8 +33,10 @@ $(() => {
 });
 $(() => {
     if (navigator.serviceWorker) {
-        navigator.serviceWorker.register("sw.js")
-            .then(() => setTimeout(() => swRefreshFiles(), 1000));
+        navigator.serviceWorker.register("sw.js").catch(e => {
+            console.log(e);
+            addToast("Failed to install service worker", e.toString());
+        });
     }
 });
 $(() => {
@@ -71,15 +73,6 @@ $(() => {
 $(() => {
     connect();
 });
-function swRefreshFiles() {
-    navigator.serviceWorker.ready.then(ready => {
-        var _a;
-        return (_a = ready.active) === null || _a === void 0 ? void 0 : _a.postMessage({
-            action: "cache",
-            urls: performance.getEntriesByType("resource").map(it => it.name)
-        });
-    });
-}
 function setWsStatus(txt) {
     connectionStatus.innerText = txt;
 }
