@@ -64,23 +64,23 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.80.Final")
+    implementation("io.netty:netty-all:4.1.82.Final")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.54.Final")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.14.Final:linux-x86_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.15.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
     implementation("net.coobird:thumbnailator:0.4.17")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-    implementation("org.yaml:snakeyaml:1.31")
+    implementation("org.yaml:snakeyaml:1.33")
 
-    val log4jVer = "2.18.0"
-    val slf4jVer = "2.0.0"
+    val log4jVer = "2.19.0"
+    val slf4jVer = "2.0.3"
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
-    implementation("org.apache.logging.log4j:log4j-slf4j18-impl:$log4jVer")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVer")
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
