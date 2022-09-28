@@ -64,8 +64,14 @@ dependencies {
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
 
-    implementation("io.netty:netty-all:4.1.82.Final")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.54.Final")
+    val nettyVer = "4.1.82.Final"
+    implementation("io.netty:netty-handler-proxy:$nettyVer")
+    implementation("io.netty:netty-resolver-dns:$nettyVer")
+    implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
+    implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-x86_64")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.54.Final:linux-aarch_64")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.54.Final:linux-x86_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.15.Final:linux-aarch_64")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.15.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:31.1-jre")
@@ -76,6 +82,7 @@ dependencies {
 
     val log4jVer = "2.19.0"
     val slf4jVer = "2.0.3"
+    implementation("com.lmax:disruptor:3.4.4")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")

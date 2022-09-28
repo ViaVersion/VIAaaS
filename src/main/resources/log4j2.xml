@@ -6,7 +6,8 @@
             <PatternLayout
                     pattern="%d{HH:mm:ss} %style{%highlight{%level}{FATAL=red blink, ERROR=red, WARN=yellow bright, INFO=cyan bright, DEBUG=green, TRACE=white}} [%thread] [%logger] %minecraftFormatting{%msg}%n"/>
         </TerminalConsole>
-        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingRandomAccessFile name="File" fileName="logs/latest.log"
+                                 filePattern="logs/%d{yyyy-MM}/%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %minecraftFormatting{%msg}{strip}%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
@@ -14,7 +15,8 @@
                 <OnStartupTriggeringPolicy/>
             </Policies>
         </RollingRandomAccessFile>
-        <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz">
+        <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log"
+                                 filePattern="logs/debug-%i.log.gz" immediateFlush="false">
             <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss} [%t] [%logger] %level{length=1} %minecraftFormatting{%msg}{strip}%n"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="20 MB"/>
