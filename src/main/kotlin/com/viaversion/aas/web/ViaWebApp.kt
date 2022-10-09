@@ -1,6 +1,7 @@
 package com.viaversion.aas.web
 
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.http.content.*
 import io.ktor.server.application.*
@@ -8,7 +9,7 @@ import io.ktor.server.plugins.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.compression.*
-import io.ktor.server.plugins.conditionalheaders.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.forwardedheaders.*
 import io.ktor.server.plugins.partialcontent.*
@@ -27,12 +28,6 @@ import java.time.Duration
 class ViaWebApp(val viaWebServer: WebServer) {
     fun Application.main() {
         install(DefaultHeaders)
-        install(ConditionalHeaders)
-        install(CachingHeaders) {
-            options { _, _ ->
-                io.ktor.http.content.CachingOptions(CacheControl.MaxAge(600, visibility = CacheControl.Visibility.Public))
-            }
-        }
         install(CallLogging) {
             level = Level.DEBUG
             this.format {
@@ -48,19 +43,27 @@ class ViaWebApp(val viaWebServer: WebServer) {
         }
         install(XForwardedHeaders)
         install(ForwardedHeaders)
-        // i think we aren't vulnerable to breach, dynamic things are websockets
-        // https://ktor.io/docs/compression.html#security
-        install(Compression)
-        install(PartialContent)
-
+        install(ContentNegotiation) {
+            gson()
+        }
         routing {
             routeStatic()
             routeWs()
+            routeApi()
         }
     }
 
     private fun Route.routeStatic() {
-        static {
+        static("/") {
+            // https://ktor.io/docs/compression.html#security
+            install(Compression)
+            install(CachingHeaders) {
+                options { _, _ ->
+                    CachingOptions(CacheControl.MaxAge(600, visibility = CacheControl.Visibility.Public))
+                }
+            }
+            //install(ConditionalHeaders) https://youtrack.jetbrains.com/issue/KTOR-4943/
+            install(PartialContent)
             get("{path...}") {
                 val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")
                 val index = Path.of("index.html")
@@ -99,6 +102,12 @@ class ViaWebApp(val viaWebServer: WebServer) {
             } finally {
                 viaWebServer.disconnected(this)
             }
+        }
+    }
+
+    private fun Route.routeApi() {
+        get("/api/getEpoch") {
+            call.respond(System.currentTimeMillis() / 1000)
         }
     }
 }

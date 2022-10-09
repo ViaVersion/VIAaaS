@@ -309,10 +309,10 @@ async function getIpAddress(cors) {
         .then(it => it.trim());
 }
 function getNetworkTimestamp() {
-    return fetch("https://icanhazepoch.com")
+    return fetch("/api/getEpoch", { "headers": { "accept": "application/json" } })
         .then(checkFetchSuccess("code"))
-        .then(r => r.text())
-        .then(it => parseInt(it.trim()));
+        .then(r => r.json())
+        .then(it => parseInt(it));
 }
 let notificationCallbacks = new Map();
 $(() => {

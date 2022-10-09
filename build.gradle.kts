@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 import com.google.javascript.jscomp.CompilerOptions.LanguageMode
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor
 import org.gradlewebtools.minify.minifier.js.JsMinifier
@@ -13,7 +15,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -91,7 +93,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.1.0"
+    val ktorVersion = "2.1.2"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -117,9 +119,9 @@ run.standardInput = System.`in`
 
 project.configurations.implementation.get().isCanBeResolved = true
 tasks {
-    named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    named<ShadowJar>("shadowJar") {
         configurations = listOf(project.configurations.implementation.get())
-        transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer::class.java)
+        transform(Log4j2PluginsCacheFileTransformer::class.java)
     }
     build {
         dependsOn(shadowJar)

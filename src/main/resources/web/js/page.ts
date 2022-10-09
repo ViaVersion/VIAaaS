@@ -332,11 +332,11 @@ async function getIpAddress(cors: boolean): Promise<string> {
         .then(it => it.trim());
 }
 
-function getNetworkTimestamp() {
-    return fetch("https://icanhazepoch.com")
+function getNetworkTimestamp(): Promise<number> {
+    return fetch("/api/getEpoch", {"headers": {"accept": "application/json"}})
         .then(checkFetchSuccess("code"))
-        .then(r => r.text())
-        .then(it => parseInt(it.trim()))
+        .then(r => r.json())
+        .then(it => parseInt(it))
 }
 
 // Notification
@@ -686,7 +686,7 @@ function removeToken(token: string) {
 
 function getTokens(): Array<string> {
     let serialized = localStorage.getItem("viaaas_tokens");
-    let parsed = serialized? JSON.parse(serialized) : {};
+    let parsed = serialized ? JSON.parse(serialized) : {};
     return parsed[wsUrl] || [];
 }
 
