@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Latest build
+    url: https://github.com/ViaVersion/VIAaaS/actions
+    about: Before reporting a bug, please check if using latest from our ci fixes your issue.
+  - name: ViaVersion Discord
+    url: https://discord.gg/viaversion
+    about: For smaller issues or questions, you can also join our Discord server.
