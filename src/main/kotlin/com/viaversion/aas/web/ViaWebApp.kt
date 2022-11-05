@@ -3,12 +3,13 @@ package com.viaversion.aas.web
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.serialization.gson.*
-import io.ktor.server.http.content.*
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.conditionalheaders.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.forwardedheaders.*
@@ -62,7 +63,7 @@ class ViaWebApp(val viaWebServer: WebServer) {
                     CachingOptions(CacheControl.MaxAge(600, visibility = CacheControl.Visibility.Public))
                 }
             }
-            //install(ConditionalHeaders) https://youtrack.jetbrains.com/issue/KTOR-4943/
+            install(ConditionalHeaders)
             install(PartialContent)
             get("{path...}") {
                 val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")

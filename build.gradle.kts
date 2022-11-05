@@ -78,7 +78,7 @@ dependencies {
 
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
-    implementation("net.coobird:thumbnailator:0.4.17")
+    implementation("net.coobird:thumbnailator:0.4.18")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.33")
 
@@ -93,7 +93,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.1.2"
+    val ktorVersion = "2.1.3"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -111,7 +111,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:4.1.0")
+    implementation("com.auth0:java-jwt:4.2.1")
 }
 
 val run: JavaExec by tasks
