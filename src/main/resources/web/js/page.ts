@@ -636,8 +636,7 @@ function getTokenPopup(username: string, request: any) {
         .catch((e: any) => {
             console.warn("silent token acquisition fails.");
             // @ts-ignore
-            if (error instanceof msal.InteractionRequiredAuthError) {
-                // fallback to interaction when silent call fails
+            if (e instanceof msal.InteractionRequiredAuthError) {
                 return myMSALObj.acquireTokenPopup(request).catch((error: any) => console.error(error));
             } else {
                 console.warn(e);

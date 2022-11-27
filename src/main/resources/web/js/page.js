@@ -570,7 +570,7 @@ function getTokenPopup(username, request) {
     return myMSALObj.acquireTokenSilent(request)
         .catch((e) => {
         console.warn("silent token acquisition fails.");
-        if (error instanceof msal.InteractionRequiredAuthError) {
+        if (e instanceof msal.InteractionRequiredAuthError) {
             return myMSALObj.acquireTokenPopup(request).catch((error) => console.error(error));
         }
         else {
