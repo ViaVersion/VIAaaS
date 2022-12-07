@@ -2,6 +2,7 @@ package com.viaversion.aas.codec.packet.login
 
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.parseUndashedId
+import com.viaversion.aas.protocol.sharewareVersion
 import com.viaversion.aas.type.AspirinTypes
 import com.viaversion.aas.util.SignableProperty
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -19,7 +20,7 @@ class LoginSuccess : Packet {
             protocolVersion >= ProtocolVersion.v1_16.version -> {
                 Type.UUID.read(byteBuf)
             }
-            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == 1 -> {
+            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == sharewareVersion.version -> {
                 UUID.fromString(Type.STRING.read(byteBuf))
             }
             else -> parseUndashedId(Type.STRING.read(byteBuf))
@@ -35,7 +36,7 @@ class LoginSuccess : Packet {
             protocolVersion >= ProtocolVersion.v1_16.version -> {
                 Type.UUID.write(byteBuf, id)
             }
-            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == 1 -> {
+            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == sharewareVersion.version -> {
                 Type.STRING.write(byteBuf, id.toString())
             }
             else -> Type.STRING.write(byteBuf, id.toString().replace("-", ""))

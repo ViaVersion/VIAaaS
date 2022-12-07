@@ -59,8 +59,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.4.3-SNAPSHOT"
-    val vbVer = "4.4.3-SNAPSHOT"
+    val vvVer = "4.5.0"
+    val vbVer = "4.5.0"
     val vrVer = "9e4ac93"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
@@ -83,7 +83,7 @@ dependencies {
     implementation("org.yaml:snakeyaml:1.33")
 
     val log4jVer = "2.19.0"
-    val slf4jVer = "2.0.4"
+    val slf4jVer = "2.0.5"
     implementation("com.lmax:disruptor:3.4.4")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")

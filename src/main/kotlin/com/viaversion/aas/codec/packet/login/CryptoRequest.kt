@@ -1,6 +1,7 @@
 package com.viaversion.aas.codec.packet.login
 
 import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.protocol.sharewareVersion
 import com.viaversion.aas.readByteArray
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
@@ -16,7 +17,7 @@ class CryptoRequest : Packet {
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
         serverId = Type.STRING.read(byteBuf)
-        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == 1) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == sharewareVersion.version) {
             publicKey = KeyFactory.getInstance("RSA")
                 .generatePublic(X509EncodedKeySpec(Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)))
             nonce = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
@@ -29,7 +30,7 @@ class CryptoRequest : Packet {
 
     override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
         Type.STRING.write(byteBuf, serverId)
-        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == 1) {
+        if (protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == sharewareVersion.version) {
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, publicKey.encoded)
             Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, nonce)
         } else {

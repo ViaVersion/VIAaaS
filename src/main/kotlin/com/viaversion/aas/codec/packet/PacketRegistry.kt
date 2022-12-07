@@ -29,6 +29,7 @@ import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ClientboundPacke
 import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPackets1_18
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ClientboundPackets1_19_1
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ServerboundPackets1_19_1
+import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ClientboundPackets1_19_3
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ClientboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
@@ -87,7 +88,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.DISCONNECT.id,
                 ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.DISCONNECT.id,
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.DISCONNECT.id,
-                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id
+                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id,
+                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id
             )
         )
         register(
@@ -102,7 +104,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.PLUGIN_MESSAGE.id
             )
         )
         register(
@@ -112,6 +115,7 @@ object PacketRegistry {
             ProtocolVersion.v1_8.singleton,
             ClientboundPackets1_8.SET_COMPRESSION.id
         )
+        // todo update this to 1.19.3
         register(
             State.PLAY, Direction.SERVERBOUND, ::ServerboundChatCommand,
             mapOf(
@@ -132,7 +136,7 @@ object PacketRegistry {
         return Range.closed(this.originalVersion, o.originalVersion)
     }
 
-    val ProtocolVersion.singleton get() = Range.singleton(this.originalVersion)
+    private val ProtocolVersion.singleton get() = Range.singleton(this.originalVersion)
 
     inline fun <reified P : Packet> register(
         state: State,
@@ -175,17 +179,17 @@ object PacketRegistry {
     data class DecodingInfo(val constructor: Supplier<out Packet>)
     data class EncodingInfo(val packetId: Int)
 
-    fun getPacketConstructor(
+    private fun getPacketConstructor(
         protocolVersion: Int,
         state: State,
         id: Int,
         direction: Direction
     ): Supplier<out Packet>? {
-        return entriesDecoding.get(Triple(state, direction, id))?.get(protocolVersion)?.constructor
+        return entriesDecoding[Triple(state, direction, id)]?.get(protocolVersion)?.constructor
     }
 
-    fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int, direction: Direction): Int? {
-        return entriesEncoding.get(direction to packetClass)?.get(protocolVersion)?.packetId
+    private fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int, direction: Direction): Int? {
+        return entriesEncoding[direction to packetClass]?.get(protocolVersion)?.packetId
     }
 
     fun decode(byteBuf: ByteBuf, protocolVersion: Int, state: State, direction: Direction): Packet {

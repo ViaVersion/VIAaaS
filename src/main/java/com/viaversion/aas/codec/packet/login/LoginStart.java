@@ -42,7 +42,8 @@ public class LoginStart implements Packet {
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
 		username = new StringType(16).read(byteBuf);
-		if (protocolVersion >= ProtocolVersion.v1_19.getVersion()) {
+		if (protocolVersion >= ProtocolVersion.v1_19.getVersion()
+				&& protocolVersion < ProtocolVersion.v1_19_3.getVersion()) {
 			profileKey = Type.OPTIONAL_PROFILE_KEY.read(byteBuf);
 		}
 
@@ -54,7 +55,8 @@ public class LoginStart implements Packet {
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
 		Type.STRING.write(byteBuf, username);
-		if (protocolVersion >= ProtocolVersion.v1_19.getVersion()) {
+		if (protocolVersion >= ProtocolVersion.v1_19.getVersion()
+				&& protocolVersion < ProtocolVersion.v1_19_3.getVersion()) {
 			Type.OPTIONAL_PROFILE_KEY.write(byteBuf, profileKey);
 		}
 		if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
