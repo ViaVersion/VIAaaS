@@ -478,7 +478,7 @@ class McAccount {
                 }
                 return Promise.resolve();
             })
-            .catch(e => addToast("Failed to refresh token!", e));
+            .catch(e => addToast("Failed to refresh mc token!", e));
     }
 }
 
@@ -621,10 +621,10 @@ $(() => myMSALObj.handleRedirectPromise().then((resp: any) => {
             let accNew = new MicrosoftAccount("", "", "", resp.account.username);
             accNew.refresh()
                 .then(() => addActiveAccount(accNew))
-                .catch(e => addToast("Failed to get token", e));
+                .catch(e => addToast("Failed to get mc token", e));
         } else {
             found.refresh()
-                .catch(e => addToast("Failed to refresh token", e));
+                .catch(e => addToast("Failed to refresh mc token", e));
         }
     }
 }));
