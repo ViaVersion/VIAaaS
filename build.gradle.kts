@@ -9,18 +9,18 @@ import java.nio.file.Files as JFiles
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.7.3") }
+    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.8.0") }
 }
 
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "1.8.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.42.0"
+    id("com.github.ben-manes.versions") version "0.44.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("com.palantir.git-version") version "0.15.0"
-    id("org.gradlewebtools.minify") version "1.3.1" apply false
+    id("org.gradlewebtools.minify") version "1.3.2" apply false
 }
 
 application {
@@ -78,12 +78,12 @@ dependencies {
 
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
-    implementation("net.coobird:thumbnailator:0.4.18")
+    implementation("net.coobird:thumbnailator:0.4.19")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:1.33")
 
     val log4jVer = "2.19.0"
-    val slf4jVer = "2.0.5"
+    val slf4jVer = "2.0.6"
     implementation("com.lmax:disruptor:3.4.4")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
@@ -93,7 +93,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.21.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.2.1"
+    val ktorVersion = "2.2.2"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")

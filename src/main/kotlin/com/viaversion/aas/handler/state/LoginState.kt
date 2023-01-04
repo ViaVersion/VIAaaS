@@ -72,7 +72,7 @@ class LoginState : ConnectionState {
     private fun handleReauthResponse(packet: PluginResponse): Boolean {
         if (packet.id == pendingReauth) {
             pendingReauth = null
-            if (packet.success) {
+            if (packet.isSuccess) {
                 val buf = Unpooled.wrappedBuffer(packet.data)
                 callbackReauth.complete(buf.readBoolean())
             } else {
@@ -212,7 +212,7 @@ class LoginState : ConnectionState {
             val id = Type.VAR_INT.readPrimitive(buffer)
             val data = readRemainingBytes(buffer)
             if (handleReauthResponse(PluginResponse().also {
-                    it.success = true
+                    it.isSuccess = true
                     it.id = id
                     it.data = data
                 })) return
