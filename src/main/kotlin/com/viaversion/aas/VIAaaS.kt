@@ -1,20 +1,19 @@
 package com.viaversion.aas
 
 import com.viaversion.aas.command.VIAaaSConsole
+import com.viaversion.aas.platform.AspirinAprilFools
 import com.viaversion.aas.platform.AspirinBackwards
 import com.viaversion.aas.platform.AspirinPlatform
 import com.viaversion.aas.platform.AspirinRewind
 import com.viaversion.aas.protocol.registerAspirinProtocols
 import com.viaversion.aas.web.ViaWebApp
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import de.gerrygames.viarewind.api.ViaRewindConfigImpl
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
-import java.io.File
 
 
 fun main(args: Array<String>) {
@@ -54,9 +53,11 @@ private fun printSplash() {
 }
 
 private fun initVia() {
-    AspirinPlatform.initVia()
-    AspirinRewind().init(ViaRewindConfigImpl(File("config/viarewind.yml")))
-    AspirinBackwards().init(File("config/viabackwards"))
+    AspirinPlatform.initVia {
+        AspirinAprilFools().init()
+    }
+    AspirinBackwards().init()
+    AspirinRewind().init()
 
     ProtocolVersion.register(-2, "AUTO")
     registerAspirinProtocols()

@@ -30,6 +30,7 @@ import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPacke
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ClientboundPackets1_19_1
 import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ServerboundPackets1_19_1
 import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ClientboundPackets1_19_3
+import com.viaversion.viaversion.protocols.protocol1_19_4to1_19_3.ClientboundPackets1_19_4
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ClientboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
@@ -89,7 +90,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.DISCONNECT.id,
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.DISCONNECT.id,
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id,
-                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id
+                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
+                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.DISCONNECT.id
             )
         )
         register(
@@ -105,7 +107,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id
             )
         )
         register(

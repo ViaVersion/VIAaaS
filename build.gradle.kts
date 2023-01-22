@@ -40,7 +40,7 @@ compileKotlin.kotlinOptions.jvmTarget = "11"
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.github.creeper123123321.viaaas"
-version = "0.4.18+" + try {
+version = "0.4.19+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -52,6 +52,7 @@ repositories {
     mavenCentral()
     maven("https://repo.viaversion.com/")
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://maven.lenni0451.net/releases/")
     maven("https://jitpack.io/")
 }
 
@@ -59,12 +60,13 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.5.2-SNAPSHOT"
-    val vbVer = "4.5.2-SNAPSHOT"
+    val vvVer = "4.6.0-23w03a-SNAPSHOT"
+    val vbVer = "4.6.0-23w03a-SNAPSHOT"
     val vrVer = "9e4ac93"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
+    implementation("net.raphimc:ViaAprilFools:2.0.1")
 
     val nettyVer = "4.1.86.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")

@@ -34,7 +34,7 @@ object AspirinPlatform : ViaPlatform<UUID> {
         eventLoop.execute(AspirinServer::waitMainStart)
     }
 
-    fun initVia() {
+    fun initVia(enableListener: Runnable) {
         Via.init(
             ViaManagerImpl.builder()
                 .injector(AspirinInjector())
@@ -45,8 +45,8 @@ object AspirinPlatform : ViaPlatform<UUID> {
         conf = AspirinViaConfig()
 
         MappingDataLoader.enableMappingsCache()
+        Via.getManager().addEnableListener(enableListener)
         (Via.getManager() as ViaManagerImpl).init()
-
     }
 
     override fun sendMessage(p0: UUID, p1: String) = Unit
@@ -61,7 +61,7 @@ object AspirinPlatform : ViaPlatform<UUID> {
     override fun getDump() = JsonObject()
     override fun kickPlayer(p0: UUID, p1: String) = false
     override fun getApi() = AspirinApi()
-    override fun getDataFolder() = File("viaversion")
+    override fun getDataFolder() = File("config/viaversion")
     override fun getConf() = conf
     override fun runAsync(p0: Runnable) = FutureTask(CompletableFuture.runAsync(p0, executor))
     override fun getLogger() = logger

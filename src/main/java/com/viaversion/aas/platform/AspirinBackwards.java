@@ -12,6 +12,10 @@ public class AspirinBackwards implements ViaBackwardsPlatform {
 		return logger;
 	}
 
+	public void init() {
+		init(getDataFolder());
+	}
+
 	@Override
 	public void disable() {
 	}
