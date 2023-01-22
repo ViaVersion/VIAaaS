@@ -166,8 +166,7 @@ Fabric/Forge client:
 
 #### Can you support more versions / Is there some alternative?
 
-- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and RK_01's ViaProxy server (
-  viaproxy.raphimc.net)
+- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and [ViaProxy](https://github.com/RaphiMC/ViaProxy)
 
 #### Can I customize the files of HTTP server?
 
