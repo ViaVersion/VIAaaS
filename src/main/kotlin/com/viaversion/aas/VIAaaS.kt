@@ -54,9 +54,9 @@ private fun printSplash() {
 
 private fun initVia() {
     AspirinPlatform.initVia {
+        AspirinBackwards().init()
         AspirinAprilFools().init()
     }
-    AspirinBackwards().init()
     AspirinRewind().init()
 
     ProtocolVersion.register(-2, "AUTO")
