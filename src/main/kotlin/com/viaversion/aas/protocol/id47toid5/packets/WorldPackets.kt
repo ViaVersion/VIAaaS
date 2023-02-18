@@ -5,6 +5,7 @@ import com.viaversion.aas.protocol.id47toid5.Protocol1_8To1_7_6
 import com.viaversion.aas.protocol.id47toid5.chunks.ChunkPacketTransformer
 import com.viaversion.aas.protocol.id47toid5.data.Particle1_8to1_7
 import com.viaversion.aas.protocol.id47toid5.storage.MapStorage
+import com.viaversion.viaversion.api.protocol.remapper.PacketHandlers
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper
 import com.viaversion.viaversion.api.protocol.remapper.TypeRemapper
 import com.viaversion.viaversion.api.type.Type
@@ -17,21 +18,17 @@ import de.gerrygames.viarewind.protocol.protocol1_7_6_10to1_8.types.Types1_7_6_1
 import kotlin.experimental.and
 
 fun Protocol1_8To1_7_6.registerWorldPackets() {
-    this.registerClientbound(ClientboundPackets1_7.CHUNK_DATA, object : PacketRemapper() {
-        override fun registerMap() {
-            handler { packetWrapper -> ChunkPacketTransformer.transformChunk(packetWrapper) }
-        }
-    })
+    this.registerClientbound(ClientboundPackets1_7.CHUNK_DATA) { packetWrapper ->
+        ChunkPacketTransformer.transformChunk(packetWrapper)
+    }
 
     //Multi Block Change
-    this.registerClientbound(ClientboundPackets1_7.MULTI_BLOCK_CHANGE, object : PacketRemapper() {
-        override fun registerMap() {
-            handler { packetWrapper -> ChunkPacketTransformer.transformMultiBlockChange(packetWrapper) }
-        }
-    })
+    this.registerClientbound(ClientboundPackets1_7.MULTI_BLOCK_CHANGE) { packetWrapper ->
+        ChunkPacketTransformer.transformMultiBlockChange(packetWrapper)
+    }
 
-    this.registerClientbound(ClientboundPackets1_7.BLOCK_CHANGE, object : PacketRemapper() {
-        override fun registerMap() {
+    this.registerClientbound(ClientboundPackets1_7.BLOCK_CHANGE, object : PacketHandlers() {
+        override fun register() {
             map(xyzUBytePos, TypeRemapper(Type.POSITION)) //Position
             handler { packetWrapper ->
                 val blockId = packetWrapper.read(Type.VAR_INT)
@@ -41,8 +38,8 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
         }
     })
 
-    this.registerClientbound(ClientboundPackets1_7.BLOCK_ACTION, object : PacketRemapper() {
-        override fun registerMap() {
+    this.registerClientbound(ClientboundPackets1_7.BLOCK_ACTION, object : PacketHandlers() {
+        override fun register() {
             map(xyzShortPos, TypeRemapper(Type.POSITION)) //Position
             map(Type.UNSIGNED_BYTE)
             map(Type.UNSIGNED_BYTE)
@@ -58,11 +55,9 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
         }
     })
 
-    this.registerClientbound(ClientboundPackets1_7.MAP_BULK_CHUNK, object : PacketRemapper() {
-        override fun registerMap() {
-            handler { packetWrapper -> ChunkPacketTransformer.transformChunkBulk(packetWrapper) }
-        }
-    })
+    this.registerClientbound(ClientboundPackets1_7.MAP_BULK_CHUNK) { packetWrapper ->
+        ChunkPacketTransformer.transformChunkBulk(packetWrapper)
+    }
 
     this.registerClientbound(ClientboundPackets1_7.EFFECT, object : PacketRemapper() {
         override fun registerMap() {
@@ -101,14 +96,14 @@ fun Protocol1_8To1_7_6.registerWorldPackets() {
                         try {
                             toWrite = parts[i + 1].toInt()
                             if (particle.extra == 1 && parts.size == 3) {
-                                ++i
+                                i++
                                 toWrite = toWrite or (parts[i + 1].toInt() shl 12)
                             }
                         } catch (ignored: NumberFormatException) {
                         }
                     }
                     packetWrapper.write(Type.VAR_INT, toWrite)
-                    ++i
+                    i++
                 }
             }
         }
