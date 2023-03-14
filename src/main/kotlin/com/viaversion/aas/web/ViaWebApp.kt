@@ -32,8 +32,10 @@ class ViaWebApp(val viaWebServer: WebServer) {
         install(CallLogging) {
             level = Level.DEBUG
             this.format {
-                "${it.request.local.method.value} ${it.response.status()?.value} ${it.request.local.remoteHost} (O: ${it.request.origin.remoteHost}) " +
-                        "${it.request.local.scheme}://${it.request.local.host}:${it.request.local.port}${it.request.local.uri}"
+                "${it.request.local.method.value} ${it.response.status()?.value}" +
+                        " ${it.request.local.remoteHost}:${it.request.local.remotePort}" +
+                        " (O: ${it.request.origin.remoteHost}:${it.request.origin.remotePort}) " +
+                        "${it.request.local.scheme}://${it.request.local.serverHost}:${it.request.local.serverPort}${it.request.local.uri}"
             }
         }
         install(WebSockets) {
