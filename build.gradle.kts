@@ -30,6 +30,7 @@ application {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
     }
     withSourcesJar()
 }
@@ -60,8 +61,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.6.2-SNAPSHOT"
-    val vbVer = "4.6.1"
+    val vvVer = "4.6.3-SNAPSHOT"
+    val vbVer = "4.6.2-SNAPSHOT"
     val vrVer = "197f7b2"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
