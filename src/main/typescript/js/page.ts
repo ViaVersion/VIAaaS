@@ -1,4 +1,4 @@
-/// <reference path='config.js' />
+/// <reference path='config.ts' />
 // Note that some APIs only work on HTTPS
 
 // Minecraft.id
@@ -256,7 +256,7 @@ function addToast(title: string, msg: string, yes: (() => void) | null = null, n
    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
  </div>
  <div class="toast-body">
-   <pre class="txt"></pre>
+   <pre class="txt text-wrap"></pre>
    <div class="btns mt-2 pt-2 border-top"></div>
  </div>
 </div>`);

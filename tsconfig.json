@@ -11,11 +11,15 @@
     "noImplicitOverride": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "removeComments": true,
+    "removeComments": false,
     "alwaysStrict": true,
-    "strict": true
+    "strict": true,
+    "allowJs": true,
+    "inlineSourceMap": true,
+    "outDir": "src/main/resources/web/js"
   },
   "include": [
-    "js/**.ts"
+    "src/main/typescript/js/**.ts",
+    "src/main/typescript/js/**.js"
   ]
 }
