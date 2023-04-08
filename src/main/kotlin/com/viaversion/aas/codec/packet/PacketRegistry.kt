@@ -91,7 +91,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.DISCONNECT.id,
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id,
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
-                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.DISCONNECT.id
+                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.DISCONNECT.id,
+                ProtocolVersion.v1_20.singleton to ClientboundPackets1_19_4.DISCONNECT.id // todo change to 1.20 if needed
             )
         )
         register(
@@ -108,7 +109,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_20.singleton to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id
             )
         )
         register(

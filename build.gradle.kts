@@ -61,9 +61,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.6.3-SNAPSHOT"
-    val vbVer = "4.6.2-SNAPSHOT"
-    val vrVer = "197f7b2"
+    val vvVer = "4.7.0-23w14a-SNAPSHOT"
+    val vbVer = "4.7.0-23w14a-SNAPSHOT"
+    val vrVer = "2e7dc6b"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
@@ -83,7 +83,7 @@ dependencies {
     implementation("com.velocitypowered:velocity-native:3.1.2-SNAPSHOT")
     implementation("net.coobird:thumbnailator:0.4.19")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-    implementation("org.yaml:snakeyaml:1.33")
+    implementation("org.yaml:snakeyaml:2.0")
 
     val log4jVer = "2.20.0"
     val slf4jVer = "2.0.6"
