@@ -77,6 +77,6 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
     }
 
     override fun hasPermission(p0: String): Boolean = true
-    override fun getUUID(): UUID = UUID.fromString(name)
+    override fun getUUID(): UUID = UUID.nameUUIDFromBytes(name.toByteArray())
     override fun getName(): String = "VIAaaS Console"
 }
