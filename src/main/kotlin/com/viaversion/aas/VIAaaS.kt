@@ -3,6 +3,7 @@ package com.viaversion.aas
 import com.viaversion.aas.command.VIAaaSConsole
 import com.viaversion.aas.platform.AspirinAprilFools
 import com.viaversion.aas.platform.AspirinBackwards
+import com.viaversion.aas.platform.AspirinLegacy
 import com.viaversion.aas.platform.AspirinPlatform
 import com.viaversion.aas.platform.AspirinRewind
 import com.viaversion.aas.protocol.registerAspirinProtocols
@@ -54,10 +55,11 @@ private fun printSplash() {
 
 private fun initVia() {
     AspirinPlatform.initVia {
+        AspirinRewind().init()
         AspirinBackwards().init()
         AspirinAprilFools().init()
+        AspirinLegacy().init()
     }
-    AspirinRewind().init()
 
     ProtocolVersion.register(-2, "AUTO")
     registerAspirinProtocols()

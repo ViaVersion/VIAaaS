@@ -182,6 +182,7 @@ class LoginState : ConnectionState {
                     "Session req: {} ({} {}) {}",
                     handler.data.frontHandler.endRemoteAddress, playerId, frontName, backName
                 )
+                // todo change this for viaproxy
                 val pluginReauthed = reauthMessage(handler, backName!!, backHash).await()
                 if (!pluginReauthed) {
                     AspirinServer.viaWebServer.requestSessionJoin(

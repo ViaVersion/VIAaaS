@@ -61,15 +61,16 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.7.0-23w14a-SNAPSHOT"
-    val vbVer = "4.7.0-23w14a-SNAPSHOT"
-    val vrVer = "2e7dc6b"
+    val vvVer = "4.7.0-23w16a-SNAPSHOT"
+    val vbVer = "4.7.0-23w16a-SNAPSHOT"
+    val vrVer = "5f7fdc5"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
     implementation("net.raphimc:ViaAprilFools:2.0.6")
+    implementation("net.raphimc:ViaLegacy:2.2.15")
 
-    val nettyVer = "4.1.89.Final"
+    val nettyVer = "4.1.91.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
@@ -96,7 +97,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.23.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.2.4"
+    val ktorVersion = "2.3.0"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")

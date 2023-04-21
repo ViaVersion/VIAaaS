@@ -35,6 +35,8 @@ private suspend fun createBackChannel(
     proxyUri: URI?,
     proxyAddress: InetSocketAddress?
 ): Channel {
+    autoDetectVersion(handler, socketAddr)
+
     val loop = handler.data.frontChannel.eventLoop()
     val channel = Bootstrap()
         .handler(BackEndInit(handler.data, proxyUri, proxyAddress))
@@ -57,9 +59,7 @@ private suspend fun createBackChannel(
         mcLogger.debug("+ {} {} -> {}", state.name[0], handler.endRemoteAddress, socketAddr)
     }
     handler.data.backChannel = channel as SocketChannel
-
-    autoDetectVersion(handler, socketAddr)
-
+    
     val packet = Handshake()
     packet.nextState = state
     packet.protocolId = handler.data.frontVer!!
