@@ -58,19 +58,23 @@ class PlayState : ConnectionState {
 
     private fun modifyPluginMessage(handler: MinecraftHandler, pluginMessage: PluginMessage) {
         if (handler.frontEnd) return
-        when (pluginMessage.channel) {
-            "MC|Brand", "brand", "minecraft:brand" -> {
-                if (!VIAaaSConfig.showBrandInfo) return
+        try {
+            when (pluginMessage.channel) {
+                "MC|Brand", "brand", "minecraft:brand" -> {
+                    if (!VIAaaSConfig.showBrandInfo) return
 
-                val brand = "${
-                    decodeBrand(
-                        pluginMessage.data,
-                        is17(handler)
-                    )
-                }${" (VIAaaS C: ${handler.data.frontVer?.parseProtocol()} S: ${handler.data.backServerVer?.parseProtocol()})"}"
+                    val brand = "${
+                        decodeBrand(
+                            pluginMessage.data,
+                            is17(handler)
+                        )
+                    }${" (VIAaaS C: ${handler.data.frontVer?.parseProtocol()} S: ${handler.data.backServerVer?.parseProtocol()})"}"
 
-                pluginMessage.data = encodeBrand(brand, is17(handler))
+                    pluginMessage.data = encodeBrand(brand, is17(handler))
+                }
             }
+        } catch (e: Exception) {
+            mcLogger.debug("Couldn't modify plugin message", e)
         }
     }
 
