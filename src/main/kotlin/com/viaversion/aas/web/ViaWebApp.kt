@@ -50,14 +50,14 @@ class ViaWebApp(val viaWebServer: WebServer) {
             gson()
         }
         routing {
-            routeStatic()
+            routeRoot()
             routeWs()
             routeApi()
         }
     }
 
-    private fun Route.routeStatic() {
-        static("/") {
+    private fun Route.routeRoot() {
+        route("/") {
             // https://ktor.io/docs/compression.html#security
             install(Compression)
             install(CachingHeaders) {
@@ -71,14 +71,12 @@ class ViaWebApp(val viaWebServer: WebServer) {
                 val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")
                 val index = Path.of("index.html")
 
-                var resource = call.resolveResource(relativePath.toString(), "web")
-                if (resource == null) {
-                    resource = call.resolveResource(relativePath.resolve(index).toString(), "web")
-                }
+                val resource = call.resolveResource(relativePath.toString(), "web")
+                    ?: call.resolveResource(relativePath.resolve(index).toString(), "web")
 
-                var file = File("config/web").combineSafe(relativePath)
+                var file = File("config/web/").combineSafe(relativePath)
                 if (file.isDirectory) {
-                    file = file.resolve("index.html")
+                    file = file.resolve(index.toFile())
                 }
 
                 when {
@@ -109,8 +107,10 @@ class ViaWebApp(val viaWebServer: WebServer) {
     }
 
     private fun Route.routeApi() {
-        get("/api/getEpoch") {
-            call.respond(System.currentTimeMillis() / 1000)
+        route("/api/") {
+            get("/getEpoch") {
+                call.respond(System.currentTimeMillis() / 1000)
+            }
         }
     }
 }
