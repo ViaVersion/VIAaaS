@@ -53,7 +53,6 @@ repositories {
     mavenCentral()
     maven("https://repo.viaversion.com/")
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://maven.lenni0451.net/releases/")
     maven("https://jitpack.io/")
 }
 
@@ -61,14 +60,14 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.7.0-1.20-pre1-SNAPSHOT"
-    val vbVer = "4.7.0-1.20-pre1-SNAPSHOT"
+    val vvVer = "4.7.0-1.20-pre6-SNAPSHOT"
+    val vbVer = "4.7.0-1.20-pre5-SNAPSHOT"
     val vrVer = "5f7fdc5"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
-    implementation("net.raphimc:ViaAprilFools:2.0.6")
-    implementation("net.raphimc:ViaLegacy:2.2.15")
+    implementation("net.raphimc:ViaAprilFools:2.0.7-SNAPSHOT")
+    implementation("net.raphimc:ViaLegacy:2.2.17-SNAPSHOT")
 
     val nettyVer = "4.1.91.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
