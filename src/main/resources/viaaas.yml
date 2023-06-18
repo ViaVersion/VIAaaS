@@ -45,6 +45,7 @@ block-local-address: true
 # If some server is in this list, it will be blocked.
 blocked-back-addresses:
   - "*.hypixel.net"
+  - "*.minemen.club"
 # Only allows the backend address if it matches an address in this list.
 allowed-back-addresses:
   - "*"
