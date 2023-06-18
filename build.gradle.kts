@@ -79,7 +79,7 @@ dependencies {
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.21.Final:linux-aarch_64")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.21.Final:linux-x86_64")
 
-    implementation("com.google.guava:guava:31.1-jre")
+    implementation("com.google.guava:guava:32.0.1-jre")
     implementation("com.velocitypowered:velocity-native:3.2.0-SNAPSHOT")
     implementation("net.coobird:thumbnailator:0.4.19")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
