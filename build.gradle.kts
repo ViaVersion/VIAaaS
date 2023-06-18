@@ -9,7 +9,7 @@ import java.nio.file.Files as JFiles
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.8.0") }
+    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.9.1") }
 }
 
 plugins {
