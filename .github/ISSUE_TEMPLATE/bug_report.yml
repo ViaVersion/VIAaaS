@@ -25,6 +25,7 @@ body:
       description: |
         If you encounter warnings/errors in your console, **paste them with https://paste.gg/ and put the paste link here**.
         If the error is small/less than 10 lines, you may put it directly into this field.
+        There may be some additional information in ``logs/debug.log``
       value: |
         ```
         Put the paste.gg link or text here.
