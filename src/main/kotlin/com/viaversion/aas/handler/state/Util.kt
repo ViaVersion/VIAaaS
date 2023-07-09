@@ -59,7 +59,7 @@ private suspend fun createBackChannel(
         mcLogger.debug("+ {} {} -> {}", state.name[0], handler.endRemoteAddress, socketAddr)
     }
     handler.data.backChannel = channel as SocketChannel
-    
+
     val packet = Handshake()
     packet.nextState = state
     packet.protocolId = handler.data.frontVer!!
@@ -74,7 +74,7 @@ private suspend fun createBackChannel(
 }
 
 private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: InetSocketAddress) {
-    if (handler.data.backServerVer == -2) { // Auto
+    if (handler.data.autoDetectProtocol) { // Auto
         var detectedProtocol: ProtocolVersion? = null
         try {
             detectedProtocol = withTimeout(10_000) {
@@ -85,14 +85,10 @@ private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: Ine
             mcLogger.debug("Stacktrace: ", e)
         }
 
-        if (detectedProtocol != null
+        handler.data.backServerVer = if (detectedProtocol != null
             && detectedProtocol.version !in arrayOf(-1, -2)
             && ProtocolVersion.isRegistered(detectedProtocol.version)
-        ) {
-            handler.data.backServerVer = detectedProtocol.version
-        } else {
-            handler.data.backServerVer = 47 // fallback 1.8
-        }
+        ) detectedProtocol.version else 47 // fallback 1.8
     }
 }
 
@@ -136,6 +132,7 @@ private suspend fun resolveBackendAddresses(hostAndPort: HostAndPort): List<Inet
     return when {
         removedEndDot.endsWith(".onion", ignoreCase = true) ->
             listOf(InetSocketAddress.createUnresolved(removedEndDot, srvResolved.port))
+
         else -> AspirinServer.dnsResolver
             .resolveAll(srvResolved.host)
             .suspendAwait()

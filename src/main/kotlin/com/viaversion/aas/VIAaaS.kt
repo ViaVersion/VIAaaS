@@ -53,6 +53,8 @@ private fun printSplash() {
     println("VIAaaS ${AspirinServer.version}")
 }
 
+val autoProtocolId = -2
+
 private fun initVia() {
     AspirinPlatform.initVia {
         AspirinRewind().init()
@@ -61,7 +63,7 @@ private fun initVia() {
         AspirinLegacy().init()
     }
 
-    ProtocolVersion.register(-2, "AUTO")
+    ProtocolVersion.register(autoProtocolId, "AUTO")
     registerAspirinProtocols()
 }
 

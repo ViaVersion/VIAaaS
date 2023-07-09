@@ -266,6 +266,7 @@ class LoginState : ConnectionState {
                     val info = AspirinServer.viaWebServer.requestAddressInfo(frontName).await()
                     backAddress = info.backHostAndPort
                     handler.data.backServerVer = info.backVersion
+                    if (info.backVersion == autoProtocolId) handler.data.autoDetectProtocol = true
                     frontOnline = info.frontOnline
                     info.backName?.also { backName = info.backName }
                 }

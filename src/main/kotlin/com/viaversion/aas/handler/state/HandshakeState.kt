@@ -8,6 +8,7 @@ import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
+import com.viaversion.aas.autoProtocolId
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.util.AddressParser
 import com.viaversion.aas.util.StacklessException
@@ -72,7 +73,7 @@ class HandshakeState : ConnectionState {
             }
         }
 
-        val backProto = parsed.protocol ?: -2
+        val backProto = parsed.protocol ?: autoProtocolId
 
         val backAddress = parsed.serverAddress!!
         val port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
@@ -83,6 +84,7 @@ class HandshakeState : ConnectionState {
         val addressFromWeb = VIAaaSConfig.hostName.any { parsed.serverAddress.equals(it, ignoreCase = true) }
 
         handler.data.backServerVer = backProto
+        if (backProto == autoProtocolId) handler.data.autoDetectProtocol = true
         (handler.data.state as? LoginState)?.also {
             it.frontOnline = frontOnline
             it.backName = parsed.username
