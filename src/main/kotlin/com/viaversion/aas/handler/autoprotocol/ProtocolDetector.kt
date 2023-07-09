@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit
 
 object ProtocolDetector {
     val coroutineScope = CoroutineScope(SupervisorJob())
-    private val loader = CacheLoader.from<InetSocketAddress, CompletableFuture<ProtocolVersion>> { address ->
+    val loader = CacheLoader.from<InetSocketAddress, CompletableFuture<ProtocolVersion>> { address ->
         val future = CompletableFuture<ProtocolVersion>()
         coroutineScope.launch {
             try {
@@ -78,9 +78,17 @@ object ProtocolDetector {
         future
     }
 
-    private val SERVER_VER = CacheBuilder.newBuilder()
+    private val versionCache = CacheBuilder.newBuilder()
         .expireAfterWrite(VIAaaSConfig.protocolDetectorCache.toLong(), TimeUnit.SECONDS)
         .build(loader)
 
-    fun detectVersion(address: InetSocketAddress): CompletableFuture<ProtocolVersion> = SERVER_VER[address]
+    fun detectVersion(address: InetSocketAddress): CompletableFuture<ProtocolVersion> {
+        val future = versionCache[address]
+        future.whenComplete { _, throwable ->
+            if (throwable != null) {
+                versionCache.invalidate(address)
+            }
+        }
+        return future
+    }
 }

@@ -21,7 +21,7 @@ class BackEndInit(val connectionData: ConnectionData, val proxyUri: URI?, val pr
         val user = UserConnectionImpl(ch, true)
         val pipeline = ProtocolPipelineImpl(user)
         val version = connectionData.backServerVer!!
-        val isLegacy = LegacyProtocolVersion.protocolCompare(version, ProtocolVersion.v_1_6_4.version) <= 0
+        val isLegacy = LegacyProtocolVersion.protocolCompare(version, LegacyProtocolVersion.r1_6_4.version) <= 0
 
         if (isLegacy) {
             pipeline.add(PreNettyBaseProtocol.INSTANCE)
