@@ -2,15 +2,14 @@ package com.viaversion.aas.handler
 
 import com.viaversion.aas.codec.FrameCodec
 import com.viaversion.aas.codec.MinecraftCodec
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.connection.UserConnectionImpl
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.ReadTimeoutHandler
 import net.raphimc.vialegacy.api.LegacyProtocolVersion
+import net.raphimc.vialegacy.api.protocol.PreNettyBaseProtocol
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec
-import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.baseprotocols.PreNettyBaseProtocol
 import java.net.InetSocketAddress
 import java.net.URI
 import java.util.concurrent.TimeUnit

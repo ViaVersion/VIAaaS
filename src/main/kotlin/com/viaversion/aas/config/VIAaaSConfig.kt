@@ -13,7 +13,7 @@ import java.net.URI
 import java.net.URL
 import java.util.*
 
-object VIAaaSConfig : Config(File("config/viaaas.yml")) {
+object VIAaaSConfig : Config(File("config/viaaas.yml")), com.viaversion.viaversion.api.configuration.Config {
     var defaultParameters: Map<Int, AddressParser> = emptyMap()
     var bindAddresses = emptyList<HostAndPort>()
     var hostName: List<String> = emptyList()
@@ -37,11 +37,11 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")) {
     var compressionLevel: Int = 6
 
     init {
-        reloadConfig()
+        reload()
     }
 
-    override fun reloadConfig() {
-        super.reloadConfig()
+    override fun reload() {
+        super.reload()
         reloadFields()
     }
 

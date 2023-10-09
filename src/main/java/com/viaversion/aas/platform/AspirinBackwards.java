@@ -13,7 +13,7 @@ public class AspirinBackwards implements ViaBackwardsPlatform {
 	}
 
 	public void init() {
-		init(getDataFolder());
+		init(getDataFolder().toPath().resolve("config.yml").toFile());
 	}
 
 	@Override

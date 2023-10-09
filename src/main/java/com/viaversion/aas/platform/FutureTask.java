@@ -14,6 +14,7 @@ public class FutureTask implements PlatformTask<Future<?>> {
 	}
 
 	@Override
+	@Deprecated
 	public @Nullable Future<?> getObject() {
 		return object;
 	}

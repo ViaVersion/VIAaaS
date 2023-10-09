@@ -70,7 +70,6 @@ object AspirinPlatform : ViaPlatform<UUID> {
     override fun getLogger() = logger
     override fun getOnlinePlayers(): Array<ViaCommandSender> = emptyArray()
     override fun isPluginEnabled() = true
-    override fun getConfigurationProvider() = conf
     override fun getPlatformName() = "VIAaaS"
     override fun getPlatformVersion() = AspirinServer.version
     override fun getPluginVersion() = VersionInfo.VERSION

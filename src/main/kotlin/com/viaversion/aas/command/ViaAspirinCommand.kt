@@ -1,6 +1,5 @@
 package com.viaversion.aas.command
 
-import com.viaversion.aas.command.sub.AspirinReloadSubCommand
 import com.viaversion.aas.command.sub.ConnectionsSubCommand
 import com.viaversion.aas.command.sub.StopSubCommand
 import com.viaversion.aas.command.sub.VIAaaSSubCommand
@@ -14,7 +13,6 @@ object ViaAspirinCommand : ViaCommandHandler(), Command {
         registerSubCommand(StopSubCommand)
         registerSubCommand(VIAaaSSubCommand)
         registerSubCommand(ConnectionsSubCommand)
-        registerSubCommand(AspirinReloadSubCommand)
     }
 
     override fun suggest(sender: ViaCommandSender, alias: String, args: List<String>): List<String> {

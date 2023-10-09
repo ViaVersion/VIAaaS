@@ -1,6 +1,7 @@
 package com.viaversion.aas
 
 import com.viaversion.aas.command.VIAaaSConsole
+import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.platform.AspirinAprilFools
 import com.viaversion.aas.platform.AspirinBackwards
 import com.viaversion.aas.platform.AspirinLegacy
@@ -8,6 +9,7 @@ import com.viaversion.aas.platform.AspirinPlatform
 import com.viaversion.aas.platform.AspirinRewind
 import com.viaversion.aas.protocol.registerAspirinProtocols
 import com.viaversion.aas.web.ViaWebApp
+import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
@@ -61,6 +63,7 @@ private fun initVia() {
         AspirinBackwards().init()
         AspirinAprilFools().init()
         AspirinLegacy().init()
+        Via.getManager().configurationProvider.register(VIAaaSConfig)
     }
 
     ProtocolVersion.register(autoProtocolId, "AUTO")

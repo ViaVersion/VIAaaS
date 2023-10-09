@@ -15,7 +15,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.9.10"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.47.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -60,24 +60,24 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.7.1-SNAPSHOT"
-    val vbVer = "4.7.1-SNAPSHOT"
-    val vrVer = "4937bab"
+    val vvVer = "4.9.0-23w40a-SNAPSHOT"
+    val vbVer = "4.9.0-23w40a-SNAPSHOT"
+    val vrVer = "3.0.3-SNAPSHOT"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
-    implementation("com.github.ViaVersion.ViaRewind:viarewind-all:$vrVer") { isTransitive = false }
-    implementation("net.raphimc:ViaAprilFools:2.0.8-SNAPSHOT")
-    implementation("net.raphimc:ViaLegacy:2.2.18-SNAPSHOT")
+    implementation("com.viaversion:viarewind-universal:$vrVer") { isTransitive = false }
+    implementation("net.raphimc:ViaAprilFools:2.0.10-SNAPSHOT")
+    implementation("net.raphimc:ViaLegacy:2.2.21-SNAPSHOT")
 
-    val nettyVer = "4.1.93.Final"
+    val nettyVer = "4.1.99.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-x86_64")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-aarch_64")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-x86_64")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.21.Final:linux-aarch_64")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.21.Final:linux-x86_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.23.Final:linux-aarch_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.23.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:32.0.1-jre")
     implementation("com.velocitypowered:velocity-native:3.2.0-SNAPSHOT")
@@ -96,7 +96,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.23.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.3.2"
+    val ktorVersion = "2.3.5"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")

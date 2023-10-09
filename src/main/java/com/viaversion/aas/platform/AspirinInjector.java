@@ -5,7 +5,6 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.libs.fastutil.ints.IntLinkedOpenHashSet;
 import com.viaversion.viaversion.libs.fastutil.ints.IntSortedSet;
 import com.viaversion.viaversion.libs.gson.JsonObject;
-import de.gerrygames.viarewind.velocity.VersionInfo;
 
 public class AspirinInjector implements ViaInjector {
 	@Override
@@ -33,9 +32,7 @@ public class AspirinInjector implements ViaInjector {
 
 	@Override
 	public JsonObject getDump() {
-		var obj = new JsonObject();
-		obj.addProperty("ViaRewind version", VersionInfo.VERSION);
-		return obj;
+		return new JsonObject();
 	}
 
 	@Override

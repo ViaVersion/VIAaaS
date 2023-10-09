@@ -156,7 +156,7 @@ object AspirinServer {
     }
 
     fun currentPlayers(): Int {
-        return Via.getManager().connectionManager.connections.filter { it.protocolInfo.state == State.PLAY }.count()
+        return Via.getManager().connectionManager.connections.filter { it.protocolInfo.serverState == State.PLAY }.count()
     }
 
     suspend fun updaterCheckMessage(): String {

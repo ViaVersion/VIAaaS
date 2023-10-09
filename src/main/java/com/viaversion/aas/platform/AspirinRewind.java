@@ -1,7 +1,6 @@
 package com.viaversion.aas.platform;
 
-import de.gerrygames.viarewind.api.ViaRewindConfigImpl;
-import de.gerrygames.viarewind.api.ViaRewindPlatform;
+import com.viaversion.viarewind.api.ViaRewindPlatform;
 
 import java.io.File;
 import java.util.logging.Logger;
@@ -14,6 +13,6 @@ public class AspirinRewind implements ViaRewindPlatform {
 	}
 
 	public void init() {
-		init(new ViaRewindConfigImpl(new File("config/viarewind.yml")));
+		init(new File("config/viarewind.yml"));
 	}
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class AspirinViaConfig extends AbstractViaConfig {
 	{
-		reloadConfig();
+		reload();
 	}
 
 	public AspirinViaConfig() {
