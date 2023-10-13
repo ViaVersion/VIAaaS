@@ -60,8 +60,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "4.9.0-23w40a-SNAPSHOT"
-    val vbVer = "4.9.0-23w40a-SNAPSHOT"
+    val vvVer = "4.9.0-23w41a-SNAPSHOT"
+    val vbVer = "4.9.0-23w41a-SNAPSHOT"
     val vrVer = "3.0.3-SNAPSHOT"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
@@ -74,19 +74,19 @@ dependencies {
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-x86_64")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-aarch_64")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-x86_64")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.62.Final:linux-aarch_64")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.62.Final:linux-x86_64")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.23.Final:linux-aarch_64")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.23.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:32.0.1-jre")
     implementation("com.velocitypowered:velocity-native:3.2.0-SNAPSHOT")
-    implementation("net.coobird:thumbnailator:0.4.19")
+    implementation("net.coobird:thumbnailator:0.4.20")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-    implementation("org.yaml:snakeyaml:2.0")
+    implementation("org.yaml:snakeyaml:2.2")
 
     val log4jVer = "2.20.0"
-    val slf4jVer = "2.0.7"
+    val slf4jVer = "2.0.9"
     implementation("com.lmax:disruptor:3.4.4")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")

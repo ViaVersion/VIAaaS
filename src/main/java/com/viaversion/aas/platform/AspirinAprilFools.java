@@ -13,7 +13,7 @@ public class AspirinAprilFools implements ViaAprilFoolsPlatform {
 	}
 
 	public void init() {
-		init(getDataFolder());
+		init(new File("config/viaaprilfools.yml"));
 	}
 
 	@Override

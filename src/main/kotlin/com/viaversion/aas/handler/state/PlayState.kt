@@ -3,6 +3,7 @@ package com.viaversion.aas.handler.state
 import com.google.gson.JsonPrimitive
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.UnknownPacket
+import com.viaversion.aas.codec.packet.play.ConfigurationAck
 import com.viaversion.aas.codec.packet.play.Kick
 import com.viaversion.aas.codec.packet.play.PluginMessage
 import com.viaversion.aas.codec.packet.play.ServerboundChatCommand
@@ -33,8 +34,13 @@ class PlayState : ConnectionState {
             packet is Kick -> handleKick(handler, packet)
             packet is ServerboundChatCommand -> modifyChatCommand(packet)
             packet is ServerboundChatMessage -> modifyChatMessage(packet)
+            packet is ConfigurationAck -> handleConfigAck(handler, packet)
         }
         forward(handler, ReferenceCountUtil.retain(packet))
+    }
+
+    private fun handleConfigAck(handler: MinecraftHandler, packet: ConfigurationAck) {
+        handler.data.state = ConfigurationState()
     }
 
     private fun handleKick(handler: MinecraftHandler, packet: Kick) {

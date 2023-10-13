@@ -90,7 +90,10 @@ class LoginState : ConnectionState {
             forward(handler, SetCompression().also { it.threshold = threshold })
             setCompression(handler.data.frontChannel, threshold)
         }
-        handler.data.state = PlayState()
+        handler.data.state = when {
+            handler.data.frontVer!! >= ProtocolVersion.v1_20_2.version -> ConfigurationState()
+            else -> PlayState()
+        }
         forward(handler, loginSuccess)
     }
 
@@ -289,7 +292,7 @@ class LoginState : ConnectionState {
                 loginStart.username = backName!!
                 // todo implement profile public key?
                 loginStart.profileKey = null
-                loginStart.profileId = null
+                loginStart.profileId = generateOfflinePlayerUuid(loginStart.username!!)
                 send(handler.data.backChannel!!, loginStart, true)
             } catch (e: Exception) {
                 handler.data.frontChannel.fireExceptionCaughtIfOpen(e)

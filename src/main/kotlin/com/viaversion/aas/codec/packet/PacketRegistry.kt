@@ -3,8 +3,12 @@ package com.viaversion.aas.codec.packet
 import com.google.common.collect.Range
 import com.google.common.collect.RangeMap
 import com.google.common.collect.TreeRangeMap
+import com.viaversion.aas.codec.packet.configuration.ConfigurationDisconnect
+import com.viaversion.aas.codec.packet.configuration.ConfigurationPluginMessage
+import com.viaversion.aas.codec.packet.configuration.FinishConfig
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.codec.packet.login.*
+import com.viaversion.aas.codec.packet.play.ConfigurationAck
 import com.viaversion.aas.codec.packet.play.Kick
 import com.viaversion.aas.codec.packet.play.PluginMessage
 import com.viaversion.aas.codec.packet.play.ServerboundChatCommand
@@ -33,6 +37,8 @@ import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ClientboundPac
 import com.viaversion.viaversion.protocols.protocol1_19_4to1_19_3.ClientboundPackets1_19_4
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ClientboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19
+import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ClientboundPackets1_20_2
+import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ServerboundPackets1_20_2
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
@@ -77,6 +83,12 @@ object PacketRegistry {
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusResponse, Range.all(), 0)
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusPong, Range.all(), 1)
 
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, Range.all(), 0)
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, Range.all(), 1)
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, Range.all(), 2)
+        register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, Range.all(), 1)
+        register(State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfig, Range.all(), 2)
+
         register(
             State.PLAY, Direction.CLIENTBOUND, ::Kick, mapOf(
                 ProtocolVersion.v1_7_1..ProtocolVersion.v1_8 to ClientboundPackets1_8.DISCONNECT.id,
@@ -91,8 +103,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.DISCONNECT.id,
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id,
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
-                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.DISCONNECT.id,
-                ProtocolVersion.v1_20.singleton to ClientboundPackets1_19_4.DISCONNECT.id // todo change to 1.20 if needed
+                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.DISCONNECT.id,
+                ProtocolVersion.v1_20_2.singleton to ClientboundPackets1_20_2.DISCONNECT.id
             )
         )
         register(
@@ -109,8 +121,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19_4.singleton to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_20.singleton to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_20_2.singleton to ClientboundPackets1_20_2.PLUGIN_MESSAGE.id
             )
         )
         register(
@@ -120,7 +132,10 @@ object PacketRegistry {
             ProtocolVersion.v1_8.singleton,
             ClientboundPackets1_8.SET_COMPRESSION.id
         )
-        // todo update this to 1.19.3
+        register(State.PLAY, Direction.SERVERBOUND, ::ConfigurationAck, mapOf(
+            ProtocolVersion.v1_20_2.singleton to ServerboundPackets1_20_2.CONFIGURATION_ACKNOWLEDGED.id
+        ))
+        // todo update this to latest version
         register(
             State.PLAY, Direction.SERVERBOUND, ::ServerboundChatCommand,
             mapOf(
@@ -204,6 +219,8 @@ object PacketRegistry {
         try {
             packet.decode(byteBuf, protocolVersion)
             return ReferenceCountUtil.retain(packet)
+        } catch (e: Exception) {
+            throw StacklessException("Failed to decode $packetId $state $direction", e)
         } finally {
             ReferenceCountUtil.release(packet)
         }
@@ -217,6 +234,10 @@ object PacketRegistry {
                 ?: throw StacklessException("Failed to get id for " + packet::class.java.simpleName)
         }
         Type.VAR_INT.writePrimitive(byteBuf, id)
-        packet.encode(byteBuf, protocolVersion)
+        try {
+            packet.encode(byteBuf, protocolVersion)
+        } catch (e: Exception) {
+            throw StacklessException("Failed to encode $id $direction", e)
+        }
     }
 }

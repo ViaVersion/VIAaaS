@@ -47,7 +47,9 @@ public class LoginStart implements Packet {
 			profileKey = Type.OPTIONAL_PROFILE_KEY.read(byteBuf);
 		}
 
-		if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
+		if (protocolVersion >= ProtocolVersion.v1_20_2.getVersion()) {
+			profileId = Type.UUID.read(byteBuf);
+		} else if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
 			profileId = Type.OPTIONAL_UUID.read(byteBuf);
 		}
 	}
@@ -59,7 +61,9 @@ public class LoginStart implements Packet {
 				&& protocolVersion < ProtocolVersion.v1_19_3.getVersion()) {
 			Type.OPTIONAL_PROFILE_KEY.write(byteBuf, profileKey);
 		}
-		if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
+		if (protocolVersion >= ProtocolVersion.v1_20_2.getVersion()) {
+			Type.UUID.write(byteBuf, profileId);
+		} else if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
 			Type.OPTIONAL_UUID.write(byteBuf, profileId);
 		}
 	}
