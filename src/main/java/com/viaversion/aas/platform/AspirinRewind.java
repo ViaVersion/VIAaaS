@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 public class AspirinRewind implements ViaRewindPlatform {
-	private Logger logger = Logger.getLogger("ViaRewind");
+	private final Logger logger = Logger.getLogger("ViaRewind");
 	@Override
 	public Logger getLogger() {
 		return logger;

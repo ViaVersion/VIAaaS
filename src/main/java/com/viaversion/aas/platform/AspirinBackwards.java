@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 public class AspirinBackwards implements ViaBackwardsPlatform {
-	private Logger logger = Logger.getLogger("ViaBackwards");
+	private final Logger logger = Logger.getLogger("ViaBackwards");
 	@Override
 	public Logger getLogger() {
 		return logger;

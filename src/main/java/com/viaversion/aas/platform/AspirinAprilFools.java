@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 public class AspirinAprilFools implements ViaAprilFoolsPlatform {
-	private Logger logger = Logger.getLogger("ViaAprilFools");
+	private final Logger logger = Logger.getLogger("ViaAprilFools");
 	@Override
 	public Logger getLogger() {
 		return logger;
