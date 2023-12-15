@@ -1,6 +1,6 @@
 package com.viaversion.aas.codec.packet.play;
 
-import com.viaversion.aas.codec.packet.common.AbstractSingleJson;
+import com.viaversion.aas.codec.packet.common.AbstractSingleChat;
 
-public class Kick extends AbstractSingleJson {
+public class Kick extends AbstractSingleChat {
 }

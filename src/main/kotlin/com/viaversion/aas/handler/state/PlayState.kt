@@ -48,7 +48,7 @@ class PlayState : ConnectionState {
         mcLogger.debug(
             "{} disconnected on play: {}",
             handler.endRemoteAddress.toString(),
-            packet.msg
+            packet.msgAsJson
         )
     }
 
@@ -98,7 +98,7 @@ class PlayState : ConnectionState {
         super.disconnect(handler, msg)
         writeFlushClose(
             handler.data.frontChannel,
-            Kick().also { it.msg = JsonPrimitive("[VIAaaS] §c$msg") },
+            Kick().also { it.setMsgForVersion(JsonPrimitive("[VIAaaS] §c$msg"), handler.data.frontVer!!) },
             delay = is17(handler)
         )
     }
