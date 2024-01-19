@@ -9,15 +9,15 @@ import java.nio.file.Files as JFiles
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath("com.github.hazendaz:htmlcompressor:1.9.1") }
+    dependencies { classpath("com.github.hazendaz:htmlcompressor:2.0.0") }
 }
 
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.22"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.47.0"
+    id("com.github.ben-manes.versions") version "0.50.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("com.palantir.git-version") version "3.0.0"
     id("org.gradlewebtools.minify") version "1.3.2" apply false
@@ -62,7 +62,7 @@ dependencies {
 
     val vvVer = "4.9.3-SNAPSHOT"
     val vbVer = "4.9.2-SNAPSHOT"
-    val vrVer = "3.0.5"
+    val vrVer = "3.0.6-SNAPSHOT"
     implementation("com.viaversion:viaversion:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-universal:$vrVer") { isTransitive = false }
@@ -85,18 +85,18 @@ dependencies {
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:2.2")
 
-    val log4jVer = "2.20.0"
-    val slf4jVer = "2.0.9"
-    implementation("com.lmax:disruptor:3.4.4")
+    val log4jVer = "2.22.1"
+    val slf4jVer = "2.0.11"
+    implementation("com.lmax:disruptor:4.0.0")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVer")
-    implementation("org.jline:jline-terminal-jansi:3.23.0")
+    implementation("org.jline:jline-terminal-jansi:3.25.0")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.3.5"
+    val ktorVersion = "2.3.7"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
