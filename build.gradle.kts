@@ -87,7 +87,7 @@ dependencies {
 
     val log4jVer = "2.22.1"
     val slf4jVer = "2.0.11"
-    implementation("com.lmax:disruptor:4.0.0")
+    implementation("com.lmax:disruptor:3.4.4")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
