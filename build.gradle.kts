@@ -69,7 +69,7 @@ dependencies {
     implementation("net.raphimc:ViaAprilFools:2.0.11-SNAPSHOT")
     implementation("net.raphimc:ViaLegacy:2.2.22-SNAPSHOT")
 
-    val nettyVer = "4.1.99.Final"
+    val nettyVer = "4.1.105.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
