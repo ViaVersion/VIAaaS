@@ -6,7 +6,7 @@ import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.Tag;
-import com.viaversion.viaversion.protocols.protocol1_20_3to1_20_2.util.ComponentConverter;
+import com.viaversion.viaversion.util.ComponentUtil;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,13 +32,13 @@ public class AbstractSingleChat implements Packet {
 
 	public JsonElement getMsgAsJson() {
 		if (msg != null) return msg;
-		if (msgTag != null) return JsonParser.parseString(ComponentConverter.tagComponentToJson(this.msgTag).toString());
+		if (msgTag != null) return JsonParser.parseString(ComponentUtil.tagToJson(this.msgTag).toString());
 		return null;
 	}
 
 	public void setMsgForVersion(JsonElement msg, int protocolVersion) {
 		if (protocolVersion >= ProtocolVersion.v1_20_3.getVersion()) {
-			this.msgTag = ComponentConverter.jsonComponentToTag(com.viaversion.viaversion.libs.gson.JsonParser.parseString(msg.toString()));
+			this.msgTag = ComponentUtil.jsonToTag(com.viaversion.viaversion.libs.gson.JsonParser.parseString(msg.toString()));
 		} else {
 			this.msg = msg;
 		}
