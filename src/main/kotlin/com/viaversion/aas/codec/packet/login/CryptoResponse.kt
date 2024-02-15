@@ -13,10 +13,10 @@ class CryptoResponse : Packet {
     var salt: Long? = null
     var signature: ByteArray? = null
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         when {
-            protocolVersion >= ProtocolVersion.v1_19.version
-                    && protocolVersion < ProtocolVersion.v1_19_3.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)
+                    && protocolVersion.olderThan(ProtocolVersion.v1_19_3) -> {
                 encryptedKey = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
                 if (byteBuf.readBoolean()) {
                     encryptedNonce = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
@@ -26,7 +26,7 @@ class CryptoResponse : Packet {
                 }
             }
 
-            protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == sharewareVersion.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8) || protocolVersion.equalTo(sharewareVersion) -> {
                 encryptedKey = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
                 encryptedNonce = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
             }
@@ -38,10 +38,10 @@ class CryptoResponse : Packet {
         }
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         when {
-            protocolVersion >= ProtocolVersion.v1_19.version
-                    && protocolVersion < ProtocolVersion.v1_19_3.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)
+                    && protocolVersion.olderThan(ProtocolVersion.v1_19_3) -> {
                 Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedKey)
                 if (encryptedNonce != null) {
                     byteBuf.writeBoolean(true)
@@ -53,7 +53,7 @@ class CryptoResponse : Packet {
                 }
             }
 
-            protocolVersion >= ProtocolVersion.v1_8.version || protocolVersion == sharewareVersion.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8) || protocolVersion.equalTo(sharewareVersion) -> {
                 Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedKey)
                 Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedNonce)
             }

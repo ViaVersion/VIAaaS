@@ -6,6 +6,7 @@ import com.viaversion.aas.codec.packet.PacketRegistry;
 import com.viaversion.aas.handler.MinecraftHandler;
 import com.viaversion.aas.util.StacklessException;
 import com.viaversion.viaversion.api.protocol.packet.Direction;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.exception.CancelEncoderException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -43,7 +44,7 @@ public class MinecraftCodec extends MessageToMessageCodec<ByteBuf, Packet> {
 		var handler = ctx.pipeline().get(MinecraftHandler.class);
 		var frontVer = handler.getData().getFrontVer();
 		if (frontVer == null) {
-			frontVer = 0;
+			frontVer = ProtocolVersion.unknown;
 		}
 		out.add(PacketRegistry.INSTANCE.decode(
 				msg,

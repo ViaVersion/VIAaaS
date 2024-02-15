@@ -4,15 +4,16 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.net.HostAndPort
 import com.google.common.util.concurrent.RateLimiter
+import com.viaversion.aas.AUTO
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
-import com.viaversion.aas.autoProtocolId
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.util.AddressParser
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.netty.channel.ChannelHandlerContext
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -47,7 +48,7 @@ class HandshakeState : ConnectionState {
     }
 
     private fun handleNextState(handler: MinecraftHandler, packet: Handshake) {
-        handler.data.frontVer = packet.protocolId
+        handler.data.frontVer = ProtocolVersion.getProtocol(packet.protocolId)
         when (packet.nextState.ordinal) {
             1 -> handler.data.state = StatusState()
             2 -> handler.data.state = LoginState()
@@ -73,7 +74,7 @@ class HandshakeState : ConnectionState {
             }
         }
 
-        val backProto = parsed.protocol ?: autoProtocolId
+        val backProto = parsed.protocol ?: AUTO
 
         val backAddress = parsed.serverAddress!!
         val port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
@@ -84,7 +85,7 @@ class HandshakeState : ConnectionState {
         val addressFromWeb = VIAaaSConfig.hostName.any { parsed.serverAddress.equals(it, ignoreCase = true) }
 
         handler.data.backServerVer = backProto
-        if (backProto == autoProtocolId) handler.data.autoDetectProtocol = true
+        if (backProto == AUTO) handler.data.autoDetectProtocol = true
         (handler.data.state as? LoginState)?.also {
             it.frontOnline = frontOnline
             it.backName = parsed.username

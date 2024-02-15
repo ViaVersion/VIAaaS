@@ -4,14 +4,15 @@ import com.viaversion.aas.codec.CompressionCodec
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.handler.state.ConnectionState
 import com.viaversion.aas.handler.state.HandshakeState
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.netty.channel.Channel
 
 class ConnectionData(
     val frontChannel: Channel,
     var backChannel: Channel? = null,
     var state: ConnectionState = HandshakeState(),
-    var frontVer: Int? = null,
-    var backServerVer: Int? = null,
+    var frontVer: ProtocolVersion? = null,
+    var backServerVer: ProtocolVersion? = null,
     var autoDetectProtocol: Boolean = false
 ) {
     val frontHandler get() = frontChannel.pipeline()[MinecraftHandler::class.java]

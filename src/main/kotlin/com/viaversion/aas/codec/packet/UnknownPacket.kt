@@ -1,14 +1,15 @@
 package com.viaversion.aas.codec.packet
 
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufHolder
 
-class UnknownPacket(val id: Int, val content: ByteBuf) : Packet, ByteBufHolder {
-    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+class UnknownPacket(val id: Int, private val content: ByteBuf) : Packet, ByteBufHolder {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         content.writeBytes(byteBuf)
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         byteBuf.writeBytes(content)
     }
 

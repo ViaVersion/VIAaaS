@@ -7,6 +7,7 @@ import com.viaversion.aas.config.AspirinViaConfig
 import com.viaversion.viaversion.ViaManagerImpl
 import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.command.ViaCommandSender
+import com.viaversion.viaversion.api.connection.UserConnection
 import com.viaversion.viaversion.api.platform.PlatformTask
 import com.viaversion.viaversion.api.platform.ViaPlatform
 import com.viaversion.viaversion.libs.gson.JsonObject
@@ -19,7 +20,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
-object AspirinPlatform : ViaPlatform<UUID> {
+object AspirinPlatform : ViaPlatform<UserConnection> {
     private lateinit var conf: AspirinViaConfig
     val executor = Executors.newCachedThreadPool(
         ThreadFactoryBuilder()

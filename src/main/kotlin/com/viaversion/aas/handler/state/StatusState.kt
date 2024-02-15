@@ -39,7 +39,7 @@ class StatusState : ConnectionState {
                 it.addProperty("id", UUID.nameUUIDFromBytes("VIAaaS".toByteArray(Charsets.UTF_8)).toString())
                 it.addProperty(
                     "name", "§9VIAaaS§r C: §7%s§'r S: §7%s"
-                        .format(handler.data.frontVer?.parseProtocol(), handler.data.backServerVer?.parseProtocol())
+                        .format(handler.data.frontVer, handler.data.backServerVer)
                 )
             })
         }
@@ -52,7 +52,7 @@ class StatusState : ConnectionState {
         packet.msg = JsonObject().also {
             it.add("version", JsonObject().also {
                 it.addProperty("name", "VIAaaS")
-                it.addProperty("protocol", handler.data.frontVer)
+                it.addProperty("protocol", handler.data.frontVer!!.version)
             })
             it.add("players", JsonObject().also {
                 it.addProperty("max", VIAaaSConfig.maxPlayers ?: -1)

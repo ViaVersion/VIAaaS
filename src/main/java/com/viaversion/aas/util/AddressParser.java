@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class AddressParser {
-	public Integer protocol;
+	public ProtocolVersion protocol;
 	public String viaSuffix;
 	public String serverAddress;
 	public String viaOptions;
@@ -113,10 +113,11 @@ public class AddressParser {
 	}
 
 	public void parseProtocol(String arg) {
-		protocol = Ints.tryParse(arg);
-		if (protocol == null) {
-			ProtocolVersion ver = ProtocolVersion.getClosest(arg.replace("_", "."));
-			if (ver != null) protocol = ver.getVersion();
+		final Integer protocolId = Ints.tryParse(arg);
+		if (protocolId == null) {
+			protocol = ProtocolVersion.getClosest(arg.replace("_", "."));
+		} else {
+			protocol = ProtocolVersion.getProtocol(protocolId);
 		}
 	}
 }

@@ -14,13 +14,13 @@ import java.net.InetSocketAddress
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
-class BackEndInit(val connectionData: ConnectionData, val proxyUri: URI?, val proxyAddress: InetSocketAddress?) :
+class BackEndInit(private val connectionData: ConnectionData, private val proxyUri: URI?, private val proxyAddress: InetSocketAddress?) :
     ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         val user = UserConnectionImpl(ch, true)
         val pipeline = ProtocolPipelineImpl(user)
         val version = connectionData.backServerVer!!
-        val isLegacy = LegacyProtocolVersion.protocolCompare(version, LegacyProtocolVersion.r1_6_4.version) <= 0
+        val isLegacy = version.olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)
 
         if (isLegacy) {
             pipeline.add(PreNettyBaseProtocol.INSTANCE)

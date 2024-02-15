@@ -84,14 +84,14 @@ class LoginState : ConnectionState {
     }
 
     private fun handleLoginSuccess(handler: MinecraftHandler, loginSuccess: LoginSuccess) {
-        if (handler.data.compressionLevel == -1 && handler.data.frontVer!! >= ProtocolVersion.v1_8.version) {
+        if (handler.data.compressionLevel == -1 && handler.data.frontVer!!.newerThanOrEqualTo(ProtocolVersion.v1_8)) {
             // Enable front-end compression
             val threshold = 256
             forward(handler, SetCompression().also { it.threshold = threshold })
             setCompression(handler.data.frontChannel, threshold)
         }
         handler.data.state = when {
-            handler.data.frontVer!! >= ProtocolVersion.v1_20_2.version -> ConfigurationState()
+            handler.data.frontVer!!.newerThanOrEqualTo(ProtocolVersion.v1_20_2) -> ConfigurationState()
             else -> PlayState()
         }
         forward(handler, loginSuccess)
@@ -122,7 +122,7 @@ class LoginState : ConnectionState {
     fun reauthMessage(handler: MinecraftHandler, backName: String, backHash: String): CompletableFuture<Boolean> {
         if (!handler.data.frontEncrypted
             || !frontName.equals(backName, ignoreCase = true)
-            || handler.data.frontVer!! < ProtocolVersion.v1_8.version
+            || handler.data.frontVer!!.olderThan(ProtocolVersion.v1_8)
         ) {
             callbackReauth.complete(false)
             return callbackReauth
@@ -140,7 +140,7 @@ class LoginState : ConnectionState {
     }
 
     private fun sendOpenAuthRequest(handler: MinecraftHandler, channel: String, id: Int, data: ByteArray) {
-        if (handler.data.frontVer!! < ProtocolVersion.v1_13.version) {
+        if (handler.data.frontVer!!.olderThan(ProtocolVersion.v1_13)) {
             encodeCompressionOpenAuth(channel, id, data).forEach { entry ->
                 send(handler.data.frontChannel, SetCompression().also { it.threshold = entry })
             }
@@ -269,7 +269,7 @@ class LoginState : ConnectionState {
                     val info = AspirinServer.viaWebServer.requestAddressInfo(frontName).await()
                     backAddress = info.backHostAndPort
                     handler.data.backServerVer = info.backVersion
-                    if (info.backVersion == autoProtocolId) handler.data.autoDetectProtocol = true
+                    if (info.backVersion == AUTO) handler.data.autoDetectProtocol = true
                     frontOnline = info.frontOnline
                     info.backName?.also { backName = info.backName }
                 }

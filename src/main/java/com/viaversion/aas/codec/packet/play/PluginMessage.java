@@ -12,9 +12,9 @@ public class PluginMessage implements Packet {
 	private byte[] data;
 
 	@Override
-	public void decode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		channel = Type.STRING.read(byteBuf);
-		if (protocolVersion <= ProtocolVersion.v1_7_6.getVersion()) {
+		if (protocolVersion.olderThanOrEqualTo(ProtocolVersion.v1_7_6)) {
 			data = UtilKt.readByteArray(byteBuf, readExtendedForgeShort(byteBuf));
 		} else {
 			data = UtilKt.readRemainingBytes(byteBuf);
@@ -22,9 +22,9 @@ public class PluginMessage implements Packet {
 	}
 
 	@Override
-	public void encode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		Type.STRING.write(byteBuf, channel);
-		if (protocolVersion <= ProtocolVersion.v1_7_6.getVersion()) {
+		if (protocolVersion.olderThanOrEqualTo(ProtocolVersion.v1_7_6)) {
 			writeExtendedForgeShort(byteBuf, data.length);
 		}
 		byteBuf.writeBytes(data);

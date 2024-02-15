@@ -47,24 +47,16 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")), com.viaversion.viaversi
 
     private fun reloadFields() {
         reloadIcon()
-        defaultParameters = this.get("default-parameters", Map::class.java, emptyMap<Int, String>())!!.map {
-            (it.key as Number).toInt() to AddressParser().parse(it.value.toString())
+        defaultParameters = this.get("default-parameters", emptyMap<Int, String>())!!.map {
+            (it.key as Number).toInt() to AddressParser().parse(it.value)
         }.toMap()
         bindAddresses = this.getStringList("bind-addresses").map { HostAndPort.fromString(it).withDefaultPort(25565) }
-        hostName = this.get("host-name", List::class.java, emptyList<String>())!!.map { it.toString() }
+        hostName = this.get("host-name", emptyList<String>())!!.map { it }
         blockLocalAddress = this.getBoolean("block-local-address", true)
         requireHostName = this.getBoolean("require-host-name", true)
         defaultBackendPort = this.getInt("default-backend-port", 25565).let { if (it == -1) null else it }
-        blockedBackAddresses = this.get(
-            "blocked-back-addresses",
-            List::class.java,
-            emptyList<String>()
-        )!!.map { it.toString() }
-        allowedBackAddresses = this.get(
-            "allowed-back-addresses",
-            List::class.java,
-            emptyList<String>()
-        )!!.map { it.toString() }
+        blockedBackAddresses = this.get("blocked-back-addresses", emptyList())!!
+        allowedBackAddresses = this.get("allowed-back-addresses", emptyList())!!
         forceOnlineMode = this.getBoolean("force-online-mode", false)
         showVersionPing = this.getBoolean("show-version-ping", true)
         showBrandInfo = this.getBoolean("show-brand-info", true)
@@ -81,7 +73,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml")), com.viaversion.viaversi
         compressionLevel = this.getInt("compression-level", 6)
     }
 
-    fun reloadIcon() {
+    private fun reloadIcon() {
         val rawUrl = this.getString("favicon-url", "")!!
         try {
             faviconUrl = when {

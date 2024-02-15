@@ -18,10 +18,10 @@ public class CryptoRequest implements Packet {
 	private byte[] nonce;
 
 	@Override
-	public void decode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		serverId = Type.STRING.read(byteBuf);
-		if (protocolVersion >= ProtocolVersion.v1_8.getVersion()
-				|| protocolVersion == AspirinProtocolsKt.getSharewareVersion().getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)
+				|| protocolVersion.equalTo(AspirinProtocolsKt.getSharewareVersion())) {
 			publicKey = KeyFactory.getInstance("RSA")
 					.generatePublic(new X509EncodedKeySpec(Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf)));
 			nonce = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf);
@@ -33,11 +33,11 @@ public class CryptoRequest implements Packet {
 	}
 
 	@Override
-	public void encode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 
 		Type.STRING.write(byteBuf, serverId);
-		if (protocolVersion >= ProtocolVersion.v1_8.getVersion()
-				|| protocolVersion == AspirinProtocolsKt.getSharewareVersion().getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)
+				|| protocolVersion.equalTo(AspirinProtocolsKt.getSharewareVersion())) {
 			Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, publicKey.getEncoded());
 			Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, nonce);
 		} else {

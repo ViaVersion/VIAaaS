@@ -11,6 +11,7 @@ import com.viaversion.aas.protocol.registerAspirinProtocols
 import com.viaversion.aas.web.ViaWebApp
 import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
+import com.viaversion.viaversion.api.protocol.version.VersionType
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -55,7 +56,7 @@ private fun printSplash() {
     println("VIAaaS ${AspirinServer.version}")
 }
 
-val autoProtocolId = -2
+val AUTO = ProtocolVersion(VersionType.SPECIAL, -2, -1, "AUTO", null)
 
 private fun initVia() {
     AspirinPlatform.initVia {
@@ -66,7 +67,7 @@ private fun initVia() {
         Via.getManager().configurationProvider.register(VIAaaSConfig)
     }
 
-    ProtocolVersion.register(autoProtocolId, "AUTO")
+    ProtocolVersion.register(AUTO)
     registerAspirinProtocols()
 }
 

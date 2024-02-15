@@ -17,26 +17,26 @@ public class ServerboundChatMessage implements Packet {
 	private PlayerMessageSignature lastReceivedMessage;
 
 	@Override
-	public void decode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		message = Type.STRING.read(byteBuf);
 		timestamp = byteBuf.readLong();
 		salt = byteBuf.readLong();
 		signature = Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf);
 		signedPreview = byteBuf.readBoolean();
-		if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
 			lastSeenMessages = Type.PLAYER_MESSAGE_SIGNATURE_ARRAY.read(byteBuf);
 			lastReceivedMessage = Type.OPTIONAL_PLAYER_MESSAGE_SIGNATURE.read(byteBuf);
 		}
 	}
 
 	@Override
-	public void encode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		Type.STRING.write(byteBuf, message);
 		byteBuf.writeLong(timestamp);
 		byteBuf.writeLong(salt);
 		Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, signature);
 		byteBuf.writeBoolean(signedPreview);
-		if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
 			Type.PLAYER_MESSAGE_SIGNATURE_ARRAY.write(byteBuf, lastSeenMessages);
 			Type.OPTIONAL_PLAYER_MESSAGE_SIGNATURE.write(byteBuf, lastReceivedMessage);
 		}

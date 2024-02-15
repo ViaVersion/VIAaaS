@@ -208,8 +208,6 @@ fun generateServerId() = ByteArray(13).let {
     // https://developer.mozilla.org/en-US/docs/Glossary/Base64 133% of original
 }
 
-fun Int.parseProtocol() = ProtocolVersion.getProtocol(this)
-
 fun sha512Hex(data: ByteArray): String {
     return MessageDigest.getInstance("SHA-512").digest(data)
         .asUByteArray()

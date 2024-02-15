@@ -12,7 +12,6 @@ import com.viaversion.aas.codec.packet.play.SetPlayCompression
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.*
 import com.viaversion.aas.mcLogger
-import com.viaversion.aas.parseProtocol
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.writeFlushClose
 import com.viaversion.viaversion.api.protocol.packet.State
@@ -74,7 +73,7 @@ class PlayState : ConnectionState {
                             pluginMessage.data,
                             is17(handler)
                         )
-                    }${" (VIAaaS C: ${handler.data.frontVer?.parseProtocol()} S: ${handler.data.backServerVer?.parseProtocol()})"}"
+                    }${" (VIAaaS C: ${handler.data.frontVer} S: ${handler.data.backServerVer})"}"
 
                     pluginMessage.data = encodeBrand(brand, is17(handler))
                 }

@@ -49,7 +49,7 @@ object ProtocolDetector {
                     .option(ChannelOption.IP_TOS, 0x18)
                     .handler(object : ChannelInitializer<Channel>() {
                         override fun initChannel(channel: Channel) {
-                            val data = ConnectionData(channel, state = ProtocolDetectionState(future), frontVer = -1)
+                            val data = ConnectionData(channel, state = ProtocolDetectionState(future), frontVer = ProtocolVersion.unknown)
                             channel.pipeline().also { addProxyHandler(it, proxyUri, proxySocket) }
                                 .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
                                 .addLast("frame", FrameCodec())

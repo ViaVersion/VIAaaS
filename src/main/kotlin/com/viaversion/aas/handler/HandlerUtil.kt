@@ -20,7 +20,7 @@ fun forward(handler: MinecraftHandler, packet: Packet, flush: Boolean = false) {
     send(handler.other!!, packet, flush)
 }
 
-fun is17(handler: MinecraftHandler) = handler.data.frontVer!! <= ProtocolVersion.v1_7_6.version
+fun is17(handler: MinecraftHandler) = handler.data.frontVer!!.olderThanOrEqualTo(ProtocolVersion.v1_7_6)
 
 fun addProxyHandler(pipe: ChannelPipeline, proxyUri: URI?, socket: InetSocketAddress?) {
     if (proxyUri != null) {

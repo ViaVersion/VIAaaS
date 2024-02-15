@@ -13,36 +13,36 @@ import java.util.*
 class LoginSuccess : Packet {
     lateinit var id: UUID
     lateinit var username: String
-    val properties = mutableListOf<SignableProperty>()
+    private val properties = mutableListOf<SignableProperty>()
 
-    override fun decode(byteBuf: ByteBuf, protocolVersion: Int) {
+    override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         id = when {
-            protocolVersion >= ProtocolVersion.v1_16.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_16) -> {
                 Type.UUID.read(byteBuf)
             }
-            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == sharewareVersion.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_7_6) || protocolVersion.equalTo(sharewareVersion) -> {
                 UUID.fromString(Type.STRING.read(byteBuf))
             }
             else -> parseUndashedId(Type.STRING.read(byteBuf))
         }
         username = Type.STRING.read(byteBuf)
-        if (protocolVersion >= ProtocolVersion.v1_19.version) {
+        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
             properties.addAll(AspirinTypes.SIGNABLE_PROPERTY_ARRAY.read(byteBuf).asList())
         }
     }
 
-    override fun encode(byteBuf: ByteBuf, protocolVersion: Int) {
+    override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         when {
-            protocolVersion >= ProtocolVersion.v1_16.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_16) -> {
                 Type.UUID.write(byteBuf, id)
             }
-            protocolVersion >= ProtocolVersion.v1_7_6.version || protocolVersion == sharewareVersion.version -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_7_6) || protocolVersion.equalTo(sharewareVersion) -> {
                 Type.STRING.write(byteBuf, id.toString())
             }
             else -> Type.STRING.write(byteBuf, id.toString().replace("-", ""))
         }
         Type.STRING.write(byteBuf, username)
-        if (protocolVersion >= ProtocolVersion.v1_19.version) {
+        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
             AspirinTypes.SIGNABLE_PROPERTY_ARRAY.write(byteBuf, properties.toTypedArray())
         }
     }

@@ -62,7 +62,7 @@ private suspend fun createBackChannel(
 
     val packet = Handshake()
     packet.nextState = state
-    packet.protocolId = handler.data.frontVer!!
+    packet.protocolId = handler.data.frontVer!!.version
     packet.address = socketAddr.hostString + if (extraData != null) 0.toChar() + extraData else ""
     packet.port = socketAddr.port
 
@@ -88,7 +88,7 @@ private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: Ine
         handler.data.backServerVer = if (detectedProtocol != null
             && detectedProtocol.version !in arrayOf(-1, -2)
             && ProtocolVersion.isRegistered(detectedProtocol.version)
-        ) detectedProtocol.version else 47 // fallback 1.8
+        ) detectedProtocol else ProtocolVersion.v1_8 // fallback
     }
 }
 

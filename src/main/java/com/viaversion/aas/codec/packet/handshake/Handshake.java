@@ -2,6 +2,7 @@ package com.viaversion.aas.codec.packet.handshake;
 
 import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.viaversion.api.protocol.packet.State;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.type.Type;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ public class Handshake implements Packet {
 	private State nextState;
 
 	@Override
-	public void decode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		protocolId = Type.VAR_INT.readPrimitive(byteBuf);
 		address = Type.STRING.read(byteBuf);
 		port = byteBuf.readUnsignedShort();
@@ -21,7 +22,7 @@ public class Handshake implements Packet {
 	}
 
 	@Override
-	public void encode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		Type.VAR_INT.writePrimitive(byteBuf, protocolId);
 		Type.STRING.write(byteBuf, address);
 		byteBuf.writeShort(port);

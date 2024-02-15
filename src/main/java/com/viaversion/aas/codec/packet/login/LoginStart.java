@@ -40,30 +40,30 @@ public class LoginStart implements Packet {
 	}
 
 	@Override
-	public void decode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		username = new StringType(16).read(byteBuf);
-		if (protocolVersion >= ProtocolVersion.v1_19.getVersion()
-				&& protocolVersion < ProtocolVersion.v1_19_3.getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)
+				&& protocolVersion.olderThan(ProtocolVersion.v1_19_3)) {
 			profileKey = Type.OPTIONAL_PROFILE_KEY.read(byteBuf);
 		}
 
-		if (protocolVersion >= ProtocolVersion.v1_20_2.getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2)) {
 			profileId = Type.UUID.read(byteBuf);
-		} else if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
+		} else if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
 			profileId = Type.OPTIONAL_UUID.read(byteBuf);
 		}
 	}
 
 	@Override
-	public void encode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
+	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		Type.STRING.write(byteBuf, username);
-		if (protocolVersion >= ProtocolVersion.v1_19.getVersion()
-				&& protocolVersion < ProtocolVersion.v1_19_3.getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)
+				&& protocolVersion.olderThan(ProtocolVersion.v1_19_3)) {
 			Type.OPTIONAL_PROFILE_KEY.write(byteBuf, profileKey);
 		}
-		if (protocolVersion >= ProtocolVersion.v1_20_2.getVersion()) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2)) {
 			Type.UUID.write(byteBuf, profileId);
-		} else if (protocolVersion >= ProtocolVersion.v1_19_1.getVersion()) {
+		} else if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
 			Type.OPTIONAL_UUID.write(byteBuf, profileId);
 		}
 	}

@@ -36,8 +36,8 @@ public class AbstractSingleChat implements Packet {
 		return null;
 	}
 
-	public void setMsgForVersion(JsonElement msg, int protocolVersion) {
-		if (protocolVersion >= ProtocolVersion.v1_20_3.getVersion()) {
+	public void setMsgForVersion(JsonElement msg, ProtocolVersion protocolVersion) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_3)) {
 			this.msgTag = ComponentUtil.jsonToTag(com.viaversion.viaversion.libs.gson.JsonParser.parseString(msg.toString()));
 		} else {
 			this.msg = msg;
@@ -45,8 +45,8 @@ public class AbstractSingleChat implements Packet {
 	}
 
 	@Override
-	public void decode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
-		if (protocolVersion < ProtocolVersion.v1_20_3.getVersion()) {
+	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
+		if (protocolVersion.olderThan(ProtocolVersion.v1_20_3)) {
 			msg = JsonParser.parseString(Type.STRING.read(byteBuf));
 		} else {
 			msgTag = Type.TAG.read(byteBuf);
@@ -54,8 +54,8 @@ public class AbstractSingleChat implements Packet {
 	}
 
 	@Override
-	public void encode(@NotNull ByteBuf byteBuf, int protocolVersion) throws Exception {
-		if (protocolVersion < ProtocolVersion.v1_20_3.getVersion()) {
+	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
+		if (protocolVersion.olderThan(ProtocolVersion.v1_20_3)) {
 			Type.STRING.write(byteBuf, msg.toString());
 		}
 	}

@@ -9,12 +9,7 @@ import com.viaversion.aas.codec.packet.configuration.ConfigurationPluginMessage
 import com.viaversion.aas.codec.packet.configuration.FinishConfig
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.codec.packet.login.*
-import com.viaversion.aas.codec.packet.play.ConfigurationAck
-import com.viaversion.aas.codec.packet.play.Kick
-import com.viaversion.aas.codec.packet.play.PluginMessage
-import com.viaversion.aas.codec.packet.play.ServerboundChatCommand
-import com.viaversion.aas.codec.packet.play.ServerboundChatMessage
-import com.viaversion.aas.codec.packet.play.SetPlayCompression
+import com.viaversion.aas.codec.packet.play.*
 import com.viaversion.aas.codec.packet.status.StatusPing
 import com.viaversion.aas.codec.packet.status.StatusPong
 import com.viaversion.aas.codec.packet.status.StatusRequest
@@ -49,10 +44,10 @@ import java.util.function.Supplier
 
 object PacketRegistry {
     // state, direction, packet id, protocol version -> entry
-    val entriesDecoding = hashMapOf<Triple<State, Direction, Int>, RangeMap<Int, DecodingInfo>>()
+    private val entriesDecoding = hashMapOf<Triple<State, Direction, Int>, RangeMap<ProtocolVersion, DecodingInfo>>()
 
     // direction, type, protocol version -> entry
-    val entriesEncoding = hashMapOf<Pair<Direction, Class<out Packet>>, RangeMap<Int, EncodingInfo>>()
+    private val entriesEncoding = hashMapOf<Pair<Direction, Class<out Packet>>, RangeMap<ProtocolVersion, EncodingInfo>>()
 
     init {
         // Obviously stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java
@@ -60,7 +55,7 @@ object PacketRegistry {
 
         register(State.LOGIN, Direction.SERVERBOUND, ::LoginStart, Range.all(), 0)
         register(State.LOGIN, Direction.SERVERBOUND, ::CryptoResponse, Range.all(), 1)
-        register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13.version), 2)
+        register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13), 2)
         register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, sharewareVersion.singleton, 2)
 
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginDisconnect, Range.all(), 0)
@@ -68,13 +63,13 @@ object PacketRegistry {
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginSuccess, Range.all(), 2)
         register(
             State.LOGIN, Direction.CLIENTBOUND, ::SetCompression, mapOf(
-                Range.atLeast(ProtocolVersion.v1_8.version) to 3,
+                Range.atLeast(ProtocolVersion.v1_8) to 3,
                 sharewareVersion.singleton to 3
             )
         )
         register(
             State.LOGIN, Direction.CLIENTBOUND, ::PluginRequest, mapOf(
-                Range.atLeast(ProtocolVersion.v1_13.version) to 4,
+                Range.atLeast(ProtocolVersion.v1_13) to 4,
                 sharewareVersion.singleton to 4
             )
         )
@@ -94,7 +89,7 @@ object PacketRegistry {
 
         register(
             State.PLAY, Direction.CLIENTBOUND, ::Kick, mapOf(
-                ProtocolVersion.v1_7_1..ProtocolVersion.v1_8 to ClientboundPackets1_8.DISCONNECT.id,
+                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to ClientboundPackets1_8.DISCONNECT.id,
                 ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.DISCONNECT.id,
                 ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.DISCONNECT.id,
                 ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.DISCONNECT.id,
@@ -112,7 +107,7 @@ object PacketRegistry {
         )
         register(
             State.PLAY, Direction.CLIENTBOUND, ::PluginMessage, mapOf(
-                ProtocolVersion.v1_7_1..ProtocolVersion.v1_8 to ClientboundPackets1_8.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to ClientboundPackets1_8.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.PLUGIN_MESSAGE.id,
@@ -154,17 +149,17 @@ object PacketRegistry {
         )
     }
 
-    operator fun ProtocolVersion.rangeTo(o: ProtocolVersion): Range<Int> {
-        return Range.closed(this.originalVersion, o.originalVersion)
+    operator fun ProtocolVersion.rangeTo(o: ProtocolVersion): Range<ProtocolVersion> {
+        return Range.closed(this, o)
     }
 
-    private val ProtocolVersion.singleton get() = Range.singleton(this.originalVersion)
+    private val ProtocolVersion.singleton get() = Range.singleton(this)
 
-    inline fun <reified P : Packet> register(
+    private inline fun <reified P : Packet> register(
         state: State,
         direction: Direction,
         constructor: Supplier<P>,
-        idByProtocol: Map<Range<Int>, Int>,
+        idByProtocol: Map<Range<ProtocolVersion>, Int>,
         klass: Class<P> = P::class.java,
     ) {
         idByProtocol.forEach { (protocolRange, packetId) ->
@@ -176,7 +171,7 @@ object PacketRegistry {
                 }
         }
 
-        val protocolRangeToId = TreeRangeMap.create<Int, Int>()
+        val protocolRangeToId = TreeRangeMap.create<ProtocolVersion, Int>()
         idByProtocol.forEach { (range, id) -> protocolRangeToId.put(range, id) }
 
         entriesEncoding.computeIfAbsent(direction to klass) { TreeRangeMap.create() }.also { rangeMap ->
@@ -188,11 +183,11 @@ object PacketRegistry {
         }
     }
 
-    inline fun <reified P : Packet> register(
+    private inline fun <reified P : Packet> register(
         state: State,
         direction: Direction,
         constructor: Supplier<P>,
-        protocol: Range<Int>,
+        protocol: Range<ProtocolVersion>,
         id: Int
     ) {
         register(constructor = constructor, direction = direction, state = state, idByProtocol = mapOf(protocol to id))
@@ -202,7 +197,7 @@ object PacketRegistry {
     data class EncodingInfo(val packetId: Int)
 
     private fun getPacketConstructor(
-        protocolVersion: Int,
+        protocolVersion: ProtocolVersion,
         state: State,
         id: Int,
         direction: Direction
@@ -210,11 +205,11 @@ object PacketRegistry {
         return entriesDecoding[Triple(state, direction, id)]?.get(protocolVersion)?.constructor
     }
 
-    private fun getPacketId(packetClass: Class<out Packet>, protocolVersion: Int, direction: Direction): Int? {
+    private fun getPacketId(packetClass: Class<out Packet>, protocolVersion: ProtocolVersion, direction: Direction): Int? {
         return entriesEncoding[direction to packetClass]?.get(protocolVersion)?.packetId
     }
 
-    fun decode(byteBuf: ByteBuf, protocolVersion: Int, state: State, direction: Direction): Packet {
+    fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion, state: State, direction: Direction): Packet {
         val packetId = Type.VAR_INT.readPrimitive(byteBuf)
         val packet = getPacketConstructor(protocolVersion, state, packetId, direction)?.get()
             ?: UnknownPacket(packetId, ByteBufAllocator.DEFAULT.buffer())
@@ -228,7 +223,7 @@ object PacketRegistry {
         }
     }
 
-    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: Int, direction: Direction) {
+    fun encode(packet: Packet, byteBuf: ByteBuf, protocolVersion: ProtocolVersion, direction: Direction) {
         val id = if (packet is UnknownPacket) {
             packet.id
         } else {
