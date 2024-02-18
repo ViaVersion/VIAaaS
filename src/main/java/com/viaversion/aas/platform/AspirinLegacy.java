@@ -14,10 +14,10 @@ public class AspirinLegacy implements ViaLegacyPlatform {
 
     @Override
     public File getDataFolder() {
-        return new File("config/vialegacy");
+        return Via.getPlatform().getDataFolder();
     }
 
     public void init() {
-        init(new File("config/vialegacy.yml"));
+        init(new File(getDataFolder(), "vialegacy.yml"));
     }
 }

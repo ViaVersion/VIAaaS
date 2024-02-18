@@ -1,6 +1,7 @@
 package com.viaversion.aas.platform;
 
 import com.viaversion.viabackwards.api.ViaBackwardsPlatform;
+import com.viaversion.viaversion.api.Via;
 
 import java.io.File;
 import java.util.logging.Logger;
@@ -13,7 +14,7 @@ public class AspirinBackwards implements ViaBackwardsPlatform {
 	}
 
 	public void init() {
-		init(getDataFolder().toPath().resolve("config.yml").toFile());
+		init(new File(getDataFolder(), "viabackwards.yml"));
 	}
 
 	@Override
@@ -22,6 +23,6 @@ public class AspirinBackwards implements ViaBackwardsPlatform {
 
 	@Override
 	public File getDataFolder() {
-		return new File("config/viabackwards");
+		return Via.getPlatform().getDataFolder();
 	}
 }

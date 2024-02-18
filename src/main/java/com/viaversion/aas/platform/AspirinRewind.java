@@ -1,6 +1,7 @@
 package com.viaversion.aas.platform;
 
 import com.viaversion.viarewind.api.ViaRewindPlatform;
+import com.viaversion.viaversion.api.Via;
 
 import java.io.File;
 import java.util.logging.Logger;
@@ -13,6 +14,11 @@ public class AspirinRewind implements ViaRewindPlatform {
 	}
 
 	public void init() {
-		init(new File("config/viarewind.yml"));
+		init(new File(getDataFolder(), "viarewind.yml"));
+	}
+
+	@Override
+	public File getDataFolder() {
+		return Via.getPlatform().getDataFolder();
 	}
 }

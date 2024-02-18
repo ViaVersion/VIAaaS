@@ -1,5 +1,6 @@
 package com.viaversion.aas.platform;
 
+import com.viaversion.viaversion.api.Via;
 import net.raphimc.viaaprilfools.platform.ViaAprilFoolsPlatform;
 
 import java.io.File;
@@ -13,11 +14,11 @@ public class AspirinAprilFools implements ViaAprilFoolsPlatform {
 	}
 
 	public void init() {
-		init(new File("config/viaaprilfools.yml"));
+		init(new File(getDataFolder(), "viaaprilfools.yml"));
 	}
 
 	@Override
 	public File getDataFolder() {
-		return new File("config/viaaprilfools");
+		return Via.getPlatform().getDataFolder();
 	}
 }
