@@ -48,7 +48,9 @@ class HandshakeState : ConnectionState {
     }
 
     private fun handleNextState(handler: MinecraftHandler, packet: Handshake) {
-        handler.data.frontVer = ProtocolVersion.getProtocol(packet.protocolId)
+        ProtocolVersion.getProtocol(packet.protocolId).apply {
+            if (this.isKnown) handler.data.frontVer = this
+        }
         when (packet.nextState.ordinal) {
             1 -> handler.data.state = StatusState()
             2 -> handler.data.state = LoginState()
