@@ -148,15 +148,13 @@ class WebLogin : WebState {
         webClient.server.addressCallbacks[callback].complete(
             AddressInfo(
                 backVersion = obj["version"].asString.let {
-                    var protocol: ProtocolVersion? = null
                     val output = Ints.tryParse(it)
-                    if (output == null) {
-                        val ver = ProtocolVersion.getClosest(it)
-                        if (ver != null) protocol = ver
+                    val protocol = if (output == null) {
+                        ProtocolVersion.getClosest(it)
                     } else {
-                        protocol = ProtocolVersion.getProtocol(output)
+                        ProtocolVersion.getProtocol(output)
                     }
-                    protocol ?: AUTO
+                    if (!protocol!!.isKnown) AUTO else protocol
                 },
                 backHostAndPort = HostAndPort.fromParts(obj["host"].asString, obj["port"].asInt),
                 frontOnline = obj["frontOnline"].asString.toBooleanStrictOrNull(),
