@@ -56,21 +56,12 @@ object PacketRegistry {
         register(State.LOGIN, Direction.SERVERBOUND, ::LoginStart, Range.all(), 0)
         register(State.LOGIN, Direction.SERVERBOUND, ::CryptoResponse, Range.all(), 1)
         register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13), 2)
-//        register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, sharewareVersion.singleton, 2)
 
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginDisconnect, Range.all(), 0)
         register(State.LOGIN, Direction.CLIENTBOUND, ::CryptoRequest, Range.all(), 1)
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginSuccess, Range.all(), 2)
-        register(
-            State.LOGIN, Direction.CLIENTBOUND, ::SetCompression, mapOf(
-                Range.atLeast(ProtocolVersion.v1_8) to 3
-            )
-        )
-        register(
-            State.LOGIN, Direction.CLIENTBOUND, ::PluginRequest, mapOf(
-                Range.atLeast(ProtocolVersion.v1_13) to 4
-            )
-        )
+        register(State.LOGIN, Direction.CLIENTBOUND, ::SetCompression, Range.atLeast(ProtocolVersion.v1_8), 3)
+        register(State.LOGIN, Direction.CLIENTBOUND, ::PluginRequest, Range.atLeast(ProtocolVersion.v1_13), 4)
 
         register(State.STATUS, Direction.SERVERBOUND, ::StatusRequest, Range.all(), 0)
         register(State.STATUS, Direction.SERVERBOUND, ::StatusPing, Range.all(), 1)
