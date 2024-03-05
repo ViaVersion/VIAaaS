@@ -20,7 +20,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.50.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("com.palantir.git-version") version "3.0.0"
-    id("org.gradlewebtools.minify") version "1.3.2" apply false
+    id("org.gradlewebtools.minify") version "2.1.0" apply false
 }
 
 application {
@@ -69,15 +69,15 @@ dependencies {
     implementation("net.raphimc:ViaAprilFools:2.0.11-SNAPSHOT")
     implementation("net.raphimc:ViaLegacy:2.2.22-SNAPSHOT")
 
-    val nettyVer = "4.1.105.Final"
+    val nettyVer = "4.1.107.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-x86_64")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.62.Final:linux-aarch_64")
-    implementation("io.netty:netty-tcnative-boringssl-static:2.0.62.Final:linux-x86_64")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.23.Final:linux-aarch_64")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.23.Final:linux-x86_64")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.63.Final:linux-aarch_64")
+    implementation("io.netty:netty-tcnative-boringssl-static:2.0.63.Final:linux-x86_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.25.Final:linux-aarch_64")
+    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.25.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:33.0.0-jre")
     implementation("com.velocitypowered:velocity-native:3.3.0-SNAPSHOT")
@@ -93,10 +93,10 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVer")
-    implementation("org.jline:jline-terminal-jansi:3.25.0")
+    implementation("org.jline:jline-terminal-jansi:3.25.1")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.3.7"
+    val ktorVersion = "2.3.9"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
