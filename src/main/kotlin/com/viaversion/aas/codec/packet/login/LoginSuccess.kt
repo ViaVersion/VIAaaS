@@ -3,7 +3,6 @@ package com.viaversion.aas.codec.packet.login
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.parseUndashedId
 import com.viaversion.aas.protocol.sharewareVersion
-import com.viaversion.aas.type.AspirinTypes
 import com.viaversion.aas.util.SignableProperty
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
@@ -27,7 +26,13 @@ class LoginSuccess : Packet {
         }
         username = Type.STRING.read(byteBuf)
         if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
-            properties.addAll(AspirinTypes.SIGNABLE_PROPERTY_ARRAY.read(byteBuf).asList())
+            val properties = Type.VAR_INT.readPrimitive(byteBuf)
+            for (i in 0 until properties) {
+                val name = Type.STRING.read(byteBuf)
+                val value = Type.STRING.read(byteBuf)
+                val signature = Type.OPTIONAL_STRING.read(byteBuf)
+                this.properties.add(SignableProperty(name, value, signature))
+            }
         }
     }
 
@@ -43,7 +48,12 @@ class LoginSuccess : Packet {
         }
         Type.STRING.write(byteBuf, username)
         if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
-            AspirinTypes.SIGNABLE_PROPERTY_ARRAY.write(byteBuf, properties.toTypedArray())
+            Type.VAR_INT.writePrimitive(byteBuf, properties.size)
+            for (property in properties) {
+                Type.STRING.write(byteBuf, property.key)
+                Type.STRING.write(byteBuf, property.value)
+                Type.OPTIONAL_STRING.write(byteBuf, property.signature)
+            }
         }
     }
 }
