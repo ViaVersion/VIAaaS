@@ -48,9 +48,8 @@ class HandshakeState : ConnectionState {
     }
 
     private fun handleNextState(handler: MinecraftHandler, packet: Handshake) {
-        ProtocolVersion.getProtocol(packet.protocolId).apply {
-            if (this.isKnown) handler.data.frontVer = this
-        }
+        handler.data.frontVer = ProtocolVersion.getProtocol(packet.protocolId)
+
         when (packet.nextState.ordinal) {
             1 -> handler.data.state = StatusState()
             2 -> handler.data.state = LoginState()
@@ -87,7 +86,7 @@ class HandshakeState : ConnectionState {
         val addressFromWeb = VIAaaSConfig.hostName.any { parsed.serverAddress.equals(it, ignoreCase = true) }
 
         handler.data.backServerVer = backProto
-        if (backProto == AUTO) handler.data.autoDetectProtocol = true
+        handler.data.autoDetectProtocol = backProto == AUTO
         (handler.data.state as? LoginState)?.also {
             it.frontOnline = frontOnline
             it.backName = parsed.username

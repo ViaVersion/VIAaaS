@@ -117,10 +117,7 @@ public class AddressParser {
 		if (protocolId == null) {
 			protocol = ProtocolVersion.getClosest(arg.replace("_", "."));
 		} else {
-			final ProtocolVersion ver = ProtocolVersion.getProtocol(protocolId);
-			if (ver.isKnown()) {
-				protocol = ver;
-			}
+			protocol = ProtocolVersion.getProtocol(protocolId);
 		}
 	}
 }
