@@ -14,7 +14,6 @@ import com.viaversion.aas.codec.packet.status.StatusPing
 import com.viaversion.aas.codec.packet.status.StatusPong
 import com.viaversion.aas.codec.packet.status.StatusRequest
 import com.viaversion.aas.codec.packet.status.StatusResponse
-import com.viaversion.aas.protocol.sharewareVersion
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.api.protocol.packet.State
@@ -56,6 +55,7 @@ object PacketRegistry {
         register(State.LOGIN, Direction.SERVERBOUND, ::LoginStart, Range.all(), 0)
         register(State.LOGIN, Direction.SERVERBOUND, ::CryptoResponse, Range.all(), 1)
         register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13), 2)
+        register(State.LOGIN, Direction.SERVERBOUND, ::LoginAck, Range.atLeast(ProtocolVersion.v1_20_2), 3)
 
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginDisconnect, Range.all(), 0)
         register(State.LOGIN, Direction.CLIENTBOUND, ::CryptoRequest, Range.all(), 1)

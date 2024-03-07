@@ -54,8 +54,14 @@ class LoginState : ConnectionState {
             is LoginSuccess -> handleLoginSuccess(handler, packet)
             is SetCompression -> handleCompression(handler, packet)
             is PluginRequest -> forward(handler, packet)
+            is LoginAck -> handleLoginAck(handler, packet)
             else -> throw StacklessException("Invalid packet!")
         }
+    }
+
+    private fun handleLoginAck(handler: MinecraftHandler, packet: LoginAck) {
+        handler.data.state = ConfigurationState()
+        forward(handler, packet)
     }
 
     private fun handleLoginDisconnect(handler: MinecraftHandler, packet: LoginDisconnect) {
@@ -90,9 +96,8 @@ class LoginState : ConnectionState {
             forward(handler, SetCompression().also { it.threshold = threshold })
             setCompression(handler.data.frontChannel, threshold)
         }
-        handler.data.state = when {
-            handler.data.frontVer!!.newerThanOrEqualTo(ProtocolVersion.v1_20_2) -> ConfigurationState()
-            else -> PlayState()
+        if (handler.data.frontVer!!.olderThan(ProtocolVersion.v1_20_2)) {
+            handler.data.state = PlayState()
         }
         forward(handler, loginSuccess)
     }

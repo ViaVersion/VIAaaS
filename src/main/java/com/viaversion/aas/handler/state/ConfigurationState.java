@@ -22,7 +22,7 @@ public class ConfigurationState implements ConnectionState {
 
 	@Override
 	public void handlePacket(@NotNull MinecraftHandler handler, @NotNull ChannelHandlerContext ctx, @NotNull Packet packet) {
-		if (packet instanceof FinishConfig) handleFinish(handler, (FinishConfig) packet);
+		if (packet instanceof FinishConfig) handleFinish(handler);
 		if (packet instanceof ConfigurationDisconnect) handleDisconnect(handler, (ConfigurationDisconnect) packet);
 		HandlerUtilKt.forward(handler, ReferenceCountUtil.retain(packet), false);
 	}
@@ -36,7 +36,8 @@ public class ConfigurationState implements ConnectionState {
 		);
 	}
 
-	private void handleFinish(MinecraftHandler handler, FinishConfig packet) {
+	private void handleFinish(MinecraftHandler handler) {
+		if (handler.getBackEnd()) return;
 		handler.getData().setState(new PlayState());
 	}
 
