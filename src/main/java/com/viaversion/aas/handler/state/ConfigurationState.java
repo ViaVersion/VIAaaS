@@ -54,7 +54,7 @@ public class ConfigurationState implements ConnectionState {
 	public void disconnect(@NotNull MinecraftHandler handler, @NotNull String msg) {
 		ConnectionState.DefaultImpls.disconnect(this, handler, msg);
 		var packet = new ConfigurationDisconnect();
-		packet.setMsgForVersion(new JsonPrimitive("[VIAaaS] §c$msg"), handler.getData().getFrontVer());
+		packet.setMsgForVersion(new JsonPrimitive("[VIAaaS] §c" + msg), handler.getData().getFrontVer());
 		UtilKt.writeFlushClose(handler.getData().getFrontChannel(), packet, false);
 	}
 
