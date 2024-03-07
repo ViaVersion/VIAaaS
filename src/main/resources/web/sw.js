@@ -14,12 +14,8 @@ self.addEventListener("install", () => {
 });
 
 self.addEventListener("fetch", evt => {
-    if (!shouldCache(evt.request.url) || evt.request.method !== "GET") return;
-    if (isImmutable(evt.request.url)) {
-        evt.respondWith(fromCache(evt.request).catch(() => tryNetworkAndCache(evt.request)));
-    } else {
-        evt.respondWith(tryNetworkAndCache(evt.request).catch(() => fromCache(evt.request)));
-    }
+    if (!isImmutable(evt.request.url) || evt.request.method !== "GET") return;
+    evt.respondWith(fromCache(evt.request).catch(() => tryNetwork(evt.request)));
 });
 
 function isImmutable(url) {
@@ -27,22 +23,22 @@ function isImmutable(url) {
     return ["cdnjs.cloudflare.com", "alcdn.msauth.net"].indexOf(parsed.host) !== -1;
 }
 
-function shouldCache(it) {
-    return [".js", ".css", ".png", ".html", ".webp", "manifest.json"].findIndex(end => it.endsWith(end)) !== -1
-        || it === new URL("./", self.location).toString()
-}
-
-function tryNetworkAndCache(request) {
+function tryNetwork(request) {
     return fetch(request)
         .then(async response => {
-            if (!shouldCache(response.url)) return response;
+            if (!isImmutable(request.url)) return response;
 
             try {
-                await fromCache(request);
+                await fromCache(request)
+                    .catch(async e => {
+                        console.log("caching due to: " + e);
+                        console.log(request);
+                        let cache = await caches.open(cacheId);
+                        // passing request directly doesn't work well with workers due to opaque response
+                        await cache.add(request.url);
+                    });
             } catch (e) {
-                console.log("caching due to: " + e);
-                let cache = await caches.open(cacheId);
-                await cache.add(request);
+                console.log("failed to cache: " + e)
             }
             return response;
         });
@@ -54,11 +50,6 @@ function fromCache(request) {
             let matching = await cache.match(request);
             if (matching == null) return Promise.reject("no match");
 
-            let timeDiff = new Date() - new Date(matching.headers.get("date"));
-            if (!isImmutable(request.url) && timeDiff >= 24 * 60 * 60 * 1000) {
-                await cache.delete(request);
-                return Promise.reject("expired");
-            }
             return matching;
         });
 }
