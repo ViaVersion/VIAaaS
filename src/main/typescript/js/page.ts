@@ -333,7 +333,7 @@ async function getIpAddress(cors: boolean): Promise<string> {
 }
 
 function getNetworkTimestamp(): Promise<number> {
-    return fetch("/api/getEpoch", {"headers": {"accept": "application/json"}})
+    return fetch("api/getEpoch", {"headers": {"accept": "application/json"}})
         .then(checkFetchSuccess("code"))
         .then(r => r.json())
         .then(it => parseInt(it))
