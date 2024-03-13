@@ -137,7 +137,7 @@ class WebServer {
             }
             launch {
                 delay(10_000)
-                future.completeExceptionally(StacklessException("No response from browser"))
+                future.completeExceptionally(StacklessException("No address info response from browser"))
             }
         }
         return future
@@ -223,7 +223,7 @@ class WebServer {
                 }
                 launch {
                     delay(20_000)
-                    future.completeExceptionally(StacklessException("No response from browser"))
+                    future.completeExceptionally(StacklessException("No auth response from browser"))
                 }
             }
         }
