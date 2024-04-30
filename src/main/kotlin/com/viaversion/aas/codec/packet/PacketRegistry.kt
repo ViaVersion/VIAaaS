@@ -3,10 +3,7 @@ package com.viaversion.aas.codec.packet
 import com.google.common.collect.Range
 import com.google.common.collect.RangeMap
 import com.google.common.collect.TreeRangeMap
-import com.viaversion.aas.codec.packet.configuration.ConfigurationDisconnect
-import com.viaversion.aas.codec.packet.configuration.ConfigurationKeepAlive
-import com.viaversion.aas.codec.packet.configuration.ConfigurationPluginMessage
-import com.viaversion.aas.codec.packet.configuration.FinishConfig
+import com.viaversion.aas.codec.packet.configuration.*
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.codec.packet.login.*
 import com.viaversion.aas.codec.packet.play.*
@@ -90,6 +87,9 @@ object PacketRegistry {
             ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
             ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
         ))
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationTransfer, Range.atLeast(ProtocolVersion.v1_20_5),
+            ClientboundConfigurationPackets1_20_5.TRANSFER.id)
+
         register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
             ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
             ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id

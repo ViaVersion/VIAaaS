@@ -1,6 +1,7 @@
 package com.viaversion.aas.codec.packet.handshake;
 
 import com.viaversion.aas.codec.packet.Packet;
+import com.viaversion.aas.util.IntendedState;
 import com.viaversion.viaversion.api.protocol.packet.State;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.type.Type;
@@ -12,13 +13,18 @@ public class Handshake implements Packet {
 	private String address;
 	private int port;
 	private State nextState;
+	private IntendedState intendedState;
 
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		protocolId = Type.VAR_INT.readPrimitive(byteBuf);
 		address = Type.STRING.read(byteBuf);
 		port = byteBuf.readUnsignedShort();
-		nextState = State.values()[Type.VAR_INT.readPrimitive(byteBuf)];
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+			intendedState = IntendedState.values()[Type.VAR_INT.readPrimitive(byteBuf) - 1];
+		} else {
+			nextState = State.values()[Type.VAR_INT.readPrimitive(byteBuf)];
+		}
 	}
 
 	@Override
@@ -26,7 +32,11 @@ public class Handshake implements Packet {
 		Type.VAR_INT.writePrimitive(byteBuf, protocolId);
 		Type.STRING.write(byteBuf, address);
 		byteBuf.writeShort(port);
-		byteBuf.writeByte(nextState.ordinal()); // var int is too small, fits in a byte
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+			Type.VAR_INT.writePrimitive(byteBuf, intendedState.ordinal() + 1);
+		} else {
+			byteBuf.writeByte(nextState.ordinal()); // var int is too small, fits in a byte
+		}
 	}
 
 	public int getProtocolId() {
@@ -59,5 +69,13 @@ public class Handshake implements Packet {
 
 	public void setNextState(State nextState) {
 		this.nextState = nextState;
+	}
+
+	public IntendedState getIntendedState() {
+		return intendedState;
+	}
+
+	public void setIntendedState(IntendedState intendedState) {
+		this.intendedState = intendedState;
 	}
 }
