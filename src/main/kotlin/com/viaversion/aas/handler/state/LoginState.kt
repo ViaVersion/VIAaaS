@@ -10,6 +10,7 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
 import com.viaversion.aas.handler.setCompression
+import com.viaversion.aas.util.IntendedState
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -291,7 +292,7 @@ class LoginState : ConnectionState {
                 connectBack(
                     handler,
                     HostAndPort.fromParts(backAddress!!.host, backAddress!!.port),
-                    State.LOGIN,
+                    IntendedState.LOGIN,
                     extraData
                 )
                 loginStart.username = backName!!

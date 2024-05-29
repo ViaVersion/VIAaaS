@@ -7,11 +7,10 @@ import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
-import io.ktor.client.call.*
 import io.ktor.client.call.body
 import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.server.netty.*
 import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
@@ -191,11 +190,13 @@ fun readRemainingBytes(byteBuf: ByteBuf) = Type.REMAINING_BYTES.read(byteBuf)!!
 fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) }
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {
-    return try {
-        AspirinServer.httpClient.get(
+    try {
+        val req = AspirinServer.httpClient.get(
             "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" +
                     UrlEscapers.urlFormParameterEscaper().escape(username) + "&serverId=$hash"
-        ).body()
+        )
+        if (!req.status.isSuccess() || req.status == HttpStatusCode.NoContent) throw StacklessException("http code ${req.status}")
+        return req.body()
     } catch (e: Exception) {
         throw StacklessException("Couldn't authenticate with session servers", e)
     }

@@ -151,7 +151,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_20_5.singleton to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id
             )
         )
-        // todo update this to latest version
+        // todo update chat to latest version
+        // todo handle transfer packets
         register(
             State.PLAY, Direction.SERVERBOUND, ::ServerboundChatCommand,
             mapOf(

@@ -3,7 +3,7 @@ package com.viaversion.aas.util;
 import com.viaversion.viaversion.api.protocol.packet.State;
 
 public enum IntendedState {
-
+    INVALID(null),
     STATUS(State.STATUS),
     LOGIN(State.LOGIN),
     TRANSFER(State.LOGIN);

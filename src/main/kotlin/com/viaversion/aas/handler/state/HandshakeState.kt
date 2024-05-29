@@ -11,6 +11,7 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.util.AddressParser
+import com.viaversion.aas.util.IntendedState
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
@@ -36,12 +37,12 @@ class HandshakeState : ConnectionState {
     override val state: State
         get() = State.HANDSHAKE
 
-    private fun checkRateLimit(handler: MinecraftHandler, state: State) {
+    private fun checkRateLimit(handler: MinecraftHandler, state: IntendedState) {
         val socketAddress = (handler.endRemoteAddress as InetSocketAddress).address
         val limit = RateLimit.rateLimitByIp[socketAddress]
 
         if (!limit.handshakeLimiter.tryAcquire()
-            || (state == State.LOGIN && !limit.loginLimiter.tryAcquire())
+            || (state == IntendedState.LOGIN && !limit.loginLimiter.tryAcquire())
         ) {
             throw StacklessException("Rate-limited")
         }
@@ -50,9 +51,9 @@ class HandshakeState : ConnectionState {
     private fun handleNextState(handler: MinecraftHandler, packet: Handshake) {
         handler.data.frontVer = ProtocolVersion.getProtocol(packet.protocolId)
 
-        when (packet.nextState.ordinal) {
-            1 -> handler.data.state = StatusState()
-            2 -> handler.data.state = LoginState()
+        when (packet.intendedState) {
+            IntendedState.STATUS -> handler.data.state = StatusState()
+            IntendedState.LOGIN -> handler.data.state = LoginState()
             else -> throw StacklessException("Invalid next state")
         }
     }
@@ -117,7 +118,7 @@ class HandshakeState : ConnectionState {
         if (packet !is Handshake) throw StacklessException("Invalid packet!")
 
         handleNextState(handler, packet)
-        checkRateLimit(handler, packet.nextState)
+        checkRateLimit(handler, packet.intendedState)
         handleVirtualHost(handler, packet)
 
         handler.data.state.start(handler)

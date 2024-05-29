@@ -10,6 +10,7 @@ import com.viaversion.aas.codec.packet.status.StatusResponse
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.forward
+import com.viaversion.aas.util.IntendedState
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import io.netty.channel.ChannelHandlerContext
@@ -76,7 +77,7 @@ class StatusState : ConnectionState {
         handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 if (address != null) {
-                    connectBack(handler, address!!, state)
+                    connectBack(handler, address!!, IntendedState.STATUS)
                 } else {
                     handler.disconnect("VIAaaS")
                 }

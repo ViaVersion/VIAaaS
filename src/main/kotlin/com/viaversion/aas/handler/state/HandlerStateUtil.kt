@@ -8,8 +8,8 @@ import com.viaversion.aas.handler.BackEndInit
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.autoprotocol.ProtocolDetector
 import com.viaversion.aas.handler.forward
+import com.viaversion.aas.util.IntendedState
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
 import io.ktor.server.netty.*
@@ -30,7 +30,7 @@ import kotlin.math.ceil
 private suspend fun createBackChannel(
     handler: MinecraftHandler,
     socketAddr: InetSocketAddress,
-    state: State,
+    state: IntendedState,
     extraData: String?,
     proxyUri: URI?,
     proxyAddress: InetSocketAddress?
@@ -53,7 +53,7 @@ private suspend fun createBackChannel(
         .channel()
     (channel.pipeline()["proxy"] as? ProxyHandler)?.connectFuture()?.suspendAwait()
 
-    if (state == State.LOGIN) {
+    if (state == IntendedState.LOGIN) {
         mcLogger.info("+ L {} -> {}", handler.endRemoteAddress, socketAddr)
     } else {
         mcLogger.debug("+ {} {} -> {}", state.name[0], handler.endRemoteAddress, socketAddr)
@@ -61,7 +61,7 @@ private suspend fun createBackChannel(
     handler.data.backChannel = channel as SocketChannel
 
     val packet = Handshake()
-    packet.nextState = state
+    packet.intendedState = state
     packet.protocolId = handler.data.frontVer!!.version
     packet.address = socketAddr.hostString + if (extraData != null) 0.toChar() + extraData else ""
     packet.port = socketAddr.port
@@ -95,7 +95,7 @@ private suspend fun autoDetectVersion(handler: MinecraftHandler, socketAddr: Ine
 private suspend fun tryBackAddresses(
     handler: MinecraftHandler,
     addresses: Iterable<InetSocketAddress>,
-    state: State,
+    state: IntendedState,
     extraData: String?
 ) {
     var latestException: Exception? = null
@@ -145,7 +145,7 @@ private suspend fun resolveBackendAddresses(hostAndPort: HostAndPort): List<Inet
 suspend fun connectBack(
     handler: MinecraftHandler,
     address: HostAndPort,
-    state: State,
+    state: IntendedState,
     extraData: String? = null
 ) {
     val addresses = resolveBackendAddresses(address)

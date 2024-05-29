@@ -13,7 +13,7 @@ import com.viaversion.aas.handler.ConnectionData
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.handler.addProxyHandler
 import com.viaversion.aas.send
-import com.viaversion.viaversion.api.protocol.packet.State
+import com.viaversion.aas.util.IntendedState
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.server.netty.*
 import io.netty.bootstrap.Bootstrap
@@ -66,7 +66,7 @@ object ProtocolDetector {
                         handshake.address = address.hostString
                         handshake.port = address.port
                         handshake.protocolId = -1
-                        handshake.nextState = State.STATUS
+                        handshake.intendedState = IntendedState.STATUS
                         send(ch.channel(), handshake)
                         send(ch.channel(), StatusRequest(), flush = true)
                     }
