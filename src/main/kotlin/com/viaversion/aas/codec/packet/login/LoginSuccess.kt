@@ -13,6 +13,7 @@ class LoginSuccess : Packet {
     lateinit var id: UUID
     lateinit var username: String
     private val properties = mutableListOf<SignableProperty>()
+    private var strictErrorHandling: Boolean = false
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         id = when {
@@ -34,6 +35,9 @@ class LoginSuccess : Packet {
                 this.properties.add(SignableProperty(name, value, signature))
             }
         }
+        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+            strictErrorHandling = byteBuf.readBoolean()
+        }
     }
 
     override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
@@ -54,6 +58,9 @@ class LoginSuccess : Packet {
                 Type.STRING.write(byteBuf, property.value)
                 Type.OPTIONAL_STRING.write(byteBuf, property.signature)
             }
+        }
+        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+            byteBuf.writeBoolean(strictErrorHandling)
         }
     }
 }

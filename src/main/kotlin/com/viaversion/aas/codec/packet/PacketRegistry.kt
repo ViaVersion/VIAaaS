@@ -3,10 +3,7 @@ package com.viaversion.aas.codec.packet
 import com.google.common.collect.Range
 import com.google.common.collect.RangeMap
 import com.google.common.collect.TreeRangeMap
-import com.viaversion.aas.codec.packet.configuration.ConfigurationDisconnect
-import com.viaversion.aas.codec.packet.configuration.ConfigurationKeepAlive
-import com.viaversion.aas.codec.packet.configuration.ConfigurationPluginMessage
-import com.viaversion.aas.codec.packet.configuration.FinishConfig
+import com.viaversion.aas.codec.packet.configuration.*
 import com.viaversion.aas.codec.packet.handshake.Handshake
 import com.viaversion.aas.codec.packet.login.*
 import com.viaversion.aas.codec.packet.play.*
@@ -32,8 +29,14 @@ import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ClientboundPac
 import com.viaversion.viaversion.protocols.protocol1_19_4to1_19_3.ClientboundPackets1_19_4
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ClientboundPackets1_19
 import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19
+import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ClientboundConfigurationPackets1_20_2
 import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ClientboundPackets1_20_2
+import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ServerboundConfigurationPackets1_20_2
 import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ServerboundPackets1_20_2
+import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ClientboundConfigurationPackets1_20_5
+import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ClientboundPackets1_20_5
+import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ServerboundConfigurationPackets1_20_5
+import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ServerboundPackets1_20_5
 import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
@@ -68,13 +71,37 @@ object PacketRegistry {
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusResponse, Range.all(), 0)
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusPong, Range.all(), 1)
 
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, Range.all(), 0)
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, Range.all(), 1)
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, Range.all(), 2)
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, Range.all(), 3)
-        register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, Range.all(), 1)
-        register(State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfig, Range.all(), 2)
-        register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, Range.all(), 3)
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, mapOf(
+            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
+            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+        ))
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, mapOf(
+            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.DISCONNECT.id,
+            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
+        ))
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, mapOf(
+            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
+            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+        ))
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, mapOf(
+            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
+            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+        ))
+        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationTransfer, Range.atLeast(ProtocolVersion.v1_20_5),
+            ClientboundConfigurationPackets1_20_5.TRANSFER.id)
+
+        register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
+            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
+            ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+        ))
+        register(State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfig, mapOf(
+            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
+            ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+        ))
+        register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, mapOf(
+            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
+            ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+        ))
 
         register(
             State.PLAY, Direction.CLIENTBOUND, ::Kick, mapOf(
@@ -91,7 +118,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id,
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.DISCONNECT.id,
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.DISCONNECT.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.DISCONNECT.id,
+                ProtocolVersion.v1_20_5.singleton to ClientboundPackets1_20_5.DISCONNECT.id
             )
         )
         register(
@@ -109,7 +137,8 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.PLUGIN_MESSAGE.id,
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.PLUGIN_MESSAGE.id,
+                ProtocolVersion.v1_20_5.singleton to ClientboundPackets1_20_5.PLUGIN_MESSAGE.id
             )
         )
         register(
@@ -118,7 +147,8 @@ object PacketRegistry {
         )
         register(
             State.PLAY, Direction.SERVERBOUND, ::ConfigurationAck, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundPackets1_20_2.CONFIGURATION_ACKNOWLEDGED.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundPackets1_20_2.CONFIGURATION_ACKNOWLEDGED.id,
+                ProtocolVersion.v1_20_5.singleton to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id
             )
         )
         // todo update this to latest version

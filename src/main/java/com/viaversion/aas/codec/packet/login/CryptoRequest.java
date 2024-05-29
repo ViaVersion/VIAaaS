@@ -16,6 +16,7 @@ public class CryptoRequest implements Packet {
 	private String serverId;
 	private PublicKey publicKey;
 	private byte[] nonce;
+	private boolean authenticate;
 
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
@@ -29,6 +30,9 @@ public class CryptoRequest implements Packet {
 			publicKey = KeyFactory.getInstance("RSA")
 					.generatePublic(new X509EncodedKeySpec(UtilKt.readByteArray(byteBuf, byteBuf.readUnsignedShort())));
 			nonce = UtilKt.readByteArray(byteBuf, byteBuf.readUnsignedShort());
+		}
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+			authenticate = byteBuf.readBoolean();
 		}
 	}
 
@@ -46,6 +50,9 @@ public class CryptoRequest implements Packet {
 			byteBuf.writeBytes(encodedKey);
 			byteBuf.writeShort(nonce.length);
 			byteBuf.writeBytes(nonce);
+		}
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+			byteBuf.writeBoolean(authenticate);
 		}
 	}
 
@@ -71,5 +78,13 @@ public class CryptoRequest implements Packet {
 
 	public void setNonce(byte[] nonce) {
 		this.nonce = nonce;
+	}
+
+	public boolean isAuthenticate() {
+		return authenticate;
+	}
+
+	public void setAuthenticate(boolean authenticate) {
+		this.authenticate = authenticate;
 	}
 }

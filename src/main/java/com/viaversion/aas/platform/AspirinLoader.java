@@ -1,9 +1,7 @@
 package com.viaversion.aas.platform;
 
-import com.viaversion.aas.provider.AspirinCompressionProvider;
-import com.viaversion.aas.provider.AspirinEncryptionProvider;
-import com.viaversion.aas.provider.AspirinProfileProvider;
-import com.viaversion.aas.provider.AspirinVersionProvider;
+import com.viaversion.aas.provider.*;
+import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
@@ -16,6 +14,9 @@ public class AspirinLoader implements ViaPlatformLoader {
 	public void load() {
 		Via.getManager().getProviders().use(VersionProvider.class, new AspirinVersionProvider());
 		Via.getManager().getProviders().use(CompressionProvider.class, new AspirinCompressionProvider());
+
+		//ViaBackwards
+		Via.getManager().getProviders().use(TransferProvider.class, new AspirinTransferProvider());
 
 		//ViaLegacy
 		Via.getManager().getProviders().use(GameProfileFetcher.class, new AspirinProfileProvider());
