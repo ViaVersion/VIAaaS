@@ -121,6 +121,7 @@ class LoginState : ConnectionState {
         cryptoKey = AspirinServer.mcCryptoKey
         cryptoRequest.publicKey = cryptoKey.public
         cryptoRequest.nonce = frontNonce
+        cryptoRequest.isAuthenticate = true
 
         send(frontChannel, cryptoRequest, true)
     }
