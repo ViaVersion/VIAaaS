@@ -10,7 +10,7 @@ import com.viaversion.viaversion.util.ComponentUtil;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
-public class AbstractSingleChat implements Packet {
+public abstract class AbstractSingleChat implements Packet {
 	private JsonElement msg;
 	private Tag msgTag;
 

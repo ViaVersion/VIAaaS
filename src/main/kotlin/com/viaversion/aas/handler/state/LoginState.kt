@@ -5,6 +5,7 @@ import com.google.gson.JsonPrimitive
 import com.viaversion.aas.*
 import com.viaversion.aas.codec.CryptoCodec
 import com.viaversion.aas.codec.packet.Packet
+import com.viaversion.aas.codec.packet.UnknownPacket
 import com.viaversion.aas.codec.packet.login.*
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.MinecraftHandler
@@ -54,9 +55,9 @@ class LoginState : ConnectionState {
             is CryptoRequest -> handleCryptoRequest(handler, packet)
             is LoginSuccess -> handleLoginSuccess(handler, packet)
             is SetCompression -> handleCompression(handler, packet)
-            is PluginRequest -> forward(handler, packet)
             is LoginAck -> handleLoginAck(handler, packet)
-            else -> throw StacklessException("Invalid packet!")
+            is UnknownPacket -> throw StacklessException("unknown packet ${packet.id}")
+            else -> forward(handler, packet)
         }
     }
 

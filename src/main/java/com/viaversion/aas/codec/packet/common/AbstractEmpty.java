@@ -5,7 +5,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
-public class AbstractEmpty implements Packet {
+public abstract class AbstractEmpty implements Packet {
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 	}

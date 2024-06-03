@@ -49,7 +49,8 @@ object PacketRegistry {
     private val entriesDecoding = hashMapOf<Triple<State, Direction, Int>, RangeMap<ProtocolVersion, DecodingInfo>>()
 
     // direction, type, protocol version -> entry
-    private val entriesEncoding = hashMapOf<Pair<Direction, Class<out Packet>>, RangeMap<ProtocolVersion, EncodingInfo>>()
+    private val entriesEncoding =
+        hashMapOf<Pair<Direction, Class<out Packet>>, RangeMap<ProtocolVersion, EncodingInfo>>()
 
     init {
         // Obviously stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java
@@ -59,49 +60,75 @@ object PacketRegistry {
         register(State.LOGIN, Direction.SERVERBOUND, ::CryptoResponse, Range.all(), 1)
         register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13), 2)
         register(State.LOGIN, Direction.SERVERBOUND, ::LoginAck, Range.atLeast(ProtocolVersion.v1_20_2), 3)
+        register(State.LOGIN, Direction.SERVERBOUND, ::LoginCookieResponse, Range.atLeast(ProtocolVersion.v1_20_5), 4)
 
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginDisconnect, Range.all(), 0)
         register(State.LOGIN, Direction.CLIENTBOUND, ::CryptoRequest, Range.all(), 1)
         register(State.LOGIN, Direction.CLIENTBOUND, ::LoginSuccess, Range.all(), 2)
         register(State.LOGIN, Direction.CLIENTBOUND, ::SetCompression, Range.atLeast(ProtocolVersion.v1_8), 3)
         register(State.LOGIN, Direction.CLIENTBOUND, ::PluginRequest, Range.atLeast(ProtocolVersion.v1_13), 4)
+        register(State.LOGIN, Direction.CLIENTBOUND, ::LoginCookieRequest, Range.atLeast(ProtocolVersion.v1_20_5), 5)
 
         register(State.STATUS, Direction.SERVERBOUND, ::StatusRequest, Range.all(), 0)
         register(State.STATUS, Direction.SERVERBOUND, ::StatusPing, Range.all(), 1)
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusResponse, Range.all(), 0)
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusPong, Range.all(), 1)
 
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, mapOf(
-            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
-        ))
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, mapOf(
-            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.DISCONNECT.id,
-            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
-        ))
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, mapOf(
-            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
-        ))
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, mapOf(
-            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-            ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
-        ))
-        register(State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationTransfer, Range.atLeast(ProtocolVersion.v1_20_5),
-            ClientboundConfigurationPackets1_20_5.TRANSFER.id)
+        register(
+            State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationCookieRequest,
+            ProtocolVersion.v1_20_5.singleton, ClientboundConfigurationPackets1_20_5.COOKIE_REQUEST.id
+        )
+        register(
+            State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+            )
+        )
+        register(
+            State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.DISCONNECT.id,
+                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
+            )
+        )
+        register(
+            State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
+                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+            )
+        )
+        register(
+            State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
+                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+            )
+        )
+        register(
+            State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationTransfer,
+            Range.atLeast(ProtocolVersion.v1_20_5), ClientboundConfigurationPackets1_20_5.TRANSFER.id
+        )
 
-        register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
-            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-            ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
-        ))
-        register(State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfig, mapOf(
-            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-            ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
-        ))
-        register(State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, mapOf(
-            ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-            ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
-        ))
+        register(
+            State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationCookieResponse,
+            ProtocolVersion.v1_20_5.singleton, ServerboundConfigurationPackets1_20_5.COOKIE_RESPONSE.id
+        )
+        register(
+            State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+            )
+        )
+        register(
+            State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfig, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
+                ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+            )
+        )
+        register(
+            State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
+                ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+            )
+        )
 
         register(
             State.PLAY, Direction.CLIENTBOUND, ::Kick, mapOf(
@@ -176,8 +203,7 @@ object PacketRegistry {
     private val ProtocolVersion.singleton get() = Range.singleton(this)
 
     private inline fun <reified P : Packet> register(
-        state: State,
-        direction: Direction,
+        state: State, direction: Direction,
         constructor: Supplier<P>,
         idByProtocol: Map<Range<ProtocolVersion>, Int>,
         klass: Class<P> = P::class.java,
@@ -204,11 +230,9 @@ object PacketRegistry {
     }
 
     private inline fun <reified P : Packet> register(
-        state: State,
-        direction: Direction,
+        state: State, direction: Direction,
         constructor: Supplier<P>,
-        protocol: Range<ProtocolVersion>,
-        id: Int
+        protocol: Range<ProtocolVersion>, id: Int
     ) {
         register(constructor = constructor, direction = direction, state = state, idByProtocol = mapOf(protocol to id))
     }
@@ -217,15 +241,16 @@ object PacketRegistry {
     data class EncodingInfo(val packetId: Int)
 
     private fun getPacketConstructor(
-        protocolVersion: ProtocolVersion,
-        state: State,
-        id: Int,
-        direction: Direction
+        protocolVersion: ProtocolVersion, state: State,
+        id: Int, direction: Direction
     ): Supplier<out Packet>? {
         return entriesDecoding[Triple(state, direction, id)]?.get(protocolVersion)?.constructor
     }
 
-    private fun getPacketId(packetClass: Class<out Packet>, protocolVersion: ProtocolVersion, direction: Direction): Int? {
+    private fun getPacketId(
+        packetClass: Class<out Packet>,
+        protocolVersion: ProtocolVersion, direction: Direction
+    ): Int? {
         return entriesEncoding[direction to packetClass]?.get(protocolVersion)?.packetId
     }
 

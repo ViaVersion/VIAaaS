@@ -6,7 +6,7 @@ import com.viaversion.viaversion.api.type.Type;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
-public class AbstractCompression implements Packet {
+public abstract class AbstractCompression implements Packet {
 	private int threshold;
 
 	public int getThreshold() {

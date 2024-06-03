@@ -5,7 +5,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
-public class AbstractPing implements Packet {
+public abstract class AbstractPing implements Packet {
 	private long number;
 
 	public long getNumber() {
