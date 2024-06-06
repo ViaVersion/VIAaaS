@@ -362,15 +362,16 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
     // @ts-ignore
     let tag = uuid.v4();
     navigator.serviceWorker.ready.then(r => {
-        r.showNotification("Click to allow auth impersonation", {
-            body: msg,
-            tag: tag,
-            vibrate: [200, 10, 100, 200, 100, 10, 100, 10, 200],
-            actions: [
-                {action: "reject", title: "Reject"},
-                {action: "confirm", title: "Confirm"}
-            ]
-        }).then(() => {
+        val options = {
+              body: msg,
+              tag: tag,
+              vibrate: [200, 10, 100, 200, 100, 10, 100, 10, 200],
+              actions: [
+                  {action: "reject", title: "Reject"},
+                  {action: "confirm", title: "Confirm"}
+              ]
+          }
+        r.showNotification("Click to allow auth impersonation", options).then(() => {
         });
         notificationCallbacks.set(tag, action => {
             if (action === "reject") {
