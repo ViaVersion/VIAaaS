@@ -362,7 +362,7 @@ function authNotification(msg: string, yes: () => void, no: () => void) {
     // @ts-ignore
     let tag = uuid.v4();
     navigator.serviceWorker.ready.then(r => {
-        val options = {
+        let options = {
               body: msg,
               tag: tag,
               vibrate: [200, 10, 100, 200, 100, 10, 100, 10, 200],
