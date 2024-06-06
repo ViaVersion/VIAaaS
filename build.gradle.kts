@@ -176,6 +176,31 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
+tasks.register<Exec>("compileTs") {
+    group = "build"
+    description = "Compiles TypeScript resources into JS"
+    workingDir = rootProject.rootDir
+
+    onlyIf {
+        val hasNpx = try {
+            val result = exec {
+                isIgnoreExitValue = true
+                commandLine("sh", "-c", "command -v npx")
+            }
+            result.exitValue == 0
+        } catch (e: Exception) {
+            false
+        }
+
+        if (!hasNpx) println("Command npx isn't available")
+        return@onlyIf hasNpx
+    }
+
+    commandLine("npx", "tsc")
+}
+
+tasks.getByName("processResources").dependsOn("compileTs")
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
