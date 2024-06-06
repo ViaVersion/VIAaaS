@@ -1,5 +1,5 @@
 {
-  "description": "Please use Gradle, NPM is mainly used for auto completing on IDE and update checking.",
+  "description": "VIAaaS web resources",
   "name": "viaaas-web",
   "private": true,
   "devDependencies": {
@@ -13,5 +13,8 @@
   },
   "scripts": {
     "start": "./gradlew run"
+  },
+  "dependencies": {
+    "typescript": "^5.4.5"
   }
 }
