@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: CI with Gradle and NPM
 on: [ push, pull_request ]
 jobs:
   build:
@@ -21,6 +21,12 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install NPM dependencies
+        run: npm ci
       - name: Build with Gradle
         run: ./gradlew build
       - name: Upload Artifacts
