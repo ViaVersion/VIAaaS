@@ -1,24 +1,6 @@
 /// <reference path='config.ts' />
 // Note that some APIs only work on HTTPS
 
-// Minecraft.id
-let urlParams = new URLSearchParams();
-window.location.hash.substring(1).split("?")
-    .map(it => new URLSearchParams(it)
-        .forEach((a, b) => urlParams.append(b, a)));
-let mcIdUsername = urlParams.get("username");
-let mcIdCode = urlParams.get("mcauth_code");
-let mcIdSuccess = urlParams.get("mcauth_success");
-
-$(() => {
-    if (mcIdSuccess === "false") {
-        addToast("Couldn't authenticate with Minecraft.ID", urlParams.get("mcauth_msg") ?? "");
-    }
-    if (mcIdCode != null) {
-        history.replaceState(null, "", "#");
-    }
-});
-
 // Page
 let connectionStatus = document.getElementById("connection_status")!!;
 let corsStatus = document.getElementById("cors_status")!!;
@@ -68,9 +50,10 @@ $(() => {
     $("#form_listen").on("submit", () => submittedListen());
     $("#form_send_token").on("submit", () => submittedSendToken());
     $("#en_notifications").on("click", () => Notification.requestPermission().then(renderActions));
-    $("#listen_continue").on("click", () => clickedListenContinue());
     $("#address_info_form").on("input", () => generateAddress());
     $("#generated_address").on("click", () => copyGeneratedAddress());
+    $("#listen_online").on("change", () => updateTempCodeVisibility());
+    $("#link_address").text("link." + instance_suffix_input.value);
     $(window).on("beforeinstallprompt", e => e.preventDefault());
 
     ohNo();
@@ -161,17 +144,16 @@ function generateAddress() {
     }
 }
 
-$("#mcIdUsername").text(mcIdUsername ?? "");
-
 function submittedListen() {
     let user = $("#listen_username").val() as string;
     if (!user) return;
     if (($("#listen_online")[0] as HTMLInputElement).checked) {
-        let callbackUrl = new URL(location.href);
-        callbackUrl.search = "";
-        callbackUrl.hash = "#username=" + encodeURIComponent(user);
-        location.href = "https://api.minecraft.id/gateway/start/" + encodeURIComponent(user)
-            + "?callback=" + encodeURIComponent(callbackUrl.toString());
+        sendSocket(JSON.stringify({
+            action: "temp_code_login",
+            username: user,
+            code: $("#listen_code").val()
+        }));
+        // todo
     } else {
         let taskId = Math.random();
         workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
@@ -192,19 +174,8 @@ function submittedSendToken() {
         .catch(e => addToast("Failed to send access token", e));
 }
 
-function clickedListenContinue() {
-    sendSocket(JSON.stringify({
-        "action": "minecraft_id_login",
-        "username": mcIdUsername,
-        "code": mcIdCode
-    }));
-    mcIdCode = null;
-    renderActions();
-}
-
 function renderActions() {
     $("#en_notifications").hide();
-    $("#listen_continue").hide();
     $("#listen_open").hide();
     $("#send_token_open").hide();
 
@@ -212,11 +183,17 @@ function renderActions() {
         $("#en_notifications").show();
     }
     if (listenVisible) {
-        if (mcIdUsername != null && mcIdCode != null) {
-            $("#listen_continue").show();
-        }
         $("#listen_open").show();
         $("#send_token_open").show();
+    }
+}
+
+function updateTempCodeVisibility() {
+    let tmpCode = $("#listen_code");
+    if (($("#listen_online")[0] as HTMLInputElement).checked) {
+        tmpCode.prop("disabled", false);
+    } else {
+        tmpCode.prop("disabled", true);
     }
 }
 
@@ -356,22 +333,22 @@ function handleSWMsg(event: MessageEvent) {
 
 function authNotification(msg: string, yes: () => void, no: () => void) {
     if (!navigator.serviceWorker || Notification.permission !== "granted") {
-        addToast("Allow auth impersonation?", msg, yes, no);
+        addToast("Allow auth?", msg, yes, no);
         return;
     }
     // @ts-ignore
     let tag = uuid.v4();
     navigator.serviceWorker.ready.then(r => {
         let options = {
-              body: msg,
-              tag: tag,
-              vibrate: [200, 10, 100, 200, 100, 10, 100, 10, 200],
-              actions: [
-                  {action: "reject", title: "Reject"},
-                  {action: "confirm", title: "Confirm"}
-              ]
-          }
-        r.showNotification("Click to allow auth impersonation", options).then(() => {
+            body: msg,
+            tag: tag,
+            vibrate: [200, 10, 100, 200, 100, 10, 100, 10, 200],
+            actions: [
+                {action: "reject", title: "Reject"},
+                {action: "confirm", title: "Confirm"}
+            ]
+        }
+        r.showNotification("Click to allow auth", options).then(() => {
         });
         notificationCallbacks.set(tag, action => {
             if (action === "reject") {
@@ -704,7 +681,7 @@ function confirmJoin(hash: string) {
 }
 
 function handleJoinRequest(parsed: any) {
-    authNotification("Allow auth impersonation from VIAaaS instance?\nAccount: "
+    authNotification("Allow auth from VIAaaS instance?\nAccount: "
         + parsed.user + "\nServer Message: \n"
         + parsed.message.split(/[\r\n]+/).map((it: string) => "> " + it).join('\n'), () => {
         let account = findAccountByMcName(parsed.user);

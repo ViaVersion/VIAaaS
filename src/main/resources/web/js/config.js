@@ -12,4 +12,3 @@ const whitelistedOrigin = [
 var defaultCorsProxy = "https://cors.re.yt.nom.br/";
 // Default instance suffix, in format "viaaas.example.com[:25565]", null to use the page hostname;
 var defaultInstanceSuffix = null;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vdHlwZXNjcmlwdC9qcy9jb25maWcudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBLG9HQUFvRztBQUNwRyxzRkFBc0Y7QUFDdEYsdURBQXVEO0FBRXZELGtCQUFrQjtBQUNsQixNQUFNLGFBQWEsR0FBVyxzQ0FBc0MsQ0FBQztBQUNyRSxrRkFBa0Y7QUFDbEYsTUFBTSxpQkFBaUIsR0FBYTtJQUNoQywwQkFBMEI7Q0FDN0IsQ0FBQztBQUNGLDRCQUE0QjtBQUM1QixJQUFJLGdCQUFnQixHQUFrQiw0QkFBNEIsQ0FBQztBQUNuRSxrR0FBa0c7QUFDbEcsSUFBSSxxQkFBcUIsR0FBa0IsSUFBSSxDQUFDIn0=

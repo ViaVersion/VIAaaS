@@ -15,7 +15,6 @@
     "alwaysStrict": true,
     "strict": true,
     "allowJs": true,
-    "inlineSourceMap": true,
     "outDir": "src/main/resources/web/js"
   },
   "include": [

@@ -76,7 +76,9 @@ class StatusState : ConnectionState {
         handler.data.frontChannel.setAutoRead(false)
         handler.coroutineScope.launch(Dispatchers.IO) {
             try {
-                if (address != null) {
+                if (address?.host == "link") {
+                    handler.disconnect("Join to link your account")
+                } else if (address != null) {
                     connectBack(handler, address!!, IntendedState.STATUS)
                 } else {
                     handler.disconnect("VIAaaS")

@@ -9,11 +9,7 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
 import io.ktor.server.websocket.*
-import kotlinx.coroutines.future.await
-import java.net.URLEncoder
 import java.time.Duration
 import java.util.*
 import kotlin.math.absoluteValue
@@ -31,7 +27,7 @@ class WebLogin : WebState {
 
         when (obj["action"].asString) {
             "offline_login" -> handleOfflineLogin(webClient, msg, obj)
-            "minecraft_id_login" -> handleMcIdLogin(webClient, obj)
+            "temp_code_login" -> handleTempCodeLogin(webClient, obj)
             "listen_login_requests" -> handleListenLogins(webClient, obj)
             "unlisten_login_requests" -> handleUnlisten(webClient, obj)
             "session_hash_response" -> handleSessionResponse(webClient, obj)
@@ -83,25 +79,22 @@ class WebLogin : WebState {
         webLogger.info("Token gen: {}: offline {} {}", webClient.id, username, uuid)
     }
 
-    private suspend fun handleMcIdLogin(webClient: WebClient, obj: JsonObject) {
+    private suspend fun handleTempCodeLogin(webClient: WebClient, obj: JsonObject) {
         val username = obj["username"].asString
         val code = obj["code"].asString
 
-        val check = AspirinServer.httpClient.submitForm(
-            "https://api.minecraft.id/gateway/verify/${URLEncoder.encode(username, Charsets.UTF_8)}",
-            formParameters = parametersOf("code", code),
-        ).body<JsonObject>()
+        val cacheKey = username.lowercase()
+        val check = webClient.server.tempCodes.getIfPresent(cacheKey)
 
-        if (check["valid"].asBoolean) {
-            val mcIdUser = check["username"].asString
-            val uuid = check["uuid"]?.asString?.let { parseUndashedId(it.replace("-", "")) }
-                ?: webClient.server.usernameToIdCache[mcIdUser].await()
-                ?: throw StacklessException("Failed to get UUID from minecraft.id")
+        if (check != null && check.tempCode == code) {
+            webClient.server.tempCodes.invalidate(cacheKey)
+            val mcIdUser = check.username
+            val uuid = check.id
 
             val token = webClient.server.generateToken(uuid, mcIdUser)
             webClient.ws.sendSerialized(loginSuccessJson(mcIdUser, uuid, token))
 
-            webLogger.info("Token gen: {}: {} {}", webClient.id, mcIdUser, uuid)
+            webLogger.info("Token gen: {}: temp code {} {}", webClient.id, mcIdUser, uuid)
         } else {
             webClient.ws.sendSerialized(loginNotSuccess())
             webLogger.info("Token gen fail: {}: {}", webClient.id, username)

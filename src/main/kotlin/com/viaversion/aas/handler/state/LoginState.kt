@@ -13,6 +13,7 @@ import com.viaversion.aas.handler.forward
 import com.viaversion.aas.handler.setCompression
 import com.viaversion.aas.util.IntendedState
 import com.viaversion.aas.util.StacklessException
+import com.viaversion.aas.web.TempLoginInfo
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
@@ -281,7 +282,8 @@ class LoginState : ConnectionState {
                     frontOnline = info.frontOnline
                     info.backName?.also { backName = info.backName }
                 }
-                if (VIAaaSConfig.forceOnlineMode) frontOnline = true
+                val isLink = backAddress!!.host == "link"
+                if (VIAaaSConfig.forceOnlineMode || isLink) frontOnline = true
                 if (frontOnline != null) {
                     when (frontOnline) {
                         false -> callbackPlayerId.complete(generateOfflinePlayerUuid(frontName))
@@ -290,6 +292,7 @@ class LoginState : ConnectionState {
                     }
                     val id = callbackPlayerId.await()
                     mcLogger.info("Login: {} {} {}", handler.endRemoteAddress, frontName, id)
+                    if (isLink) return@launch handleTempCode(handler, frontName, id)
                 }
                 connectBack(
                     handler,
@@ -306,6 +309,12 @@ class LoginState : ConnectionState {
                 handler.data.frontChannel.fireExceptionCaughtIfOpen(e)
             }
         }
+    }
+
+    private fun handleTempCode(handler: MinecraftHandler, name: String, id: UUID) {
+        val info = TempLoginInfo(secureRandom.nextInt().toUInt().toString(36), name, id)
+        AspirinServer.viaWebServer.tempCodes.put(name.lowercase(), info)
+        handler.disconnect("Your temp code is: ${info.tempCode}")
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {

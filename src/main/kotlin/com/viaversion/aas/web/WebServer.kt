@@ -75,6 +75,9 @@ class WebServer {
     val minecraftAccessTokens = CacheBuilder.newBuilder()
         .expireAfterWrite(10, TimeUnit.MINUTES)
         .build<UUID, String>()
+    val tempCodes = CacheBuilder.newBuilder()
+        .expireAfterWrite(5, TimeUnit.MINUTES)
+        .build<String, TempLoginInfo>() // lowercase username
 
     fun generateToken(account: UUID, username: String): String {
         return JWT.create()

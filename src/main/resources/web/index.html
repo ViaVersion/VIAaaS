@@ -97,9 +97,6 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
             <ul class="list-group" id="listening"></ul>
         </div>
         <div id="actions">
-            <button type="button" class="btn btn-primary" id="listen_continue">Listen to <span
-                    id="mcIdUsername"></span>
-            </button>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#listenModal"
                     id="listen_open">Listen to logins
@@ -348,11 +345,7 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <p>The instance will send impersonation requests to this page. Please note
-                        that they're verified by UUID, so offline and online accounts
-                        are considered different.</p>
-                    <p>VIAaaS will also request the address parameters when they're not specified.
-                        They're verified by username. Online-mode listeners have priority.</p>
+                    <p>The instance will send auth requests and address parameters to this page.</p>
                     <div class="mb-3">
                         <label for="listen_username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="listen_username">
@@ -360,6 +353,11 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="listen_online" checked>
                         <label for="listen_online" class="form-check-label">Online Mode</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="listen_code" class="form-label">Temp Code</label>
+                        <p>Join <span id="link_address" class="font-monospace"></span> to get the temporary code</p>
+                        <input type="text" class="form-control" id="listen_code">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -379,12 +377,9 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
                 </div>
                 <div class="modal-body">
-                    <p>The instance will cache your Minecraft access token for some minutes, allowing you to connect
+                    <p>The instance will cache your Minecraft access token, usually for some minutes, allowing you to connect
                         without keeping this page open.</p>
-                    <p>Note that the access token are valid for ~1 day and a compromised instance may be used to access
-                        your account.</p>
-                    <p>You'll need to connect as online-mode in the front-end. It's not possible to use the cached
-                        token when changing the backend username</p>
+                    <p>You'll need to connect as online-mode in the front-end.</p>
                     <div class="input-group mb-3">
                         <label class="input-group-text" for="send_token_user">Account</label>
                         <select class="form-select" id="send_token_user">
