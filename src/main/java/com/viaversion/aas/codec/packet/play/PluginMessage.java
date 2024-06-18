@@ -3,7 +3,7 @@ package com.viaversion.aas.codec.packet.play;
 import com.viaversion.aas.UtilKt;
 import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +13,7 @@ public class PluginMessage implements Packet {
 
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		channel = Type.STRING.read(byteBuf);
+		channel = Types.STRING.read(byteBuf);
 		if (protocolVersion.olderThanOrEqualTo(ProtocolVersion.v1_7_6)) {
 			data = UtilKt.readByteArray(byteBuf, readExtendedForgeShort(byteBuf));
 		} else {
@@ -23,7 +23,7 @@ public class PluginMessage implements Packet {
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		Type.STRING.write(byteBuf, channel);
+		Types.STRING.write(byteBuf, channel);
 		if (protocolVersion.olderThanOrEqualTo(ProtocolVersion.v1_7_6)) {
 			writeExtendedForgeShort(byteBuf, data.length);
 		}

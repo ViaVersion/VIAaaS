@@ -1,13 +1,13 @@
 package com.viaversion.aas.platform;
 
 import com.viaversion.aas.provider.*;
-import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider;
+import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.platform.ViaPlatformLoader;
 import com.viaversion.viaversion.api.protocol.version.VersionProvider;
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.providers.CompressionProvider;
-import net.raphimc.vialegacy.protocols.release.protocol1_7_2_5to1_6_4.providers.EncryptionProvider;
-import net.raphimc.vialegacy.protocols.release.protocol1_8to1_7_6_10.providers.GameProfileFetcher;
+import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvider;
+import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
+import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
 
 public class AspirinLoader implements ViaPlatformLoader {
 	@Override

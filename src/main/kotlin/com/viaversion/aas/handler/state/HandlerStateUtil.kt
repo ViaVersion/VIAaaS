@@ -12,6 +12,7 @@ import com.viaversion.aas.util.IntendedState
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.Types
 import io.ktor.server.netty.*
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBufAllocator
@@ -161,8 +162,8 @@ val openAuthMagic = 0xfdebf3fd.toInt()
 fun encodeCompressionOpenAuth(channel: String, id: Int, data: ByteArray): IntArray {
     val buffer = ByteBufAllocator.DEFAULT.buffer()
     try {
-        Type.STRING.write(buffer, channel)
-        Type.VAR_INT.writePrimitive(buffer, id)
+        Types.STRING.write(buffer, channel)
+        Types.VAR_INT.writePrimitive(buffer, id)
         buffer.writeBytes(data)
         val out = IntArray(2 + ceil(buffer.readableBytes() / 3.0).toInt())
 

@@ -15,30 +15,30 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import com.viaversion.viaversion.api.type.Type
-import com.viaversion.viaversion.protocols.protocol1_13to1_12_2.ClientboundPackets1_13
-import com.viaversion.viaversion.protocols.protocol1_14to1_13_2.ClientboundPackets1_14
-import com.viaversion.viaversion.protocols.protocol1_15to1_14_4.ClientboundPackets1_15
-import com.viaversion.viaversion.protocols.protocol1_16_2to1_16_1.ClientboundPackets1_16_2
-import com.viaversion.viaversion.protocols.protocol1_16to1_15_2.ClientboundPackets1_16
-import com.viaversion.viaversion.protocols.protocol1_17to1_16_4.ClientboundPackets1_17
-import com.viaversion.viaversion.protocols.protocol1_18to1_17_1.ClientboundPackets1_18
-import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ClientboundPackets1_19_1
-import com.viaversion.viaversion.protocols.protocol1_19_1to1_19.ServerboundPackets1_19_1
-import com.viaversion.viaversion.protocols.protocol1_19_3to1_19_1.ClientboundPackets1_19_3
-import com.viaversion.viaversion.protocols.protocol1_19_4to1_19_3.ClientboundPackets1_19_4
-import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ClientboundPackets1_19
-import com.viaversion.viaversion.protocols.protocol1_19to1_18_2.ServerboundPackets1_19
-import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ClientboundConfigurationPackets1_20_2
-import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ClientboundPackets1_20_2
-import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ServerboundConfigurationPackets1_20_2
-import com.viaversion.viaversion.protocols.protocol1_20_2to1_20.packet.ServerboundPackets1_20_2
-import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ClientboundConfigurationPackets1_20_5
-import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ClientboundPackets1_20_5
-import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ServerboundConfigurationPackets1_20_5
-import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.packet.ServerboundPackets1_20_5
-import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8
-import com.viaversion.viaversion.protocols.protocol1_9to1_8.ClientboundPackets1_9
+import com.viaversion.viaversion.api.type.Types
+import com.viaversion.viaversion.protocols.v1_12_2to1_13.packet.ClientboundPackets1_13
+import com.viaversion.viaversion.protocols.v1_13_2to1_14.packet.ClientboundPackets1_14
+import com.viaversion.viaversion.protocols.v1_14_4to1_15.packet.ClientboundPackets1_15
+import com.viaversion.viaversion.protocols.v1_15_2to1_16.packet.ClientboundPackets1_16
+import com.viaversion.viaversion.protocols.v1_16_1to1_16_2.packet.ClientboundPackets1_16_2
+import com.viaversion.viaversion.protocols.v1_16_4to1_17.packet.ClientboundPackets1_17
+import com.viaversion.viaversion.protocols.v1_17_1to1_18.packet.ClientboundPackets1_18
+import com.viaversion.viaversion.protocols.v1_18_2to1_19.packet.ClientboundPackets1_19
+import com.viaversion.viaversion.protocols.v1_18_2to1_19.packet.ServerboundPackets1_19
+import com.viaversion.viaversion.protocols.v1_19_1to1_19_3.packet.ClientboundPackets1_19_3
+import com.viaversion.viaversion.protocols.v1_19_3to1_19_4.packet.ClientboundPackets1_19_4
+import com.viaversion.viaversion.protocols.v1_19to1_19_1.packet.ClientboundPackets1_19_1
+import com.viaversion.viaversion.protocols.v1_19to1_19_1.packet.ServerboundPackets1_19_1
+import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ClientboundConfigurationPackets1_20_5
+import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ClientboundPackets1_20_5
+import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ServerboundConfigurationPackets1_20_5
+import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ServerboundPackets1_20_5
+import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ClientboundConfigurationPackets1_20_2
+import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ClientboundPackets1_20_2
+import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundConfigurationPackets1_20_2
+import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundPackets1_20_2
+import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_8
+import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.util.ReferenceCountUtil
@@ -76,30 +76,30 @@ object PacketRegistry {
 
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationCookieRequest,
-            ProtocolVersion.v1_20_5.singleton, ClientboundConfigurationPackets1_20_5.COOKIE_REQUEST.id
+            Range.atLeast(ProtocolVersion.v1_20_5), ClientboundConfigurationPackets1_20_5.COOKIE_REQUEST.id
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.DISCONNECT.id,
-                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
+                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-                ProtocolVersion.v1_20_5.singleton to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
             )
         )
         register(
@@ -109,24 +109,24 @@ object PacketRegistry {
 
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationCookieResponse,
-            ProtocolVersion.v1_20_5.singleton, ServerboundConfigurationPackets1_20_5.COOKIE_RESPONSE.id
+            Range.atLeast(ProtocolVersion.v1_20_5), ServerboundConfigurationPackets1_20_5.COOKIE_RESPONSE.id
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+                Range.atLeast(ProtocolVersion.v1_20_5) to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
             )
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfig, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-                ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+                Range.atLeast(ProtocolVersion.v1_20_5) to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
             )
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-                ProtocolVersion.v1_20_5.singleton to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+                Range.atLeast(ProtocolVersion.v1_20_5) to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
             )
         )
 
@@ -146,26 +146,26 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.DISCONNECT.id,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.DISCONNECT.id,
-                ProtocolVersion.v1_20_5.singleton to ClientboundPackets1_20_5.DISCONNECT.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ClientboundPackets1_20_5.DISCONNECT.id
             )
         )
         register(
             State.PLAY, Direction.CLIENTBOUND, ::PluginMessage, mapOf(
-                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to ClientboundPackets1_8.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.PLUGIN_MESSAGE.id,
-                ProtocolVersion.v1_20_5.singleton to ClientboundPackets1_20_5.PLUGIN_MESSAGE.id
+                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to ClientboundPackets1_8.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.CUSTOM_PAYLOAD.id,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ClientboundPackets1_20_5.CUSTOM_PAYLOAD.id
             )
         )
         register(
@@ -175,7 +175,7 @@ object PacketRegistry {
         register(
             State.PLAY, Direction.SERVERBOUND, ::ConfigurationAck, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundPackets1_20_2.CONFIGURATION_ACKNOWLEDGED.id,
-                ProtocolVersion.v1_20_5.singleton to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id
             )
         )
         // todo update chat to latest version
@@ -190,8 +190,8 @@ object PacketRegistry {
         register(
             State.PLAY, Direction.SERVERBOUND, ::ServerboundChatMessage,
             mapOf(
-                ProtocolVersion.v1_19.singleton to ServerboundPackets1_19.CHAT_MESSAGE.id,
-                ProtocolVersion.v1_19_1.singleton to ServerboundPackets1_19_1.CHAT_MESSAGE.id
+                ProtocolVersion.v1_19.singleton to ServerboundPackets1_19.CHAT.id,
+                ProtocolVersion.v1_19_1.singleton to ServerboundPackets1_19_1.CHAT.id
             )
         )
     }
@@ -255,7 +255,7 @@ object PacketRegistry {
     }
 
     fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion, state: State, direction: Direction): Packet {
-        val packetId = Type.VAR_INT.readPrimitive(byteBuf)
+        val packetId = Types.VAR_INT.readPrimitive(byteBuf)
         val packet = getPacketConstructor(protocolVersion, state, packetId, direction)?.get()
             ?: UnknownPacket(packetId, ByteBufAllocator.DEFAULT.buffer())
         try {
@@ -275,7 +275,7 @@ object PacketRegistry {
             getPacketId(packet.javaClass, protocolVersion, direction)
                 ?: throw StacklessException("Failed to get id for " + packet::class.java.simpleName)
         }
-        Type.VAR_INT.writePrimitive(byteBuf, id)
+        Types.VAR_INT.writePrimitive(byteBuf, id)
         try {
             packet.encode(byteBuf, protocolVersion)
         } catch (e: Exception) {

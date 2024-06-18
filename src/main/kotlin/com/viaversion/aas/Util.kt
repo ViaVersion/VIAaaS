@@ -7,7 +7,7 @@ import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
-import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.Types
 import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -44,6 +44,7 @@ import java.security.PublicKey
 import java.security.SecureRandom
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.logging.Logger
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
@@ -51,6 +52,7 @@ val badLength = DecoderException("Invalid length!")
 val mcLogger = LoggerFactory.getLogger("VIAaaS MC")
 val webLogger = LoggerFactory.getLogger("VIAaaS Web")
 val viaaasLogger = LoggerFactory.getLogger("VIAaaS")
+val viaaasLoggerJava = Logger.getLogger("VIAaaS")
 
 val secureRandom = SecureRandom()
 
@@ -186,7 +188,7 @@ fun writeFlushClose(ch: Channel, obj: Any, delay: Boolean = false) {
     }
 }
 
-fun readRemainingBytes(byteBuf: ByteBuf) = Type.REMAINING_BYTES.read(byteBuf)!!
+fun readRemainingBytes(byteBuf: ByteBuf) = Types.REMAINING_BYTES.read(byteBuf)!!
 fun ByteBuf.readByteArray(length: Int) = ByteArray(length).also { readBytes(it) }
 
 suspend fun hasJoined(username: String, hash: String): JsonObject {

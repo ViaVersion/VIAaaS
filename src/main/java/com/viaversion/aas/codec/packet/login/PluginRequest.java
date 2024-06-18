@@ -3,7 +3,7 @@ package com.viaversion.aas.codec.packet.login;
 import com.viaversion.aas.UtilKt;
 import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,15 +14,15 @@ public class PluginRequest implements Packet {
 
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		id = Type.VAR_INT.readPrimitive(byteBuf);
-		channel = Type.STRING.read(byteBuf);
+		id = Types.VAR_INT.readPrimitive(byteBuf);
+		channel = Types.STRING.read(byteBuf);
 		data = UtilKt.readRemainingBytes(byteBuf);
 	}
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		Type.VAR_INT.writePrimitive(byteBuf, id);
-		Type.STRING.write(byteBuf, channel);
+		Types.VAR_INT.writePrimitive(byteBuf, id);
+		Types.STRING.write(byteBuf, channel);
 		byteBuf.writeBytes(data);
 	}
 

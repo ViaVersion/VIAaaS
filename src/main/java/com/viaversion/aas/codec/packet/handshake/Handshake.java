@@ -4,6 +4,7 @@ import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.aas.util.IntendedState;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,18 +16,18 @@ public class Handshake implements Packet {
 
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		protocolId = Type.VAR_INT.readPrimitive(byteBuf);
-		address = Type.STRING.read(byteBuf);
+		protocolId = Types.VAR_INT.readPrimitive(byteBuf);
+		address = Types.STRING.read(byteBuf);
 		port = byteBuf.readUnsignedShort();
-		intendedState = IntendedState.values()[Type.VAR_INT.readPrimitive(byteBuf)];
+		intendedState = IntendedState.values()[Types.VAR_INT.readPrimitive(byteBuf)];
 	}
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		Type.VAR_INT.writePrimitive(byteBuf, protocolId);
-		Type.STRING.write(byteBuf, address);
+		Types.VAR_INT.writePrimitive(byteBuf, protocolId);
+		Types.STRING.write(byteBuf, address);
 		byteBuf.writeShort(port);
-		Type.VAR_INT.writePrimitive(byteBuf, intendedState.ordinal());
+		Types.VAR_INT.writePrimitive(byteBuf, intendedState.ordinal());
 	}
 
 	public int getProtocolId() {

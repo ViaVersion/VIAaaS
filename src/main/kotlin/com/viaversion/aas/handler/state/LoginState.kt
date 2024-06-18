@@ -16,7 +16,7 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.aas.web.TempLoginInfo
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.Types
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
@@ -140,7 +140,7 @@ class LoginState : ConnectionState {
         pendingReauth = ThreadLocalRandom.current().nextInt()
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
-            Type.STRING.write(buf, backHash)
+            Types.STRING.write(buf, backHash)
             sendOpenAuthRequest(handler, "oam:join", pendingReauth!!, readRemainingBytes(buf))
         } finally {
             buf.release()
@@ -222,7 +222,7 @@ class LoginState : ConnectionState {
     fun handleCryptoResponse(handler: MinecraftHandler, cryptoResponse: CryptoResponse) {
         if ("oam:data".encodeToByteArray().contentEquals(cryptoResponse.encryptedNonce)) {
             val buffer = Unpooled.wrappedBuffer(cryptoResponse.encryptedKey)
-            val id = Type.VAR_INT.readPrimitive(buffer)
+            val id = Types.VAR_INT.readPrimitive(buffer)
             val data = readRemainingBytes(buffer)
             if (handleReauthResponse(PluginResponse().also {
                     it.isSuccess = true

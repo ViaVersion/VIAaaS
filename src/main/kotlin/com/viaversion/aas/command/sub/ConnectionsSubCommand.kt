@@ -5,7 +5,7 @@ import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.command.ViaCommandSender
 import com.viaversion.viaversion.api.command.ViaSubCommand
 
-object ConnectionsSubCommand : ViaSubCommand() {
+object ConnectionsSubCommand : ViaSubCommand {
     override fun name(): String = "connections"
     override fun description(): String = "Lists VIAaaS connections"
     override fun execute(p0: ViaCommandSender, p1: Array<out String>): Boolean {

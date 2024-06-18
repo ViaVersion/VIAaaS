@@ -1,6 +1,6 @@
 package com.viaversion.aas.provider;
 
-import com.viaversion.viabackwards.protocol.protocol1_20_3to1_20_5.provider.TransferProvider;
+import com.viaversion.viabackwards.protocol.v1_20_5to1_20_3.provider.TransferProvider;
 import com.viaversion.viaversion.api.connection.UserConnection;
 
 public class AspirinTransferProvider implements TransferProvider {

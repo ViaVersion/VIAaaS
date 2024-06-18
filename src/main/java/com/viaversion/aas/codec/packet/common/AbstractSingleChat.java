@@ -3,9 +3,9 @@ package com.viaversion.aas.codec.packet.common;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.viaversion.aas.codec.packet.Packet;
+import com.viaversion.nbt.tag.Tag;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.type.Type;
-import com.viaversion.viaversion.libs.opennbt.tag.builtin.Tag;
+import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.util.ComponentUtil;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
@@ -47,18 +47,16 @@ public abstract class AbstractSingleChat implements Packet {
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		if (protocolVersion.olderThan(ProtocolVersion.v1_20_3)) {
-			msg = JsonParser.parseString(Type.STRING.read(byteBuf));
+			msg = JsonParser.parseString(Types.STRING.read(byteBuf));
 		} else {
-			msgTag = Type.TAG.read(byteBuf);
+			msgTag = Types.TAG.read(byteBuf);
 		}
 	}
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		if (protocolVersion.olderThan(ProtocolVersion.v1_20_3)) {
-			Type.STRING.write(byteBuf, msg.toString());
+			Types.STRING.write(byteBuf, msg.toString());
 		}
 	}
-
-
 }

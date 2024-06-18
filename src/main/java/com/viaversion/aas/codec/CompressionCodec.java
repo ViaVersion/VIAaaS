@@ -7,6 +7,7 @@ import com.velocitypowered.natives.util.Natives;
 import com.viaversion.aas.config.VIAaaSConfig;
 import com.viaversion.aas.handler.MinecraftHandler;
 import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
@@ -89,7 +90,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 				outBuf.writeByte(0);
 				outBuf.writeBytes(msg);
 			} else {
-				Type.VAR_INT.writePrimitive(outBuf, uncompressedSize);
+				Types.VAR_INT.writePrimitive(outBuf, uncompressedSize);
 				var compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, msg);
 				try {
 					compressor.deflate(compatibleIn, outBuf);
@@ -112,7 +113,7 @@ public class CompressionCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 	protected void decode(ChannelHandlerContext ctx, ByteBuf input, List<Object> out) throws Exception {
 		if (!input.isReadable() || !ctx.channel().isActive()) return;
 
-		var claimedUncompressedSize = Type.VAR_INT.readPrimitive(input);
+		var claimedUncompressedSize = Types.VAR_INT.readPrimitive(input);
 		if (claimedUncompressedSize == 0) { // Uncompressed
 			out.add(input.retain());
 			return;

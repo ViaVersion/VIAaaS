@@ -4,6 +4,7 @@ import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.viaversion.api.minecraft.ProfileKey;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.api.type.types.StringType;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
@@ -44,27 +45,27 @@ public class LoginStart implements Packet {
 		username = new StringType(16).read(byteBuf);
 		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)
 				&& protocolVersion.olderThan(ProtocolVersion.v1_19_3)) {
-			profileKey = Type.OPTIONAL_PROFILE_KEY.read(byteBuf);
+			profileKey = Types.OPTIONAL_PROFILE_KEY.read(byteBuf);
 		}
 
 		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2)) {
-			profileId = Type.UUID.read(byteBuf);
+			profileId = Types.UUID.read(byteBuf);
 		} else if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
-			profileId = Type.OPTIONAL_UUID.read(byteBuf);
+			profileId = Types.OPTIONAL_UUID.read(byteBuf);
 		}
 	}
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		Type.STRING.write(byteBuf, username);
+		Types.STRING.write(byteBuf, username);
 		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)
 				&& protocolVersion.olderThan(ProtocolVersion.v1_19_3)) {
-			Type.OPTIONAL_PROFILE_KEY.write(byteBuf, profileKey);
+			Types.OPTIONAL_PROFILE_KEY.write(byteBuf, profileKey);
 		}
 		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_2)) {
-			Type.UUID.write(byteBuf, profileId);
+			Types.UUID.write(byteBuf, profileId);
 		} else if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
-			Type.OPTIONAL_UUID.write(byteBuf, profileId);
+			Types.OPTIONAL_UUID.write(byteBuf, profileId);
 		}
 	}
 }

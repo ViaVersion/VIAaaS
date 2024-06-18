@@ -5,7 +5,7 @@ import com.viaversion.aas.parseUndashedId
 import com.viaversion.aas.protocol.sharewareVersion
 import com.viaversion.aas.util.SignableProperty
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.Types
 import io.netty.buffer.ByteBuf
 import java.util.*
 
@@ -18,20 +18,20 @@ class LoginSuccess : Packet {
     override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         id = when {
             protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_16) -> {
-                Type.UUID.read(byteBuf)
+                Types.UUID.read(byteBuf)
             }
             protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_7_6) || protocolVersion.equalTo(sharewareVersion) -> {
-                UUID.fromString(Type.STRING.read(byteBuf))
+                UUID.fromString(Types.STRING.read(byteBuf))
             }
-            else -> parseUndashedId(Type.STRING.read(byteBuf))
+            else -> parseUndashedId(Types.STRING.read(byteBuf))
         }
-        username = Type.STRING.read(byteBuf)
+        username = Types.STRING.read(byteBuf)
         if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
-            val properties = Type.VAR_INT.readPrimitive(byteBuf)
+            val properties = Types.VAR_INT.readPrimitive(byteBuf)
             for (i in 0 until properties) {
-                val name = Type.STRING.read(byteBuf)
-                val value = Type.STRING.read(byteBuf)
-                val signature = Type.OPTIONAL_STRING.read(byteBuf)
+                val name = Types.STRING.read(byteBuf)
+                val value = Types.STRING.read(byteBuf)
+                val signature = Types.OPTIONAL_STRING.read(byteBuf)
                 this.properties.add(SignableProperty(name, value, signature))
             }
         }
@@ -43,20 +43,20 @@ class LoginSuccess : Packet {
     override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         when {
             protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_16) -> {
-                Type.UUID.write(byteBuf, id)
+                Types.UUID.write(byteBuf, id)
             }
             protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_7_6) || protocolVersion.equalTo(sharewareVersion) -> {
-                Type.STRING.write(byteBuf, id.toString())
+                Types.STRING.write(byteBuf, id.toString())
             }
-            else -> Type.STRING.write(byteBuf, id.toString().replace("-", ""))
+            else -> Types.STRING.write(byteBuf, id.toString().replace("-", ""))
         }
-        Type.STRING.write(byteBuf, username)
+        Types.STRING.write(byteBuf, username)
         if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
-            Type.VAR_INT.writePrimitive(byteBuf, properties.size)
+            Types.VAR_INT.writePrimitive(byteBuf, properties.size)
             for (property in properties) {
-                Type.STRING.write(byteBuf, property.key)
-                Type.STRING.write(byteBuf, property.value)
-                Type.OPTIONAL_STRING.write(byteBuf, property.signature)
+                Types.STRING.write(byteBuf, property.key)
+                Types.STRING.write(byteBuf, property.value)
+                Types.OPTIONAL_STRING.write(byteBuf, property.signature)
             }
         }
         if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {

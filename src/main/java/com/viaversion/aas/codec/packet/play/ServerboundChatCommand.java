@@ -3,7 +3,7 @@ package com.viaversion.aas.codec.packet.play;
 import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.viaversion.api.minecraft.PlayerMessageSignature;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,34 +45,34 @@ public class ServerboundChatCommand implements Packet {
 
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		message = Type.STRING.read(byteBuf);
+		message = Types.STRING.read(byteBuf);
 		timestamp = byteBuf.readLong();
 		salt = byteBuf.readLong();
-		signatures = new ArgumentSignature[Type.VAR_INT.readPrimitive(byteBuf)];
+		signatures = new ArgumentSignature[Types.VAR_INT.readPrimitive(byteBuf)];
 		for (int i = 0; i < signatures.length; i++) {
-			signatures[i] = new ArgumentSignature(Type.STRING.read(byteBuf), Type.BYTE_ARRAY_PRIMITIVE.read(byteBuf));
+			signatures[i] = new ArgumentSignature(Types.STRING.read(byteBuf), Types.BYTE_ARRAY_PRIMITIVE.read(byteBuf));
 		}
 		signedPreview = byteBuf.readBoolean();
 		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
-			lastSeenMessages = Type.PLAYER_MESSAGE_SIGNATURE_ARRAY.read(byteBuf);
-			lastReceivedMessage = Type.OPTIONAL_PLAYER_MESSAGE_SIGNATURE.read(byteBuf);
+			lastSeenMessages = Types.PLAYER_MESSAGE_SIGNATURE_ARRAY.read(byteBuf);
+			lastReceivedMessage = Types.OPTIONAL_PLAYER_MESSAGE_SIGNATURE.read(byteBuf);
 		}
 	}
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		Type.STRING.write(byteBuf, message);
+		Types.STRING.write(byteBuf, message);
 		byteBuf.writeLong(timestamp);
 		byteBuf.writeLong(salt);
-		Type.VAR_INT.writePrimitive(byteBuf, signatures.length);
+		Types.VAR_INT.writePrimitive(byteBuf, signatures.length);
 		for (ArgumentSignature signature : signatures) {
-			Type.STRING.write(byteBuf, signature.getArgumentName());
-			Type.BYTE_ARRAY_PRIMITIVE.write(byteBuf, signature.getSignature());
+			Types.STRING.write(byteBuf, signature.getArgumentName());
+			Types.BYTE_ARRAY_PRIMITIVE.write(byteBuf, signature.getSignature());
 		}
 		byteBuf.writeBoolean(signedPreview);
 		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19_1)) {
-			Type.PLAYER_MESSAGE_SIGNATURE_ARRAY.write(byteBuf, lastSeenMessages);
-			Type.OPTIONAL_PLAYER_MESSAGE_SIGNATURE.write(byteBuf, lastReceivedMessage);
+			Types.PLAYER_MESSAGE_SIGNATURE_ARRAY.write(byteBuf, lastSeenMessages);
+			Types.OPTIONAL_PLAYER_MESSAGE_SIGNATURE.write(byteBuf, lastReceivedMessage);
 		}
 	}
 

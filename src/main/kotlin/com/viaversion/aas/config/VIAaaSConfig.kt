@@ -3,6 +3,7 @@ package com.viaversion.aas.config
 import com.google.common.net.HostAndPort
 import com.viaversion.aas.secureRandom
 import com.viaversion.aas.util.AddressParser
+import com.viaversion.aas.viaaasLoggerJava
 import com.viaversion.viaversion.util.Config
 import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.filters.Canvas
@@ -13,7 +14,7 @@ import java.net.URI
 import java.net.URL
 import java.util.*
 
-object VIAaaSConfig : Config(File("config/viaaas.yml")), com.viaversion.viaversion.api.configuration.Config {
+object VIAaaSConfig : Config(File("config/viaaas.yml"), viaaasLoggerJava), com.viaversion.viaversion.api.configuration.Config {
     var defaultParameters: Map<Int, AddressParser> = emptyMap()
     var bindAddresses = emptyList<HostAndPort>()
     var hostName: List<String> = emptyList()

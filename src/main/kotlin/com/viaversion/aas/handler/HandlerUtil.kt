@@ -6,6 +6,7 @@ import com.viaversion.aas.readRemainingBytes
 import com.viaversion.aas.send
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Type
+import com.viaversion.viaversion.api.type.Types
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
@@ -43,7 +44,7 @@ fun decodeBrand(data: ByteArray, is17: Boolean): String {
             String(data, Charsets.UTF_8)
         }
         else -> {
-            Type.STRING.read(Unpooled.wrappedBuffer(data))
+            Types.STRING.read(Unpooled.wrappedBuffer(data))
         }
     }
 }
@@ -54,7 +55,7 @@ fun encodeBrand(string: String, is17: Boolean): ByteArray {
     } else {
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
-            Type.STRING.write(buf, string)
+            Types.STRING.write(buf, string)
             readRemainingBytes(buf)
         } finally {
             buf.release()

@@ -1,5 +1,6 @@
 package com.viaversion.aas.config;
 
+import com.viaversion.aas.platform.AspirinPlatform;
 import com.viaversion.viaversion.configuration.AbstractViaConfig;
 
 import java.io.File;
@@ -13,7 +14,7 @@ public class AspirinViaConfig extends AbstractViaConfig {
 	}
 
 	public AspirinViaConfig() {
-		super(new File("config/viaversion.yml"));
+		super(new File("config/viaversion.yml"), AspirinPlatform.INSTANCE.getLogger());
 	}
 
 	@Override

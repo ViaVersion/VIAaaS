@@ -2,6 +2,7 @@ package com.viaversion.aas.codec;
 
 import com.viaversion.aas.UtilKt;
 import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import com.viaversion.viaversion.exception.CancelDecoderException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,7 +32,7 @@ public class FrameCodec extends ByteToMessageCodec<ByteBuf> {
 		in.readerIndex(index);
 		if (result == -1) return; // not readable
 
-		int length = Type.VAR_INT.readPrimitive(in);
+		int length = Types.VAR_INT.readPrimitive(in);
 
 		if (length >= 2097152 || length < 0) throw UtilKt.getBadLength();
 		if (!in.isReadable(length)) {
@@ -45,7 +46,7 @@ public class FrameCodec extends ByteToMessageCodec<ByteBuf> {
 	@Override
 	protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
 		if (msg.readableBytes() >= 2097152) throw UtilKt.getBadLength();
-		Type.VAR_INT.writePrimitive(out, msg.readableBytes());
+		Types.VAR_INT.writePrimitive(out, msg.readableBytes());
 		out.writeBytes(msg);
 	}
 }

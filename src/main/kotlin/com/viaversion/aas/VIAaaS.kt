@@ -12,7 +12,6 @@ import com.viaversion.aas.web.ViaWebApp
 import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.protocol.version.VersionType
-import com.viaversion.viaversion.protocols.protocol1_20_5to1_20_3.Protocol1_20_5To1_20_3
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -68,7 +67,6 @@ private fun initVia() {
         Via.getManager().configurationProvider.register(VIAaaSConfig)
     }
 
-    Protocol1_20_5To1_20_3.strictErrorHandling = false
     ProtocolVersion.register(AUTO)
     registerAspirinProtocols()
 }

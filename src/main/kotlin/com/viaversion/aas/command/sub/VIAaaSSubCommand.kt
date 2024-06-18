@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-object VIAaaSSubCommand : ViaSubCommand() {
+object VIAaaSSubCommand : ViaSubCommand {
     override fun name(): String = "viaaas"
     override fun description(): String = "Info about VIAaaS"
     override fun execute(p0: ViaCommandSender, p1: Array<out String>): Boolean {

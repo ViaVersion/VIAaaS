@@ -3,7 +3,7 @@ package com.viaversion.aas.provider;
 import com.viaversion.aas.handler.MinecraftHandler;
 import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.protocols.base.BaseVersionProvider;
+import com.viaversion.viaversion.protocol.version.BaseVersionProvider;
 
 public class AspirinVersionProvider extends BaseVersionProvider {
 	@Override

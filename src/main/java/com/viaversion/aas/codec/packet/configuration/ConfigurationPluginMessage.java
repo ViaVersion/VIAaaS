@@ -4,6 +4,7 @@ import com.viaversion.aas.UtilKt;
 import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import com.viaversion.viaversion.api.type.Type;
+import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,13 +14,13 @@ public class ConfigurationPluginMessage implements Packet {
 
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		channel = Type.STRING.read(byteBuf);
+		channel = Types.STRING.read(byteBuf);
 		data = UtilKt.readRemainingBytes(byteBuf);
 	}
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-		Type.STRING.write(byteBuf, channel);
-		Type.REMAINING_BYTES.write(byteBuf, data);
+		Types.STRING.write(byteBuf, channel);
+		Types.REMAINING_BYTES.write(byteBuf, data);
 	}
 }
