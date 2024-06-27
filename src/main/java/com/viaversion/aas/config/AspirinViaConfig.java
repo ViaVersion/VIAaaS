@@ -4,22 +4,20 @@ import com.viaversion.aas.platform.AspirinPlatform;
 import com.viaversion.viaversion.configuration.AbstractViaConfig;
 
 import java.io.File;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class AspirinViaConfig extends AbstractViaConfig {
-	{
-		reload();
-	}
+
+	protected final List<String> UNSUPPORTED = new ArrayList<>();
 
 	public AspirinViaConfig() {
 		super(new File("config/viaversion.yml"), AspirinPlatform.INSTANCE.getLogger());
-	}
+		UNSUPPORTED.addAll(BUKKIT_ONLY_OPTIONS);
+		UNSUPPORTED.addAll(VELOCITY_ONLY_OPTIONS);
 
-	@Override
-	public URL getDefaultConfigURL() {
-		return getClass().getClassLoader().getResource("assets/viaversion/config.yml");
+		reload();
 	}
 
 	@Override
@@ -29,12 +27,6 @@ public class AspirinViaConfig extends AbstractViaConfig {
 
 	@Override
 	public List<String> getUnsupportedOptions() {
-		return List.of(
-				"anti-xray-patch", "quick-move-action-fix", "nms-player-ticking",
-				"item-cache", "velocity-ping-interval", "velocity-ping-save", "velocity-servers",
-				"blockconnection-method", "change-1_9-hitbox", "change-1_14-hitbox", "block-protocols",
-				"block-disconnect-msg", "reload-disconnect-msg", "max-pps", "max-pps-kick-msg", "tracking-period",
-				"tracking-warning-pps", "tracking-max-warnings", "tracking-max-kick-msg", "use-new-deathmessages"
-		);
+		return UNSUPPORTED;
 	}
 }
