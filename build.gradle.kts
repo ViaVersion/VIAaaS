@@ -93,7 +93,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVer")
-    implementation("org.jline:jline-terminal-jansi:3.26.1")
+    implementation("org.jline:jline-terminal-jansi:3.25.1")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
     val ktorVersion = "2.3.12"
