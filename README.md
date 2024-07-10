@@ -2,7 +2,7 @@ VIAaaS
 ---
 
 [![ViaVersion Discord](https://img.shields.io/badge/chat-on%20discord-blue.svg)](https://viaversion.com/discord)
-[![Powered by ViaVersion](https://img.shields.io/badge/Powered%20by-ViaVersion-blue.svg)](https://viaversion.com/)
+[![powered by ViaVersion](https://img.shields.io/badge/powered%20by-ViaVersion-blue.svg)](https://viaversion.com/)
 
 
 VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy
@@ -13,15 +13,7 @@ Address generator: https://jo0001.github.io/ViaSetup/aspirin
 
 Public instances: https://github.com/ViaVersion/VIAaaS/wiki/List-of-Public-Instances
 
-## Demo
-
-Online mode: https://youtu.be/9MKKjuoe66k
-
-Using with GeyserConnect: https://youtu.be/_LItAIIFmsI
-
-Using with GeyserConnect on offline mode: https://youtu.be/-hZESD61nSU
-
-Using with OpenAuthMod: https://youtu.be/h3EfNSxxf8k
+## Videos
 
 Offline mode tutorial: https://youtu.be/lPdELnrxmp0
 
@@ -30,9 +22,9 @@ Offline mode tutorial: https://youtu.be/lPdELnrxmp0
 - [ViaVersion](https://viaversion.com), [ViaBackwards](https://viaversion.com/backwards)
   and [ViaRewind](https://viaversion.com/rewind) translates the connections to backend server.
 - VIAaaS auth page stores account credentials in the player's browser local storage.
-- It requires a CORS Proxy for calling Mojang APIs.
+- It uses a CORS Proxy for calling Mojang APIs.
 - Account credentials aren't sent to VIAaaS instance by default.
-- The web page receives and validates the joinGame's session hash from VIAaaS instance.
+- The web page receives and validates the join game request from VIAaaS instance.
 
 ## Setting up server instance
 
@@ -46,10 +38,9 @@ curl -Lf --output VIAaaS-all.jar "https://jitpack.io/com/github/ViaVersion/VIAaa
 java -jar VIAaaS-all.jar
 ```
 
-- Requires Java 11
+- Requires Java 17
 - Default Minecraft: ```via.localhost``` with port 25565
 - Default HTTPS: ```https://localhost:25543/```
-- Default WS URL: ```wss://localhost:25543/ws```
 
 ### How to create a public server
 
@@ -58,11 +49,6 @@ java -jar VIAaaS-all.jar
 - Open the Minecraft port (25565)
 - The HTTPS page needs a valid SSL certificate, you can use a reverse proxy like [Apache](https://httpd.apache.org/) (with
   a [Let's Encrypt](https://letsencrypt.org/) certificate).
-
-## CORS Proxy
-
-- Due to Mojang API not allowing cross-origin requests, we need to use a CORS proxy
-- Note the ending slash in cors-anywhere address
 
 ## Usage for players
 
@@ -102,7 +88,6 @@ Fabric/Forge client:
 
 - ```server.example.net._p25565._v1_12_2._of._uBACKUSERNAME.via.example.com```
 - ```server.example.net.v_1_8.via.example.com```
-- It's inspired by [Tor2web](https://www.tor2web.org/) proxies.
 
 #### Address parts:
 
@@ -156,17 +141,12 @@ Fabric/Forge client:
     # The IP address of the remote (Java Edition) server
     address: 2b2t.org._v1_12_2.via.localhost
   ```
-- If you are using a public GeyserConnect instance: connect to a publicly available VIAaaS instance,
+- If you are using GeyserConnect: connect to a publicly available VIAaaS instance,
   like ```mc.example.com._v1_8.via.example.net``` as a Java Edition server.
-
-#### Can I use it to connect to .onion Minecraft hidden servers?
-
-- You can use .onion addresses if the instance is proxying the backend connections to TOR. Note that VIAaaS may log your
-  requests, and that your DNS queries may be sent unencrypted.
 
 #### Can you support more versions / Is there some alternative?
 
-- See [DirtMultiVersion](https://github.com/DirtPowered/DirtMultiversion) and [ViaProxy](https://github.com/ViaVersion/ViaProxy)
+- See [ViaProxy](https://github.com/ViaVersion/ViaProxy)
 
 #### Can I customize the files of HTTP server?
 

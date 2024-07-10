@@ -62,7 +62,7 @@ dependencies {
 
     val vvVer = "5.0.2-SNAPSHOT"
     val vbVer = "5.0.2-SNAPSHOT"
-    val vrVer = "4.0.1-SNAPSHOT"
+    val vrVer = "4.0.2-SNAPSHOT"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
@@ -93,10 +93,10 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVer")
-    implementation("org.jline:jline-terminal-jansi:3.25.1")
+    implementation("org.jline:jline-terminal-jansi:3.26.1")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.3.11"
+    val ktorVersion = "2.3.12"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
