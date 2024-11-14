@@ -8,7 +8,6 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.ReadTimeoutHandler
 import net.raphimc.vialegacy.api.LegacyProtocolVersion
-import net.raphimc.vialegacy.api.protocol.PreNettyBaseProtocol
 import net.raphimc.vialegacy.netty.PreNettyLengthCodec
 import java.net.InetSocketAddress
 import java.net.URI
@@ -21,10 +20,6 @@ class BackEndInit(private val connectionData: ConnectionData, private val proxyU
         val pipeline = ProtocolPipelineImpl(user)
         val version = connectionData.backServerVer!!
         val isLegacy = version.olderThanOrEqualTo(LegacyProtocolVersion.r1_6_4)
-
-        if (isLegacy) {
-            pipeline.add(PreNettyBaseProtocol.INSTANCE)
-        }
 
         ch.pipeline()
             .also { addProxyHandler(it, proxyUri, proxyAddress) }
