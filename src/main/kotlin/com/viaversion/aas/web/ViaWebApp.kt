@@ -7,7 +7,7 @@ import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.cachingheaders.*
-import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.conditionalheaders.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -24,7 +24,7 @@ import kotlinx.coroutines.channels.consumeEach
 import org.slf4j.event.Level
 import java.io.File
 import java.nio.file.Path
-import java.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class ViaWebApp(val viaWebServer: WebServer) {
     fun Application.main() {
@@ -40,8 +40,8 @@ class ViaWebApp(val viaWebServer: WebServer) {
         }
         install(WebSockets) {
             maxFrameSize = Short.MAX_VALUE.toLong()
-            pingPeriod = Duration.ofSeconds(20)
-            timeout = Duration.ofSeconds(15)
+            pingPeriod = 20.seconds
+            timeout = 15.seconds
             contentConverter = GsonWebsocketContentConverter()
         }
         install(XForwardedHeaders)

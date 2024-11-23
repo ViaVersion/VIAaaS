@@ -37,7 +37,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 
 object AspirinServer {
-    var ktorServer: NettyApplicationEngine? = null
+    var ktorServer: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     val version = JsonParser.parseString(
         AspirinPlatform::class.java.classLoader
             .getResourceAsStream("viaaas_info.json")!!
@@ -125,7 +125,10 @@ object AspirinServer {
             chFutures.add(serverBootstrap.bind(it.host, it.port))
         }
 
-        ktorServer = embeddedServer(Netty, commandLineEnvironment(args)) {}.start(false)
+        val commandLineCfg = CommandLineConfig(args)
+        ktorServer = embeddedServer(factory = Netty, rootConfig = commandLineCfg.rootConfig) {
+            takeFrom(commandLineCfg.engineConfig)
+        }.start(false)
 
         viaaasLogger.info(
             "Using compression: {}, crypto: {}",

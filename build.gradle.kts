@@ -4,6 +4,7 @@ import com.google.javascript.jscomp.CompilerOptions.LanguageMode
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor
 import org.gradlewebtools.minify.minifier.js.JsMinifier
 import org.gradlewebtools.minify.minifier.js.JsMinifierOptions
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Files as JFiles
 
@@ -15,7 +16,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.0.21"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.50.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -36,7 +37,7 @@ java {
 }
 
 val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "17"
+compileKotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 
 val gitVersion: groovy.lang.Closure<String> by extra
 
@@ -70,7 +71,7 @@ dependencies {
     implementation("net.raphimc:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:3.0.6-SNAPSHOT")
 
-    val nettyVer = "4.1.111.Final"
+    val nettyVer = "4.1.115.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
@@ -97,7 +98,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.25.1")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "2.3.12"
+    val ktorVersion = "3.0.1"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
