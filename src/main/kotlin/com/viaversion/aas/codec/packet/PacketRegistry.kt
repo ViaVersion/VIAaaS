@@ -37,6 +37,7 @@ import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ClientboundConfi
 import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ClientboundPackets1_20_2
 import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundConfigurationPackets1_20_2
 import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundPackets1_20_2
+import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ServerboundPackets1_21_2
 import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
@@ -146,7 +147,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.DISCONNECT.id,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.DISCONNECT.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ClientboundPackets1_20_5.DISCONNECT.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_2 to ClientboundPackets1_20_5.DISCONNECT.id
             )
         )
         register(
@@ -165,7 +166,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.CUSTOM_PAYLOAD.id,
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.CUSTOM_PAYLOAD.id,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ClientboundPackets1_20_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_2 to ClientboundPackets1_20_5.CUSTOM_PAYLOAD.id
             )
         )
         register(
@@ -175,7 +176,8 @@ object PacketRegistry {
         register(
             State.PLAY, Direction.SERVERBOUND, ::ConfigurationAck, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundPackets1_20_2.CONFIGURATION_ACKNOWLEDGED.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id,
+                ProtocolVersion.v1_21_2.singleton to ServerboundPackets1_21_2.CONFIGURATION_ACKNOWLEDGED.id
             )
         )
         // todo update chat to latest version

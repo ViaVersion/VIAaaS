@@ -17,16 +17,16 @@ class LoginSuccess : Packet {
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         id = when {
-            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_16) -> {
+            protocolVersion >= ProtocolVersion.v1_16 -> {
                 Types.UUID.read(byteBuf)
             }
-            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_7_6) || protocolVersion.equalTo(sharewareVersion) -> {
+            protocolVersion >= ProtocolVersion.v1_7_6 || protocolVersion == sharewareVersion -> {
                 UUID.fromString(Types.STRING.read(byteBuf))
             }
             else -> parseUndashedId(Types.STRING.read(byteBuf))
         }
         username = Types.STRING.read(byteBuf)
-        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
+        if (protocolVersion >= ProtocolVersion.v1_19) {
             val properties = Types.VAR_INT.readPrimitive(byteBuf)
             for (i in 0 until properties) {
                 val name = Types.STRING.read(byteBuf)
@@ -35,23 +35,24 @@ class LoginSuccess : Packet {
                 this.properties.add(SignableProperty(name, value, signature))
             }
         }
-        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+        if (protocolVersion >= ProtocolVersion.v1_20_5
+            && protocolVersion <= ProtocolVersion.v1_21) {
             strictErrorHandling = byteBuf.readBoolean()
         }
     }
 
     override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
         when {
-            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_16) -> {
+            protocolVersion >= ProtocolVersion.v1_16 -> {
                 Types.UUID.write(byteBuf, id)
             }
-            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_7_6) || protocolVersion.equalTo(sharewareVersion) -> {
+            protocolVersion >= ProtocolVersion.v1_7_6 || protocolVersion == sharewareVersion -> {
                 Types.STRING.write(byteBuf, id.toString())
             }
             else -> Types.STRING.write(byteBuf, id.toString().replace("-", ""))
         }
         Types.STRING.write(byteBuf, username)
-        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_19)) {
+        if (protocolVersion >= ProtocolVersion.v1_19) {
             Types.VAR_INT.writePrimitive(byteBuf, properties.size)
             for (property in properties) {
                 Types.STRING.write(byteBuf, property.key)
@@ -59,7 +60,8 @@ class LoginSuccess : Packet {
                 Types.OPTIONAL_STRING.write(byteBuf, property.signature)
             }
         }
-        if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_20_5)) {
+        if (protocolVersion >= ProtocolVersion.v1_20_5
+            && protocolVersion <= ProtocolVersion.v1_21) {
             byteBuf.writeBoolean(strictErrorHandling)
         }
     }
