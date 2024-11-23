@@ -1,5 +1,6 @@
 package com.viaversion.aas.web
 
+import com.auth0.jwt.JWT
 import com.google.common.net.HostAndPort
 import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
@@ -11,6 +12,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.server.websocket.*
 import java.time.Duration
+import java.time.Instant
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -153,10 +155,17 @@ class WebLogin : WebState {
 
     private suspend fun handleSaveAccessToken(webClient: WebClient, obj: JsonObject) {
         val accessToken = obj["mc_access_token"].asString
+        val decodedToken = JWT.decode(accessToken)
+        assert(decodedToken.expiresAtAsInstant <= Instant.now())
+        assert(decodedToken.notBeforeAsInstant >= Instant.now())
+        val expectedId = UUID.fromString(decodedToken.getClaim("profiles").asMap()["mc"].toString())
+
         val profile = AspirinServer.httpClient.get("https://api.minecraftservices.com/minecraft/profile") {
             header("Authorization", "Bearer $accessToken")
         }.body<JsonObject>()
         val uuid = parseUndashedId(profile["id"].asString)
+        assert(uuid == expectedId)
+
         webClient.server.minecraftAccessTokens.put(uuid, accessToken)
         webLogger.info("Received token: {} {}", webClient.id, uuid)
     }

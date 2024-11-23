@@ -13,7 +13,6 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.netty.*
 import io.ktor.server.websocket.*
@@ -170,7 +169,7 @@ class WebServer {
                 it.addProperty("serverId", hash)
             })
             contentType(ContentType.Application.Json)
-        }.bodyAsText().isEmpty()
+        }.status.isSuccess()
     }
 
     suspend fun requestSessionJoin(
