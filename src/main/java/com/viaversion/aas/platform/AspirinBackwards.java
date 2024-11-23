@@ -15,6 +15,7 @@ public class AspirinBackwards implements ViaBackwardsPlatform {
 
 	public void init() {
 		init(new File(getDataFolder(), "viabackwards.yml"));
+		enable();
 	}
 
 	@Override
