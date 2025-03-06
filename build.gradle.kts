@@ -42,7 +42,7 @@ compileKotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.viaversion.aas"
-version = "0.4.19+" + try {
+version = "0.5.0+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
@@ -61,9 +61,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.2.1-SNAPSHOT"
-    val vbVer = "5.2.0"
-    val vrVer = "4.0.4"
+    val vvVer = "5.2.1"
+    val vbVer = "5.2.1"
+    val vrVer = "4.0.5"
     val vafVer = "3.0.5-SNAPSHOT"
     val vlVer = "3.0.7-SNAPSHOT"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }

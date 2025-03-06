@@ -147,7 +147,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.DISCONNECT.id,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.DISCONNECT.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_2 to ClientboundPackets1_20_5.DISCONNECT.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to ClientboundPackets1_20_5.DISCONNECT.id
             )
         )
         register(
@@ -166,7 +166,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.CUSTOM_PAYLOAD.id,
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.CUSTOM_PAYLOAD.id,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_2 to ClientboundPackets1_20_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to ClientboundPackets1_20_5.CUSTOM_PAYLOAD.id
             )
         )
         register(
@@ -177,7 +177,7 @@ object PacketRegistry {
             State.PLAY, Direction.SERVERBOUND, ::ConfigurationAck, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundPackets1_20_2.CONFIGURATION_ACKNOWLEDGED.id,
                 ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id,
-                ProtocolVersion.v1_21_2.singleton to ServerboundPackets1_21_2.CONFIGURATION_ACKNOWLEDGED.id
+                ProtocolVersion.v1_21_2..ProtocolVersion.v1_21_4 to ServerboundPackets1_21_2.CONFIGURATION_ACKNOWLEDGED.id
             )
         )
         // todo update chat to latest version
