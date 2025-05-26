@@ -10,7 +10,7 @@ import java.nio.file.Files as JFiles
 
 buildscript {
     repositories { mavenCentral() }
-    dependencies { classpath("com.github.hazendaz:htmlcompressor:2.0.0") }
+    dependencies { classpath("com.github.hazendaz:htmlcompressor:2.0.2") }
 }
 
 plugins {
@@ -18,10 +18,10 @@ plugins {
     application
     kotlin("jvm") version "2.0.21"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.50.0"
+    id("com.github.ben-manes.versions") version "0.52.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.palantir.git-version") version "3.0.0"
-    id("org.gradlewebtools.minify") version "2.1.0" apply false
+    id("com.palantir.git-version") version "3.3.0"
+    id("org.gradlewebtools.minify") version "2.1.1" apply false
 }
 
 application {
@@ -61,11 +61,11 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.2.1"
-    val vbVer = "5.2.1"
-    val vrVer = "4.0.5"
+    val vvVer = "5.4.0-SNAPSHOT"
+    val vbVer = "5.4.0-SNAPSHOT"
+    val vrVer = "4.0.8-SNAPSHOT"
     val vafVer = "3.0.5-SNAPSHOT"
-    val vlVer = "3.0.7-SNAPSHOT"
+    val vlVer = "3.0.10-SNAPSHOT"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
@@ -82,24 +82,24 @@ dependencies {
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.25.Final:linux-aarch_64")
     implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.25.Final:linux-x86_64")
 
-    implementation("com.google.guava:guava:33.2.1-jre")
+    implementation("com.google.guava:guava:33.4.8-jre")
     implementation("com.velocitypowered:velocity-native:3.3.0-SNAPSHOT")
     implementation("net.coobird:thumbnailator:0.4.20")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
-    implementation("org.yaml:snakeyaml:2.2")
+    implementation("org.yaml:snakeyaml:2.4")
 
     val log4jVer = "2.23.1"
     val slf4jVer = "2.0.12"
-    implementation("com.lmax:disruptor:3.4.4")
+    implementation("com.lmax:disruptor:4.0.0")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVer")
-    implementation("org.jline:jline-terminal-jansi:3.25.1")
+    implementation("org.jline:jline-terminal-jansi:3.30.3")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "3.0.1"
+    val ktorVersion = "3.1.3"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -117,7 +117,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:4.4.0")
+    implementation("com.auth0:java-jwt:4.5.0")
 }
 
 val run: JavaExec by tasks
