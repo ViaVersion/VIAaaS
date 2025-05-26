@@ -88,8 +88,8 @@ dependencies {
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:2.4")
 
-    val log4jVer = "2.23.1"
-    val slf4jVer = "2.0.12"
+    val log4jVer = "2.24.3"
+    val slf4jVer = "2.0.17"
     implementation("com.lmax:disruptor:4.0.0")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
