@@ -1,6 +1,6 @@
 package com.viaversion.aas.util;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class SignableProperty {
 	private String key;
