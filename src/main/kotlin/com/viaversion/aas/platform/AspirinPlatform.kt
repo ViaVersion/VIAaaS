@@ -50,7 +50,6 @@ object AspirinPlatform : ViaPlatform<UserConnection> {
         (Via.getManager() as ViaManagerImpl).onServerLoaded()
     }
 
-    override fun sendMessage(p0: UUID, p1: String) = Unit
     override fun onReload() = Unit
     override fun runSync(runnable: Runnable) = FutureTask(eventLoop.submit(runnable))
     override fun runSync(p0: Runnable, p1: Long) =
@@ -60,7 +59,6 @@ object AspirinPlatform : ViaPlatform<UserConnection> {
         FutureTask(eventLoop.scheduleAtFixedRate(p0, 0, p1 * 50L, TimeUnit.MILLISECONDS))
 
     override fun getDump() = JsonObject()
-    override fun kickPlayer(p0: UUID, p1: String) = false
     override fun getApi() = AspirinApi()
     override fun getDataFolder() = File("config/viaversion")
     override fun getConf() = conf
@@ -69,8 +67,6 @@ object AspirinPlatform : ViaPlatform<UserConnection> {
         FutureTask(eventLoop.scheduleAtFixedRate({ runAsync(runnable!!) }, 0, ticks * 50, TimeUnit.MILLISECONDS))
 
     override fun getLogger() = logger
-    override fun getOnlinePlayers(): Array<ViaCommandSender> = emptyArray()
-    override fun isPluginEnabled() = true
     override fun getPlatformName() = "VIAaaS"
     override fun getPlatformVersion() = AspirinServer.version
     override fun getPluginVersion() = VersionInfo.VERSION

@@ -1,7 +1,6 @@
 package com.viaversion.aas.platform;
 
 import com.viaversion.viaversion.api.platform.PlatformTask;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Future;
