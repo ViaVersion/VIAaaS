@@ -566,10 +566,7 @@ function getLoginRequest() {
     return {scopes: ["XboxLive.signin"]};
 }
 
-let redirectUrl = "https://viaversion.github.io/VIAaaS/src/main/resources/web/";
-if (location.hostname === "localhost" || whitelistedOrigin.includes(location.origin)) {
-    redirectUrl = location.origin + location.pathname;
-}
+let redirectUrl = location.origin + location.pathname;
 
 const msalConfig = {
     auth: {
