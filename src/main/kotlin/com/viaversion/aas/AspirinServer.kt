@@ -72,7 +72,7 @@ object AspirinServer {
     var chFutures = mutableListOf<ChannelFuture>()
     val dnsResolver = DnsNameResolverBuilder(childLoop.next())
         .socketChannelFactory(channelSocketFactory(childLoop))
-        .channelFactory(channelDatagramFactory(childLoop))
+        .datagramChannelFactory(channelDatagramFactory(childLoop))
         .build()
     val httpClient = HttpClient(Java) {
         install(UserAgent) {

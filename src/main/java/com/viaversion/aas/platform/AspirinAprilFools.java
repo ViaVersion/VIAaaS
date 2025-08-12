@@ -1,7 +1,7 @@
 package com.viaversion.aas.platform;
 
+import com.viaversion.viaaprilfools.platform.ViaAprilFoolsPlatform;
 import com.viaversion.viaversion.api.Via;
-import net.raphimc.viaaprilfools.platform.ViaAprilFoolsPlatform;
 
 import java.io.File;
 import java.util.logging.Logger;

@@ -61,15 +61,15 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.4.0-SNAPSHOT"
-    val vbVer = "5.4.0-SNAPSHOT"
-    val vrVer = "4.0.8-SNAPSHOT"
-    val vafVer = "3.0.5-SNAPSHOT"
-    val vlVer = "3.0.10-SNAPSHOT"
+    val vvVer = "5.4.2"
+    val vbVer = "5.4.2"
+    val vrVer = "4.0.9"
+    val vafVer = "4.0.3"
+    val vlVer = "3.0.10"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
-    implementation("net.raphimc:viaaprilfools-common:$vafVer") { isTransitive = false }
+    implementation("com.viaversion:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:$vlVer")
 
     val nettyVer = "4.1.115.Final"
