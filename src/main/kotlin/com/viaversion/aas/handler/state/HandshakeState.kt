@@ -120,8 +120,15 @@ class HandshakeState : ConnectionState {
         handleNextState(handler, packet)
         checkRateLimit(handler, packet.intendedState)
         handleVirtualHost(handler, packet)
+        checkVersionAccepted(packet.intendedState, packet.protocolId)
 
         handler.data.state.start(handler)
+    }
+
+    private fun checkVersionAccepted(intendedState: IntendedState, protocolId: Int) {
+        if (intendedState == IntendedState.LOGIN && !ProtocolVersion.isRegistered(protocolId)) {
+            throw StacklessException("Your client version ($protocolId) is unsupported")
+        }
     }
 
     override fun disconnect(handler: MinecraftHandler, msg: String) {
