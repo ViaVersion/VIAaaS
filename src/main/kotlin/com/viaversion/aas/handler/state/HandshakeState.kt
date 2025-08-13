@@ -60,46 +60,33 @@ class HandshakeState : ConnectionState {
 
     private fun handleVirtualHost(handler: MinecraftHandler, packet: Handshake) {
         val virtualPort = packet.port
-        val extraData = packet.address.substringAfter(0.toChar(), missingDelimiterValue = "").ifEmpty { null }
-        val virtualHostNoExtra = packet.address.substringBefore(0.toChar())
+        val extraData = packet.address.let(::extractExtraHandshakeData)
+        val virtualHostNoExtra = packet.address.let(::removeHandshakeExtraData)
 
-        var parsed = AddressParser().parse(virtualHostNoExtra, VIAaaSConfig.hostName)
-        val hadHostname = parsed.viaSuffix != null
-        var usedDefault = false
+        val useWebParameters = matchesBaseHostname(virtualHostNoExtra)
 
-        if (!hadHostname) {
-            var defaultBack = VIAaaSConfig.defaultParameters[virtualPort]
-            if (defaultBack == null) defaultBack = VIAaaSConfig.defaultParameters[-1]
-            if (defaultBack != null) {
-                parsed = defaultBack
-                usedDefault = true
-            }
+        var parsed: AddressParser? = null
+        var parsedHadViaSuffix = false
+        if (!useWebParameters) {
+            parsed = AddressParser().parse(virtualHostNoExtra, VIAaaSConfig.hostName)
+            parsedHadViaSuffix = parsed.viaSuffix != null
+            if (!parsedHadViaSuffix) parsed = null
         }
 
-        val backProto = parsed.protocol ?: AUTO
-
-        val backAddress = parsed.serverAddress!!
-        val port = parsed.port ?: VIAaaSConfig.defaultBackendPort ?: virtualPort
-        val host = HostAndPort.fromParts(backAddress, port)
-
-        val frontOnline = parsed.online
-
-        val addressFromWeb = VIAaaSConfig.hostName.any { parsed.serverAddress.equals(it, ignoreCase = true) }
+        val backProto = parsed?.protocol ?: AUTO
+        val backAutoDetect = backProto == AUTO
+        val backendHostPort = parsed?.let(::hostPortFromParser)
 
         handler.data.backServerVer = backProto
-        handler.data.autoDetectProtocol = backProto == AUTO
+        handler.data.autoDetectProtocol = backAutoDetect
         (handler.data.state as? LoginState)?.also {
-            it.frontOnline = frontOnline
-            it.backName = parsed.username
-            if (!addressFromWeb) {
-                it.backAddress = host
-            }
+            it.frontOnline = parsed?.online
+            it.backName = parsed?.username
+            it.backAddress = backendHostPort
             it.extraData = extraData
         }
         (handler.data.state as? StatusState)?.also {
-            if (!addressFromWeb) {
-                it.address = host
-            }
+            it.address = backendHostPort
         }
 
         val playerAddr = handler.data.frontHandler.endRemoteAddress
@@ -108,10 +95,23 @@ class HandshakeState : ConnectionState {
             playerAddr, handler.data.state.state.name, virtualHostNoExtra, virtualPort, handler.data.frontVer
         )
 
-        if (!usedDefault && !hadHostname && VIAaaSConfig.requireHostName && !addressFromWeb
-        ) {
+        if (!parsedHadViaSuffix && !useWebParameters) {
             throw StacklessException("Missing parts in hostname")
         }
+    }
+
+    private fun extractExtraHandshakeData(hsData: String): String? {
+        return hsData.substringAfter(0.toChar(), missingDelimiterValue = "").ifEmpty { null }
+    }
+
+    private fun removeHandshakeExtraData(hsData: String) = hsData.substringBefore(0.toChar())
+
+    private fun matchesBaseHostname(hostAddress: String) : Boolean {
+        return VIAaaSConfig.hostName.any { hostAddress.equals(it, ignoreCase = true) }
+    }
+
+    private fun hostPortFromParser(parsed: AddressParser): HostAndPort {
+        return HostAndPort.fromParts(parsed.serverAddress, parsed.port ?: 25565)
     }
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {

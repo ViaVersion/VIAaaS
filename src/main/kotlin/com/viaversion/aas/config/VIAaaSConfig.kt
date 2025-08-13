@@ -2,7 +2,6 @@ package com.viaversion.aas.config
 
 import com.google.common.net.HostAndPort
 import com.viaversion.aas.secureRandom
-import com.viaversion.aas.util.AddressParser
 import com.viaversion.aas.viaaasLoggerJava
 import com.viaversion.viaversion.util.Config
 import net.coobird.thumbnailator.Thumbnails
@@ -15,12 +14,9 @@ import java.net.URL
 import java.util.*
 
 object VIAaaSConfig : Config(File("config/viaaas.yml"), viaaasLoggerJava), com.viaversion.viaversion.api.configuration.Config {
-    var defaultParameters: Map<Int, AddressParser> = emptyMap()
     var bindAddresses = emptyList<HostAndPort>()
     var hostName: List<String> = emptyList()
     var blockLocalAddress = true
-    var requireHostName: Boolean = true
-    var defaultBackendPort: Int? = null
     var blockedBackAddresses: List<String> = emptyList()
     var allowedBackAddresses: List<String> = emptyList()
     var forceOnlineMode: Boolean = false
@@ -48,14 +44,9 @@ object VIAaaSConfig : Config(File("config/viaaas.yml"), viaaasLoggerJava), com.v
 
     private fun reloadFields() {
         reloadIcon()
-        defaultParameters = this.get("default-parameters", emptyMap<Int, String>())!!.map {
-            (it.key as Number).toInt() to AddressParser().parse(it.value)
-        }.toMap()
         bindAddresses = this.getStringList("bind-addresses").map { HostAndPort.fromString(it).withDefaultPort(25565) }
         hostName = this.get("host-name", emptyList<String>())!!.map { it }
         blockLocalAddress = this.getBoolean("block-local-address", true)
-        requireHostName = this.getBoolean("require-host-name", true)
-        defaultBackendPort = this.getInt("default-backend-port", 25565).let { if (it == -1) null else it }
         blockedBackAddresses = this.get("blocked-back-addresses", emptyList())!!
         allowedBackAddresses = this.get("allowed-back-addresses", emptyList())!!
         forceOnlineMode = this.getBoolean("force-online-mode", false)

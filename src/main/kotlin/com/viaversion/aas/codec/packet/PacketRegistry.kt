@@ -225,9 +225,6 @@ object PacketRegistry {
                 }
         }
 
-        val protocolRangeToId = TreeRangeMap.create<ProtocolVersion, Int>()
-        idByProtocol.forEach { (range, id) -> protocolRangeToId.put(range, id) }
-
         entriesEncoding.computeIfAbsent(direction to klass) { TreeRangeMap.create() }.also { rangeMap ->
             idByProtocol.forEach { (protocolRange, packetId) ->
                 if (rangeMap.subRangeMap(protocolRange).asMapOfRanges().isNotEmpty())

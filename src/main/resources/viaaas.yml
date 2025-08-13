@@ -17,25 +17,11 @@ compression-level: 6
 ######
 # VIAaaS virtual hosts options
 ######
-# Requires virtual host to contain the value from "host-name" as a suffix.
-# A false value will allow virtual hosts with no suffix, connecting to the hostname sent by client.
-# A false value could be used for transparent proxying or for MiTM.
-require-host-name: true
 # Host names of this instance. Will be used as a suffix.
 host-name:
   - viaaas.localhost
   - via.localhost
   - via.localho.st
-# Default port to be used when connecting to the backend server.
-# Use -1 to reuse the port sent by client, useful for transparent proxying.
-default-backend-port: 25565
-# A list of backend address if the address host-name is missing
-# It will be chosen via virtual port
-# May be useful for BungeeCord
-# default-backends:
-#   -1: "anyport.example.com._v1_12._of"
-#   25565: "test.geysermc.org._v1_8"
-default-parameters: {}
 #
 ######
 # Address filtering

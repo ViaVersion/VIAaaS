@@ -4,3 +4,4 @@
 /config
 /logs
 node_modules/
+.kotlin/
