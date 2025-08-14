@@ -49,6 +49,8 @@ java -jar VIAaaS-all.jar
 - Open the Minecraft port (25565)
 - The HTTPS page needs a valid SSL certificate, you can use a reverse proxy like [Apache](https://httpd.apache.org/) (with
   a [Let's Encrypt](https://letsencrypt.org/) certificate).
+- You'll need to configure a Azure Client ID, edit ```config/web/js/config.js``` (default is in the jar) and
+  configure your [Azure Client ID](https://minecraft.wiki/w/Microsoft_authentication).
 
 ## Usage for players
 
@@ -116,12 +118,6 @@ Fabric/Forge client:
 - It's easier to maintain in that way, because providing login via chat requires encoding and decoding more packets,
   which reduces maintainability.
 - It allows your account password and token to be kept with you.
-
-#### How to use Microsoft Account?:
-
-- If you're an administrator of the instance, edit ```config/web/js/config.js``` (default is in the jar) and
-  configure your [Azure Client ID](https://wiki.vg/Microsoft_Authentication_Scheme#Microsoft_OAuth_Flow) and your domain
-  whitelist.
 
 ### Connection
 
