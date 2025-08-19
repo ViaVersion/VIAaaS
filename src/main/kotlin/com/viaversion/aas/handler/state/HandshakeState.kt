@@ -107,7 +107,8 @@ class HandshakeState : ConnectionState {
     private fun removeHandshakeExtraData(hsData: String) = hsData.substringBefore(0.toChar())
 
     private fun matchesBaseHostname(hostAddress: String) : Boolean {
-        return VIAaaSConfig.hostName.any { hostAddress.equals(it, ignoreCase = true) }
+        val cleanedAddress = hostAddress.removeSuffix(".")
+        return VIAaaSConfig.hostName.any { cleanedAddress.equals(it, ignoreCase = true) }
     }
 
     private fun hostPortFromParser(parsed: AddressParser): HostAndPort {
