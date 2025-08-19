@@ -56,7 +56,7 @@ public class MinecraftCodec extends MessageToMessageCodec<ByteBuf, Packet> {
 		));
 		if (msg.isReadable()) {
 			UtilKt.getMcLogger().debug("Remaining bytes in packet {}", out);
-			throw new StacklessException("Remaining bytes!!!");
+			throw new StacklessException("Remaining bytes after packet decoding!");
 		}
 	}
 }
