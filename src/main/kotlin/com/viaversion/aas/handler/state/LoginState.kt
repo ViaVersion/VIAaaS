@@ -313,7 +313,7 @@ class LoginState : ConnectionState {
 
     private fun handleTempCode(handler: MinecraftHandler, name: String, id: UUID) {
         val info = TempLoginInfo(secureRandom.nextInt().toUInt().toString(36), name, id)
-        AspirinServer.viaWebServer.tempCodes.put(name.lowercase(), info)
+        AspirinServer.viaWebServer.addTempCode(name, info)
         handler.disconnect("Your temp code is: ${info.tempCode}")
     }
 

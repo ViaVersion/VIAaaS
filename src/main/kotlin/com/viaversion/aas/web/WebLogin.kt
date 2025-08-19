@@ -42,7 +42,7 @@ class WebLogin : WebState {
     }
 
     override suspend fun disconnected(webClient: WebClient) {
-        webClient.listenedIds.forEach { webClient.unlistenId(it) }
+        webClient.unlistenAll()
     }
 
     override suspend fun onException(webClient: WebClient, exception: Throwable) {
@@ -85,18 +85,17 @@ class WebLogin : WebState {
         val username = obj["username"].asString
         val code = obj["code"].asString
 
-        val cacheKey = username.lowercase()
-        val check = webClient.server.tempCodes.getIfPresent(cacheKey)
+        val check = webClient.server.checkTempCode(username, code)
 
-        if (check != null && check.tempCode == code) {
-            webClient.server.tempCodes.invalidate(cacheKey)
-            val mcIdUser = check.username
+        if (check != null) {
+            webClient.server.invalidateTempCode(username)
+            val verifiedUsername = check.username
             val uuid = check.id
 
-            val token = webClient.server.generateToken(uuid, mcIdUser)
-            webClient.ws.sendSerialized(loginSuccessJson(mcIdUser, uuid, token))
+            val token = webClient.server.generateToken(uuid, verifiedUsername)
+            webClient.ws.sendSerialized(loginSuccessJson(verifiedUsername, uuid, token))
 
-            webLogger.info("Token gen: {}: temp code {} {}", webClient.id, mcIdUser, uuid)
+            webLogger.info("Token gen: {}: temp code {} {}", webClient.id, verifiedUsername, uuid)
         } else {
             webClient.ws.sendSerialized(loginNotSuccess())
             webLogger.info("Token gen fail: {}: {}", webClient.id, username)
@@ -135,13 +134,13 @@ class WebLogin : WebState {
 
     private fun handleSessionResponse(webClient: WebClient, obj: JsonObject) {
         val hash = obj["session_hash"].asString
-        webClient.server.sessionHashCallbacks.getIfPresent(hash)?.complete(Unit)
+        webClient.server.completeSessionHashCallback(hash)
     }
 
     private fun handleParametersResponse(webClient: WebClient, obj: JsonObject) {
         val callback = UUID.fromString(obj["callback"].asString)
-        webClient.server.addressCallbacks[callback].complete(
-            AddressInfo(
+        webClient.server.completeAddressCallback(
+            callback, AddressInfo(
                 backVersion = obj["version"].asString.let {
                     Ints.tryParse(it)?.let { ProtocolVersion.getProtocol(it) }
                         ?: ProtocolVersion.getClosest(it) ?: AUTO
@@ -166,7 +165,7 @@ class WebLogin : WebState {
         val uuid = parseUndashedId(profile["id"].asString)
         assert(uuid == expectedId)
 
-        webClient.server.minecraftAccessTokens.put(uuid, accessToken)
+        webClient.server.addAccessToken(uuid, accessToken)
         webLogger.info("Received token: {} {}", webClient.id, uuid)
     }
 }

@@ -23,7 +23,7 @@ import org.apache.logging.log4j.io.IoBuilder
 fun main(args: Array<String>) {
     try {
         setupSystem()
-        printSplash()
+        printStartingSplash()
         CoroutineScope(Job()).launch { viaaasLogger.info("{}", AspirinServer.updaterCheckMessage()) }
         AspirinServer.generateCert()
         initVia()
@@ -52,8 +52,8 @@ private fun setupSystem() {
     System.setErr(IoBuilder.forLogger("STDERR").setLevel(Level.ERROR).buildPrintStream())
 }
 
-private fun printSplash() {
-    println("VIAaaS ${AspirinServer.version}")
+private fun printStartingSplash() {
+    println("VIAaaS ${AspirinServer.version} is starting")
 }
 
 val AUTO = ProtocolVersion(VersionType.SPECIAL, -2, -1, "AUTO", null)

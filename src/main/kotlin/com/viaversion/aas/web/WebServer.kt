@@ -35,17 +35,17 @@ import java.util.concurrent.TimeUnit
 
 class WebServer {
     val clients = ConcurrentHashMap<WebSocketSession, WebClient>()
-    val jwtAlgorithm = Algorithm.HMAC256(VIAaaSConfig.jwtSecret)
-    val coroutineScope = CoroutineScope(SupervisorJob())
+    private val jwtAlgorithm = Algorithm.HMAC256(VIAaaSConfig.jwtSecret)
+    private val coroutineScope = CoroutineScope(SupervisorJob())
 
     // Minecraft account -> WebClient
-    val listeners = Multimaps.synchronizedSetMultimap(
+    private val listeners = Multimaps.synchronizedSetMultimap(
         MultimapBuilder.SetMultimapBuilder
             .hashKeys()
             .hashSetValues()
             .build<UUID, WebClient>()
     )
-    val usernameToIdCache = CacheBuilder.newBuilder()
+    private val usernameToIdCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<String, CompletableFuture<UUID?>>(CacheLoader.from { name ->
             coroutineScope.async {
@@ -55,7 +55,7 @@ class WebServer {
             }.asCompletableFuture()
         })
 
-    val idToProfileCache = CacheBuilder.newBuilder()
+    private val idToProfileCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<UUID, CompletableFuture<JsonObject?>>(CacheLoader.from { id ->
             coroutineScope.async {
@@ -65,18 +65,32 @@ class WebServer {
             }.asCompletableFuture()
         })
 
-    val sessionHashCallbacks = CacheBuilder.newBuilder()
+    private val sessionHashCallbacks = CacheBuilder.newBuilder()
         .expireAfterWrite(30, TimeUnit.SECONDS)
         .build<String, CompletableFuture<Unit>>(CacheLoader.from { _ -> CompletableFuture() })
-    val addressCallbacks = CacheBuilder.newBuilder()
+    private val addressCallbacks = CacheBuilder.newBuilder()
         .expireAfterWrite(30, TimeUnit.SECONDS)
         .build<UUID, CompletableFuture<AddressInfo>>(CacheLoader.from { _ -> CompletableFuture() })
-    val minecraftAccessTokens = CacheBuilder.newBuilder()
+    private val minecraftAccessTokens = CacheBuilder.newBuilder()
         .expireAfterWrite(10, TimeUnit.MINUTES)
         .build<UUID, String>()
-    val tempCodes = CacheBuilder.newBuilder()
+    private val tempCodes = CacheBuilder.newBuilder()
         .expireAfterWrite(5, TimeUnit.MINUTES)
         .build<String, TempLoginInfo>() // lowercase username
+
+    fun addTempCode(name: String, info: TempLoginInfo) {
+        tempCodes.put(name.lowercase(), info)
+    }
+
+    fun checkTempCode(name: String, code: String): TempLoginInfo? {
+        val info = tempCodes.getIfPresent(name.lowercase()) ?: return null
+        if (info.tempCode != code) return null
+        return info
+    }
+
+    fun invalidateTempCode(user: String) {
+        tempCodes.invalidate(user.lowercase())
+    }
 
     fun generateToken(account: UUID, username: String): String {
         return JWT.create()
@@ -90,6 +104,18 @@ class WebServer {
             .sign(jwtAlgorithm)
     }
 
+    fun addAccessToken(uuid: UUID, token: String) {
+        minecraftAccessTokens.put(uuid, token)
+    }
+
+    fun completeSessionHashCallback(hash: String): Boolean {
+        return sessionHashCallbacks.getIfPresent(hash)?.complete(Unit) ?: false
+    }
+
+    fun completeAddressCallback(uuid: UUID, addressInfo: AddressInfo): Boolean {
+        return addressCallbacks.getIfPresent(uuid)?.complete(addressInfo) ?: false
+    }
+
     // todo implement token renewal
     suspend fun renewToken(token: String): String? {
         val info = parseToken(token) ?: return null
@@ -98,6 +124,14 @@ class WebServer {
             name = idToProfileCache[info.id].await()?.get("name")?.asString ?: name
         }
         return generateToken(info.id, name)
+    }
+
+    internal fun addListener(id: UUID, client: WebClient) : Boolean {
+        return listeners.put(id, client)
+    }
+
+    internal fun removeListener(id: UUID, client: WebClient): Boolean {
+        return listeners.remove(id, client)
     }
 
     fun parseToken(token: String): UserInfo? {
@@ -242,7 +276,7 @@ class WebServer {
 
     suspend fun onMessage(ws: WebSocketServerSession, msg: String) {
         val client = clients[ws]!!
-        while (!client.rateLimiter.tryAcquire()) {
+        while (!client.tryAcquireMessage()) {
             delay(10)
         }
         client.state.onMessage(client, msg)

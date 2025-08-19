@@ -45,9 +45,9 @@ object AspirinServer {
             .readText()
     ).asJsonObject["version"].asString
     val cleanedVer get() = version.substringBefore("+")
-    var viaWebServer = WebServer()
-    private var serverFinishing = CompletableFuture<Unit>()
-    private var finishedFuture = CompletableFuture<Unit>()
+    val viaWebServer = WebServer()
+    private val serverFinishing = CompletableFuture<Unit>()
+    private val finishedFuture = CompletableFuture<Unit>()
     private val initFuture = CompletableFuture<Unit>()
     val bufferWaterMark = WriteBufferWaterMark(512 * 1024, 2048 * 1024)
 
@@ -159,7 +159,7 @@ object AspirinServer {
     }
 
     fun currentPlayers(): Int {
-        return Via.getManager().connectionManager.connections.filter { it.protocolInfo.serverState == State.PLAY }.count()
+        return Via.getManager().connectionManager.connections.count { it.protocolInfo.serverState == State.PLAY }
     }
 
     suspend fun updaterCheckMessage(): String {
@@ -169,9 +169,9 @@ object AspirinServer {
             val latest = Version(latestData["tag_name"]!!.asString.removePrefix("v"))
             val current = Version(cleanedVer)
             when {
-                latest > current -> "This build is outdated. Latest is $latest"
-                latest < current -> "This build is newer than released."
-                else -> "VIAaaS seems up to date."
+                latest > current -> "This build is outdated. Latest release version is $latest"
+                latest < current -> "This build is newer than latest release version ($latest)."
+                else -> "This build seems up to date."
             }
         } catch (e: Exception) {
             "Failed to fetch latest release info. $e"

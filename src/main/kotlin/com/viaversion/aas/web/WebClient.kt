@@ -18,21 +18,30 @@ data class WebClient(
         fun next() = atInt.getAndAdd(1)
     }
 
-    val id = run {
+    val id = generateId()
+    private val listenedIds: MutableSet<UUID> = Sets.newConcurrentHashSet()
+    private val rateLimiter = RateLimiter.create(VIAaaSConfig.rateLimitWs)
+
+    fun tryAcquireMessage() : Boolean {
+        return rateLimiter.tryAcquire()
+    }
+
+    fun generateId(): String {
         val local = ws.call.request.local.remoteHost
         val remote = ws.call.request.origin.remoteHost
-        "$local${if (local != remote) "|$remote" else ""}-${IdGen.next()}"
+        return "$local${if (local != remote) "|$remote" else ""}-${IdGen.next()}"
     }
-    val listenedIds: MutableSet<UUID> = Sets.newConcurrentHashSet()
-    val rateLimiter = RateLimiter.create(VIAaaSConfig.rateLimitWs)
 
     fun listenId(uuid: UUID): Boolean {
         if (listenedIds.size >= VIAaaSConfig.listeningWsLimit) return false // This is getting insane
         listenedIds.add(uuid)
-        return server.listeners.put(uuid, this)
+        return server.addListener(uuid, this)
     }
     fun unlistenId(uuid: UUID): Boolean {
-        server.listeners.remove(uuid, this)
+        server.removeListener(uuid, this)
         return listenedIds.remove(uuid)
+    }
+    fun unlistenAll() {
+        listenedIds.forEach { unlistenId(it) }
     }
 }

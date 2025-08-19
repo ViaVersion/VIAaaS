@@ -1,9 +1,6 @@
 package com.viaversion.aas.handler.state
 
-import com.google.common.cache.CacheBuilder
-import com.google.common.cache.CacheLoader
 import com.google.common.net.HostAndPort
-import com.google.common.util.concurrent.RateLimiter
 import com.viaversion.aas.AUTO
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.codec.packet.handshake.Handshake
@@ -16,33 +13,17 @@ import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.netty.channel.ChannelHandlerContext
-import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.util.concurrent.TimeUnit
 
 class HandshakeState : ConnectionState {
-    object RateLimit {
-        val rateLimitByIp = CacheBuilder.newBuilder()
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(CacheLoader.from<InetAddress, Limits> {
-                Limits(
-                    RateLimiter.create(VIAaaSConfig.rateLimitConnectionMc),
-                    RateLimiter.create(VIAaaSConfig.rateLimitLoginMc)
-                )
-            })
-
-        data class Limits(val handshakeLimiter: RateLimiter, val loginLimiter: RateLimiter)
-    }
-
     override val state: State
         get() = State.HANDSHAKE
 
     private fun checkRateLimit(handler: MinecraftHandler, state: IntendedState) {
-        val socketAddress = (handler.endRemoteAddress as InetSocketAddress).address
-        val limit = RateLimit.rateLimitByIp[socketAddress]
+        val address = (handler.endRemoteAddress as? InetSocketAddress)?.address ?: return
 
-        if (!limit.handshakeLimiter.tryAcquire()
-            || (state == IntendedState.LOGIN && !limit.loginLimiter.tryAcquire())
+        if (!ConnectionRateLimit.tryAcquireHandshake(address)
+            || (state == IntendedState.LOGIN && !ConnectionRateLimit.tryAcquireLogin(address))
         ) {
             throw StacklessException("Rate-limited")
         }
@@ -120,8 +101,8 @@ class HandshakeState : ConnectionState {
 
         handleNextState(handler, packet)
         checkRateLimit(handler, packet.intendedState)
-        handleVirtualHost(handler, packet)
         checkVersionAccepted(packet.intendedState, packet.protocolId)
+        handleVirtualHost(handler, packet)
 
         handler.data.state.start(handler)
     }
