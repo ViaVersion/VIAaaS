@@ -225,12 +225,8 @@ class WebServer {
                     if (address is InetSocketAddress) {
                         try {
                             val cleanedIp = address.hostString.substringBefore("%")
-                            val ipLookup = async(Dispatchers.IO) {
-                                AspirinServer.httpClient.get("https://ipinfo.io/$cleanedIp").body<JsonObject>()
-                            }
                             val dnsQuery = AspirinServer.dnsResolver
                                 .resolveAll(DefaultDnsQuestion(reverseLookup(address.address), DnsRecordType.PTR))
-                            info = ipLookup.await()
                             ptr = dnsQuery.suspendAwait().let {
                                 try {
                                     it.firstNotNullOfOrNull { it as? DnsPtrRecord }?.hostname()
@@ -242,11 +238,10 @@ class WebServer {
                         } catch (ignored: Exception) {
                         }
                     }
-                    val ipString =
-                        "${info?.get("org")?.asString}, ${info?.get("country")?.asString}, ${info?.get("region")?.asString}, ${
-                            info?.get("city")?.asString
-                        }"
-                    val msg = "Requester: $id $address ($ptr) ($ipString)\nBackend: $backAddress"
+
+                    val reverseInfo = if (ptr != null) "($ptr)" else ""
+
+                    val msg = "Requester: $id $address $reverseInfo\nBackend: $backAddress"
                     listeners[id].forEach {
                         it.ws.sendSerialized(JsonObject().also {
                             it.addProperty("action", "session_hash_request")
