@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 import com.google.javascript.jscomp.CompilerOptions.LanguageMode
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.gradlewebtools.minify.minifier.js.JsMinifier
 import org.gradlewebtools.minify.minifier.js.JsMinifierOptions
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -179,28 +180,38 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
-tasks.register<Exec>("compileTs") {
-    group = "build"
-    description = "Compiles TypeScript resources into JS"
-    workingDir = rootProject.rootDir
-
-    onlyIf {
-        val hasNpx = try {
-            val result = exec {
-                isIgnoreExitValue = true
-                commandLine("sh", "-c", "command -v npx")
-            }
-            result.exitValue == 0
-        } catch (e: Exception) {
-            false
-        }
-
-        if (!hasNpx) println("Command npx isn't available")
-        return@onlyIf hasNpx
+abstract class CompileTs : DefaultTask() {
+    init {
+        group = "build"
+        description = "Compiles TypeScript resources into JS"
     }
 
-    commandLine("npx", "tsc")
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @TaskAction
+    fun execute() {
+        val os = DefaultNativePlatform.getCurrentOperatingSystem()
+        val checkCmd = if (os.isWindows) listOf("where", "npx") else listOf("which", "npx")
+
+        val checkResult = execOperations.exec {
+            isIgnoreExitValue = true
+            commandLine(checkCmd)
+        }
+
+        if (checkResult.exitValue != 0) {
+            logger.lifecycle("Command npx isn't available. Skipping compilation.")
+            return
+        }
+
+        execOperations.exec {
+            workingDir = project.rootDir
+            commandLine("npx", "tsc")
+        }
+    }
 }
+
+tasks.register<CompileTs>("compileTs")
 
 tasks.getByName("processResources").dependsOn("compileTs")
 
