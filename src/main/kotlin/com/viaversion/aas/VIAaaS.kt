@@ -60,8 +60,8 @@ val AUTO = ProtocolVersion(VersionType.SPECIAL, -2, -1, "AUTO", null)
 
 private fun initVia() {
     AspirinPlatform.initVia {
-        AspirinRewind().init()
         AspirinBackwards().init()
+        AspirinRewind().init()
         AspirinAprilFools().init()
         AspirinLegacy().init()
         Via.getManager().configurationProvider.register(VIAaaSConfig)

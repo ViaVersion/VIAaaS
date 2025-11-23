@@ -63,7 +63,7 @@ class LoginState : ConnectionState {
     }
 
     private fun handleLoginAck(handler: MinecraftHandler, packet: LoginAck) {
-        handler.data.state = ConfigurationState()
+        handler.data.setBothStates(ConfigurationState())
         forward(handler, packet)
     }
 
@@ -100,7 +100,7 @@ class LoginState : ConnectionState {
             setCompression(handler.data.frontChannel, threshold)
         }
         if (handler.data.frontVer!!.olderThan(ProtocolVersion.v1_20_2)) {
-            handler.data.state = PlayState()
+            handler.data.setBothStates(PlayState())
         }
         forward(handler, loginSuccess)
     }

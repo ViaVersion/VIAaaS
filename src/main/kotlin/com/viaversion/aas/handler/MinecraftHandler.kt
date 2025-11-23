@@ -26,9 +26,11 @@ class MinecraftHandler(
     var loggedDc = false
     val coroutineScope = CoroutineScope(SupervisorJob())
 
+    fun getState() = if (backEnd) data.serverState else data.clientState
+
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         if (!ctx.channel().isActive) return
-        data.state.handlePacket(this, ctx, packet)
+        getState().handlePacket(this, ctx, packet)
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
@@ -38,7 +40,7 @@ class MinecraftHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         if (!failedProxy(ctx)) {
-            data.state.onInactivated(this)
+            getState().onInactivated(this)
         }
         ctx.executor().execute(coroutineScope::cancel) // wait a bit... cancelexception spam...
     }
@@ -69,6 +71,6 @@ class MinecraftHandler(
     }
 
     fun disconnect(s: String) {
-        data.state.disconnect(this, s)
+        data.clientState.disconnect(this, s)
     }
 }

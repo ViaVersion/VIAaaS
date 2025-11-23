@@ -33,8 +33,8 @@ class HandshakeState : ConnectionState {
         handler.data.frontVer = ProtocolVersion.getProtocol(packet.protocolId)
 
         when (packet.intendedState) {
-            IntendedState.STATUS -> handler.data.state = StatusState()
-            IntendedState.LOGIN -> handler.data.state = LoginState()
+            IntendedState.STATUS -> handler.data.setBothStates(StatusState())
+            IntendedState.LOGIN -> handler.data.setBothStates(LoginState())
             else -> throw StacklessException("Invalid next state")
         }
     }
@@ -60,20 +60,20 @@ class HandshakeState : ConnectionState {
 
         handler.data.backServerVer = backProto
         handler.data.autoDetectProtocol = backAutoDetect
-        (handler.data.state as? LoginState)?.also {
+        (handler.data.clientState as? LoginState)?.also {
             it.frontOnline = parsed?.online
             it.backName = parsed?.username
             it.backAddress = backendHostPort
             it.extraData = extraData
         }
-        (handler.data.state as? StatusState)?.also {
+        (handler.data.clientState as? StatusState)?.also {
             it.address = backendHostPort
         }
 
         val playerAddr = handler.data.frontHandler.endRemoteAddress
         mcLogger.debug(
             "HS: {} {} {} {} v{}",
-            playerAddr, handler.data.state.state.name, virtualHostNoExtra, virtualPort, handler.data.frontVer
+            playerAddr, handler.data.clientState.state.name, virtualHostNoExtra, virtualPort, handler.data.frontVer
         )
 
         if (!parsedHadViaSuffix && !useWebParameters) {
@@ -104,7 +104,7 @@ class HandshakeState : ConnectionState {
         checkVersionAccepted(packet.intendedState, packet.protocolId)
         handleVirtualHost(handler, packet)
 
-        handler.data.state.start(handler)
+        handler.data.clientState.start(handler)
     }
 
     private fun checkVersionAccepted(intendedState: IntendedState, protocolId: Int) {

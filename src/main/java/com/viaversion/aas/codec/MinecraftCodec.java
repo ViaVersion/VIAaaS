@@ -48,11 +48,13 @@ public class MinecraftCodec extends MessageToMessageCodec<ByteBuf, Packet> {
 		if (frontVer == null) {
 			frontVer = ProtocolVersion.unknown;
 		}
+		var direction = handler.getFrontEnd() ? Direction.SERVERBOUND : Direction.CLIENTBOUND;
+		var state = handler.getFrontEnd() ? handler.getData().getClientState() : handler.getData().getServerState();
 		out.add(PacketRegistry.INSTANCE.decode(
 				msg,
 				frontVer,
-				handler.getData().getState().getState(),
-				handler.getFrontEnd() ? Direction.SERVERBOUND : Direction.CLIENTBOUND
+				state.getState(),
+				direction
 		));
 		if (msg.isReadable()) {
 			UtilKt.getMcLogger().debug("Remaining bytes in packet {}", out);

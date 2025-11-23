@@ -16,7 +16,7 @@ buildscript {
 plugins {
     `java-library`
     application
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.20"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.52.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -61,18 +61,18 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.4.2"
-    val vbVer = "5.4.2"
-    val vrVer = "4.0.9"
-    val vafVer = "4.0.3"
-    val vlVer = "3.0.10"
+    val vvVer = "5.5.1"
+    val vbVer = "5.5.1"
+    val vrVer = "4.0.11"
+    val vafVer = "4.0.5"
+    val vlVer = "3.0.11"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
     implementation("com.viaversion:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:$vlVer")
 
-    val nettyVer = "4.1.115.Final"
+    val nettyVer = "4.1.128.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
@@ -99,7 +99,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.30.3")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "3.1.3"
+    val ktorVersion = "3.3.2"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")

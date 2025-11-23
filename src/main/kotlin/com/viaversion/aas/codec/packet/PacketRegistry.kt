@@ -29,6 +29,7 @@ import com.viaversion.viaversion.protocols.v1_19_1to1_19_3.packet.ClientboundPac
 import com.viaversion.viaversion.protocols.v1_19_3to1_19_4.packet.ClientboundPackets1_19_4
 import com.viaversion.viaversion.protocols.v1_19to1_19_1.packet.ClientboundPackets1_19_1
 import com.viaversion.viaversion.protocols.v1_19to1_19_1.packet.ServerboundPackets1_19_1
+import com.viaversion.viaversion.protocols.v1_20_2to1_20_3.packet.ClientboundPackets1_20_3
 import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ClientboundConfigurationPackets1_20_5
 import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ClientboundPackets1_20_5
 import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ServerboundConfigurationPackets1_20_5
@@ -38,7 +39,10 @@ import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ClientboundPacke
 import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundConfigurationPackets1_20_2
 import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundPackets1_20_2
 import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.packet.ClientboundPackets1_21_5
+import com.viaversion.viaversion.protocols.v1_21_5to1_21_6.packet.ClientboundPackets1_21_6
 import com.viaversion.viaversion.protocols.v1_21_5to1_21_6.packet.ServerboundPackets1_21_6
+import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ClientboundPackets1_21_9
+import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ClientboundPackets1_21_2
 import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ServerboundPackets1_21_2
 import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_8
 import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_9
@@ -56,9 +60,10 @@ object PacketRegistry {
         hashMapOf<Pair<Direction, Class<out Packet>>, RangeMap<ProtocolVersion, EncodingInfo>>()
 
     init {
-        // Obviously stolen from https://github.com/VelocityPowered/Velocity/blob/dev/1.1.0/proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java
+        // https://github.com/PaperMC/Velocity/blob/dev/3.0.0/proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java
         register(State.HANDSHAKE, Direction.SERVERBOUND, ::Handshake, Range.all(), 0)
 
+        // Login packets
         register(State.LOGIN, Direction.SERVERBOUND, ::LoginStart, Range.all(), 0)
         register(State.LOGIN, Direction.SERVERBOUND, ::CryptoResponse, Range.all(), 1)
         register(State.LOGIN, Direction.SERVERBOUND, ::PluginResponse, Range.atLeast(ProtocolVersion.v1_13), 2)
@@ -77,62 +82,71 @@ object PacketRegistry {
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusResponse, Range.all(), 0)
         register(State.STATUS, Direction.CLIENTBOUND, ::StatusPong, Range.all(), 1)
 
+        // Configuration packets
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationCookieRequest,
-            Range.atLeast(ProtocolVersion.v1_20_5), ClientboundConfigurationPackets1_20_5.COOKIE_REQUEST.id
+            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, ClientboundConfigurationPackets1_20_5.COOKIE_REQUEST.id
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.DISCONNECT.id,
-                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-                Range.atLeast(ProtocolVersion.v1_20_5) to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationTransfer,
-            Range.atLeast(ProtocolVersion.v1_20_5), ClientboundConfigurationPackets1_20_5.TRANSFER.id
+            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, ClientboundConfigurationPackets1_20_5.TRANSFER.id
         )
 
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationCookieResponse,
-            Range.atLeast(ProtocolVersion.v1_20_5), ServerboundConfigurationPackets1_20_5.COOKIE_RESPONSE.id
+            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, ServerboundConfigurationPackets1_20_5.COOKIE_RESPONSE.id
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-                Range.atLeast(ProtocolVersion.v1_20_5) to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
             )
         )
         register(
-            State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfig, mapOf(
+            State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfigAck, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-                Range.atLeast(ProtocolVersion.v1_20_5) to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
             )
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-                Range.atLeast(ProtocolVersion.v1_20_5) to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
             )
         )
 
+        register(
+            State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPing, mapOf(
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.PONG.id,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.PONG.id
+            )
+        )
+
+        // Play packets
         register(
             State.PLAY, Direction.CLIENTBOUND, ::Kick, mapOf(
                 ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to ClientboundPackets1_8.DISCONNECT.id,
@@ -150,7 +164,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.DISCONNECT.id,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.DISCONNECT.id,
                 ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to ClientboundPackets1_20_5.DISCONNECT.id,
-                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_7 to ClientboundPackets1_21_5.DISCONNECT.id,
+                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_9 to ClientboundPackets1_21_5.DISCONNECT.id,
             )
         )
         register(
@@ -170,7 +184,18 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.CUSTOM_PAYLOAD.id,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.CUSTOM_PAYLOAD.id,
                 ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to ClientboundPackets1_20_5.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_7 to ClientboundPackets1_21_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_9 to ClientboundPackets1_21_5.CUSTOM_PAYLOAD.id
+            )
+        )
+        register(
+            State.PLAY, Direction.CLIENTBOUND, ::StartConfiguration, mapOf(
+                ProtocolVersion.v1_20_2.singleton to ClientboundPackets1_20_2.START_CONFIGURATION.id,
+                ProtocolVersion.v1_20_3.singleton to ClientboundPackets1_20_3.START_CONFIGURATION.id,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ClientboundPackets1_20_5.START_CONFIGURATION.id,
+                ProtocolVersion.v1_21_2..ProtocolVersion.v1_21_4 to ClientboundPackets1_21_2.START_CONFIGURATION.id,
+                ProtocolVersion.v1_21_5.singleton to ClientboundPackets1_21_5.START_CONFIGURATION.id,
+                ProtocolVersion.v1_21_6..ProtocolVersion.v1_21_7 to ClientboundPackets1_21_6.START_CONFIGURATION.id,
+                ProtocolVersion.v1_21_9.singleton to ClientboundPackets1_21_9.START_CONFIGURATION.id
             )
         )
         register(
@@ -182,12 +207,9 @@ object PacketRegistry {
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundPackets1_20_2.CONFIGURATION_ACKNOWLEDGED.id,
                 ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id,
                 ProtocolVersion.v1_21_2..ProtocolVersion.v1_21_5 to ServerboundPackets1_21_2.CONFIGURATION_ACKNOWLEDGED.id,
-                ProtocolVersion.v1_21_6..ProtocolVersion.v1_21_7 to ServerboundPackets1_21_6.CONFIGURATION_ACKNOWLEDGED.id
+                ProtocolVersion.v1_21_6..ProtocolVersion.v1_21_9 to ServerboundPackets1_21_6.CONFIGURATION_ACKNOWLEDGED.id
             )
         )
-        // todo update chat to latest version
-        // todo handle transfer packets
-        // todo 1.21.5+
         register(
             State.PLAY, Direction.SERVERBOUND, ::ServerboundChatCommand,
             mapOf(
@@ -202,6 +224,9 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_1.singleton to ServerboundPackets1_19_1.CHAT.id
             )
         )
+        // todo update chat to latest version
+        // todo handle transfer packets
+        // todo 1.21.5+
     }
 
     operator fun ProtocolVersion.rangeTo(o: ProtocolVersion): Range<ProtocolVersion> {
@@ -220,7 +245,7 @@ object PacketRegistry {
             entriesDecoding.computeIfAbsent(Triple(state, direction, packetId)) { TreeRangeMap.create() }
                 .also { rangeMap ->
                     if (rangeMap.subRangeMap(protocolRange).asMapOfRanges().isNotEmpty())
-                        throw IllegalStateException("entry already exists")
+                        throw IllegalStateException("entry already exists $protocolRange $packetId")
                     rangeMap.put(protocolRange, DecodingInfo(constructor))
                 }
         }
@@ -228,7 +253,7 @@ object PacketRegistry {
         entriesEncoding.computeIfAbsent(direction to klass) { TreeRangeMap.create() }.also { rangeMap ->
             idByProtocol.forEach { (protocolRange, packetId) ->
                 if (rangeMap.subRangeMap(protocolRange).asMapOfRanges().isNotEmpty())
-                    throw IllegalStateException("entry already exists")
+                    throw IllegalStateException("entry already exists $protocolRange $packetId")
                 rangeMap.put(protocolRange, EncodingInfo(packetId))
             }
         }

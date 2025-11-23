@@ -68,8 +68,9 @@ class StatusState : ConnectionState {
             }
         }
         send(handler.data.frontChannel, packet, flush = true)
-        handler.data.state = StatusKicked()
-        handler.data.state.start(handler)
+        val newState = StatusKicked()
+        handler.data.setBothStates(newState)
+        newState.start(handler)
     }
 
     override fun start(handler: MinecraftHandler) {

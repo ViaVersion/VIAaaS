@@ -5,6 +5,7 @@ import com.viaversion.aas.UtilKt;
 import com.viaversion.aas.codec.packet.Packet;
 import com.viaversion.aas.codec.packet.configuration.ConfigurationDisconnect;
 import com.viaversion.aas.codec.packet.configuration.FinishConfig;
+import com.viaversion.aas.codec.packet.configuration.FinishConfigAck;
 import com.viaversion.aas.handler.HandlerUtilKt;
 import com.viaversion.aas.handler.MinecraftHandler;
 import com.viaversion.viaversion.api.protocol.packet.State;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ConfigurationState implements ConnectionState {
 	private boolean kickedByServer = false;
+	private PlayState playState = null;
 	@NotNull
 	@Override
 	public State getState() {
@@ -23,6 +25,7 @@ public class ConfigurationState implements ConnectionState {
 	@Override
 	public void handlePacket(@NotNull MinecraftHandler handler, @NotNull ChannelHandlerContext ctx, @NotNull Packet packet) {
 		if (packet instanceof FinishConfig) handleFinish(handler);
+		if (packet instanceof FinishConfigAck) handleFinishAck(handler);
 		if (packet instanceof ConfigurationDisconnect) handleDisconnect(handler, (ConfigurationDisconnect) packet);
 		HandlerUtilKt.forward(handler, ReferenceCountUtil.retain(packet), false);
 	}
@@ -37,8 +40,13 @@ public class ConfigurationState implements ConnectionState {
 	}
 
 	private void handleFinish(MinecraftHandler handler) {
-		if (handler.getBackEnd()) return;
-		handler.getData().setState(new PlayState());
+		if (playState != null) throw new IllegalStateException();
+		playState = new PlayState();
+		handler.getData().setServerState(playState);
+	}
+
+	private void handleFinishAck(MinecraftHandler handler) {
+		handler.getData().setClientState(playState);
 	}
 
 	@Override

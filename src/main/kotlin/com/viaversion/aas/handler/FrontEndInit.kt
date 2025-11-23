@@ -2,6 +2,7 @@ package com.viaversion.aas.handler
 
 import com.viaversion.aas.codec.FrameCodec
 import com.viaversion.aas.codec.MinecraftCodec
+import com.viaversion.aas.handler.state.HandshakeState
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.flow.FlowControlHandler
@@ -10,6 +11,8 @@ import java.util.concurrent.TimeUnit
 
 object FrontEndInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
+        val handshakeState = HandshakeState()
+        val data = ConnectionData(frontChannel = ch, serverState = handshakeState, clientState = handshakeState)
         ch.pipeline()
             // "crypto"
             .addLast("frame", FrameCodec())
@@ -17,6 +20,6 @@ object FrontEndInit : ChannelInitializer<Channel>() {
             .addLast("flow-handler", FlowControlHandler())
             .addLast("mc", MinecraftCodec())
             .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
-            .addLast("handler", MinecraftHandler(ConnectionData(frontChannel = ch), frontEnd = true))
+            .addLast("handler", MinecraftHandler(data, frontEnd = true))
     }
 }
