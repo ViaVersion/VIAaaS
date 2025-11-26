@@ -575,9 +575,16 @@ let wsUrl = getWsUrl();
 let socket = null;
 function defaultWs() {
     let url = new URL("ws", location.href);
-    url.protocol = "wss";
-    return window.location.host.endsWith("github.io") || !window.location.protocol.startsWith("http")
-        ? "wss://localhost:25543/ws" : url.toString();
+    if (window.location.host.endsWith("github.io") || !window.location.protocol.startsWith("http")) {
+        return "wss://localhost:25543/ws";
+    }
+    if (url.protocol === "https:") {
+        url.protocol = "wss:";
+    }
+    else {
+        url.protocol = "ws:";
+    }
+    return url.toString();
 }
 function getWsUrl() {
     return localStorage.getItem("viaaas_ws_url") || defaultWs();

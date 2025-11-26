@@ -1,6 +1,7 @@
 #######################
 # Some configurations need a restart
-# See https://ktor.io/docs/configurations.html#command-line for https interface options
+# Web port can be changed via CLI, e.g.: java -jar viaaas.jar -sslPort=8443
+# See https://ktor.io/docs/server-configuration-file.html#command-line for web interface options
 #######################
 #
 ######
