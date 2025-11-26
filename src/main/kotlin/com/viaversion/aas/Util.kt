@@ -8,7 +8,7 @@ import com.google.gson.JsonObject
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.type.Types
-import io.ktor.client.call.body
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.netty.*
@@ -35,6 +35,7 @@ import io.netty.incubator.channel.uring.*
 import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
+import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
@@ -135,11 +136,18 @@ fun checkLocalAddress(inetAddress: InetAddress): Boolean {
             || inetAddress.isMCNodeLocal
             || inetAddress.isMCOrgLocal
             || inetAddress.isMCSiteLocal
+            || ((inetAddress as? Inet6Address)?.isUniqueLocalAddress() ?: false)
             || NetworkInterface.networkInterfaces().flatMap { it.inetAddresses() }
         .anyMatch {
             // This public address acts like a localhost, let's block it
             it == inetAddress
         })
+}
+
+fun Inet6Address.isUniqueLocalAddress(): Boolean {
+    val firstByte = this.address[0].toUByte().toInt()
+
+    return (firstByte and 0xFE) == 0xFC
 }
 
 fun matchesAddress(addr: InetSocketAddress, list: List<String>): Boolean {
