@@ -19,7 +19,7 @@ public class ViaCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-		if (!ctx.channel().isActive() ||!info.checkServerboundPacket()) throw CancelEncoderException.generate(null);
+		if (!ctx.channel().isActive() ||!info.checkServerboundPacket(msg.readableBytes())) throw CancelEncoderException.generate(null);
 		if (!info.shouldTransformPacket()) {
 			out.add(msg.retain());
 			return;
