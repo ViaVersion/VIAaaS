@@ -2,8 +2,12 @@ package com.viaversion.aas.config
 
 import com.google.common.net.HostAndPort
 import com.viaversion.aas.secureRandom
+import com.viaversion.aas.viaaasLogger
 import com.viaversion.aas.viaaasLoggerJava
 import com.viaversion.viaversion.util.Config
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.coobird.thumbnailator.Thumbnails
 import net.coobird.thumbnailator.filters.Canvas
 import net.coobird.thumbnailator.geometry.Positions
@@ -32,6 +36,7 @@ object VIAaaSConfig : Config(File("config/viaaas.yml"), viaaasLoggerJava), com.v
     var backendProxy: URI? = null
     var protocolDetectorCache: Int = 30
     var compressionLevel: Int = 6
+    val loadingScope = CoroutineScope(Dispatchers.IO)
 
     init {
         reload()
@@ -67,22 +72,34 @@ object VIAaaSConfig : Config(File("config/viaaas.yml"), viaaasLoggerJava), com.v
 
     private fun reloadIcon() {
         val rawUrl = this.getString("favicon-url", "")!!
-        try {
-            faviconUrl = when {
-                rawUrl.isEmpty() -> null
-                rawUrl.startsWith("data:image/png;base64,") -> rawUrl.filter { !it.isWhitespace() }
-                else -> "data:image/png;base64," + Base64.getEncoder().encodeToString(
-                    ByteArrayOutputStream().also {
-                        Thumbnails.of(URL(rawUrl))
-                            .size(64, 64)
-                            .addFilter(Canvas(64, 64, Positions.CENTER, false))
-                            .outputFormat("png")
-                            .toOutputStream(it)
-                    }.toByteArray()
-                )
+        faviconUrl = null
+
+        if (rawUrl.isEmpty()) return
+        if (rawUrl.startsWith("data:image/png;base64,")) {
+            faviconUrl = rawUrl.filterNot { it.isWhitespace() }
+            return
+        }
+
+        loadingScope.launch {
+            try {
+                faviconUrl = "data:image/png;base64," + Base64.getEncoder().encodeToString(
+                        ByteArrayOutputStream().also { out ->
+                            val url = URL(rawUrl)
+                            val connection = url.openConnection()
+                            connection.connectTimeout = 10_000
+                            connection.readTimeout = 10_000
+                            connection.inputStream.use { input ->
+                                Thumbnails.of(input)
+                                    .size(64, 64)
+                                    .addFilter(Canvas(64, 64, Positions.CENTER, false))
+                                    .outputFormat("png")
+                                    .toOutputStream(out)
+                            }
+                        }.toByteArray())
+                viaaasLogger.info("Favicon loaded")
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
