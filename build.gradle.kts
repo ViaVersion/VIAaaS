@@ -43,7 +43,7 @@ compileKotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.viaversion.aas"
-version = "0.5.0+" + try {
+version = "0.5.1+" + try {
     gitVersion()
 } catch (e: Exception) {
     "unknown"
