@@ -55,7 +55,6 @@ repositories {
     mavenCentral()
     maven("https://repo.viaversion.com/")
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://jitpack.io/")
 }
 
 dependencies {

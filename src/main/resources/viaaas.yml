@@ -47,11 +47,11 @@ show-brand-info: true
 #####
 # Limits
 #####
-# Rates limits websocket messages per second. Message processing will be delayed.
+# Rates limits websocket messages per second. Negative value disables it.
 rate-limit-ws: 1.5
-# Rate limits new front-end connections per second per ip. Will disconnect.
+# Rate limits new front-end connections per second per ip. Causes a disconnect. Negative value disables it.
 rate-limit-connection-mc: 10.0
-# Rate limits the logins into front-end per second per ip. Will disconnect
+# Rate limits the logins into front-end per second per ip. Causes a disconnect. Negative value disable it.
 rate-limit-login-mc: 0.2
 # Limits how many usernames a websocket connection can listen to.
 listening-ws-limit: 10

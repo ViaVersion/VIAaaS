@@ -20,11 +20,18 @@ data class WebClient(
 
     val id = generateId()
     private val listenedIds: MutableSet<UUID> = Sets.newConcurrentHashSet()
-    private val rateLimiter = RateLimiter.create(VIAaaSConfig.rateLimitWs)
+    private val rateLimiter = createRateLimiter()
 
     fun tryAcquireMessage() : Boolean {
-        return rateLimiter.tryAcquire()
+        return rateLimiter?.tryAcquire() ?: true
     }
+
+    fun createRateLimiter(): RateLimiter? {
+        val limit = VIAaaSConfig.rateLimitWs
+        if (limit <= 0) return null
+        return RateLimiter.create(limit)
+    }
+
 
     fun generateId(): String {
         val local = ws.call.request.local.remoteHost
