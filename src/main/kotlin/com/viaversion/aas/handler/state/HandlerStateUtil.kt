@@ -11,7 +11,6 @@ import com.viaversion.aas.handler.forward
 import com.viaversion.aas.util.IntendedState
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.Types
 import io.ktor.server.netty.*
 import io.netty.bootstrap.Bootstrap
@@ -41,7 +40,7 @@ private suspend fun createBackChannel(
     val loop = handler.data.frontChannel.eventLoop()
     val channel = Bootstrap()
         .handler(BackEndInit(handler.data, proxyUri, proxyAddress))
-        .channelFactory(channelSocketFactory(loop.parent()))
+        .channelFactory(channelSocketFactory())
         .group(loop)
         .option(ChannelOption.WRITE_BUFFER_WATER_MARK, AspirinServer.bufferWaterMark)
         .option(ChannelOption.IP_TOS, 0x18)
@@ -126,7 +125,7 @@ private suspend fun tryBackAddresses(
 }
 
 private suspend fun resolveBackendAddresses(hostAndPort: HostAndPort): List<InetSocketAddress> {
-    val srvResolved = resolveSrv(hostAndPort)
+    val srvResolved = resolveSrv(hostAndPort) ?: hostAndPort
 
     val removedEndDot = srvResolved.host.replace(Regex("\\.$"), "")
 

@@ -43,7 +43,7 @@ object ProtocolDetector {
                 val ch = Bootstrap()
                     .group(AspirinServer.childLoop)
                     .resolver(NoopAddressResolverGroup.INSTANCE)
-                    .channelFactory(channelSocketFactory(AspirinServer.childLoop))
+                    .channelFactory(channelSocketFactory())
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.TCP_FASTOPEN_CONNECT, true)
                     .option(ChannelOption.IP_TOS, 0x18)

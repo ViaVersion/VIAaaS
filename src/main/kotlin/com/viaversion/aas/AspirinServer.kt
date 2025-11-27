@@ -7,6 +7,7 @@ import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.handler.FrontEndInit
 import com.viaversion.aas.handler.MinecraftHandler
 import com.viaversion.aas.platform.AspirinPlatform
+import com.viaversion.aas.util.NettyTransportTypes
 import com.viaversion.aas.web.WebServer
 import com.viaversion.viaversion.ViaManagerImpl
 import com.viaversion.viaversion.api.Via
@@ -26,6 +27,7 @@ import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelOption
 import io.netty.channel.WriteBufferWaterMark
+import io.netty.resolver.dns.DnsNameResolver
 import io.netty.resolver.dns.DnsNameResolverBuilder
 import io.netty.util.concurrent.Future
 import java.io.File
@@ -70,9 +72,9 @@ object AspirinServer {
     val parentLoop = eventLoopGroup()
     val childLoop = eventLoopGroup()
     var chFutures = mutableListOf<ChannelFuture>()
-    val dnsResolver = DnsNameResolverBuilder(childLoop.next())
-        .socketChannelFactory(channelSocketFactory(childLoop))
-        .datagramChannelFactory(channelDatagramFactory(childLoop))
+    val dnsResolver: DnsNameResolver = DnsNameResolverBuilder(childLoop.next())
+        .socketChannelFactory(channelSocketFactory())
+        .datagramChannelFactory(channelDatagramFactory())
         .build()
     val httpClient = HttpClient(Java) {
         install(UserAgent) {
@@ -113,9 +115,11 @@ object AspirinServer {
     fun mainStartSignal() = initFuture.complete(Unit)
 
     fun listenPorts(args: Array<String>) {
+        viaaasLogger.info("Using transport type {}", NettyTransportTypes.getDefault())
+
         val serverBootstrap = ServerBootstrap()
             .group(parentLoop, childLoop)
-            .channelFactory(channelServerSocketFactory(parentLoop))
+            .channelFactory(channelServerSocketFactory())
             .childHandler(FrontEndInit)
             .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, bufferWaterMark)
             .childOption(ChannelOption.IP_TOS, 0x18)

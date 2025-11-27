@@ -72,15 +72,15 @@ dependencies {
     implementation("com.viaversion:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:$vlVer")
 
-    val nettyVer = "4.1.128.Final"
+    val nettyVer = "4.2.7.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-x86_64")
+    implementation("io.netty:netty-transport-native-io_uring:$nettyVer:linux-aarch_64")
+    implementation("io.netty:netty-transport-native-io_uring:$nettyVer:linux-x86_64")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.65.Final:linux-aarch_64")
     implementation("io.netty:netty-tcnative-boringssl-static:2.0.65.Final:linux-x86_64")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.25.Final:linux-aarch_64")
-    implementation("io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.25.Final:linux-x86_64")
 
     implementation("com.google.guava:guava:33.4.8-jre")
     implementation("com.velocitypowered:velocity-native:3.4.0-SNAPSHOT")

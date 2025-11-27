@@ -6,6 +6,7 @@ import com.google.common.net.UrlEscapers
 import com.google.common.primitives.Ints
 import com.google.gson.JsonObject
 import com.viaversion.aas.config.VIAaaSConfig
+import com.viaversion.aas.util.NettyTransportTypes
 import com.viaversion.aas.util.StacklessException
 import com.viaversion.viaversion.api.type.Types
 import io.ktor.client.call.*
@@ -13,27 +14,19 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.netty.*
 import io.netty.buffer.ByteBuf
-import io.netty.channel.Channel
-import io.netty.channel.ChannelFactory
-import io.netty.channel.ChannelFutureListener
-import io.netty.channel.EventLoopGroup
-import io.netty.channel.epoll.*
-import io.netty.channel.kqueue.*
-import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.*
 import io.netty.channel.socket.DatagramChannel
 import io.netty.channel.socket.ServerSocketChannel
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioDatagramChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.DecoderException
 import io.netty.handler.codec.dns.DefaultDnsQuestion
-import io.netty.handler.codec.dns.DefaultDnsRawRecord
 import io.netty.handler.codec.dns.DefaultDnsRecordDecoder
+import io.netty.handler.codec.dns.DnsRawRecord
+import io.netty.handler.codec.dns.DnsRecord
 import io.netty.handler.codec.dns.DnsRecordType
-import io.netty.incubator.channel.uring.*
 import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
+import java.lang.IllegalArgumentException
 import java.math.BigInteger
 import java.net.Inet6Address
 import java.net.InetAddress
@@ -44,6 +37,7 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.SecureRandom
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 import javax.crypto.Cipher
@@ -57,33 +51,66 @@ val viaaasLoggerJava = Logger.getLogger("VIAaaS")
 
 val secureRandom = SecureRandom()
 
-suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort {
-    if (hostAndPort.host.endsWith(".onion", ignoreCase = true)) return hostAndPort
-    if (hostAndPort.port == 25565) {
+data class SrvRecord(val priority: Int, val weight: Int, val port: Int, val target: String)
+
+
+suspend fun resolveSrv(hostAndPort: HostAndPort): HostAndPort? {
+    if (hostAndPort.host.endsWith(".onion", ignoreCase = true)) return null
+    if (hostAndPort.port != 25565) return null
+
+    val candidates = mutableListOf<SrvRecord>()
+    try {
+        // based on https://github.com/Camotoy/PacketLib/blob/312cff5f975be54cf2d92208ae2947dbda8b9f59/src/main/java/com/github/steveice10/packetlib/tcp/TcpClientSession.java
+        val records: List<DnsRecord> = AspirinServer.dnsResolver
+            .resolveAll(DefaultDnsQuestion("_minecraft._tcp.${hostAndPort.host}", DnsRecordType.SRV))
+            .suspendAwait()
         try {
-            // stolen from PacketLib (MIT) https://github.com/Camotoy/PacketLib/blob/312cff5f975be54cf2d92208ae2947dbda8b9f59/src/main/java/com/github/steveice10/packetlib/tcp/TcpClientSession.java
-            val records = AspirinServer.dnsResolver
-                .resolveAll(DefaultDnsQuestion("_minecraft._tcp.${hostAndPort.host}", DnsRecordType.SRV))
-                .suspendAwait()
-            try {
-                records.forEach { record ->
-                    if (record is DefaultDnsRawRecord && record.type() == DnsRecordType.SRV) {
-                        val content = record.content()
+            records.forEach { record ->
+                if (record.type() != DnsRecordType.SRV) return@forEach
+                if (record !is DnsRawRecord) return@forEach
 
-                        content.skipBytes(4)
-                        val port = content.readUnsignedShort()
-                        val address = DefaultDnsRecordDecoder.decodeName(content)
-
-                        return HostAndPort.fromParts(address, port)
-                    }
-                }
-            } finally {
-                records.forEach { ReferenceCountUtil.release(it) }
+                candidates.add(readSrvContent(record.content()))
             }
-        } catch (ignored: Exception) {
+        } finally {
+            records.forEach { ReferenceCountUtil.release(it) }
         }
+    } catch (ignored: Exception) {
     }
-    return hostAndPort
+
+    if (candidates.isEmpty()) return null
+
+    candidates.sortBy { it.priority }
+
+    val highPriority = candidates[0].priority
+    val selected = candidates.takeWhile { it.priority == highPriority }.randomWeighted { it.weight }
+
+    return HostAndPort.fromParts(selected.target, selected.port)
+}
+
+fun readSrvContent(byteBuf: ByteBuf): SrvRecord {
+    return SrvRecord(
+        byteBuf.readUnsignedShort(),
+        byteBuf.readUnsignedShort(),
+        byteBuf.readUnsignedShort(),
+        DefaultDnsRecordDecoder.decodeName(byteBuf)
+    )
+}
+
+fun <T> List<T>.randomWeighted(weightSelector: (T) -> Int): T {
+    val totalWeight = this.sumOf(weightSelector)
+
+    if (totalWeight < 0) throw IllegalArgumentException("Weight can't be negative.")
+    if (totalWeight == 0) return random()
+
+    val value = ThreadLocalRandom.current().nextInt(totalWeight)
+    var current = 0
+
+    for (item in this) {
+        current += weightSelector(item)
+        if (current > value) return item
+    }
+
+    return this.first()
 }
 
 // https://medium.com/asecuritysite-when-bob-met-alice/whats-so-special-about-pkcs-1-v1-5-and-the-attack-that-just-won-t-go-away-51ccf35d65b7
@@ -104,7 +131,7 @@ fun aesKey(key: ByteArray) = SecretKeySpec(key, "AES")
 fun parseUndashedId(string: String): UUID {
     Preconditions.checkArgument(string.length == 32, "Length is incorrect")
     return UUID(
-        string.substring(0, 16).toULong(16).toLong(),
+        string.take(16).toULong(16).toLong(),
         string.substring(16).toULong(16).toLong()
     )
 }
@@ -226,40 +253,19 @@ fun sha512Hex(data: ByteArray): String {
 }
 
 fun eventLoopGroup(): EventLoopGroup {
-    return when {
-        System.getProperty("com.viaversion.aas.io_uring").toBoolean()
-                && IOUring.isAvailable() -> IOUringEventLoopGroup() // experimental
-        Epoll.isAvailable() -> EpollEventLoopGroup()
-        KQueue.isAvailable() -> KQueueEventLoopGroup()
-        else -> NioEventLoopGroup()
-    }
+    return MultiThreadIoEventLoopGroup(NettyTransportTypes.getDefault().ioHandlerFactory)
 }
 
-fun channelServerSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<ServerSocketChannel> {
-    return when (eventLoop) {
-        is IOUringEventLoopGroup -> ChannelFactory { IOUringServerSocketChannel() }
-        is EpollEventLoopGroup -> ChannelFactory { EpollServerSocketChannel() }
-        is KQueueEventLoopGroup -> ChannelFactory { KQueueServerSocketChannel() }
-        else -> ChannelFactory { NioServerSocketChannel() }
-    }
+fun channelServerSocketFactory(): ChannelFactory<ServerSocketChannel> {
+    return NettyTransportTypes.getDefault().serverChannelFactory
 }
 
-fun channelSocketFactory(eventLoop: EventLoopGroup): ChannelFactory<SocketChannel> {
-    return when (eventLoop) {
-        is IOUringEventLoopGroup -> ChannelFactory { IOUringSocketChannel() }
-        is EpollEventLoopGroup -> ChannelFactory { EpollSocketChannel() }
-        is KQueueEventLoopGroup -> ChannelFactory { KQueueSocketChannel() }
-        else -> ChannelFactory { NioSocketChannel() }
-    }
+fun channelSocketFactory(): ChannelFactory<SocketChannel> {
+    return NettyTransportTypes.getDefault().channelFactory
 }
 
-fun channelDatagramFactory(eventLoop: EventLoopGroup): ChannelFactory<DatagramChannel> {
-    return when (eventLoop) {
-        is IOUringEventLoopGroup -> ChannelFactory { IOUringDatagramChannel() }
-        is EpollEventLoopGroup -> ChannelFactory { EpollDatagramChannel() }
-        is KQueueEventLoopGroup -> ChannelFactory { KQueueDatagramChannel() }
-        else -> ChannelFactory { NioDatagramChannel() }
-    }
+fun channelDatagramFactory(): ChannelFactory<DatagramChannel> {
+    return NettyTransportTypes.getDefault().datagramChannelFactory
 }
 
 fun reverseLookup(address: InetAddress): String {
@@ -276,5 +282,5 @@ fun reverseLookup(address: InetAddress): String {
 }
 
 fun Channel.fireExceptionCaughtIfOpen(e: Exception) {
-    if (isOpen()) pipeline().fireExceptionCaught(e)
+    if (isOpen) pipeline().fireExceptionCaught(e)
 }
