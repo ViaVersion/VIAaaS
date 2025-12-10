@@ -16,36 +16,12 @@ import com.viaversion.viaversion.api.protocol.packet.Direction
 import com.viaversion.viaversion.api.protocol.packet.State
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Types
-import com.viaversion.viaversion.protocols.v1_12_2to1_13.packet.ClientboundPackets1_13
-import com.viaversion.viaversion.protocols.v1_13_2to1_14.packet.ClientboundPackets1_14
-import com.viaversion.viaversion.protocols.v1_14_4to1_15.packet.ClientboundPackets1_15
-import com.viaversion.viaversion.protocols.v1_15_2to1_16.packet.ClientboundPackets1_16
-import com.viaversion.viaversion.protocols.v1_16_1to1_16_2.packet.ClientboundPackets1_16_2
-import com.viaversion.viaversion.protocols.v1_16_4to1_17.packet.ClientboundPackets1_17
-import com.viaversion.viaversion.protocols.v1_17_1to1_18.packet.ClientboundPackets1_18
-import com.viaversion.viaversion.protocols.v1_18_2to1_19.packet.ClientboundPackets1_19
 import com.viaversion.viaversion.protocols.v1_18_2to1_19.packet.ServerboundPackets1_19
-import com.viaversion.viaversion.protocols.v1_19_1to1_19_3.packet.ClientboundPackets1_19_3
-import com.viaversion.viaversion.protocols.v1_19_3to1_19_4.packet.ClientboundPackets1_19_4
-import com.viaversion.viaversion.protocols.v1_19to1_19_1.packet.ClientboundPackets1_19_1
 import com.viaversion.viaversion.protocols.v1_19to1_19_1.packet.ServerboundPackets1_19_1
-import com.viaversion.viaversion.protocols.v1_20_2to1_20_3.packet.ClientboundPackets1_20_3
-import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ClientboundConfigurationPackets1_20_5
-import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ClientboundPackets1_20_5
-import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ServerboundConfigurationPackets1_20_5
 import com.viaversion.viaversion.protocols.v1_20_3to1_20_5.packet.ServerboundPackets1_20_5
-import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ClientboundConfigurationPackets1_20_2
-import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ClientboundPackets1_20_2
-import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundConfigurationPackets1_20_2
 import com.viaversion.viaversion.protocols.v1_20to1_20_2.packet.ServerboundPackets1_20_2
-import com.viaversion.viaversion.protocols.v1_21_4to1_21_5.packet.ClientboundPackets1_21_5
-import com.viaversion.viaversion.protocols.v1_21_5to1_21_6.packet.ClientboundPackets1_21_6
 import com.viaversion.viaversion.protocols.v1_21_5to1_21_6.packet.ServerboundPackets1_21_6
-import com.viaversion.viaversion.protocols.v1_21_7to1_21_9.packet.ClientboundPackets1_21_9
-import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ClientboundPackets1_21_2
 import com.viaversion.viaversion.protocols.v1_21to1_21_2.packet.ServerboundPackets1_21_2
-import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_8
-import com.viaversion.viaversion.protocols.v1_8to1_9.packet.ClientboundPackets1_9
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.util.ReferenceCountUtil
@@ -85,122 +61,120 @@ object PacketRegistry {
         // Configuration packets
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationCookieRequest,
-            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, ClientboundConfigurationPackets1_20_5.COOKIE_REQUEST.id
+            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, 0x00
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x00,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x01
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.DISCONNECT.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.DISCONNECT.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x01,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x02
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x02,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x03
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ClientboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x03,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x04
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationTransfer,
-            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, ClientboundConfigurationPackets1_20_5.TRANSFER.id
+            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, 0x0B
         )
 
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationCookieResponse,
-            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, ServerboundConfigurationPackets1_20_5.COOKIE_RESPONSE.id
+            ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9, 0x01
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x01,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x02
             )
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfigAck, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.FINISH_CONFIGURATION.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.FINISH_CONFIGURATION.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x02,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x03
             )
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.KEEP_ALIVE.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.KEEP_ALIVE.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x03,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x04
             )
         )
 
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPing, mapOf(
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ServerboundConfigurationPackets1_20_2.PONG.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to ServerboundConfigurationPackets1_20_5.PONG.id
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x04,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_9 to 0x05
             )
         )
 
         // Play packets
         register(
             State.PLAY, Direction.CLIENTBOUND, ::Kick, mapOf(
-                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to ClientboundPackets1_8.DISCONNECT.id,
-                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.DISCONNECT.id,
-                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.DISCONNECT.id,
-                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.DISCONNECT.id,
-                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.DISCONNECT.id,
-                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.DISCONNECT.id,
-                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.DISCONNECT.id,
-                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.DISCONNECT.id,
-                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.DISCONNECT.id,
-                ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.DISCONNECT.id,
-                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.DISCONNECT.id,
-                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.DISCONNECT.id,
-                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.DISCONNECT.id,
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.DISCONNECT.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to ClientboundPackets1_20_5.DISCONNECT.id,
-                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_9 to ClientboundPackets1_21_5.DISCONNECT.id,
+                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to 0x40,
+                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to 0x1A,
+                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to 0x1B,
+                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to 0x1A,
+                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to 0x1B,
+                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to 0x1A,
+                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to 0x19,
+                ProtocolVersion.v1_17..ProtocolVersion.v1_18_2 to 0x1A,
+                ProtocolVersion.v1_19.sRange to 0x17,
+                ProtocolVersion.v1_19_1.sRange to 0x19,
+                ProtocolVersion.v1_19_3.sRange to 0x17,
+                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to 0x1A,
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x1B,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to 0x1D,
+                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_7 to 0x1C,
+                ProtocolVersion.v1_21_9.sRange to 0x20
             )
         )
         register(
             State.PLAY, Direction.CLIENTBOUND, ::PluginMessage, mapOf(
-                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to ClientboundPackets1_8.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to ClientboundPackets1_9.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to ClientboundPackets1_13.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to ClientboundPackets1_14.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to ClientboundPackets1_15.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to ClientboundPackets1_16.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to ClientboundPackets1_16_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_17..ProtocolVersion.v1_17_1 to ClientboundPackets1_17.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_18..ProtocolVersion.v1_18_2 to ClientboundPackets1_18.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_19.singleton to ClientboundPackets1_19.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_19_1.singleton to ClientboundPackets1_19_1.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_19_3.singleton to ClientboundPackets1_19_3.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to ClientboundPackets1_19_4.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to ClientboundPackets1_20_2.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to ClientboundPackets1_20_5.CUSTOM_PAYLOAD.id,
-                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_9 to ClientboundPackets1_21_5.CUSTOM_PAYLOAD.id
+                ProtocolVersion.v1_7_2..ProtocolVersion.v1_8 to 0x3F,
+                ProtocolVersion.v1_9..ProtocolVersion.v1_12_2 to 0x18,
+                ProtocolVersion.v1_13..ProtocolVersion.v1_13_2 to 0x19,
+                ProtocolVersion.v1_14..ProtocolVersion.v1_14_4 to 0x18,
+                ProtocolVersion.v1_15..ProtocolVersion.v1_15_2 to 0x19,
+                ProtocolVersion.v1_16..ProtocolVersion.v1_16_1 to 0x18,
+                ProtocolVersion.v1_16_2..ProtocolVersion.v1_16_4 to 0x17,
+                ProtocolVersion.v1_17..ProtocolVersion.v1_18_2 to 0x18,
+                ProtocolVersion.v1_19.sRange to 0x15,
+                ProtocolVersion.v1_19_1.sRange to 0x16,
+                ProtocolVersion.v1_19_3.sRange to 0x15,
+                ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to 0x17,
+                ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x18,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to 0x19,
+                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_9 to 0x18
             )
         )
         register(
             State.PLAY, Direction.CLIENTBOUND, ::StartConfiguration, mapOf(
-                ProtocolVersion.v1_20_2.singleton to ClientboundPackets1_20_2.START_CONFIGURATION.id,
-                ProtocolVersion.v1_20_3.singleton to ClientboundPackets1_20_3.START_CONFIGURATION.id,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ClientboundPackets1_20_5.START_CONFIGURATION.id,
-                ProtocolVersion.v1_21_2..ProtocolVersion.v1_21_4 to ClientboundPackets1_21_2.START_CONFIGURATION.id,
-                ProtocolVersion.v1_21_5.singleton to ClientboundPackets1_21_5.START_CONFIGURATION.id,
-                ProtocolVersion.v1_21_6..ProtocolVersion.v1_21_7 to ClientboundPackets1_21_6.START_CONFIGURATION.id,
-                ProtocolVersion.v1_21_9.singleton to ClientboundPackets1_21_9.START_CONFIGURATION.id
+                ProtocolVersion.v1_20_2.sRange to 0x65,
+                ProtocolVersion.v1_20_3.sRange to 0x67,
+                ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to 0x69,
+                ProtocolVersion.v1_21_2..ProtocolVersion.v1_21_4 to 0x70,
+                ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_7 to 0x6F,
+                ProtocolVersion.v1_21_9.sRange to 0x74
             )
         )
         register(
             State.PLAY, Direction.CLIENTBOUND, ::SetPlayCompression,
-            ProtocolVersion.v1_8.singleton, ClientboundPackets1_8.SET_COMPRESSION.id
+            ProtocolVersion.v1_8.sRange, 0x46
         )
         register(
             State.PLAY, Direction.SERVERBOUND, ::ConfigurationAck, mapOf(
@@ -213,15 +187,15 @@ object PacketRegistry {
         register(
             State.PLAY, Direction.SERVERBOUND, ::ServerboundChatCommand,
             mapOf(
-                ProtocolVersion.v1_19.singleton to ServerboundPackets1_19.CHAT_COMMAND.id,
-                ProtocolVersion.v1_19_1.singleton to ServerboundPackets1_19_1.CHAT_COMMAND.id
+                ProtocolVersion.v1_19.sRange to ServerboundPackets1_19.CHAT_COMMAND.id,
+                ProtocolVersion.v1_19_1.sRange to ServerboundPackets1_19_1.CHAT_COMMAND.id
             )
         )
         register(
             State.PLAY, Direction.SERVERBOUND, ::ServerboundChatMessage,
             mapOf(
-                ProtocolVersion.v1_19.singleton to ServerboundPackets1_19.CHAT.id,
-                ProtocolVersion.v1_19_1.singleton to ServerboundPackets1_19_1.CHAT.id
+                ProtocolVersion.v1_19.sRange to ServerboundPackets1_19.CHAT.id,
+                ProtocolVersion.v1_19_1.sRange to ServerboundPackets1_19_1.CHAT.id
             )
         )
         // todo update chat to latest version
@@ -233,7 +207,7 @@ object PacketRegistry {
         return Range.closed(this, o)
     }
 
-    private val ProtocolVersion.singleton get() = Range.singleton(this)
+    private val ProtocolVersion.sRange get() = Range.singleton(this)
 
     private inline fun <reified P : Packet> register(
         state: State, direction: Direction,
