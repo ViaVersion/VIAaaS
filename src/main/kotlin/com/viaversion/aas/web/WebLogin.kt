@@ -155,15 +155,22 @@ class WebLogin : WebState {
     private suspend fun handleSaveAccessToken(webClient: WebClient, obj: JsonObject) {
         val accessToken = obj["mc_access_token"].asString
         val decodedToken = JWT.decode(accessToken)
-        assert(decodedToken.expiresAtAsInstant <= Instant.now())
-        assert(decodedToken.notBeforeAsInstant >= Instant.now())
+        val now = Instant.now()
+        if (now > decodedToken.expiresAtAsInstant) {
+            throw IllegalArgumentException("mc access token has expired")
+        }
+        if (now < decodedToken.notBeforeAsInstant) {
+            throw IllegalArgumentException("mc access token notBefore is in the future")
+        }
         val expectedId = UUID.fromString(decodedToken.getClaim("profiles").asMap()["mc"].toString())
 
         val profile = AspirinServer.httpClient.get("https://api.minecraftservices.com/minecraft/profile") {
             header("Authorization", "Bearer $accessToken")
         }.body<JsonObject>()
         val uuid = parseUndashedId(profile["id"].asString)
-        assert(uuid == expectedId)
+        if (uuid != expectedId) {
+            throw IllegalStateException("expected $expectedId == $uuid")
+        }
 
         webClient.server.addAccessToken(uuid, accessToken)
         webLogger.info("Received token: {} {}", webClient.id, uuid)
