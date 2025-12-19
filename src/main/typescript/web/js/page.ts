@@ -542,10 +542,24 @@ class MicrosoftAccount extends McAccount {
     }
 
     override async checkActive() {
+        if (isTokenExpired(this.accessToken)) return Promise.resolve(false)
         return fetch(getCorsProxy() + "https://api.minecraftservices.com/entitlements/mcstore", {
             method: "get",
             headers: {"authorization": "Bearer " + this.accessToken}
         }).then(data => data.ok);
+    }
+}
+
+function isTokenExpired(token: string): boolean {
+    try {
+        const payloadB64 = token.split('.')[1].replace('-', '+').replace('_', '/')
+        const payload = JSON.parse(atob(payloadB64))
+        if (!payload.exp) return false
+        const currentTime = Math.floor(Date.now() / 1000);
+        return currentTime > payload.exp;
+    } catch (error) {
+        console.log(error)
+        return false;
     }
 }
 

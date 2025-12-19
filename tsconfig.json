@@ -18,7 +18,7 @@
     "outDir": "src/main/resources/web/js"
   },
   "include": [
-    "src/main/typescript/js/**.ts",
-    "src/main/typescript/js/**.js"
+    "src/main/typescript/web/js/**.ts",
+    "src/main/typescript/web/js/**.js"
   ]
 }
