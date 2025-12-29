@@ -13,6 +13,11 @@ let cacheId = "viaaas";
 self.addEventListener("install", () => {
 });
 
+self.addEventListener("activate", e => {
+    console.log("sw activated, deleting cache");
+    e.waitUntil(caches.delete(cacheId));
+});
+
 self.addEventListener("fetch", evt => {
     let req = evt.request;
     if (!isImmutable(req.url) || req.method !== "GET") return;
