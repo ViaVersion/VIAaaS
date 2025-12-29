@@ -14,12 +14,13 @@ import io.ktor.server.websocket.*
 import java.time.Duration
 import java.time.Instant
 import java.util.*
-import kotlin.math.absoluteValue
+import kotlin.math.abs
 
 class WebLogin : WebState {
     override suspend fun start(webClient: WebClient) {
         webClient.ws.sendSerialized(JsonObject().also {
             it.addProperty("action", "ad_login_methods")
+            it.addProperty("challenge", webClient.challenge)
         })
         webClient.ws.flush()
     }
@@ -67,12 +68,11 @@ class WebLogin : WebState {
 
     private suspend fun handleOfflineLogin(webClient: WebClient, msg: String, obj: JsonObject) {
         if (!sha512Hex(msg.toByteArray(Charsets.UTF_8)).startsWith("00000")) throw StacklessException("PoW failed")
-        if ((obj["date"].asLong - System.currentTimeMillis())
-                .absoluteValue > Duration.ofSeconds(20).toMillis()
-        ) {
+        if (abs(obj["date"].asLong - System.currentTimeMillis()) > Duration.ofSeconds(20).toMillis()) {
             throw StacklessException("Invalid PoW date")
         }
-        val username = obj["username"].asString.trim()
+        if (obj["challenge"].asString != webClient.challenge) throw StacklessException("Invalid challenge")
+        val username = obj["username"].asString
         val uuid = generateOfflinePlayerUuid(username)
 
         val token = webClient.server.generateToken(uuid, username)

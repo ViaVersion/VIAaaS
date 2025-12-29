@@ -12,6 +12,7 @@ let instance_suffix_input = document.getElementById("instance_suffix") as HTMLIn
 let listenVisible = false;
 // + deltaTime means that the clock is ahead
 let deltaTime = 0;
+let challenge = "";
 let workers: Array<Worker> = [];
 $(() => {
     workers = new Array(navigator.hardwareConcurrency)
@@ -145,7 +146,7 @@ function generateAddress() {
 }
 
 function submittedListen() {
-    let user = $("#listen_username").val() as string;
+    let user = ($("#listen_username").val() as string).trim();
     if (!user) return;
     if (($("#listen_online")[0] as HTMLInputElement).checked) {
         sendSocket(JSON.stringify({
@@ -156,7 +157,13 @@ function submittedListen() {
         // todo
     } else {
         let taskId = Math.random();
-        workers.forEach(it => it.postMessage({action: "listen_pow", user: user, id: taskId, deltaTime: deltaTime}));
+        workers.forEach(it => it.postMessage({
+            action: "listen_pow",
+            user: user,
+            id: taskId,
+            deltaTime: deltaTime,
+            challenge: challenge
+        }));
         addToast("Offline username", "Please wait a minute...");
     }
 }
@@ -189,11 +196,11 @@ function renderActions() {
 }
 
 function updateTempCodeVisibility() {
-    let tmpCode = $("#listen_code");
+    let tmpCode = $("#listen_code_div");
     if (($("#listen_online")[0] as HTMLInputElement).checked) {
-        tmpCode.prop("disabled", false);
+        tmpCode.show();
     } else {
-        tmpCode.prop("disabled", true);
+        tmpCode.hide();
     }
 }
 
@@ -267,6 +274,7 @@ function addToast(title: string, msg: string, yes: (() => void) | null = null, n
 function resetHtml() {
     listening.innerHTML = "";
     listenVisible = false;
+    updateTempCodeVisibility();
     renderActions();
 }
 
@@ -718,14 +726,15 @@ function onWsMsg(event: MessageEvent) {
     switch (parsed.action) {
         case "ad_login_methods":
             listenVisible = true;
+            challenge = parsed.challenge;
             renderActions();
             break;
         case "login_result":
             if (!parsed.success) {
                 addToast("Couldn't verify Minecraft account", "VIAaaS returned failed response");
             } else {
-                listen(parsed.token);
                 saveToken(parsed.token);
+                listen(parsed.token);
             }
             break;
         case "listen_login_requests_result":

@@ -19,6 +19,7 @@ data class WebClient(
     }
 
     val id = generateId()
+    val challenge = UUID.randomUUID().toString()
     private val listenedIds: MutableSet<UUID> = Sets.newConcurrentHashSet()
     private val rateLimiter = createRateLimiter()
 
