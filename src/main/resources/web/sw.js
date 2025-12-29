@@ -14,8 +14,14 @@ self.addEventListener("install", () => {
 });
 
 self.addEventListener("fetch", evt => {
-    if (!isImmutable(evt.request.url) || evt.request.method !== "GET") return;
-    evt.respondWith(fromCache(evt.request).catch(() => tryNetwork(evt.request)));
+    let req = evt.request;
+    if (!isImmutable(req.url) || req.method !== "GET") return;
+    evt.respondWith(fromCache(req)
+        .catch(err => {
+            return saveToCache(err, req)
+                .then(() => fetch(req))
+        })
+    );
 });
 
 function isImmutable(url) {
@@ -23,33 +29,19 @@ function isImmutable(url) {
     return ["cdnjs.cloudflare.com", "alcdn.msauth.net"].indexOf(parsed.host) !== -1;
 }
 
-function tryNetwork(request) {
-    return fetch(request)
-        .then(async response => {
-            if (!isImmutable(request.url)) return response;
-
-            try {
-                await fromCache(request)
-                    .catch(async e => {
-                        console.log("caching due to: " + e);
-                        console.log(request);
-                        let cache = await caches.open(cacheId);
-                        // passing request directly doesn't work well with workers due to opaque response
-                        await cache.add(request.url);
-                    });
-            } catch (e) {
-                console.log("failed to cache: " + e)
-            }
-            return response;
-        });
+async function saveToCache(err, request) {
+    if (!isImmutable(request.url)) return
+    console.log("caching due to: " + err, request);
+    let cache = await caches.open(cacheId);
+    // passing request directly doesn't work well with workers due to opaque response
+    await cache.add(request.url);
 }
 
 function fromCache(request) {
     return caches.open(cacheId)
-        .then(async cache => {
-            let matching = await cache.match(request);
-            if (matching == null) return Promise.reject("no match");
-
-            return matching;
+        .then(cache => cache.match(request))
+        .then(matched => {
+            if (matched == null) return Promise.reject("no match");
+            return matched;
         });
 }
