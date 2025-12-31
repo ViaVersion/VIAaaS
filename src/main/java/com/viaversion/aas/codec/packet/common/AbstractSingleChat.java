@@ -57,6 +57,8 @@ public abstract class AbstractSingleChat implements Packet {
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		if (protocolVersion.olderThan(ProtocolVersion.v1_20_3)) {
 			Types.STRING.write(byteBuf, msg.toString());
+		} else {
+			Types.TAG.write(byteBuf, msgTag);
 		}
 	}
 }
