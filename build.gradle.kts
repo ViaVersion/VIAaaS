@@ -24,7 +24,7 @@ plugins {
     kotlin("jvm") version "2.3.0"
     id("maven-publish")
     id("com.github.ben-manes.versions") version "0.53.0"
-    id("com.gradleup.shadow") version "9.3.0"
+    id("com.gradleup.shadow") version "8.3.9"
     id("com.palantir.git-version") version "4.2.0"
 }
 
