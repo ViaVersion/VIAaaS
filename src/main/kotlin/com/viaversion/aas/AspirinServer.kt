@@ -62,13 +62,6 @@ object AspirinServer {
         }
     }
 
-    init {
-        // This VIAaaS code idea is even more cursed
-        AspirinPlatform.runRepeatingSync({
-            mcCryptoKey = generateKey()
-        }, 10 * 60 * 20L) // regenerate each 10 min
-    }
-
     val parentLoop = eventLoopGroup()
     val childLoop = eventLoopGroup()
     var chFutures = mutableListOf<ChannelFuture>()
