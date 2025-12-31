@@ -1,7 +1,4 @@
 "use strict";
-/// <reference path='config.ts' />
-// Note that some APIs only work on HTTPS
-// Page
 let connectionStatus = document.getElementById("connection_status");
 let corsStatus = document.getElementById("cors_status");
 let listening = document.getElementById("listening");
@@ -10,7 +7,6 @@ let cors_proxy_txt = document.getElementById("cors-proxy");
 let ws_url_txt = document.getElementById("ws-url");
 let instance_suffix_input = document.getElementById("instance_suffix");
 let listenVisible = false;
-// + deltaTime means that the clock is ahead
 let deltaTime = 0;
 let challenge = "";
 let workers = [];
@@ -107,15 +103,14 @@ function copyGeneratedAddress() {
     navigator.clipboard.writeText($("#generated_address").text()).catch(e => console.log(e));
 }
 function generateAddress() {
-    var _a, _b;
     let backAddress = $("#connect_address").val();
     try {
         let url = new URL("https://" + backAddress);
         let finalAddress = "";
         let host = url.hostname;
-        let version = (_a = $("#connect_version").val()) === null || _a === void 0 ? void 0 : _a.toString().replaceAll(".", "_");
+        let version = $("#connect_version").val()?.toString().replaceAll(".", "_");
         let username = $("#connect_user").val();
-        let onlineMode = (_b = $("#connect_online").val()) === null || _b === void 0 ? void 0 : _b.toString();
+        let onlineMode = $("#connect_online").val()?.toString();
         if (host.includes(":") || host.includes("[")) {
             host = host.replaceAll(":", "-")
                 .replaceAll(/[\[\]]/g, "") + ".sslip.io";
@@ -147,7 +142,6 @@ function submittedListen() {
             username: user,
             code: $("#listen_code").val()
         }));
-        // todo
     }
     else {
         let taskId = Math.random();
@@ -169,7 +163,7 @@ function submittedSendToken() {
         .then(() => {
         sendSocket(JSON.stringify({
             "action": "save_access_token",
-            "mc_access_token": account === null || account === void 0 ? void 0 : account.accessToken
+            "mc_access_token": account?.accessToken
         }));
     })
         .catch(e => addToast("Failed to send access token", e));
@@ -288,7 +282,6 @@ function ohNo() {
         console.log(e);
     }
 }
-// Util
 function checkFetchSuccess(msg) {
     return (r) => {
         if (!r.ok)
@@ -308,7 +301,6 @@ function getNetworkTimestamp() {
         .then(r => r.json())
         .then(it => parseInt(it));
 }
-// Notification
 let notificationCallbacks = new Map();
 $(() => {
     new BroadcastChannel("viaaas-notification").addEventListener("message", handleSWMsg);
@@ -327,7 +319,6 @@ function authNotification(msg, yes, no) {
         addToast("Allow auth?", msg, yes, no);
         return;
     }
-    // @ts-ignore
     let tag = uuid.v4();
     navigator.serviceWorker.ready.then(r => {
         let options = {
@@ -354,7 +345,6 @@ function authNotification(msg, yes, no) {
         }, 30 * 1000);
     });
 }
-// Cors proxy
 function defaultCors() {
     return self.defaultCorsProxy || "https://cors.re.yt.nom.br/";
 }
@@ -368,14 +358,12 @@ function setCorsProxy(url) {
     localStorage.setItem("viaaas_cors_proxy", url);
     refreshCorsStatus();
 }
-// Account manager
 let activeAccounts = [];
 function loadAccounts() {
     let serialized = localStorage.getItem("viaaas_mc_accounts");
     let parsed = serialized ? JSON.parse(serialized) : [];
     parsed.forEach((it) => {
         if (it.clientToken) {
-            // Mojang auth doesn't work on multiplayer anymore
         }
         else if (it.msUser && myMSALObj.getAccountByUsername(it.msUser)) {
             addActiveAccount(new MicrosoftAccount(it.id, it.name, it.accessToken, it.msUser));
@@ -447,7 +435,6 @@ class MicrosoftAccount extends McAccount {
     }
     async refresh() {
         let msTokenResp = await getTokenPopup(this.msUser, getLoginRequest());
-        // noinspection HttpUrlsUsage
         let xboxJson = await fetch("https://user.auth.xboxlive.com/user/authenticate", {
             method: "post",
             body: JSON.stringify({
@@ -557,7 +544,6 @@ const msalConfig = {
         storeAuthStateInCookie: false,
     }
 };
-// @ts-ignore
 const myMSALObj = new msal.PublicClientApplication(msalConfig);
 function loginMs() {
     let req = getLoginRequest();
@@ -585,7 +571,6 @@ function getTokenPopup(username, request) {
     return myMSALObj.acquireTokenSilent(request)
         .catch((e) => {
         console.warn("silent token acquisition fails.");
-        // @ts-ignore
         if (e instanceof msal.InteractionRequiredAuthError) {
             return myMSALObj.acquireTokenPopup(request).catch((error) => console.error(error));
         }
@@ -594,7 +579,6 @@ function getTokenPopup(username, request) {
         }
     });
 }
-// Websocket
 let wsUrl = getWsUrl();
 let socket = null;
 function defaultWs() {
@@ -617,7 +601,6 @@ function setWsUrl(url) {
     localStorage.setItem("viaaas_ws_url", url);
     location.reload();
 }
-// Tokens
 function saveToken(token) {
     let serialized = localStorage.getItem("viaaas_tokens");
     let hTokens = serialized ? JSON.parse(serialized) : {};
@@ -639,15 +622,14 @@ function getTokens() {
     let parsed = serialized ? JSON.parse(serialized) : {};
     return parsed[wsUrl] || [];
 }
-// Websocket
 function listen(token) {
-    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({ "action": "listen_login_requests", "token": token }));
+    socket?.send(JSON.stringify({ "action": "listen_login_requests", "token": token }));
 }
 function unlisten(id) {
-    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({ "action": "unlisten_login_requests", "uuid": id }));
+    socket?.send(JSON.stringify({ "action": "unlisten_login_requests", "uuid": id }));
 }
 function confirmJoin(hash) {
-    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({ action: "session_hash_response", session_hash: hash }));
+    socket?.send(JSON.stringify({ action: "session_hash_response", session_hash: hash }));
 }
 function handleJoinRequest(parsed) {
     authNotification("Allow auth from VIAaaS instance?\nAccount: "
@@ -706,7 +688,7 @@ function handleParametersRequest(parsed) {
     catch (e) {
         console.log(e);
     }
-    socket === null || socket === void 0 ? void 0 : socket.send(JSON.stringify({
+    socket?.send(JSON.stringify({
         action: "parameters_response",
         callback: parsed.callback,
         version: $("#connect_version").val(),

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
+    "target": "ES2020",
     "module": "ES2015",
     "lib": [
       "ES2021",
@@ -11,7 +11,7 @@
     "noImplicitOverride": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "removeComments": false,
+    "removeComments": true,
     "alwaysStrict": true,
     "strict": true,
     "allowJs": true,
