@@ -51,7 +51,7 @@ class WebServer {
             coroutineScope.async {
                 AspirinServer.httpClient
                     .get("https://api.mojang.com/users/profiles/minecraft/$name")
-                    .body<JsonObject?>()?.get("id")?.asString?.let { parseUndashedId(it) }
+                    .body<JsonObject?>()?.get("id")?.asString?.let { parseUndashedUuid(it) }
             }.asCompletableFuture()
         })
 
@@ -199,7 +199,7 @@ class WebServer {
         return AspirinServer.httpClient.post("https://sessionserver.mojang.com/session/minecraft/join") {
             setBody(JsonObject().also {
                 it.addProperty("accessToken", accessToken)
-                it.addProperty("selectedProfile", playerId.toString().replace("-", ""))
+                it.addProperty("selectedProfile", playerId.toHexString())
                 it.addProperty("serverId", hash)
             })
             contentType(ContentType.Application.Json)

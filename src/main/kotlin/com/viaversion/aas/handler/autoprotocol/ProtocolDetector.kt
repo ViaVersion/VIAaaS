@@ -58,7 +58,7 @@ object ProtocolDetector {
                                 .addLast("handler", MinecraftHandler(data, frontEnd = false))
                         }
                     })
-                    .connect(address!!)
+                    .connect(address)
                 ch.addListener(ChannelFutureListener {
                     if (!it.isSuccess) {
                         future.completeExceptionally(it.cause())

@@ -1,7 +1,6 @@
 package com.viaversion.aas.codec.packet.login
 
 import com.viaversion.aas.codec.packet.Packet
-import com.viaversion.aas.protocol.sharewareVersion
 import com.viaversion.aas.readByteArray
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.type.Types
@@ -26,7 +25,7 @@ class CryptoResponse : Packet {
                 }
             }
 
-            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8) || protocolVersion.equalTo(sharewareVersion) -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8) -> {
                 encryptedKey = Types.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
                 encryptedNonce = Types.BYTE_ARRAY_PRIMITIVE.read(byteBuf)
             }
@@ -53,7 +52,7 @@ class CryptoResponse : Packet {
                 }
             }
 
-            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8) || protocolVersion.equalTo(sharewareVersion) -> {
+            protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8) -> {
                 Types.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedKey)
                 Types.BYTE_ARRAY_PRIMITIVE.write(byteBuf, encryptedNonce)
             }

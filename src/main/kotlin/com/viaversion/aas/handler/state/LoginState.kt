@@ -250,9 +250,9 @@ class LoginState : ConnectionState {
         handler.coroutineScope.launch(Dispatchers.IO) {
             try {
                 val profile = hasJoined(frontName, frontHash)
-                val id = profile["id"]!!.asString
+                val id = parseUndashedUuid(profile["id"]!!.asString)
 
-                callbackPlayerId.complete(parseUndashedId(id))
+                callbackPlayerId.complete(id)
             } catch (e: Exception) {
                 callbackPlayerId.completeExceptionally(e)
             }

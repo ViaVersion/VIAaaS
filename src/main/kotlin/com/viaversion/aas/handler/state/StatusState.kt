@@ -22,6 +22,7 @@ class StatusState : ConnectionState {
     override val state: State
         get() = State.STATUS
     var address: HostAndPort? = null
+    private val aspirinId = UUID.nameUUIDFromBytes("VIAaaS".encodeToByteArray()).toString()
 
     override fun handlePacket(handler: MinecraftHandler, ctx: ChannelHandlerContext, packet: Packet) {
         if (packet is UnknownPacket) throw StacklessException("Invalid packet")
@@ -37,7 +38,7 @@ class StatusState : ConnectionState {
             val players = parsed.getAsJsonObject("players") ?: JsonObject().also { parsed.add("players", it) }
             val sample = players.getAsJsonArray("sample") ?: JsonArray().also { players.add("sample", it) }
             sample.add(JsonObject().also {
-                it.addProperty("id", UUID.nameUUIDFromBytes("VIAaaS".toByteArray(Charsets.UTF_8)).toString())
+                it.addProperty("id", aspirinId)
                 it.addProperty(
                     "name", "§9VIAaaS§r C: §7%s§'r S: §7%s"
                         .format(handler.data.frontVer, handler.data.backServerVer)

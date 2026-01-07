@@ -26,7 +26,9 @@ public class MinecraftCodec extends MessageToMessageCodec<ByteBuf, Packet> {
 		try {
 			var handler = ctx.pipeline().get(MinecraftHandler.class);
 			var version = handler.getData().getFrontVer();
-			if (version == null) version = ProtocolVersion.unknown;
+			if (version == null) {
+				version = ProtocolVersion.unknown;
+			}
 			PacketRegistry.INSTANCE.encode(
 					msg,
 					buf,

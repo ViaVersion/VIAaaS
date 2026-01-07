@@ -5,7 +5,6 @@ import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.readRemainingBytes
 import com.viaversion.aas.send
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
-import com.viaversion.viaversion.api.type.Type
 import com.viaversion.viaversion.api.type.Types
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
@@ -51,7 +50,7 @@ fun decodeBrand(data: ByteArray, is17: Boolean): String {
 
 fun encodeBrand(string: String, is17: Boolean): ByteArray {
     return if (is17) {
-        string.toByteArray(Charsets.UTF_8)
+        string.encodeToByteArray()
     } else {
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {

@@ -2,9 +2,7 @@ package com.viaversion.aas.codec.packet.login;
 
 import com.viaversion.aas.UtilKt;
 import com.viaversion.aas.codec.packet.Packet;
-import com.viaversion.aas.protocol.AspirinProtocolsKt;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.Types;
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;
@@ -22,8 +20,7 @@ public class CryptoRequest implements Packet {
 	@Override
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		serverId = Types.STRING.read(byteBuf);
-		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)
-				|| protocolVersion.equalTo(AspirinProtocolsKt.getSharewareVersion())) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)) {
 			publicKey = KeyFactory.getInstance("RSA")
 					.generatePublic(new X509EncodedKeySpec(Types.BYTE_ARRAY_PRIMITIVE.read(byteBuf)));
 			nonce = Types.BYTE_ARRAY_PRIMITIVE.read(byteBuf);
@@ -39,10 +36,8 @@ public class CryptoRequest implements Packet {
 
 	@Override
 	public void encode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
-
 		Types.STRING.write(byteBuf, serverId);
-		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)
-				|| protocolVersion.equalTo(AspirinProtocolsKt.getSharewareVersion())) {
+		if (protocolVersion.newerThanOrEqualTo(ProtocolVersion.v1_8)) {
 			Types.BYTE_ARRAY_PRIMITIVE.write(byteBuf, publicKey.getEncoded());
 			Types.BYTE_ARRAY_PRIMITIVE.write(byteBuf, nonce);
 		} else {

@@ -1,6 +1,5 @@
 package com.viaversion.aas
 
-import com.google.common.base.Preconditions
 import com.google.common.net.HostAndPort
 import com.google.common.net.UrlEscapers
 import com.google.common.primitives.Ints
@@ -42,6 +41,9 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
 val badLength = DecoderException("Invalid length!")
 val mcLogger = LoggerFactory.getLogger("VIAaaS MC")
@@ -126,18 +128,17 @@ fun encryptRsa(publicKey: PublicKey, data: ByteArray) = Cipher.getInstance("RSA/
 
 fun aesKey(key: ByteArray) = SecretKeySpec(key, "AES")
 
-// https://github.com/VelocityPowered/Velocity/blob/6467335f74a7d1617512a55cc9acef5e109b51ac/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
-@OptIn(ExperimentalUnsignedTypes::class)
-fun parseUndashedId(string: String): UUID {
-    Preconditions.checkArgument(string.length == 32, "Length is incorrect")
-    return UUID(
-        string.take(16).toULong(16).toLong(),
-        string.substring(16).toULong(16).toLong()
-    )
+@OptIn(ExperimentalUuidApi::class)
+fun parseUndashedUuid(string: String): UUID {
+    return Uuid.parseHex(string).toJavaUuid()
+}
+
+fun UUID.toHexString(): String {
+    return this.toString().filterNot { it == '-' }
 }
 
 // https://github.com/VelocityPowered/Velocity/blob/0dd6fe1ef2783fe1f9322af06c6fd218aa67cdb1/proxy/src/main/java/com/velocitypowered/proxy/util/EncryptionUtils.java
-fun generateServerHash(serverId: String, sharedSecret: ByteArray?, key: PublicKey): String {
+fun generateServerHash(serverId: String, sharedSecret: ByteArray, key: PublicKey): String {
     val digest = MessageDigest.getInstance("SHA-1")
     digest.update(serverId.toByteArray(Charsets.ISO_8859_1))
     digest.update(sharedSecret)
@@ -150,9 +151,9 @@ fun twosComplementHexdigest(digest: ByteArray): String {
 }
 
 // https://github.com/VelocityPowered/Velocity/blob/e3f17eeb245b8d570f16c1f2aff5e7eafb698d5e/api/src/main/java/com/velocitypowered/api/util/UuidUtils.java
-fun generateOfflinePlayerUuid(username: String) = UUID.nameUUIDFromBytes(
-    "OfflinePlayer:$username".toByteArray(Charsets.UTF_8)
-)
+fun generateOfflinePlayerUuid(username: String): UUID {
+    return UUID.nameUUIDFromBytes("OfflinePlayer:$username".encodeToByteArray())
+}
 
 fun checkLocalAddress(inetAddress: InetAddress): Boolean {
     return VIAaaSConfig.blockLocalAddress && (inetAddress.isAnyLocalAddress
@@ -247,9 +248,7 @@ fun generateServerId() = ByteArray(13).let {
 }
 
 fun sha512Hex(data: ByteArray): String {
-    return MessageDigest.getInstance("SHA-512").digest(data)
-        .asUByteArray()
-        .joinToString("") { it.toString(16).padStart(2, '0') }
+    return MessageDigest.getInstance("SHA-512").digest(data).toHexString()
 }
 
 fun eventLoopGroup(): EventLoopGroup {
@@ -275,8 +274,8 @@ fun reverseLookup(address: InetAddress): String {
         bytes.reversed()
             .joinToString(".") { it.toUByte().toString() } + ".in-addr.arpa"
     } else { // IPv6
-        bytes.flatMap { it.toUByte().toString(16).padStart(2, '0').toCharArray().map { it.toString() } }
-            .asReversed()
+        bytes.toHexString()
+            .reversed().toCharArray()
             .joinToString(".") + ".ip6.arpa"
     }
 }

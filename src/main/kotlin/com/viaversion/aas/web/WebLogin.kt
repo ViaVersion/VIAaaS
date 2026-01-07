@@ -67,7 +67,7 @@ class WebLogin : WebState {
     }
 
     private suspend fun handleOfflineLogin(webClient: WebClient, msg: String, obj: JsonObject) {
-        if (!sha512Hex(msg.toByteArray(Charsets.UTF_8)).startsWith("00000")) throw StacklessException("PoW failed")
+        if (!sha512Hex(msg.encodeToByteArray()).startsWith("00000")) throw StacklessException("PoW failed")
         if (abs(obj["date"].asLong - System.currentTimeMillis()) > Duration.ofSeconds(20).toMillis()) {
             throw StacklessException("Invalid PoW date")
         }
@@ -167,7 +167,7 @@ class WebLogin : WebState {
         val profile = AspirinServer.httpClient.get("https://api.minecraftservices.com/minecraft/profile") {
             header("Authorization", "Bearer $accessToken")
         }.body<JsonObject>()
-        val uuid = parseUndashedId(profile["id"].asString)
+        val uuid = parseUndashedUuid(profile["id"].asString)
         if (uuid != expectedId) {
             throw IllegalStateException("expected $expectedId == $uuid")
         }

@@ -15,7 +15,8 @@ public class PluginMessage implements Packet {
 	public void decode(@NotNull ByteBuf byteBuf, ProtocolVersion protocolVersion) throws Exception {
 		channel = Types.STRING.read(byteBuf);
 		if (protocolVersion.olderThanOrEqualTo(ProtocolVersion.v1_7_6)) {
-			data = UtilKt.readByteArray(byteBuf, readExtendedForgeShort(byteBuf));
+			int size = readExtendedForgeShort(byteBuf);
+			data = UtilKt.readByteArray(byteBuf, size);
 		} else {
 			data = UtilKt.readRemainingBytes(byteBuf);
 		}
