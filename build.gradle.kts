@@ -43,6 +43,10 @@ kotlin {
     jvmToolchain(17)
 }
 
+if (JavaVersion.current() < JavaVersion.VERSION_21) {
+    throw GradleException("This build must be run with Java 21 or higher.")
+}
+
 val gitVersion: groovy.lang.Closure<String> by extra
 
 group = "com.viaversion.aas"

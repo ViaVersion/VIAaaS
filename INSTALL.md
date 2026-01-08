@@ -1,5 +1,5 @@
 ## Pre-requisites
-- Java 17 or higher
+- Java 21 or higher
 - Node.js and NPM (for compiling)
 - Git (for compiling)
 
