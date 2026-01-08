@@ -155,6 +155,10 @@ fun generateOfflinePlayerUuid(username: String): UUID {
     return UUID.nameUUIDFromBytes("OfflinePlayer:$username".encodeToByteArray())
 }
 
+fun isOfflinePlayer(uuid: UUID): Boolean {
+    return uuid.version() == 3
+}
+
 fun checkLocalAddress(inetAddress: InetAddress): Boolean {
     return VIAaaSConfig.blockLocalAddress && (inetAddress.isAnyLocalAddress
             || inetAddress.isLinkLocalAddress

@@ -171,8 +171,17 @@ class WebLogin : WebState {
         if (uuid != expectedId) {
             throw IllegalStateException("expected $expectedId == $uuid")
         }
+        val username = profile["name"].asString
 
         webClient.server.addAccessToken(uuid, accessToken)
         webLogger.info("Received token: {} {}", webClient.id, uuid)
+
+        val response = JsonObject().also {
+            it.addProperty("action", "save_access_token_result")
+            it.addProperty("username", username)
+            it.addProperty("uuid", uuid.toString())
+            it.addProperty("success", true)
+        }
+        webClient.ws.sendSerialized(response)
     }
 }

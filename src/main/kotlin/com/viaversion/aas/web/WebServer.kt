@@ -16,6 +16,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.netty.*
 import io.ktor.server.websocket.*
+import io.ktor.util.network.address
 import io.ktor.websocket.*
 import io.netty.handler.codec.dns.DefaultDnsQuestion
 import io.netty.handler.codec.dns.DnsPtrRecord
@@ -120,7 +121,8 @@ class WebServer {
     suspend fun renewToken(token: String): String? {
         val info = parseToken(token) ?: return null
         var name = info.name ?: "(unknown)"
-        if (info.id.version() == 4) { // random
+        if (!isOfflinePlayer(info.id)) {
+            // update username
             name = idToProfileCache[info.id].await()?.get("name")?.asString ?: name
         }
         return generateToken(info.id, name)
@@ -220,34 +222,33 @@ class WebServer {
         } else {
             coroutineScope.apply {
                 launch(Dispatchers.IO) {
-                    var info: JsonObject? = null
                     var ptr: String? = null
                     if (address is InetSocketAddress) {
                         try {
-                            val cleanedIp = address.hostString.substringBefore("%")
                             val dnsQuery = AspirinServer.dnsResolver
                                 .resolveAll(DefaultDnsQuestion(reverseLookup(address.address), DnsRecordType.PTR))
-                            ptr = dnsQuery.suspendAwait().let {
+                            ptr = dnsQuery.suspendAwait().let { dnsResult ->
                                 try {
-                                    it.firstNotNullOfOrNull { it as? DnsPtrRecord }?.hostname()
+                                    dnsResult.firstNotNullOfOrNull { it as? DnsPtrRecord }?.hostname()
                                         ?.removeSuffix(".")
                                 } finally {
-                                    it.forEach { ReferenceCountUtil.release(it) }
+                                    dnsResult.forEach { ReferenceCountUtil.release(it) }
                                 }
                             }
                         } catch (ignored: Exception) {
                         }
                     }
 
-                    val reverseInfo = if (ptr != null) "($ptr)" else ""
-
-                    val msg = "Requester: $id $address $reverseInfo\nBackend: $backAddress"
                     listeners[id].forEach {
                         it.ws.sendSerialized(JsonObject().also {
                             it.addProperty("action", "session_hash_request")
                             it.addProperty("user", name)
+                            it.addProperty("requester_id", id.toString())
+                            it.addProperty("requester_name", frontName)
+                            it.addProperty("requester_address", address.address)
+                            it.addProperty("requester_reverse_dns", ptr)
+                            it.addProperty("backend_server", backAddress.address)
                             it.addProperty("session_hash", hash)
-                            it.addProperty("message", msg)
                         })
                         it.ws.flush()
                     }

@@ -240,14 +240,16 @@ function addToast(title: string, msg: string, yes: (() => void) | null = null, n
    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
  </div>
  <div class="toast-body">
-   <pre class="txt text-wrap"></pre>
+   <div class="txt text-wrap"></div>
    <div class="btns mt-2 pt-2 border-top"></div>
  </div>
 </div>`);
     toast.find(".toast_title_msg").text(title);
 
-    let tBody = toast.find(".toast-body");
-    tBody.find(".txt").text(msg);
+    let tBody = toast.find(".toast-body")
+    let txtElement = tBody.find(".txt")
+    txtElement.text(msg);
+    txtElement.html(txtElement.html().replaceAll("\n", "<br>"));
 
     let btns = $(tBody).find(".btns");
     let hasButtons = false;
@@ -705,10 +707,24 @@ function confirmJoin(hash: string) {
     socket?.send(JSON.stringify({action: "session_hash_response", session_hash: hash}));
 }
 
+function isOfflinePlayer(uuid: string) {
+    const version = uuid.replaceAll('-', '').charAt(12)
+    return version === '3'
+}
+
 function handleJoinRequest(parsed: any) {
-    authNotification("Allow auth from VIAaaS instance?\nAccount: "
-        + parsed.user + "\nServer Message: \n"
-        + parsed.message.split(/[\r\n]+/).map((it: string) => "> " + it).join('\n'), () => {
+    let backName = parsed.user;
+    let frontId = parsed.requester_id
+    let frontOnline = !isOfflinePlayer(frontId)
+    let frontName = parsed.requester_name
+    let offline = frontOnline ? "" : "* (off)"
+    let backServer = parsed.backend_server
+    let address = parsed.requester_address
+    let reverse = parsed.requester_reverse_dns
+    let msg = `Allow '${frontName}'${offline} to use account '${backName}'?`
+        + `\nDestination: ${backServer}`
+        + `\nIP address of requester: ${address} (${reverse})`
+    authNotification(msg, () => {
         let account = findAccountByMcName(parsed.user);
         if (account) {
             account.joinGame(parsed.session_hash)
@@ -750,6 +766,9 @@ function onWsMsg(event: MessageEvent) {
         case "parameters_request":
             handleParametersRequest(parsed);
             break;
+        case "save_access_token_result":
+            addToast("Saved access token", "Received access token of account " + parsed.username + ".");
+            break
     }
 }
 
