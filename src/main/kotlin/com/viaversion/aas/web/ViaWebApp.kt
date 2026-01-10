@@ -4,11 +4,15 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
+import io.ktor.server.application.install
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.calllogging.*
-import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.compression.Compression
+import io.ktor.server.plugins.compression.gzip
+import io.ktor.server.plugins.compression.matchContentType
+import io.ktor.server.plugins.compression.minimumSize
 import io.ktor.server.plugins.conditionalheaders.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.defaultheaders.*
@@ -58,32 +62,51 @@ class ViaWebApp(val viaWebServer: WebServer) {
 
     private fun Route.routeRoot() {
         route("/") {
-            // https://ktor.io/docs/compression.html#security
-            install(Compression)
+            // https://ktor.io/docs/server-compression.html#security
+            install(Compression) {
+                gzip {
+                    minimumSize(4096)
+                    matchContentType(
+                        ContentType.Text.Html,
+                        ContentType.Text.JavaScript,
+                        ContentType.Text.CSS
+                    )
+                }
+            }
             install(CachingHeaders) {
-                options { _, _ ->
-                    CachingOptions(CacheControl.MaxAge(600, visibility = CacheControl.Visibility.Public))
+                options { _, content ->
+                    when (content.contentType?.withoutParameters()) {
+                        ContentType.Text.Html,
+                        ContentType.Text.JavaScript,
+                        ContentType.Text.CSS -> CachingOptions(CacheControl.NoCache(CacheControl.Visibility.Public))
+                        else -> null
+                    }
                 }
             }
             install(ConditionalHeaders)
             install(PartialContent)
             get("{path...}") {
-                val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")
-                val index = Path.of("index.html")
-
-                val resource = call.resolveResource(relativePath.toString(), "web")
-                    ?: call.resolveResource(relativePath.resolve(index).toString(), "web")
-
-                var file = File("config/web/").combineSafe(relativePath)
-                if (file.isDirectory) {
-                    file = file.resolve(index.toFile())
-                }
-
-                when {
-                    file.isFile -> call.respondFile(file)
-                    resource != null -> call.respond(resource)
-                }
+                serveFileOrResource()
             }
+        }
+    }
+
+    private suspend fun RoutingContext.serveFileOrResource() {
+        val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")
+        val index = Path.of("index.html")
+
+        val resource = call.resolveResource(relativePath.toString(), "web")
+            ?: call.resolveResource(relativePath.resolve(index).toString(), "web")
+
+        var file = File("config/web/").combineSafe(relativePath)
+        if (file.isDirectory) {
+            file = file.resolve(index.toFile())
+        }
+
+        when {
+            file.isFile -> call.respondFile(file)
+            resource != null -> call.respond(resource)
+            else -> call.respond(HttpStatusCode.NotFound, "404 Not Found")
         }
     }
 
@@ -108,6 +131,11 @@ class ViaWebApp(val viaWebServer: WebServer) {
 
     private fun Route.routeApi() {
         route("/api/") {
+            install(CachingHeaders) {
+                options { _, _ ->
+                    CachingOptions(CacheControl.NoStore(CacheControl.Visibility.Private))
+                }
+            }
             get("/getEpoch") {
                 call.respond(System.currentTimeMillis() / 1000)
             }
