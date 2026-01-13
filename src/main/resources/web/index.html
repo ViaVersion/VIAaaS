@@ -17,7 +17,7 @@
 style-src 'self' https://cdnjs.cloudflare.com/;
 img-src 'self' data: https://crafthead.net/;
 connect-src 'self' http://localhost:*/ https: wss:;
-script-src 'self' https://*.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/;
+script-src 'self' https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/ https://*.cloudflareinsights.com/;
 frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
           http-equiv="Content-Security-Policy">
     <meta content="no-referrer" name="referrer">
@@ -26,24 +26,17 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
 
     <!-- https://www.srihash.org/ -->
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/css/bootstrap.min.css"
-          integrity="sha512-XWTTruHZEYJsxV3W/lSXG1n3Q39YIWOstqvmFsdNEEQfHoZ6vm6E9GK2OrF6DSJSpIbRbi+Nn0WDPID9O7xB2Q=="
-          crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/js/bootstrap.bundle.min.js"
-            integrity="sha512-9GacT4119eY3AcosfWtHMsT5JyZudrexyEVzTBWV3viP/YfB9e2pEy3N7WXL3SV6ASXpTU0vzzSxsbfsuUH4sQ=="
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css"
+          integrity="sha512-2bBQCjcnw658Lho4nlXJcc6WkV/UxpE/sAokbXPxQNGqmNdQrWqtw26Ns9kFF/yG792pKR1Sx8/Y1Lf1XN4GKA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js"
+            integrity="sha512-HvOjJrdwNpDbkGJIG2ZNqDlVqMo77qbs4Me4cah0HoDrfhrbA+8SBlZn1KrvAQw7cILLPFJvdwIgphzQmMm+Pw=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- Safari workaround -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/HTML5Notification/3.0.0/Notification.min.js"
-            integrity="sha512-gx0m7Qoum1Bb0KrP6AEZSt0e+o2xMEyStAz2TNGXGqR4HSVgPveWFQdtE06FRvJmmp8HdkJklOLYiV3aZN6tQg=="
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+            integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
-            integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script defer crossorigin="anonymous"
-            integrity="sha512-UNM1njAgOFUa74Z0bADwAq8gbTcqZC8Ej4xPSzpnh0l6KMevwvkBvbldF9uR++qKeJ+MOZHRjV1HZjoRvjDfNQ=="
-            src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-    <script defer src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"
-            integrity="sha384-ei8xVSyFPTuRnbO1sdYy5qJT6Kd9neBfVG8AjZySEwdMG1GhCThbceSqxJnx0Ci3"
+    <script defer src="https://alcdn.msauth.net/browser/2.37.1/js/msal-browser.min.js"
+            integrity="sha384-NWzhDi2da+GzMWIyUGu3sgmclPtsYExbv/YFAR4wGgSMq5DPqao5bZWgVuM6udHv"
             crossorigin="anonymous"></script>
     <script defer src="js/config.js"></script>
     <script defer src="js/page.js"></script>
@@ -268,7 +261,7 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <h6>Standalone ViaVersion Proxy</h6>
                 </div>
                 <div class="text-center mb-3">
-                    <p class="mb-1">Copyright © 2020-2025 <a
+                    <p class="mb-1">Copyright © 2020-2026 <a
                             href="https://github.com/creeper123123321">creeper123123321</a></p>
                     <p class="mb-1">Copyright © 2021-2025 <a
                             href="https://github.com/ViaVersion/VIAaaS/graphs/contributors">contributors</a>

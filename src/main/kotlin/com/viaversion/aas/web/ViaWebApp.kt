@@ -32,7 +32,20 @@ import kotlin.time.Duration.Companion.seconds
 
 class ViaWebApp(val viaWebServer: WebServer) {
     fun Application.main() {
-        install(DefaultHeaders)
+        install(DefaultHeaders) {
+            header(
+                "Content-Security-Policy",
+                "default-src 'self';" +
+                        "style-src 'self' https://cdnjs.cloudflare.com/;" +
+                        "img-src 'self' data: https://crafthead.net/;" +
+                        "connect-src 'self' http://localhost:*/ https: wss:;" +
+                        "script-src 'self' https://cdnjs.cloudflare.com/ https://alcdn.msauth.net/ https://static.cloudflareinsights.com/;" +
+                        "frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
+            )
+            header("X-Robots-Tag", "noindex, nofollow")
+            header("X-Frame-Options", "SAMEORIGIN")
+            header("Referrer-Policy", "no-referrer")
+        }
         install(CallLogging) {
             level = Level.DEBUG
             this.format {
@@ -79,6 +92,7 @@ class ViaWebApp(val viaWebServer: WebServer) {
                         ContentType.Text.Html,
                         ContentType.Text.JavaScript,
                         ContentType.Text.CSS -> CachingOptions(CacheControl.NoCache(CacheControl.Visibility.Public))
+
                         else -> null
                     }
                 }

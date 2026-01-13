@@ -172,7 +172,7 @@ function renderActions() {
     $("#en_notifications").hide();
     $("#listen_open").hide();
     $("#send_token_open").hide();
-    if (Notification.permission === "default") {
+    if (Notification != undefined && Notification.permission === "default") {
         $("#en_notifications").show();
     }
     if (listenVisible) {
@@ -317,11 +317,11 @@ function handleSWMsg(event) {
     callback(data.action);
 }
 function authNotification(msg, yes, no) {
-    if (!navigator.serviceWorker || Notification.permission !== "granted") {
+    if (!navigator.serviceWorker || !Notification || Notification.permission !== "granted") {
         addToast("Allow auth?", msg, yes, no);
         return;
     }
-    let tag = uuid.v4();
+    let tag = crypto.randomUUID();
     navigator.serviceWorker.ready.then(r => {
         let options = {
             body: msg,
