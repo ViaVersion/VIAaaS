@@ -14,12 +14,7 @@ let listenVisible = false;
 let deltaTime = 0;
 let challenge = "";
 let workers: Array<Worker> = [];
-$(() => {
-    workers = new Array(navigator.hardwareConcurrency)
-        .fill(null)
-        .map(() => new Worker("js/worker.js"))
-    workers.forEach(it => it.onmessage = onWorkerMsg);
-});
+
 $(() => {
     if (navigator.serviceWorker) {
         navigator.serviceWorker.register("sw.js").catch(e => {
@@ -74,10 +69,22 @@ function setWsStatus(txt: string) {
     connectionStatus.innerText = txt;
 }
 
+function getWorkers(): Array<Worker> {
+    if (workers.length != 0) return workers
+    workers = new Array(navigator.hardwareConcurrency)
+    for (let i = 0; i < workers.length; i++) {
+        let w = new Worker("js/worker.js")
+        workers[i] = w
+        w.addEventListener("message", onWorkerMsg)
+    }
+    return workers
+}
+
 function refreshCorsStatus() {
     corsStatus.innerText = "...";
-    getIpAddress(true).then(ip => {
-        return getIpAddress(false).then(ip2 => corsStatus.innerText = "OK " + ip + (ip !== ip2 ? " (different IP)" : ""));
+    getIpAddress(true).then(async ip => {
+        const ip2 = await getIpAddress(false);
+        return corsStatus.innerText = "OK " + ip + (ip !== ip2 ? " (different IP)" : "");
     }).catch(e => corsStatus.innerText = "error: " + e);
 }
 
@@ -157,7 +164,7 @@ function submittedListen() {
         // todo
     } else {
         let taskId = Math.random();
-        workers.forEach(it => it.postMessage({
+        getWorkers().forEach(it => it.postMessage({
             action: "listen_pow",
             user: user,
             id: taskId,
@@ -210,7 +217,7 @@ function onWorkerMsg(e: MessageEvent) {
 
 function onCompletedPoW(e: MessageEvent) {
     addToast("Offline username", "Completed proof of work");
-    workers.forEach(it => it.postMessage({action: "cancel", id: e.data.id}));
+    getWorkers().forEach(it => it.postMessage({action: "cancel", id: e.data.id}));
     sendSocket(e.data.msg);
 }
 
