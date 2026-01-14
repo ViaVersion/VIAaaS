@@ -2,13 +2,14 @@
 // Note that some APIs only work on HTTPS
 
 // Page
-let connectionStatus = document.getElementById("connection_status")!!;
-let corsStatus = document.getElementById("cors_status")!!;
-let listening = document.getElementById("listening")!!;
-let accounts = document.getElementById("accounts-list")!!;
+let connectionStatus = document.getElementById("connection_status")!;
+let corsStatus = document.getElementById("cors_status")!;
+let listening = document.getElementById("listening")!;
+let accounts = document.getElementById("accounts-list")!;
 let cors_proxy_txt = document.getElementById("cors-proxy") as HTMLInputElement;
 let ws_url_txt = document.getElementById("ws-url") as HTMLInputElement;
 let instance_suffix_input = document.getElementById("instance_suffix") as HTMLInputElement;
+let addressInfoForm = document.getElementById("address_info_form") as HTMLFormElement
 let listenVisible = false;
 // + deltaTime means that the clock is ahead
 let deltaTime = 0;
@@ -127,8 +128,9 @@ function copyGeneratedAddress() {
 }
 
 function generateAddress() {
-    let backAddress = $("#connect_address").val();
     try {
+        if (!addressInfoForm.checkValidity()) throw Error("invalid input")
+        let backAddress = $("#connect_address").val();
         let url = new URL("https://" + backAddress);
         let finalAddress = "";
         let host = url.hostname;
@@ -155,6 +157,7 @@ function generateAddress() {
 function submittedListen() {
     let user = ($("#listen_username").val() as string).trim();
     if (!user) return;
+    bootstrap.Modal.getInstance("#listenModal")!.hide()
     if (($("#listen_online")[0] as HTMLInputElement).checked) {
         sendSocket(JSON.stringify({
             action: "temp_code_login",
@@ -176,6 +179,7 @@ function submittedListen() {
 }
 
 function submittedSendToken() {
+    bootstrap.Modal.getInstance("#sendTokenModal")!.hide()
     let account = findAccountByMcName($("#send_token_user").val() as string)
     if (!account) return;
     account.acquireActiveToken()
@@ -802,7 +806,7 @@ function listenStoredTokens() {
 
 function onWsConnect(e: Event) {
     let msg = "connected";
-    let socketHost = new URL(socket!!.url).host;
+    let socketHost = new URL(socket!.url).host;
     if (socketHost != location.host) msg += ` to ${socketHost}`;
     setWsStatus(msg);
     resetHtml();

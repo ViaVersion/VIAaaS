@@ -66,13 +66,20 @@ class WebLogin : WebState {
         }
     }
 
+    private fun validateUsername(name: String) {
+        if (name.length > 16) throw StacklessException("Username is too long")
+    }
+
     private suspend fun handleOfflineLogin(webClient: WebClient, msg: String, obj: JsonObject) {
         if (!sha512Hex(msg.encodeToByteArray()).startsWith("00000")) throw StacklessException("PoW failed")
         if (abs(obj["date"].asLong - System.currentTimeMillis()) > Duration.ofSeconds(20).toMillis()) {
             throw StacklessException("Invalid PoW date")
         }
-        if (obj["challenge"].asString != webClient.challenge) throw StacklessException("Invalid challenge")
+        if (obj["challenge"].asString != webClient.challenge) {
+            throw StacklessException("Invalid challenge")
+        }
         val username = obj["username"].asString
+        validateUsername(username)
         val uuid = generateOfflinePlayerUuid(username)
 
         val token = webClient.server.generateToken(uuid, username)
@@ -83,6 +90,7 @@ class WebLogin : WebState {
 
     private suspend fun handleTempCodeLogin(webClient: WebClient, obj: JsonObject) {
         val username = obj["username"].asString
+        validateUsername(username)
         val code = obj["code"].asString
 
         val check = webClient.server.checkTempCode(username, code)
@@ -137,31 +145,48 @@ class WebLogin : WebState {
         webClient.server.completeSessionHashCallback(hash)
     }
 
+    private fun parseVersion(versionString: String): ProtocolVersion {
+        if (versionString.length > 20) throw IllegalArgumentException("Version is too long")
+        return Ints.tryParse(versionString)?.let { ProtocolVersion.getProtocol(it) }
+            ?: ProtocolVersion.getClosest(versionString) ?: AUTO
+    }
+
+    private fun parseHostAndPort(host: String, port: Int): HostAndPort {
+        if (host.length > 255) {
+            throw IllegalArgumentException("Host too long")
+        }
+        return HostAndPort.fromParts(host, port)
+    }
+
     private fun handleParametersResponse(webClient: WebClient, obj: JsonObject) {
         val callback = UUID.fromString(obj["callback"].asString)
+        val backName = obj["backName"]?.asString
+        if (backName != null) validateUsername(backName)
+
         webClient.server.completeAddressCallback(
             callback, AddressInfo(
-                backVersion = obj["version"].asString.let {
-                    Ints.tryParse(it)?.let { ProtocolVersion.getProtocol(it) }
-                        ?: ProtocolVersion.getClosest(it) ?: AUTO
-                },
-                backHostAndPort = HostAndPort.fromParts(obj["host"].asString, obj["port"].asInt),
+                backVersion = parseVersion(obj["version"].asString),
+                backHostAndPort = parseHostAndPort(obj["host"].asString, obj["port"].asInt),
                 frontOnline = obj["frontOnline"].asString.toBooleanStrictOrNull(),
-                backName = obj["backName"]?.asString
+                backName = backName
             )
         )
+    }
+
+    private fun verifyTokenTime(notBefore: Instant, expiration: Instant) {
+        val now = Instant.now()
+        if (now > expiration) {
+            throw IllegalArgumentException("mc access token has expired")
+        }
+        if (now < notBefore) {
+            throw IllegalArgumentException("mc access token notBefore is in the future")
+        }
     }
 
     private suspend fun handleSaveAccessToken(webClient: WebClient, obj: JsonObject) {
         val accessToken = obj["mc_access_token"].asString
         val decodedToken = JWT.decode(accessToken)
-        val now = Instant.now()
-        if (now > decodedToken.expiresAtAsInstant) {
-            throw IllegalArgumentException("mc access token has expired")
-        }
-        if (now < decodedToken.notBeforeAsInstant) {
-            throw IllegalArgumentException("mc access token notBefore is in the future")
-        }
+        verifyTokenTime(decodedToken.notBeforeAsInstant, decodedToken.expiresAtAsInstant)
         val expectedId = UUID.fromString(decodedToken.getClaim("profiles").asMap()["mc"].toString())
 
         val profile = AspirinServer.httpClient.get("https://api.minecraftservices.com/minecraft/profile") {

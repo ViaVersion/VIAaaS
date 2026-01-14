@@ -105,13 +105,13 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
             <form class="input-group mb-3 row g-3 justify-content-md-center" id="address_info_form">
                 <div class="col-md-3">
                     <input id="connect_address" type="text" class="form-control" placeholder="Address:Port"
-                           aria-label="Address and Port">
+                           aria-label="Address and Port" required maxlength="200">
                 </div>
                 <div class="col-md-2">
                     <div class="input-group">
                         <span class="input-group-text"><abbr title="Version">v</abbr></span>
                         <input id="connect_version" type="text" class="form-control col-auto" placeholder="Version"
-                               aria-label="Version" list="backend_version_list">
+                               aria-label="Version" list="backend_version_list" maxlength="20">
                     </div>
                     <datalist id="backend_version_list">
                         <option>AUTO</option>
@@ -189,7 +189,7 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <div class="input-group">
                         <span class="input-group-text">.</span>
                         <input id="instance_suffix" type="text" class="form-control"
-                               placeholder="Instance Suffix" aria-label="Instance Suffix" disabled readonly>
+                               placeholder="Instance Suffix" aria-label="Instance Suffix" disabled readonly required maxlength="64">
                     </div>
                 </div>
             </form>
@@ -347,7 +347,7 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <p>The instance will send auth requests and address parameters to this page.</p>
                     <div class="mb-3">
                         <label for="listen_username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="listen_username">
+                        <input type="text" class="form-control" id="listen_username" required maxlength="16">
                     </div>
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="listen_online" checked>
@@ -356,18 +356,18 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <div class="mb-3" id="listen_code_div">
                         <label for="listen_code" class="form-label">Temp Code</label>
                         <p>Join <span id="link_address" class="font-monospace"></span> in game to get the temporary code</p>
-                        <input type="text" class="form-control" id="listen_code">
+                        <input type="text" class="form-control" id="listen_code" maxlength="7">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Listen</button>
+                    <button type="submit" class="btn btn-primary">Listen</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-<div aria-hidden="true" aria-labelledby="listenModalLabel" class="modal fade" id="sendTokenModal" tabindex="-1">
+<div aria-hidden="true" aria-labelledby="sendTokenModalLabel" class="modal fade" id="sendTokenModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <form id="form_send_token">
             <div class="modal-content">
@@ -381,13 +381,13 @@ frame-src 'self' https://login.microsoftonline.com/ https://login.live.com/"
                     <p>You'll need to connect as online-mode in the front-end.</p>
                     <div class="input-group mb-3">
                         <label class="input-group-text" for="send_token_user">Account</label>
-                        <select class="form-select" id="send_token_user">
-                            <option selected>Choose...</option>
+                        <select class="form-select" id="send_token_user" required>
+                            <option value="" selected>Choose...</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Send</button>
+                    <button type="submit" class="btn btn-primary">Send</button>
                 </div>
             </div>
         </form>

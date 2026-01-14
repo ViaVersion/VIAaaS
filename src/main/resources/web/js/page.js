@@ -6,6 +6,7 @@ let accounts = document.getElementById("accounts-list");
 let cors_proxy_txt = document.getElementById("cors-proxy");
 let ws_url_txt = document.getElementById("ws-url");
 let instance_suffix_input = document.getElementById("instance_suffix");
+let addressInfoForm = document.getElementById("address_info_form");
 let listenVisible = false;
 let deltaTime = 0;
 let challenge = "";
@@ -109,8 +110,10 @@ function copyGeneratedAddress() {
     navigator.clipboard.writeText($("#generated_address").text()).catch(e => console.log(e));
 }
 function generateAddress() {
-    let backAddress = $("#connect_address").val();
     try {
+        if (!addressInfoForm.checkValidity())
+            throw Error("invalid input");
+        let backAddress = $("#connect_address").val();
         let url = new URL("https://" + backAddress);
         let finalAddress = "";
         let host = url.hostname;
@@ -142,6 +145,7 @@ function submittedListen() {
     let user = $("#listen_username").val().trim();
     if (!user)
         return;
+    bootstrap.Modal.getInstance("#listenModal").hide();
     if ($("#listen_online")[0].checked) {
         sendSocket(JSON.stringify({
             action: "temp_code_login",
@@ -162,6 +166,7 @@ function submittedListen() {
     }
 }
 function submittedSendToken() {
+    bootstrap.Modal.getInstance("#sendTokenModal").hide();
     let account = findAccountByMcName($("#send_token_user").val());
     if (!account)
         return;
