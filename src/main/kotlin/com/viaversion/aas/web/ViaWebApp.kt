@@ -1,5 +1,6 @@
 package com.viaversion.aas.web
 
+import com.viaversion.aas.AspirinServer
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.serialization.gson.*
@@ -109,19 +110,26 @@ class ViaWebApp(val viaWebServer: WebServer) {
         val relativePath = Path.of(call.parameters.getAll("path")?.joinToString("/") ?: "")
         val index = Path.of("index.html")
 
-        val resource = call.resolveResource(relativePath.toString(), "web")
-            ?: call.resolveResource(relativePath.resolve(index).toString(), "web")
-
         var file = File("config/web/").combineSafe(relativePath)
         if (file.isDirectory) {
             file = file.resolve(index.toFile())
         }
 
-        when {
-            file.isFile -> call.respondFile(file)
-            resource != null -> call.respond(resource)
-            else -> call.respond(HttpStatusCode.NotFound, "404 Not Found")
+        if (file.isFile) {
+            call.respondFile(file)
+            return
         }
+
+        val resource = call.resolveResource(relativePath.toString(), "web")
+            ?: call.resolveResource(relativePath.resolve(index).toString(), "web")
+
+        if (resource != null) {
+            resource.versions += EntityTagVersion("resource." + AspirinServer.version, weak = true)
+            call.respond(resource)
+            return
+        }
+
+        call.respond(HttpStatusCode.NotFound, "404 Not Found")
     }
 
     private fun Route.routeWs() {
