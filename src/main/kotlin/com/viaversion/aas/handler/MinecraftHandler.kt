@@ -3,7 +3,6 @@ package com.viaversion.aas.handler
 import com.viaversion.aas.codec.packet.Packet
 import com.viaversion.aas.mcLogger
 import com.viaversion.aas.setAutoRead
-import com.viaversion.viaversion.exception.CancelCodecException
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
@@ -63,7 +62,6 @@ class MinecraftHandler(
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         if (cause is ProxyConnectException && failedProxy(ctx)) return
-        if (cause is CancelCodecException) return
         if (cause is ClosedChannelException) return
         val exceptionId = ThreadLocalRandom.current().nextInt().toUInt().toString(36)
         mcLogger.debug("Exception {}: ", exceptionId, cause)
