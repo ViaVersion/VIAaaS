@@ -16,7 +16,7 @@ public class AspirinLoader implements ViaPlatformLoader {
 		Via.getManager().getProviders().use(CompressionProvider.class, new AspirinCompressionProvider());
 
 		//ViaBackwards
-		Via.getManager().getProviders().use(TransferProvider.class, new AspirinTransferProvider());
+		Via.getManager().getProviders().use(TransferProvider.class, TransferProvider.NOOP);
 
 		//ViaLegacy
 		Via.getManager().getProviders().use(GameProfileFetcher.class, new AspirinProfileProvider());

@@ -7,9 +7,10 @@ import java.io.File;
 import java.util.logging.Logger;
 
 public class AspirinLegacy implements ViaLegacyPlatform {
+    private final Logger logger = Logger.getLogger("ViaLegacy");
     @Override
     public Logger getLogger() {
-        return Via.getPlatform().getLogger();
+        return logger;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.viaversion.aas.command
 
 import com.viaversion.aas.AspirinServer
-import com.viaversion.aas.command.sub.StopSubCommand
 import com.viaversion.viaversion.api.command.ViaCommandSender
 import net.minecrell.terminalconsole.SimpleTerminalConsole
 import org.jline.reader.Candidate
@@ -10,25 +9,8 @@ import org.jline.reader.LineReaderBuilder
 import org.slf4j.LoggerFactory
 import java.util.*
 
-object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
-    val commands = hashMapOf<String, Command>()
+class VIAaaSConsole(val cmdManager: CommandManager) : SimpleTerminalConsole(), ViaCommandSender {
     override fun isRunning(): Boolean = !AspirinServer.wasStopSignalFired()
-
-    init {
-        commands["viaversion"] = ViaAspirinCommand
-        commands["viaver"] = ViaAspirinCommand
-        commands["vvcloud"] = ViaAspirinCommand
-        commands["vvaas"] = ViaAspirinCommand
-        commands["vvaspirin"] = ViaAspirinCommand
-        commands["viaaas"] = ViaAspirinCommand
-        commands["help"] = HelpCommand
-        commands["?"] = HelpCommand
-        commands["end"] = EndCommand
-        commands["reload"] = ReloadCommand
-        commands["list"] = ListCommand
-        commands["ver"] = VersionCommand.INSTANCE
-        commands["version"] = VersionCommand.INSTANCE
-    }
 
     override fun buildReader(builder: LineReaderBuilder): LineReader {
         // Stolen from Velocity
@@ -38,10 +20,11 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
                 val alias = cmdArgs[0]
                 val args = cmdArgs.filterIndexed { i, _ -> i > 0 }
                 if (cmdArgs.size == 1) {
-                    candidates.addAll(commands.keys.filter { it.startsWith(alias, ignoreCase = true) }
+                    candidates.addAll(cmdManager.commandNames
+                        .filter { it.startsWith(alias, ignoreCase = true) }
                         .map { Candidate(it) })
                 } else {
-                    val command = commands[alias.lowercase()]
+                    val command = cmdManager.getCommand(alias.lowercase())
                     if (command != null) {
                         candidates.addAll(command.suggest(this, alias, args).map(::Candidate))
                     }
@@ -57,7 +40,7 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
         try {
             val alias = cmd[0].lowercase()
             val args = cmd.subList(1, cmd.size)
-            val command = commands[alias]
+            val command = cmdManager.getCommand(alias)
             if (command == null) {
                 sendMessage("Unknown command, try 'help'")
             } else {
@@ -69,7 +52,7 @@ object VIAaaSConsole : SimpleTerminalConsole(), ViaCommandSender {
     }
 
     public override fun shutdown() {
-        StopSubCommand.execute(this, emptyArray())
+        cmdManager.getCommand("end")!!.execute(this, "end", listOf())
     }
 
     override fun sendMessage(p0: String) {

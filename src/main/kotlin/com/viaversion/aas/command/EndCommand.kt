@@ -1,14 +1,16 @@
 package com.viaversion.aas.command
 
+import com.viaversion.aas.AspirinServer
 import com.viaversion.viaversion.api.command.ViaCommandSender
 
-object EndCommand : Command {
-    override val info = "Alias of 'viaaas stop'"
+class EndCommand : Command {
+    override val info = "Stops VIAaaS"
     override fun suggest(sender: ViaCommandSender, alias: String, args: List<String>): List<String> {
         return emptyList()
     }
 
     override fun execute(sender: ViaCommandSender, alias: String, args: List<String>) {
-        ViaAspirinCommand.execute(sender, alias, listOf("stop"))
+        sender.sendMessage("Shutting down...")
+        AspirinServer.stopSignal()
     }
 }

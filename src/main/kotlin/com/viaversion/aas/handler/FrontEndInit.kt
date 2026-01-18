@@ -9,7 +9,7 @@ import io.netty.handler.flow.FlowControlHandler
 import io.netty.handler.timeout.ReadTimeoutHandler
 import java.util.concurrent.TimeUnit
 
-object FrontEndInit : ChannelInitializer<Channel>() {
+class FrontEndInit : ChannelInitializer<Channel>() {
     override fun initChannel(ch: Channel) {
         val handshakeState = HandshakeState()
         val data = ConnectionData(frontChannel = ch, serverState = handshakeState, clientState = handshakeState)

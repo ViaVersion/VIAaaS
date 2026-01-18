@@ -1,5 +1,6 @@
 package com.viaversion.aas
 
+import com.viaversion.aas.command.CommandManager
 import com.viaversion.aas.command.VIAaaSConsole
 import com.viaversion.aas.config.VIAaaSConfig
 import com.viaversion.aas.platform.AspirinAprilFools
@@ -13,9 +14,6 @@ import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.protocol.version.VersionType
 import io.ktor.server.application.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
 
@@ -24,15 +22,19 @@ fun main(args: Array<String>) {
     try {
         setupSystem()
         printStartingSplash()
-        CoroutineScope(Job()).launch { viaaasLogger.info("{}", AspirinServer.updaterCheckMessage()) }
+        AspirinServer.checkForUpdatesStart()
         AspirinServer.generateCert()
-        initVia()
+        val commandManager = CommandManager()
+        initVia(commandManager)
+        AspirinServer.logNativesInfo()
         AspirinServer.listenPorts(args)
+        AspirinServer.logStartupSeconds()
 
         AspirinServer.mainStartSignal()
         AspirinServer.addShutdownHook()
 
-        Thread { VIAaaSConsole.start() }.start()
+        val console = VIAaaSConsole(commandManager)
+        Thread { console.start() }.start()
 
         AspirinServer.waitStopSignal()
     } catch (e: Throwable) {
@@ -58,8 +60,10 @@ private fun printStartingSplash() {
 
 val AUTO = ProtocolVersion(VersionType.SPECIAL, -2, -1, "AUTO", null)
 
-private fun initVia() {
-    AspirinPlatform.initVia {
+private fun initVia(cmdManager: CommandManager) {
+    val platform = AspirinPlatform(cmdManager)
+
+    platform.initVia {
         AspirinBackwards().init()
         AspirinRewind().init()
         AspirinAprilFools().init()

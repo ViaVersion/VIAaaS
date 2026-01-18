@@ -30,6 +30,9 @@ import io.netty.channel.WriteBufferWaterMark
 import io.netty.resolver.dns.DnsNameResolver
 import io.netty.resolver.dns.DnsNameResolverBuilder
 import io.netty.util.concurrent.Future
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.management.ManagementFactory
 import java.security.KeyPair
@@ -108,12 +111,10 @@ object AspirinServer {
     fun mainStartSignal() = initFuture.complete(Unit)
 
     fun listenPorts(args: Array<String>) {
-        viaaasLogger.info("Using transport type {}", NettyTransportTypes.getDefault())
-
         val serverBootstrap = ServerBootstrap()
             .group(parentLoop, childLoop)
             .channelFactory(channelServerSocketFactory())
-            .childHandler(FrontEndInit)
+            .childHandler(FrontEndInit())
             .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, bufferWaterMark)
             .childOption(ChannelOption.IP_TOS, 0x18)
             .childOption(ChannelOption.TCP_NODELAY, true)
@@ -127,18 +128,28 @@ object AspirinServer {
             takeFrom(commandLineCfg.engineConfig)
         }.start(false)
 
-        viaaasLogger.info(
-            "Using compression: {}, crypto: {}",
-            Natives.compress.loadedVariant,
-            Natives.cipher.loadedVariant
-        )
         chFutures.forEach {
             viaaasLogger.info("Binded minecraft into {}", it.sync().channel().localAddress())
         }
+    }
+
+    fun logNativesInfo() {
+        viaaasLogger.info("Using transport: {}, compression: {}, crypto: {}",
+            NettyTransportTypes.getDefault(),
+            Natives.compress.loadedVariant,
+            Natives.cipher.loadedVariant
+        )
+    }
+
+    fun logStartupSeconds() {
         viaaasLogger.info(
             "Application started in " + ManagementFactory.getRuntimeMXBean().uptime
                 .milliseconds.toDouble(DurationUnit.SECONDS) + "s"
         )
+    }
+
+    fun checkForUpdatesStart() {
+        CoroutineScope(Job()).launch { viaaasLogger.info("{}", updaterCheckMessage()) }
     }
 
     fun generateCert() {
