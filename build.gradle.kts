@@ -68,7 +68,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.7.1"
+    val vvVer = "5.7.2-SNAPSHOT"
     val vbVer = "5.7.1"
     val vrVer = "4.0.14"
     val vafVer = "4.0.8"

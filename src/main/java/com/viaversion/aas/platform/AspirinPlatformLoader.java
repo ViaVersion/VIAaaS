@@ -9,7 +9,8 @@ import com.viaversion.viaversion.protocols.v1_8to1_9.provider.CompressionProvide
 import net.raphimc.vialegacy.protocol.release.r1_6_4tor1_7_2_5.provider.EncryptionProvider;
 import net.raphimc.vialegacy.protocol.release.r1_7_6_10tor1_8.provider.GameProfileFetcher;
 
-public class AspirinLoader implements ViaPlatformLoader {
+public class AspirinPlatformLoader implements ViaPlatformLoader {
+
 	@Override
 	public void load() {
 		Via.getManager().getProviders().use(VersionProvider.class, new AspirinVersionProvider());
@@ -26,4 +27,5 @@ public class AspirinLoader implements ViaPlatformLoader {
 	@Override
 	public void unload() {
 	}
+
 }

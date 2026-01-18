@@ -3,17 +3,16 @@ package com.viaversion.aas
 import com.viaversion.aas.command.CommandManager
 import com.viaversion.aas.command.VIAaaSConsole
 import com.viaversion.aas.config.VIAaaSConfig
-import com.viaversion.aas.platform.AspirinAprilFools
-import com.viaversion.aas.platform.AspirinBackwards
-import com.viaversion.aas.platform.AspirinLegacy
 import com.viaversion.aas.platform.AspirinPlatform
-import com.viaversion.aas.platform.AspirinRewind
-import com.viaversion.aas.protocol.registerAspirinProtocols
 import com.viaversion.aas.web.ViaWebApp
+import com.viaversion.viaaprilfools.ViaAprilFoolsPlatformImpl
+import com.viaversion.viabackwards.ViaBackwardsPlatformImpl
+import com.viaversion.viarewind.ViaRewindPlatformImpl
 import com.viaversion.viaversion.api.Via
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import com.viaversion.viaversion.api.protocol.version.VersionType
 import io.ktor.server.application.*
+import net.raphimc.vialegacy.ViaLegacyPlatformImpl
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.io.IoBuilder
 
@@ -64,15 +63,14 @@ private fun initVia(cmdManager: CommandManager) {
     val platform = AspirinPlatform(cmdManager)
 
     platform.initVia {
-        AspirinBackwards().init()
-        AspirinRewind().init()
-        AspirinAprilFools().init()
-        AspirinLegacy().init()
+        ViaBackwardsPlatformImpl()
+        ViaRewindPlatformImpl()
+        ViaAprilFoolsPlatformImpl()
+        ViaLegacyPlatformImpl()
         Via.getManager().configurationProvider.register(VIAaaSConfig)
     }
 
     ProtocolVersion.register(AUTO)
-    registerAspirinProtocols()
 }
 
 fun Application.mainWeb() {

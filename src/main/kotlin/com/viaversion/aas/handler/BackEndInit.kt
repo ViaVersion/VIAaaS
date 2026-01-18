@@ -3,6 +3,7 @@ package com.viaversion.aas.handler
 import com.viaversion.aas.codec.FrameCodec
 import com.viaversion.aas.codec.MinecraftCodec
 import com.viaversion.viaversion.connection.UserConnectionImpl
+import com.viaversion.viaversion.platform.ViaCodecHandler
 import com.viaversion.viaversion.protocol.ProtocolPipelineImpl
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
@@ -27,7 +28,7 @@ class BackEndInit(private val connectionData: ConnectionData, private val proxyU
             // "crypto"
             .addLast("frame", FrameCodec())
             // compress
-            .addLast("via-codec", ViaCodec(user))
+            .addLast(ViaCodecHandler.NAME, ViaCodecHandler(user))
             .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
             .addLast("mc", MinecraftCodec())
             .addLast("handler", MinecraftHandler(connectionData, frontEnd = false))
