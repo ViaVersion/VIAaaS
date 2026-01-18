@@ -199,7 +199,7 @@ class WebLogin : WebState {
         val username = profile["name"].asString
 
         webClient.server.addAccessToken(uuid, accessToken)
-        webLogger.info("Received token: {} {}", webClient.id, uuid)
+        webLogger.info("Received token: {} {} ({})", webClient.id, uuid, username)
 
         val response = JsonObject().also {
             it.addProperty("action", "save_access_token_result")
