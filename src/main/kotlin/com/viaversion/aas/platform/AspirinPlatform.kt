@@ -3,9 +3,7 @@ package com.viaversion.aas.platform
 import com.viaversion.aas.AspirinServer
 import com.viaversion.aas.command.CommandManager
 import com.viaversion.aas.command.ViaAspirinCommand
-import com.viaversion.aas.config.AspirinViaConfig
 import com.viaversion.viaversion.ViaManagerImpl
-import com.viaversion.viaversion.configuration.AbstractViaConfig
 import com.viaversion.viaversion.libs.gson.JsonObject
 import com.viaversion.viaversion.platform.UserConnectionViaVersionPlatform
 import io.ktor.server.application.*
@@ -13,10 +11,6 @@ import java.io.File
 import java.util.logging.Logger
 
 class AspirinPlatform(val cmdManager: CommandManager) : UserConnectionViaVersionPlatform(File("config/viaversion")) {
-
-    override fun createConfig(): AbstractViaConfig {
-        return AspirinViaConfig(this.dataFolder.resolve("viaversion.yml"), logger)
-    }
 
     fun initVia(enableListener: Runnable) {
         val viaCommand = ViaAspirinCommand()
@@ -33,7 +27,7 @@ class AspirinPlatform(val cmdManager: CommandManager) : UserConnectionViaVersion
 
     override fun getDump(): JsonObject {
         return JsonObject().also {
-            it.add("versions", JsonObject().also{
+            it.add("versions", JsonObject().also {
                 it.addProperty("jvm", System.getProperty("java.version"))
                 it.addProperty("ktor", Application::class.java.`package`.implementationVersion)
             })
