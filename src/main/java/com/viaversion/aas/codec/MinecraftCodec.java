@@ -7,7 +7,6 @@ import com.viaversion.aas.handler.MinecraftHandler;
 import com.viaversion.aas.util.StacklessException;
 import com.viaversion.viaversion.api.protocol.packet.Direction;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import com.viaversion.viaversion.exception.CancelEncoderException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,8 +18,6 @@ import java.util.List;
 public class MinecraftCodec extends MessageToMessageCodec<ByteBuf, Packet> {
 	@Override
 	protected void encode(@NotNull ChannelHandlerContext ctx, @NotNull Packet msg, @NotNull List<Object> out) {
-		if (!ctx.channel().isActive()) throw CancelEncoderException.generate(null);
-
 		var buf = ByteBufAllocator.DEFAULT.buffer();
 
 		try {

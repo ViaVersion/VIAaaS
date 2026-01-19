@@ -1,9 +1,7 @@
 package com.viaversion.aas.codec;
 
 import com.viaversion.aas.UtilKt;
-import com.viaversion.viaversion.api.type.Type;
 import com.viaversion.viaversion.api.type.Types;
-import com.viaversion.viaversion.exception.CancelDecoderException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
@@ -15,9 +13,8 @@ public class FrameCodec extends ByteToMessageCodec<ByteBuf> {
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 		if (!ctx.channel().isActive()) {
-			in.clear();
-			// Netty throws an exception when there's no output
-			throw CancelDecoderException.CACHED;
+			in.readerIndex(in.writerIndex());
+			return;
 		}
 		// Ignore, should prevent DoS https://github.com/SpigotMC/BungeeCord/pull/2908
 
