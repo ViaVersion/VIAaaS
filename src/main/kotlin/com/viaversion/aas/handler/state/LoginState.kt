@@ -57,8 +57,16 @@ class LoginState : ConnectionState {
             is SetCompression -> handleCompression(handler, packet)
             is LoginAck -> handleLoginAck(handler, packet)
             is UnknownPacket -> throw StacklessException("unknown packet ${packet.id}")
+            is PluginRequest -> handlePluginRequest(handler, packet)
             else -> forward(handler, packet)
         }
+    }
+
+    private fun handlePluginRequest(handler: MinecraftHandler, packet: PluginRequest) {
+        if (packet.channel == "oam:join") {
+            throw StacklessException("VIAaaS connection loop detected")
+        }
+        forward(handler, packet)
     }
 
     private fun handleLoginAck(handler: MinecraftHandler, packet: LoginAck) {
