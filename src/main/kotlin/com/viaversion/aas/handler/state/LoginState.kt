@@ -22,7 +22,6 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import java.security.KeyPair
@@ -128,10 +127,10 @@ class LoginState : ConnectionState {
         send(frontChannel, cryptoRequest, true)
     }
 
-    fun reauthMessage(handler: MinecraftHandler, backName: String, backHash: String): CompletableFuture<Boolean> {
+    fun authModMessage(handler: MinecraftHandler, backName: String, backHash: String): CompletableFuture<Boolean> {
         if (!handler.data.frontEncrypted
             || !frontName.equals(backName, ignoreCase = true)
-            || handler.data.frontVer!!.olderThan(ProtocolVersion.v1_8)
+            || handler.data.frontVer!!.olderThan(ProtocolVersion.v1_13)
         ) {
             callbackReauth.complete(false)
             return callbackReauth
@@ -141,35 +140,19 @@ class LoginState : ConnectionState {
         val buf = ByteBufAllocator.DEFAULT.buffer()
         try {
             Types.STRING.write(buf, backHash)
-            sendOpenAuthRequest(handler, "oam:join", pendingReauth!!, readRemainingBytes(buf))
+            sendOpenAuthRequest(handler, pendingReauth!!, readRemainingBytes(buf))
         } finally {
             buf.release()
         }
         return callbackReauth
     }
 
-    private fun sendOpenAuthRequest(handler: MinecraftHandler, channel: String, id: Int, data: ByteArray) {
-        if (handler.data.frontVer!!.olderThan(ProtocolVersion.v1_13)) {
-            encodeCompressionOpenAuth(channel, id, data).forEach { entry ->
-                send(handler.data.frontChannel, SetCompression().also { it.threshold = entry })
-            }
-            send(
-                handler.data.frontChannel,
-                SetCompression().also { it.threshold = handler.data.compressionLevel },
-                flush = true
-            )
-
-            handler.coroutineScope.launch {
-                delay(5000)
-                callbackReauth.complete(false)
-            }
-        } else {
-            val packet = PluginRequest()
-            packet.id = id
-            packet.channel = channel
-            packet.data = data
-            send(handler.data.frontChannel, packet, true)
-        }
+    private fun sendOpenAuthRequest(handler: MinecraftHandler, id: Int, data: ByteArray) {
+        val packet = PluginRequest()
+        packet.id = id
+        packet.channel = "oam:join"
+        packet.data = data
+        send(handler.data.frontChannel, packet, true)
     }
 
     fun handleCryptoRequest(handler: MinecraftHandler, cryptoRequest: CryptoRequest) {
@@ -195,7 +178,7 @@ class LoginState : ConnectionState {
                     handler.data.frontHandler.endRemoteAddress, playerId, frontName, backName
                 )
                 // todo change this for viaproxy
-                val pluginReauthed = reauthMessage(handler, backName!!, backHash).await()
+                val pluginReauthed = authModMessage(handler, backName!!, backHash).await()
                 if (!pluginReauthed) {
                     AspirinServer.viaWebServer.requestSessionJoin(
                         frontName,
@@ -220,17 +203,6 @@ class LoginState : ConnectionState {
     }
 
     fun handleCryptoResponse(handler: MinecraftHandler, cryptoResponse: CryptoResponse) {
-        if ("oam:data".encodeToByteArray().contentEquals(cryptoResponse.encryptedNonce)) {
-            val buffer = Unpooled.wrappedBuffer(cryptoResponse.encryptedKey)
-            val id = Types.VAR_INT.readPrimitive(buffer)
-            val data = readRemainingBytes(buffer)
-            if (handleReauthResponse(PluginResponse().also {
-                    it.isSuccess = true
-                    it.id = id
-                    it.data = data
-                })) return
-        }
-
         val frontHash = let {
             val frontKey = decryptRsa(cryptoKey.private, cryptoResponse.encryptedKey)
             if (cryptoResponse.encryptedNonce != null) {
@@ -292,7 +264,9 @@ class LoginState : ConnectionState {
                     }
                     val id = callbackPlayerId.await()
                     mcLogger.info("Login: {} {} {}", handler.endRemoteAddress, frontName, id)
-                    if (isLink) return@launch handleTempCode(handler, frontName, id)
+                    if (isLink) {
+                        return@launch handleTempCode(handler, frontName, id)
+                    }
                 }
                 connectBack(
                     handler,
