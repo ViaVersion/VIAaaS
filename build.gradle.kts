@@ -68,18 +68,18 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.7.2-SNAPSHOT"
-    val vbVer = "5.7.1"
-    val vrVer = "4.0.14"
-    val vafVer = "4.0.8"
-    val vlVer = "3.0.13"
+    val vvVer = "5.8.1-SNAPSHOT"
+    val vbVer = "5.8.1-SNAPSHOT"
+    val vrVer = "4.1.0-SNAPSHOT"
+    val vafVer = "4.1.1-SNAPSHOT"
+    val vlVer = "3.0.15-SNAPSHOT"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
     implementation("com.viaversion:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:$vlVer")
 
-    val nettyVer = "4.2.9.Final"
+    val nettyVer = "4.2.12.Final"
     val nettyBoringSslVer = "2.0.74.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
