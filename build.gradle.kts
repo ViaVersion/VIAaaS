@@ -68,11 +68,11 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.8.1-SNAPSHOT"
-    val vbVer = "5.8.1-SNAPSHOT"
-    val vrVer = "4.1.0-SNAPSHOT"
-    val vafVer = "4.1.1-SNAPSHOT"
-    val vlVer = "3.0.15-SNAPSHOT"
+    val vvVer = "5.9.1-SNAPSHOT"
+    val vbVer = "5.9.1-SNAPSHOT"
+    val vrVer = "4.1.1-SNAPSHOT"
+    val vafVer = "4.2.0"
+    val vlVer = "3.0.16-SNAPSHOT"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
@@ -96,7 +96,7 @@ dependencies {
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:2.5")
 
-    val log4jVer = "2.24.3"
+    val log4jVer = "2.25.4"
     val slf4jVer = "2.0.17"
     implementation("com.lmax:disruptor:4.0.0")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
@@ -107,7 +107,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.30.3")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "3.3.3"
+    val ktorVersion = "3.4.3"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -125,7 +125,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:4.5.0")
+    implementation("com.auth0:java-jwt:4.5.1")
 }
 
 val run: JavaExec by tasks
