@@ -61,64 +61,64 @@ object PacketRegistry {
         // Configuration packets
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationCookieRequest,
-            ProtocolVersion.v1_20_5..ProtocolVersion.v26_1, 0x00
+            ProtocolVersion.v1_20_5..ProtocolVersion.v26_2, 0x00
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationPluginMessage, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x00,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x01
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x01
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationDisconnect, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x01,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x02
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x02
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::FinishConfig, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x02,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x03
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x03
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationKeepAlive, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x03,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x04
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x04
             )
         )
         register(
             State.CONFIGURATION, Direction.CLIENTBOUND, ::ConfigurationTransfer,
-            ProtocolVersion.v1_20_5..ProtocolVersion.v26_1, 0x0B
+            ProtocolVersion.v1_20_5..ProtocolVersion.v26_2, 0x0B
         )
 
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationCookieResponse,
-            ProtocolVersion.v1_20_5..ProtocolVersion.v26_1, 0x01
+            ProtocolVersion.v1_20_5..ProtocolVersion.v26_2, 0x01
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPluginMessage, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x01,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x02
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x02
             )
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::FinishConfigAck, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x02,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x03
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x03
             )
         )
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationKeepAlive, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x03,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x04
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x04
             )
         )
 
         register(
             State.CONFIGURATION, Direction.SERVERBOUND, ::ConfigurationPing, mapOf(
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x04,
-                ProtocolVersion.v1_20_5..ProtocolVersion.v26_1 to 0x05
+                ProtocolVersion.v1_20_5..ProtocolVersion.v26_2 to 0x05
             )
         )
 
@@ -140,7 +140,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x1B,
                 ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to 0x1D,
                 ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_7 to 0x1C,
-                ProtocolVersion.v1_21_9..ProtocolVersion.v26_1 to 0x20
+                ProtocolVersion.v1_21_9..ProtocolVersion.v26_2 to 0x20
             )
         )
         register(
@@ -159,7 +159,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_19_4..ProtocolVersion.v1_20 to 0x17,
                 ProtocolVersion.v1_20_2..ProtocolVersion.v1_20_3 to 0x18,
                 ProtocolVersion.v1_20_5..ProtocolVersion.v1_21_4 to 0x19,
-                ProtocolVersion.v1_21_5..ProtocolVersion.v26_1 to 0x18
+                ProtocolVersion.v1_21_5..ProtocolVersion.v26_2 to 0x18
             )
         )
         register(
@@ -170,7 +170,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_21_2..ProtocolVersion.v1_21_4 to 0x70,
                 ProtocolVersion.v1_21_5..ProtocolVersion.v1_21_7 to 0x6F,
                 ProtocolVersion.v1_21_9..ProtocolVersion.v1_21_11 to 0x74,
-                ProtocolVersion.v26_1.sRange to 0x76
+                ProtocolVersion.v26_1..ProtocolVersion.v26_2 to 0x76
             )
         )
         register(
@@ -183,7 +183,7 @@ object PacketRegistry {
                 ProtocolVersion.v1_20_5..ProtocolVersion.v1_21 to ServerboundPackets1_20_5.CONFIGURATION_ACKNOWLEDGED.id,
                 ProtocolVersion.v1_21_2..ProtocolVersion.v1_21_5 to ServerboundPackets1_21_2.CONFIGURATION_ACKNOWLEDGED.id,
                 ProtocolVersion.v1_21_6..ProtocolVersion.v1_21_11 to ServerboundPackets1_21_6.CONFIGURATION_ACKNOWLEDGED.id,
-                ProtocolVersion.v26_1.sRange to 0x10
+                ProtocolVersion.v26_1..ProtocolVersion.v26_2 to 0x10
             )
         )
         register(

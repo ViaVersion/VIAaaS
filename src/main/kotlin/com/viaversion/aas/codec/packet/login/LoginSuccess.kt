@@ -13,6 +13,7 @@ class LoginSuccess : Packet {
     lateinit var id: UUID
     lateinit var username: String
     lateinit var properties: Array<GameProfile.Property>
+    lateinit var sessionId: UUID
     private var strictErrorHandling: Boolean = false
 
     override fun decode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
@@ -33,6 +34,9 @@ class LoginSuccess : Packet {
             && protocolVersion <= ProtocolVersion.v1_21) {
             strictErrorHandling = byteBuf.readBoolean()
         }
+        if (protocolVersion >= ProtocolVersion.v26_2) {
+            sessionId = Types.UUID.read(byteBuf)
+        }
     }
 
     override fun encode(byteBuf: ByteBuf, protocolVersion: ProtocolVersion) {
@@ -52,6 +56,9 @@ class LoginSuccess : Packet {
         if (protocolVersion >= ProtocolVersion.v1_20_5
             && protocolVersion <= ProtocolVersion.v1_21) {
             byteBuf.writeBoolean(strictErrorHandling)
+        }
+        if (protocolVersion >= ProtocolVersion.v26_2) {
+            Types.UUID.write(byteBuf, sessionId)
         }
     }
 }
