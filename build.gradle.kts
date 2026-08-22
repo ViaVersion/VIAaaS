@@ -4,6 +4,7 @@ import com.google.javascript.jscomp.Compiler
 import com.google.javascript.jscomp.CompilerOptions
 import com.google.javascript.jscomp.SourceFile
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor
+import groovy.lang.Closure
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import java.io.FilterReader
@@ -23,9 +24,8 @@ plugins {
     application
     kotlin("jvm") version "2.3.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.53.0"
     id("com.gradleup.shadow") version "8.3.9"
-    id("com.palantir.git-version") version "4.2.0"
+    id("com.palantir.git-version") version "5.0.0"
 }
 
 application {
@@ -47,7 +47,7 @@ if (JavaVersion.current() < JavaVersion.VERSION_21) {
     throw GradleException("This build must be run with Java 21 or higher.")
 }
 
-val gitVersion: groovy.lang.Closure<String> by extra
+val gitVersion = extra.get("gitVersion") as Closure<String>
 
 group = "com.viaversion.aas"
 version = "0.5.2+" + try {
@@ -68,19 +68,19 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.10.1-SNAPSHOT"
-    val vbVer = "5.10.1-SNAPSHOT"
-    val vrVer = "4.1.3-SNAPSHOT"
-    val vafVer = "4.2.2-SNAPSHOT"
-    val vlVer = "3.0.17-SNAPSHOT"
+    val vvVer = "5.12.0-SNAPSHOT"
+    val vbVer = "5.12.0-SNAPSHOT"
+    val vrVer = "4.1.4-SNAPSHOT"
+    val vafVer = "4.2.3-SNAPSHOT"
+    val vlVer = "3.1.0-SNAPSHOT"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
     implementation("com.viaversion:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:$vlVer")
 
-    val nettyVer = "4.2.14.Final"
-    val nettyBoringSslVer = "2.0.77.Final"
+    val nettyVer = "4.2.17.Final"
+    val nettyBoringSslVer = "2.0.81.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
@@ -91,7 +91,7 @@ dependencies {
     implementation("io.netty:netty-tcnative-boringssl-static:$nettyBoringSslVer:linux-x86_64")
 
     implementation("com.google.guava:guava:33.5.0-jre")
-    implementation("com.velocitypowered:velocity-native:3.4.0-SNAPSHOT")
+    implementation("com.velocitypowered:velocity-native:3.4.0")
     implementation("net.coobird:thumbnailator:0.4.21")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:2.5")
@@ -107,7 +107,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.30.3")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "3.5.0"
+    val ktorVersion = "3.5.2"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -125,11 +125,10 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:4.5.1")
+    implementation("com.auth0:java-jwt:4.6.0")
 }
 
-val run: JavaExec by tasks
-run.standardInput = System.`in`
+tasks.getByName("run", JavaExec::class).standardInput = System.`in`
 
 tasks {
     shadowJar {
