@@ -68,18 +68,18 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.12.0-SNAPSHOT"
-    val vbVer = "5.12.0-SNAPSHOT"
-    val vrVer = "4.1.4-SNAPSHOT"
-    val vafVer = "4.2.3-SNAPSHOT"
-    val vlVer = "3.1.0-SNAPSHOT"
+    val vvVer = "5.12.1-SNAPSHOT"
+    val vbVer = "5.12.1-SNAPSHOT"
+    val vrVer = "4.2.1-SNAPSHOT"
+    val vafVer = "4.2.4-SNAPSHOT"
+    val vlVer = "3.1.1-SNAPSHOT"
     implementation("com.viaversion:viaversion-common:$vvVer") { isTransitive = false }
     implementation("com.viaversion:viabackwards-common:$vbVer") { isTransitive = false }
     implementation("com.viaversion:viarewind-common:$vrVer") { isTransitive = false }
     implementation("com.viaversion:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:$vlVer")
 
-    val nettyVer = "4.2.17.Final"
+    val nettyVer = "4.2.18.Final"
     val nettyBoringSslVer = "2.0.81.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
@@ -107,7 +107,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jansi:3.30.3")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "3.5.2"
+    val ktorVersion = "3.6.0"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
