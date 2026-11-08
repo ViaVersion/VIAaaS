@@ -68,8 +68,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    val vvVer = "5.12.1-SNAPSHOT"
-    val vbVer = "5.12.1-SNAPSHOT"
+    val vvVer = "5.12.3-SNAPSHOT"
+    val vbVer = "5.12.3-SNAPSHOT"
     val vrVer = "4.2.1-SNAPSHOT"
     val vafVer = "4.2.4-SNAPSHOT"
     val vlVer = "3.1.1-SNAPSHOT"
@@ -79,8 +79,8 @@ dependencies {
     implementation("com.viaversion:viaaprilfools-common:$vafVer") { isTransitive = false }
     implementation("net.raphimc:ViaLegacy:$vlVer")
 
-    val nettyVer = "4.2.18.Final"
-    val nettyBoringSslVer = "2.0.81.Final"
+    val nettyVer = "4.2.20.Final"
+    val nettyBoringSslVer = "2.0.85.Final"
     implementation("io.netty:netty-handler-proxy:$nettyVer")
     implementation("io.netty:netty-resolver-dns:$nettyVer")
     implementation("io.netty:netty-transport-native-epoll:$nettyVer:linux-aarch_64")
@@ -90,24 +90,24 @@ dependencies {
     implementation("io.netty:netty-tcnative-boringssl-static:$nettyBoringSslVer:linux-aarch_64")
     implementation("io.netty:netty-tcnative-boringssl-static:$nettyBoringSslVer:linux-x86_64")
 
-    implementation("com.google.guava:guava:33.5.0-jre")
+    implementation("com.google.guava:guava:33.8.0-jre")
     implementation("com.velocitypowered:velocity-native:3.4.0")
     implementation("net.coobird:thumbnailator:0.4.21")
     implementation("org.powernukkit.fastutil:fastutil-lite:8.1.1")
     implementation("org.yaml:snakeyaml:2.5")
 
-    val log4jVer = "2.25.4"
-    val slf4jVer = "2.0.17"
+    val log4jVer = "2.26.1"
+    val slf4jVer = "2.0.20"
     implementation("com.lmax:disruptor:4.0.0")
     implementation("net.minecrell:terminalconsoleappender:1.3.0")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-iostreams:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-jul:$log4jVer")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVer")
-    implementation("org.jline:jline-terminal-jansi:3.30.3")
+    implementation("org.jline:jline-reader:4.4.3")
     implementation("org.slf4j:slf4j-api:$slf4jVer")
 
-    val ktorVersion = "3.6.0"
+    val ktorVersion = "3.6.1"
     implementation("io.ktor:ktor-network-tls-certificates-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
@@ -125,7 +125,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
 
-    implementation("com.auth0:java-jwt:4.6.0")
+    implementation("com.auth0:java-jwt:4.6.2")
 }
 
 tasks.getByName("run", JavaExec::class).standardInput = System.`in`
